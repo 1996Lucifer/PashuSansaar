@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "332884505104",
+    "project_id": "dhenu-pashusansar",
+    "storage_bucket": "dhenu-pashusansar.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:332884505104:android:d5c416fa30ace50349d095",
+        "android_client_info": {
+          "package_name": "dj.dhenu"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "332884505104-e4obl1869k08s1krnjkmcls3d9dtu047.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "dj.dhenu",
+            "certificate_hash": "f7987a28a516be2f11549b5dd8c4f1a7e3a5d0bc"
+          }
+        },
+        {
+          "client_id": "332884505104-8ah52hg1ciovslg9bmq7l3679ki29p75.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDl3sYkoZYHkfpSgcIk6pAtHkEYwhCpB8c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "332884505104-8ah52hg1ciovslg9bmq7l3679ki29p75.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

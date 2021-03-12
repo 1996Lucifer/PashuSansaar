@@ -1,0 +1,6 @@
+com/example/flutternativeimage/MethodCallHandlerImpl.java
+ com.example.flutternativeimage.MethodCallHandlerImpl
+com/example/flutternativeimage/BuildConfig.java
+ com.example.flutternativeimage.BuildConfig
+com/example/flutternativeimage/FlutterNativeImagePlugin.java
+ com.example.flutternativeimage.FlutterNativeImagePlugin
