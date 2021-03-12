@@ -1,25 +1,8 @@
 {
     "logs": [
         {
-            "outputFile": "/Users/deepaksmac/AndroidStudioProjects/dhenu/build/app/intermediates/incremental/mergeDebugResources/merged.dir/values/values.xml",
+            "outputFile": "/Users/deepaksmac/AndroidStudioProjects/PashuSansaar/build/app/intermediates/incremental/mergeDebugResources/merged.dir/values/values.xml",
             "map": [
-                {
-                    "source": "/Users/deepaksmac/AndroidStudioProjects/dhenu/build/app/generated/crashlytics/res/debug/values/com_crashlytics_build_id.xml",
-                    "from": {
-                        "startLines": "8",
-                        "startColumns": "0",
-                        "startOffsets": "303",
-                        "endColumns": "158",
-                        "endOffsets": "461"
-                    },
-                    "to": {
-                        "startLines": "101",
-                        "startColumns": "4",
-                        "startOffsets": "6428",
-                        "endColumns": "160",
-                        "endOffsets": "6584"
-                    }
-                },
                 {
                     "source": "/Users/deepaksmac/.gradle/caches/transforms-2/files-2.1/e27c991512967187585e783daf05d758/jetified-play-services-base-17.1.0/res/values/values.xml",
                     "from": {
@@ -37,6 +20,25 @@
                         "endLines": "9,10,11,12,13,14,15,16,102,103,104,105,106,107,108,109,111,112,113,114,115,116,117,118,119,399,418",
                         "endColumns": "89,79,89,89,79,80,79,79,104,180,124,106,179,122,115,102,187,104,180,124,174,147,62,61,78,20,20",
                         "endOffsets": "705,785,875,965,1045,1126,1206,1286,6689,6870,6995,7102,7282,7405,7521,7624,7979,8084,8265,8390,8565,8713,8776,8838,8917,25522,25939"
+                    }
+                },
+                {
+                    "source": "/Users/deepaksmac/AndroidStudioProjects/PashuSansaar/android/app/src/main/res/values/styles.xml",
+                    "from": {
+                        "startLines": "3,14",
+                        "startColumns": "4,4",
+                        "startOffsets": "173,816",
+                        "endLines": "7,16",
+                        "endColumns": "12,12",
+                        "endOffsets": "465,980"
+                    },
+                    "to": {
+                        "startLines": "133,138",
+                        "startColumns": "4,4",
+                        "startOffsets": "10097,10394",
+                        "endLines": "137,140",
+                        "endColumns": "12,12",
+                        "endOffsets": "10389,10558"
                     }
                 },
                 {
@@ -59,20 +61,20 @@
                     }
                 },
                 {
-                    "source": "/Users/deepaksmac/AndroidStudioProjects/dhenu/build/app/generated/res/google-services/debug/values/values.xml",
+                    "source": "/Users/deepaksmac/AndroidStudioProjects/PashuSansaar/build/location/intermediates/packaged_res/debug/values/values.xml",
                     "from": {
-                        "startLines": "2,3,4,5,6,7,8",
-                        "startColumns": "4,4,4,4,4,4,4",
-                        "startOffsets": "55,199,281,385,494,614,715",
-                        "endColumns": "143,81,103,108,119,100,77",
-                        "endOffsets": "194,276,380,489,609,710,788"
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "82",
+                        "endOffsets": "133"
                     },
                     "to": {
-                        "startLines": "121,125,126,127,128,129,131",
-                        "startColumns": "4,4,4,4,4,4,4",
-                        "startOffsets": "8990,9349,9431,9535,9644,9764,9948",
-                        "endColumns": "143,81,103,108,119,100,77",
-                        "endOffsets": "9129,9426,9530,9639,9759,9860,10021"
+                        "startLines": "130",
+                        "startColumns": "4",
+                        "startOffsets": "9865",
+                        "endColumns": "82",
+                        "endOffsets": "9943"
                     }
                 },
                 {
@@ -95,20 +97,20 @@
                     }
                 },
                 {
-                    "source": "/Users/deepaksmac/AndroidStudioProjects/dhenu/build/location/intermediates/packaged_res/debug/values/values.xml",
+                    "source": "/Users/deepaksmac/AndroidStudioProjects/PashuSansaar/build/app/generated/crashlytics/res/debug/values/com_crashlytics_build_id.xml",
                     "from": {
-                        "startLines": "2",
-                        "startColumns": "4",
-                        "startOffsets": "55",
-                        "endColumns": "82",
-                        "endOffsets": "133"
+                        "startLines": "8",
+                        "startColumns": "0",
+                        "startOffsets": "303",
+                        "endColumns": "158",
+                        "endOffsets": "461"
                     },
                     "to": {
-                        "startLines": "130",
+                        "startLines": "101",
                         "startColumns": "4",
-                        "startOffsets": "9865",
-                        "endColumns": "82",
-                        "endOffsets": "9943"
+                        "startOffsets": "6428",
+                        "endColumns": "160",
+                        "endOffsets": "6584"
                     }
                 },
                 {
@@ -126,25 +128,6 @@
                         "startOffsets": "1423,1512,1583,3265,3318,3371,3424,6230,10881,11057,11179,11441,11636",
                         "endColumns": "88,70,72,52,52,52,52,59,65,121,60,65,66",
                         "endOffsets": "1507,1578,1651,3313,3366,3419,3472,6285,10942,11174,11235,11502,11698"
-                    }
-                },
-                {
-                    "source": "/Users/deepaksmac/AndroidStudioProjects/dhenu/android/app/src/main/res/values/styles.xml",
-                    "from": {
-                        "startLines": "3,14",
-                        "startColumns": "4,4",
-                        "startOffsets": "173,816",
-                        "endLines": "7,16",
-                        "endColumns": "12,12",
-                        "endOffsets": "465,980"
-                    },
-                    "to": {
-                        "startLines": "133,138",
-                        "startColumns": "4,4",
-                        "startOffsets": "10097,10394",
-                        "endLines": "137,140",
-                        "endColumns": "12,12",
-                        "endOffsets": "10389,10558"
                     }
                 },
                 {
@@ -179,6 +162,23 @@
                         "startOffsets": "371,429,495,558,1656,1727,8922,9134,9201,9280",
                         "endColumns": "57,65,62,61,70,71,67,66,78,68",
                         "endOffsets": "424,490,553,615,1722,1794,8985,9196,9275,9344"
+                    }
+                },
+                {
+                    "source": "/Users/deepaksmac/AndroidStudioProjects/PashuSansaar/build/app/generated/res/google-services/debug/values/values.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,7,8",
+                        "startColumns": "4,4,4,4,4,4,4",
+                        "startOffsets": "55,199,281,385,494,614,715",
+                        "endColumns": "143,81,103,108,119,100,77",
+                        "endOffsets": "194,276,380,489,609,710,788"
+                    },
+                    "to": {
+                        "startLines": "121,125,126,127,128,129,131",
+                        "startColumns": "4,4,4,4,4,4,4",
+                        "startOffsets": "8990,9349,9431,9535,9644,9764,9948",
+                        "endColumns": "143,81,103,108,119,100,77",
+                        "endOffsets": "9129,9426,9530,9639,9759,9860,10021"
                     }
                 }
             ]

@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "/Users/deepaksmac/AndroidStudioProjects/dhenu/build/app/intermediates/incremental/mergeDebugResources/merged.dir/values-or/values-or.xml",
+            "outputFile": "/Users/deepaksmac/AndroidStudioProjects/PashuSansaar/build/app/intermediates/incremental/mergeDebugResources/merged.dir/values-or/values-or.xml",
             "map": [
                 {
                     "source": "/Users/deepaksmac/.gradle/caches/transforms-2/files-2.1/f0e0927cfc905ea48db583d313f4cffe/core-1.3.2/res/values-or/values-or.xml",

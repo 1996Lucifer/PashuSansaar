@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "/Users/deepaksmac/AndroidStudioProjects/dhenu/build/app/intermediates/incremental/mergeDebugResources/merged.dir/values-en-rGB/values-en-rGB.xml",
+            "outputFile": "/Users/deepaksmac/AndroidStudioProjects/PashuSansaar/build/app/intermediates/incremental/mergeDebugResources/merged.dir/values-en-rGB/values-en-rGB.xml",
             "map": [
                 {
                     "source": "/Users/deepaksmac/.gradle/caches/transforms-2/files-2.1/5cfd6aee388285f54080c0661ab9b2c2/jetified-play-services-basement-17.1.0/res/values-en-rGB/values.xml",
