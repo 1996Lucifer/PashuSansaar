@@ -64,7 +64,6 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm> {
     data = prefs.get('animalDetails');
     var jsonData = jsonDecode(data);
 
-    print("widget.index===" + widget.index.toString());
 
     if (jsonData.length > 0) {
       setState(() {
@@ -1318,7 +1317,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm> {
     double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),
+      // appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),
       body: GestureDetector(
         onTap: () {
           return WidgetsBinding.instance.focusManager.primaryFocus?.unfocus();

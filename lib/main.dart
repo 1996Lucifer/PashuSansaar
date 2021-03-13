@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         translations: Messages(), // your translations
         locale: Locale('hn', 'IN'),
-        fallbackLocale: Locale('en', 'US'),
+        // fallbackLocale: Locale('hn', 'IN'),
         theme: ThemeData(
             fontFamily: 'Mukta',
             primaryColor: primaryColor,

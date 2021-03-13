@@ -383,7 +383,11 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                               'longitude':
                                   prefs.getDouble('longitude').toString(),
                               'referralCode':
-                                  ReusableWidgets.randomCodeGenerator()
+                                  ReusableWidgets.randomCodeGenerator(),
+                              'enteredReferralCode':
+                                  referralCodeController.text.isNotEmpty
+                                      ? referralCodeController.text
+                                      : ''
                             }).then((result) {
                               pr.hide();
                               Navigator.pushReplacement(

@@ -11,7 +11,8 @@ import 'colors.dart';
 
 class ReusableWidgets {
   static getAppBar(
-      BuildContext context, String heading, bool automaticallyImplyLeading) {
+      BuildContext context, String heading, bool automaticallyImplyLeading,
+      {List<Widget> actions}) {
     return AppBar(
       title: Row(
         children: [
@@ -27,6 +28,7 @@ class ReusableWidgets {
         ],
       ),
       automaticallyImplyLeading: automaticallyImplyLeading,
+      actions: actions,
     );
   }
 

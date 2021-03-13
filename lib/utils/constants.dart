@@ -2,9 +2,9 @@ import 'package:get/get.dart';
 
 List<String> animalType = [
   'cow'.tr,
+  'buffalo_female'.tr,
   'buffalo_male'.tr,
   'ox'.tr,
-  'buffalo_female'.tr,
   'other_animal'.tr,
   // {"id": 1, "name": 'cow'.tr},
   // {"id": 2, "name": 'buffalo_male'.tr},

@@ -10,6 +10,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:progress_dialog/progress_dialog.dart';
+import 'package:share/share.dart';
 import 'home_screen.dart';
 import 'utils/colors.dart';
 import 'utils/reusable_widgets.dart';
@@ -258,17 +259,35 @@ class ProfileMainState extends State<ProfileMain>
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-        appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),
+    return Scaffold(
+        appBar:
+            ReusableWidgets.getAppBar(context, "app_name".tr, false, actions: [
+          GestureDetector(
+            onTap: () => Share.share(
+                'पशुसंसार (पशु बेचने वाली फ्री ऐप) पर मेरे साथ जुड़ें। मेरा कोड ADFTR6 दर्ज करें और ₹50,000 जीतने का मौका पाएं। \n\n https://docs.google.com/spreadsheets/d/1PQertE_bd2Z0VfJf8G9HvYLmifqq0qGblrMlsnDzuLY/edit#gid=0')
+            //AIzaSyDg5o_0j0MC5dueSVRYp4WkCjrJPQxm7pg
+            ,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: Icon(Icons.share),
+            ),
+          )
+        ]),
         body: new Container(
           color: Colors.white,
-        child: new ListView(
+          child: new ListView(
             children: <Widget>[
               Container(
                 height: 20,
                 child: Row(
                   children: [
-                    Expanded(flex: 1, child: Text('सूचना -',style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),)),
+                    Expanded(
+                        flex: 1,
+                        child: Text(
+                          'सूचना -',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 15),
+                        )),
                     Expanded(
                       flex: 7,
                       child: Marquee(

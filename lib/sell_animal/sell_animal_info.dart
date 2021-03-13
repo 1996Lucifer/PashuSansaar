@@ -12,7 +12,13 @@ import 'sell_animal_form.dart';
 
 class SellingAnimalInfo extends StatefulWidget {
   final List animalInfo;
-  SellingAnimalInfo({Key key, @required this.animalInfo}) : super(key: key);
+  final String userName;
+
+  SellingAnimalInfo({
+    Key key,
+    @required this.animalInfo,
+    @required this.userName,
+  }) : super(key: key);
 
   @override
   _SellingAnimalInfoState createState() => _SellingAnimalInfoState();
@@ -24,18 +30,13 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo> {
     final double width = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),
+      // appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),
       body: SingleChildScrollView(
         physics: BouncingScrollPhysics(),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Expanded(
-            //   child: Container(
-            //     child: _buildSellingFormButton(context),
-            //   ),
-            // ),
             _buildSellingFormButton(context),
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -147,14 +148,6 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo> {
   _descriptionText(int index) {
     String desc = '';
 
-    // String supportingText = widget.animalInfo[index]['animalInfo']
-    //                 ['animalType'] ==
-    //             'buffalo_male'.tr ||
-    //         widget.animalInfo[index]['animalInfo']['animalType'] == 'ox'.tr
-    //     ? 'का'
-    //     : 'की';
-    // String stmn1 =
-    //     'ये ${widget.animalInfo[index]['animalInfo']['animalBreed']} ${widget.animalInfo[index]['animalInfo']['animalType']} ${widget.animalInfo[index]['animalInfo']['animalAge']} साल $supportingText है। ';
     String stmn2 =
         'यह ${widget.animalInfo[index]['extraInfo']['animalAlreadyGivenBirth']} ब्यायी है ';
     String stmn3 =
@@ -351,7 +344,8 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo> {
                           onPressed: () => Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => SellAnimalForm()),
+                                builder: (context) => SellAnimalForm(
+                                    userName: widget.userName)),
                           ),
                           child: Text(
                             'sell_more_animal_button'.tr,
