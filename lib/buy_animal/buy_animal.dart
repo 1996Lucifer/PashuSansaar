@@ -25,7 +25,6 @@ import 'package:esys_flutter_share/esys_flutter_share.dart' as eshare;
 import 'package:screenshot/screenshot.dart';
 import 'package:dhenu/utils/constants.dart' as constant;
 import 'package:dio/dio.dart';
-import 'package:solid_bottom_sheet/solid_bottom_sheet.dart';
 import 'package:uuid/uuid.dart';
 
 class BuyAnimal extends StatefulWidget {
