@@ -18,19 +18,26 @@ import '../utils/constants.dart' as constant;
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:intl/intl.dart';
+import 'package:dart_geohash/dart_geohash.dart';
 
 class SellAnimalEditForm extends StatefulWidget {
   final int index;
-  SellAnimalEditForm({
-    Key key,
-    @required this.index,
-  }) : super(key: key);
+  final String userName;
+  final String userMobileNumber;
+  SellAnimalEditForm(
+      {Key key,
+      @required this.index,
+      @required this.userName,
+      @required this.userMobileNumber})
+      : super(key: key);
 
   @override
   _SellAnimalEditFormState createState() => _SellAnimalEditFormState();
 }
 
 class _SellAnimalEditFormState extends State<SellAnimalEditForm> {
+  GeoHasher geoHasher = GeoHasher();
+
   var animalInfo = {}, extraInfoData = {};
   String _base64Image;
   ImagePicker _picker;
@@ -63,7 +70,6 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm> {
     var data;
     data = prefs.get('animalDetails');
     var jsonData = jsonDecode(data);
-
 
     if (jsonData.length > 0) {
       setState(() {
@@ -875,6 +881,47 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm> {
         ),
       ));
 
+  _descriptionText() {
+    String animalBreedCheck = (animalInfo['animalBreed'] == 'not_known'.tr)
+        ? ""
+        : animalInfo['animalBreed'];
+    String animalTypeCheck = (animalInfo['animalType'] == 'other_animal'.tr)
+        ? animalInfo['animalTypeOther']
+        : animalInfo['animalType'];
+
+    String desc = '';
+
+    String stmn2 = 'यह ${extraInfoData['animalAlreadyGivenBirth']} ब्यायी है ';
+    String stmn3 = 'और अभी ${extraInfoData['animalIfPregnant']} है। ';
+    String stmn4 = '';
+    String stmn41 = 'इसके साथ में बच्चा नहीं है। ';
+    String stmn42 = 'इसके साथ में ${extraInfoData['animalHasBaby']}। ';
+    String stmn5 =
+        'पिछले बार के हिसाब से दूध कैपेसिटी ${animalInfo['animalMilk']} लीटर है। ';
+
+    if (animalInfo['animalType'] == 'buffalo_male'.tr ||
+        animalInfo['animalType'] == 'ox'.tr ||
+        animalInfo['animalType'] == 'other_animal'.tr) {
+      desc =
+          'ये $animalBreedCheck $animalTypeCheck ${animalInfo['animalAge']} साल की है। ';
+    } else {
+      desc =
+          'ये ${animalInfo['animalBreed']} ${animalInfo['animalType']} ${animalInfo['animalAge']} साल का है। ';
+      if (extraInfoData['animalAlreadyGivenBirth'] != null) desc = desc + stmn2;
+      if (extraInfoData['animalIfPregnant'] != null) desc = desc + stmn3;
+      if (extraInfoData['animalHasBaby'] != null &&
+          extraInfoData['animalHasBaby'] == 'nothing'.tr)
+        stmn4 = stmn4 + stmn41;
+      else
+        stmn4 = stmn4 + stmn42;
+
+      desc = desc + stmn4;
+      desc = desc + stmn5;
+    }
+
+    return desc + (extraInfoData['moreInfo'] ?? '');
+  }
+
   Padding saveButton() => Padding(
         padding: EdgeInsets.all(15),
         child: SizedBox(
@@ -954,17 +1001,6 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm> {
                 pr.show();
 
                 FirebaseFirestore.instance
-                    .collection("buyingAnimalList")
-                    .doc(FirebaseAuth.instance.currentUser.uid)
-                    .update({
-                  'animalInfo': animalInfo,
-                  'animalImages': imagesUpload,
-                  'extraInfo': extraInfoData,
-                  'dateOfSaving':
-                      ReusableWidgets.dateTimeToEpoch(DateTime.now())
-                });
-
-                FirebaseFirestore.instance
                     .collection("animalSellingInfo")
                     .doc(FirebaseAuth.instance.currentUser.uid)
                     .collection('sellingAnimalList')
@@ -976,32 +1012,73 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm> {
                   'dateOfSaving':
                       ReusableWidgets.dateTimeToEpoch(DateTime.now()),
                   'uuid': uuid
-                }).then((result) {
-                  pr.hide();
-                  return showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                            title: Text('pashu_re_registered'.tr),
-                            content: Text('updated_animal'.tr),
-                            actions: <Widget>[
-                              FlatButton(
-                                  child: Text(
-                                    'Ok'.tr,
-                                    style: TextStyle(color: primaryColor),
-                                  ),
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                    Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => HomeScreen(
-                                            selectedIndex: 0,
-                                          ),
-                                        ));
-                                  }),
-                            ]);
-                      });
+                }).then((res) async {
+                  SharedPreferences prefs =
+                      await SharedPreferences.getInstance();
+                  FirebaseFirestore.instance
+                      .collection("buyingAnimalList")
+                      .doc(FirebaseAuth.instance.currentUser.uid)
+                      .update({
+                    "userAnimalDescription": _descriptionText(),
+                    "userAnimalType": animalInfo['animalType'] ?? "",
+                    "userAnimalTypeOther": animalInfo['animalTypeOther'] ?? "",
+                    "userAnimalAge": animalInfo['animalAge'] ?? "",
+                    "userAddress": "",
+                    "userName": widget.userName,
+                    "userAnimalPrice": animalInfo['animalPrice'] ?? "0",
+                    "userAnimalBreed": animalInfo['animalBreed'] ?? "",
+                    "userMobileNumber": '${widget.userMobileNumber}',
+                    "userAnimalMilk": animalInfo['animalMilk'] ?? "",
+                    "userAnimalPregnancy": animalInfo['animalIsPregnant'] ?? "",
+                    "userLatitude": prefs.getDouble('latitude'),
+                    "userLongitude": prefs.getDouble('longitude'),
+                    'geoHash': geoHasher.encode(prefs.getDouble('longitude'),
+                        prefs.getDouble('latitude')),
+                    "image1": imagesUpload['image1'] == null ||
+                            imagesUpload['image1'] == ""
+                        ? ""
+                        : imagesUpload['image1'],
+                    "image2": imagesUpload['image2'] == null ||
+                            imagesUpload['image2'] == ""
+                        ? ""
+                        : imagesUpload['image2'],
+                    "image3": imagesUpload['image3'] == null ||
+                            imagesUpload['image3'] == ""
+                        ? ""
+                        : imagesUpload['image3'],
+                    "image4": imagesUpload['image4'] == null ||
+                            imagesUpload['image4'] == ""
+                        ? ""
+                        : imagesUpload['image4'],
+                    "dateOfSaving":
+                        ReusableWidgets.dateTimeToEpoch(DateTime.now())
+                  }).then((value) {
+                    pr.hide();
+                    return showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                              title: Text('pashu_re_registered'.tr),
+                              content: Text('updated_animal'.tr),
+                              actions: <Widget>[
+                                FlatButton(
+                                    child: Text(
+                                      'Ok'.tr,
+                                      style: TextStyle(color: primaryColor),
+                                    ),
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                      Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => HomeScreen(
+                                              selectedIndex: 0,
+                                            ),
+                                          ));
+                                    }),
+                              ]);
+                        });
+                  });
                 }).catchError(
                   (err) => print("err->" + err.toString()),
                 );

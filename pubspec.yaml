@@ -27,8 +27,10 @@ dependencies:
   cloud_firestore: ^0.16.0+1
   csv: ^4.1.0
   cupertino_icons: ^1.0.1
+  dart_geohash: ^1.0.2
   date_format: ^1.0.9
   device_info: ^1.0.0
+  dio: ^3.0.10
   dotted_border: ^1.0.7
   dropdown_search: ^0.4.9
   esys_flutter_share: ^1.0.2

@@ -5,12 +5,14 @@ import 'package:dhenu/buy_animal/buy_animal.dart';
 import 'package:dhenu/utils/reusable_widgets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:geodesy/geodesy.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'profile_main.dart';
 import 'sell_animal/sell_animal_main.dart';
 import 'package:get/get.dart';
+import 'package:geoflutterfire/geoflutterfire.dart';
 
 // ignore: must_be_immutable
 class HomeScreen extends StatefulWidget {
@@ -25,6 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   ProgressDialog pr;
   List _animalInfo = [], _sellingAnimalInfo = [];
   Map _profileData = {};
+  final geo = Geoflutterfire();
 
   @override
   void initState() {
@@ -34,6 +37,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   getInitialInfo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    // GeoFirePoint center = geo.point(
+    //     latitude: prefs.getDouble('latitude'),
+    //     longitude: prefs.getDouble('longitude'));
 
     pr = new ProgressDialog(context,
         type: ProgressDialogType.Normal, isDismissible: false);
@@ -41,11 +47,15 @@ class _HomeScreenState extends State<HomeScreen> {
     pr.style(message: 'progress_dialog_message'.tr);
     pr.show();
 
+    // var collectionReference =
+    //     FirebaseFirestore.instance.collection("buyingAnimalList");
+    // var geoRef = geo.collection(collectionRef: collectionReference);
+
+    // var x = geoRef.within(center: center, radius: 10, field: 'geoHash');
+
     FirebaseFirestore.instance
         .collection("buyingAnimalList")
-        // .where('dateOfSaving',
-        //     isLessThanOrEqualTo:
-        //         ReusableWidgets.dateTimeToEpoch(DateTime.now()))
+        .orderBy("dateOfSaving", descending: true)
         .get(GetOptions(source: Source.serverAndCache))
         .then(
       (value) {
@@ -56,12 +66,32 @@ class _HomeScreenState extends State<HomeScreen> {
 
         setState(() {
           _animalInfo = _info;
-          prefs.setString('animalBuyingDetails', jsonEncode(_info));
+          _animalInfo.sort((a, b) => _getDistance(
+                  prefs.getDouble('latitude'),
+                  prefs.getDouble('longitude'),
+                  a['userLatitude'],
+                  a['userLongitude'])
+              .compareTo(_getDistance(
+                  prefs.getDouble('latitude'),
+                  prefs.getDouble('longitude'),
+                  b['userLatitude'],
+                  b['userLongitude'])));
+
+          prefs.setString('animalBuyingDetails', jsonEncode(_animalInfo));
         });
         // pr.hide();
       },
     );
     getAnimalSellingInfo();
+  }
+
+  String _getDistance(lat1, long1, lat2, long2) {
+    return (Geodesy().distanceBetweenTwoGeoPoints(
+              LatLng(lat1, long1),
+              LatLng(lat2, long2),
+            ) /
+            1000)
+        .toStringAsFixed(0);
   }
 
   getAnimalSellingInfo() async {
@@ -122,66 +152,21 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  // sellingAnimalInfoMappingWithBuying() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-
-  //   List _infoData = _animalInfo;
-
-  //   for (int i = 0; i < _sellingAnimalInfo.length; i++) {
-  //     _infoData.add({
-  //       "userAnimalDescription": _descriptionText(i),
-  //       "userAnimalType": _sellingAnimalInfo[i]['animalInfo']['animalType'],
-  //       "userAnimalAge": _sellingAnimalInfo[i]['animalInfo']['animalAge'],
-  //       "userAddress": "",
-  //       "userName": _profileData['name'],
-  //       "userAnimalPrice": _sellingAnimalInfo[i]['animalInfo']['animalPrice'],
-  //       "userAnimalBreed": _sellingAnimalInfo[i]['animalInfo']['animalBreed'],
-  //       "userMobileNumber": _profileData['mobile'],
-  //       "userAnimalMilk": _sellingAnimalInfo[i]['animalInfo']['animalMilk'],
-  //       "userAnimalPregnancy": _sellingAnimalInfo[i]['animalInfo']
-  //           ['animalIsPregnant'],
-  //       "userLatitude": prefs.getDouble('latitude'),
-  //       "userLongitude": prefs.getDouble('longitude'),
-  //       "image1": _sellingAnimalInfo[i]['animalImages']['image1'] == null ||
-  //               _sellingAnimalInfo[i]['animalImages']['image1'] == ""
-  //           ? ""
-  //           : _sellingAnimalInfo[i]['animalImages']['image1'],
-  //       "image2": _sellingAnimalInfo[i]['animalImages']['image2'] == null ||
-  //               _sellingAnimalInfo[i]['animalImages']['image2'] == ""
-  //           ? ""
-  //           : _sellingAnimalInfo[i]['animalImages']['image2'],
-  //       "image3": _sellingAnimalInfo[i]['animalImages']['image3'] == null ||
-  //               _sellingAnimalInfo[i]['animalImages']['image3'] == ""
-  //           ? ""
-  //           : _sellingAnimalInfo[i]['animalImages']['image3'],
-  //       "image4": _sellingAnimalInfo[i]['animalImages']['image4'] == null ||
-  //               _sellingAnimalInfo[i]['animalImages']['image4'] == ""
-  //           ? ""
-  //           : _sellingAnimalInfo[i]['animalImages']['image4'],
-  //       "dateOfSaving": _sellingAnimalInfo[i]['dateOfSaving']
-  //     });
-  //     _infoData.sort((a, b) => a[i]['dateOfSaving'] < b[i]['dateOfsaving']);
-  //   }
-
-  //   setState(() {
-  //     _animalInfo = _infoData;
-  //   });
-  // }
-
   getScreenOnSelection() {
     switch (widget.selectedIndex) {
       case 0:
         return BuyAnimal(
           animalInfo: _animalInfo,
           userName: _profileData['name'],
-          sellingAnimalInfo: _sellingAnimalInfo,
           userMobileNumber: _profileData['mobile'],
+          userImage: _profileData['image'],
         );
         break;
       case 1:
         return SellAnimalMain(
             sellingAnimalInfo: _sellingAnimalInfo,
-            userName: _profileData['name']);
+            userName: _profileData['name'],
+            userMobileNumber: _profileData['mobile']);
         break;
       case 2:
         return ProfileMain(profileData: _profileData);

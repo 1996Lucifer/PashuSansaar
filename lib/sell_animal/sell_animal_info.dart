@@ -13,11 +13,13 @@ import 'sell_animal_form.dart';
 class SellingAnimalInfo extends StatefulWidget {
   final List animalInfo;
   final String userName;
+  final String userMobileNumber;
 
   SellingAnimalInfo({
     Key key,
     @required this.animalInfo,
     @required this.userName,
+    @required this.userMobileNumber,
   }) : super(key: key);
 
   @override
@@ -30,7 +32,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo> {
     final double width = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      // appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),
+      appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),
       body: SingleChildScrollView(
         physics: BouncingScrollPhysics(),
         child: Column(
@@ -95,7 +97,12 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            SellAnimalEditForm(index: index),
+                                            SellAnimalEditForm(
+                                          index: index,
+                                          userName: widget.userName,
+                                          userMobileNumber:
+                                              widget.userMobileNumber,
+                                        ),
                                       ),
                                     ),
                                 child: Row(
@@ -146,6 +153,16 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo> {
   }
 
   _descriptionText(int index) {
+    String animalBreedCheck =
+        widget.animalInfo[index]['animalInfo']['animalBreed'] == 'not_known'.tr
+            ? ""
+            : widget.animalInfo[index]['animalInfo']['animalBreed'];
+    String animalTypeCheck = widget.animalInfo[index]['animalInfo']
+                ['animalType'] ==
+            'other_animal'.tr
+        ? widget.animalInfo[index]['animalInfo']['animalTypeOther']
+        : widget.animalInfo[index]['animalInfo']['animalType'];
+
     String desc = '';
 
     String stmn2 =
@@ -153,7 +170,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo> {
     String stmn3 =
         'और अभी ${widget.animalInfo[index]['extraInfo']['animalIfPregnant']} है। ';
     String stmn4 = '';
-    String stmn41 = 'इसके साथ में बच्चा नहीं है। ';
+  String stmn41 = 'इसके साथ में बच्चा नहीं है| ';
     String stmn42 =
         'इसके साथ में ${widget.animalInfo[index]['extraInfo']['animalHasBaby']}। ';
     String stmn5 =
@@ -161,12 +178,13 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo> {
 
     if (widget.animalInfo[index]['animalInfo']['animalType'] ==
             'buffalo_male'.tr ||
-        widget.animalInfo[index]['animalInfo']['animalType'] == 'ox'.tr) {
+        widget.animalInfo[index]['animalInfo']['animalType'] == 'ox'.tr ||
+        widget.animalInfo[index]['animalType'] == 'other_animal'.tr) {
       desc =
-          'ये ${widget.animalInfo[index]['animalInfo']['animalBreed']} ${widget.animalInfo[index]['animalInfo']['animalType']} ${widget.animalInfo[index]['animalInfo']['animalAge']} साल का है। ';
+          'ये $animalBreedCheck $animalTypeCheck ${widget.animalInfo[index]['animalInfo']['animalAge']} साल का है। ';
     } else {
       desc =
-          'ये ${widget.animalInfo[index]['animalInfo']['animalBreed']} ${widget.animalInfo[index]['animalInfo']['animalType']} ${widget.animalInfo[index]['animalInfo']['animalAge']} साल की है। ';
+          'ये $animalBreedCheck $animalTypeCheck ${widget.animalInfo[index]['animalInfo']['animalAge']} साल की है। ';
       if (widget.animalInfo[index]['extraInfo']['animalAlreadyGivenBirth'] !=
           null) desc = desc + stmn2;
       if (widget.animalInfo[index]['extraInfo']['animalIfPregnant'] != null)
@@ -260,12 +278,22 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo> {
                       color: greyColor,
                       fontWeight: FontWeight.bold,
                       fontSize: 16),
-                  text: widget.animalInfo[index]['animalInfo']['animalBreed'] +
+                  text: (widget.animalInfo[index]['animalInfo']
+                                  ['animalBreed'] ==
+                              'not_known'.tr
+                          ? ""
+                          : widget.animalInfo[index]['animalInfo']
+                              ['animalBreed']) +
                       ' ',
                   children: <InlineSpan>[
                     TextSpan(
-                      text: widget.animalInfo[index]['animalInfo']
-                              ['animalType'] +
+                      text: (widget.animalInfo[index]['animalInfo']
+                                      ['animalType'] ==
+                                  'other_animal'.tr
+                              ? widget.animalInfo[index]['animalInfo']
+                                  ['animalTypeOther']
+                              : widget.animalInfo[index]['animalInfo']
+                                  ['animalType']) +
                           ', ',
                       style: TextStyle(
                           color: greyColor,
@@ -345,7 +373,9 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo> {
                             context,
                             MaterialPageRoute(
                                 builder: (context) => SellAnimalForm(
-                                    userName: widget.userName)),
+                                      userName: widget.userName,
+                                      userMobileNumber: widget.userMobileNumber,
+                                    )),
                           ),
                           child: Text(
                             'sell_more_animal_button'.tr,

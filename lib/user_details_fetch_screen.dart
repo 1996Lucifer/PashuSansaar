@@ -16,6 +16,7 @@ import 'package:get/get.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:csv/csv.dart';
 import 'package:progress_dialog/progress_dialog.dart';
+import 'package:dart_geohash/dart_geohash.dart';
 
 class UserDetailsFetch extends StatefulWidget {
   final String currentUser, mobile;
@@ -36,6 +37,8 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
   TextEditingController zipCodeController = new TextEditingController();
   Map<String, dynamic> mobileInfo = {};
   LocationData _locate;
+
+  GeoHasher geoHasher = GeoHasher();
 
   String currentText = "";
 
@@ -71,11 +74,6 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
         assignDeviceID();
         return;
       }
-      //   else {
-      //     _locationData = await location.getLocation();
-      //   }
-      // } else {
-      //   _locationData = await location.getLocation();
     }
 
     _permissionGranted = await location.hasPermission();
@@ -88,19 +86,13 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
         assignDeviceID();
         return;
       }
-      // else {
-      //   _locationData = await location.getLocation();
-      // }
     }
-    // else {
-    //   _locationData = await location.getLocation();
-    // }
 
     _locationData = await location.getLocation();
     setState(() {
-      // _locate = _locationData;
-      prefs.setDouble("latitude", _locationData.latitude);
-      prefs.setDouble("longitude", _locationData.longitude);
+      _locate = _locationData;
+      prefs.setDouble("latitude", _locate.latitude);
+      prefs.setDouble("longitude", _locate.longitude);
     });
     assignDeviceID();
   }
@@ -368,7 +360,6 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                                 type: ProgressDialogType.Normal,
                                 isDismissible: false);
                             pr.style(message: 'progress_dialog_message'.tr);
-
                             pr.show();
                             FirebaseFirestore.instance
                                 .collection("userInfo")
@@ -387,7 +378,10 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                               'enteredReferralCode':
                                   referralCodeController.text.isNotEmpty
                                       ? referralCodeController.text
-                                      : ''
+                                      : '',
+                              'geoHash': geoHasher.encode(
+                                  prefs.getDouble('longitude'),
+                                  prefs.getDouble('latitude'))
                             }).then((result) {
                               pr.hide();
                               Navigator.pushReplacement(

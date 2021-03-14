@@ -19,10 +19,14 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
+import 'package:dart_geohash/dart_geohash.dart';
 
 class SellAnimalForm extends StatefulWidget {
   final String userName;
-  SellAnimalForm({Key key, @required this.userName}) : super(key: key);
+  final String userMobileNumber;
+  SellAnimalForm(
+      {Key key, @required this.userName, @required this.userMobileNumber})
+      : super(key: key);
 
   @override
   _SellAnimalFormState createState() => _SellAnimalFormState();
@@ -38,6 +42,7 @@ class _SellAnimalFormState extends State<SellAnimalForm> {
   // final _storage = new FlutterSecureStorage();
   SharedPreferences prefs;
   String desc = '';
+  GeoHasher geoHasher = GeoHasher();
 
   Map<String, dynamic> imagesUpload = {
     'image1': '',
@@ -115,45 +120,46 @@ class _SellAnimalFormState extends State<SellAnimalForm> {
     } catch (e) {}
   }
 
-  // _descriptionText(int index) {
-  //   String desc = '';
+  _descriptionText() {
+    String animalBreedCheck = animalInfo['animalBreed'] == 'not_known'.tr
+        ? ""
+        : animalInfo['animalBreed'];
+    String animalTypeCheck = animalInfo['animalType'] == 'other_animal'.tr
+        ? animalInfo['animalTypeOther']
+        : animalInfo['animalType'];
 
-  //   String stmn2 =
-  //       'यह ${widget.animalInfo[index]['extraInfo']['animalAlreadyGivenBirth']} ब्यायी है ';
-  //   String stmn3 =
-  //       'और अभी ${widget.animalInfo[index]['extraInfo']['animalIfPregnant']} है। ';
-  //   String stmn4 = '';
-  //   String stmn41 = 'इसके साथ में बच्चा नहीं है। ';
-  //   String stmn42 =
-  //       'इसके साथ में ${widget.animalInfo[index]['extraInfo']['animalHasBaby']}। ';
-  //   String stmn5 =
-  //       'पिछले बार के हिसाब से दूध कैपेसिटी ${widget.animalInfo[index]['animalInfo']['animalMilk']} लीटर है। ';
+    String desc = '';
 
-  //   if (widget.animalInfo[index]['animalInfo']['animalType'] ==
-  //           'buffalo_male'.tr ||
-  //       widget.animalInfo[index]['animalInfo']['animalType'] == 'ox'.tr) {
-  //     desc =
-  //         'ये ${widget.animalInfo[index]['animalInfo']['animalBreed']} ${widget.animalInfo[index]['animalInfo']['animalType']} ${widget.animalInfo[index]['animalInfo']['animalAge']} साल का है। ';
-  //   } else {
-  //     desc =
-  //         'ये ${widget.animalInfo[index]['animalInfo']['animalBreed']} ${widget.animalInfo[index]['animalInfo']['animalType']} ${widget.animalInfo[index]['animalInfo']['animalAge']} साल की है। ';
-  //     if (widget.animalInfo[index]['extraInfo']['animalAlreadyGivenBirth'] !=
-  //         null) desc = desc + stmn2;
-  //     if (widget.animalInfo[index]['extraInfo']['animalIfPregnant'] != null)
-  //       desc = desc + stmn3;
-  //     if (widget.animalInfo[index]['extraInfo']['animalHasBaby'] != null &&
-  //         widget.animalInfo[index]['extraInfo']['animalHasBaby'] ==
-  //             'nothing'.tr)
-  //       stmn4 = stmn4 + stmn41;
-  //     else
-  //       stmn4 = stmn4 + stmn42;
+    String stmn2 = 'यह ${extraInfoData['animalAlreadyGivenBirth']} ब्यायी है ';
+    String stmn3 = 'और अभी ${extraInfoData['animalIfPregnant']} है। ';
+    String stmn4 = '';
+    String stmn41 = 'इसके साथ में बच्चा नहीं है। ';
+    String stmn42 = 'इसके साथ में ${extraInfoData['animalHasBaby']}। ';
+    String stmn5 =
+        'पिछले बार के हिसाब से दूध कैपेसिटी ${animalInfo['animalMilk']} लीटर है। ';
 
-  //     desc = desc + stmn4;
-  //     desc = desc + stmn5;
-  //   }
+    if (animalInfo['animalType'] == 'buffalo_male'.tr ||
+        animalInfo['animalType'] == 'ox'.tr ||
+        animalInfo['animalType'] == 'other_animal'.tr) {
+      desc =
+          'ये $animalBreedCheck $animalTypeCheck ${animalInfo['animalAge']} साल का है। ';
+    } else {
+      desc =
+          'ये $animalBreedCheck $animalTypeCheck ${animalInfo['animalAge']} साल की है। ';
+      if (extraInfoData['animalAlreadyGivenBirth'] != null) desc = desc + stmn2;
+      if (extraInfoData['animalIfPregnant'] != null) desc = desc + stmn3;
+      if (extraInfoData['animalHasBaby'] != null &&
+          extraInfoData['animalHasBaby'] == 'nothing'.tr)
+        stmn4 = stmn4 + stmn41;
+      else
+        stmn4 = stmn4 + stmn42;
 
-  //   return desc + (widget.animalInfo[index]['extraInfo']['moreInfo'] ?? '');
-  // }
+      desc = desc + stmn4;
+      desc = desc + stmn5;
+    }
+
+    return desc + (extraInfoData['moreInfo'] ?? '');
+  }
 
   chooseOption(String index) => showDialog(
       context: context,
@@ -963,43 +969,6 @@ class _SellAnimalFormState extends State<SellAnimalForm> {
                   Text('animal_image_error'.tr),
                 );
               else {
-                // await Firebase.initializeApp();
-                //                   FirebaseFirestore.instance
-                //     .collection("buyingAnimalList")
-                //     .doc(FirebaseAuth.instance.currentUser.uid)
-                //     .set({
-                //   "userAnimalDescription": extraInfoData['moreInfo'],
-                //   "userAnimalType": animalInfo['animalType'],
-                //   "userAnimalAge": animalInfo['animalAge'],
-                //   "userAddress": "",
-                //   "userName": widget.userName,
-                //   "userAnimalPrice": animalInfo['animalPrice'],
-                //   "userAnimalBreed": animalInfo['animalBreed'],
-                //   "userMobileNumber":
-                //       FirebaseAuth.instance.currentUser.phoneNumber,
-                //   "userAnimalMilk": animalInfo['animalMilk'],
-                //   "userAnimalPregnancy": animalInfo['animalIsPregnant'],
-                //   "userLatitude": prefs.getDouble('latitude'),
-                //   "userLongitude": prefs.getDouble('longitude'),
-                //   "image1": imagesUpload['image1'] == null ||
-                //           imagesUpload['image1'] == ""
-                //       ? ""
-                //       : imagesUpload['image1'],
-                //   "image2": imagesUpload['image2'] == null ||
-                //           imagesUpload['image2'] == ""
-                //       ? ""
-                //       : imagesUpload['image2'],
-                //   "image3": imagesUpload['image3'] == null ||
-                //           imagesUpload['image3'] == ""
-                //       ? ""
-                //       : imagesUpload['image3'],
-                //   "image4": imagesUpload['image4'] == null ||
-                //           imagesUpload['image4'] == ""
-                //       ? ""
-                //       : imagesUpload['image4'],
-                //   "dateOfSaving":
-                //       ReusableWidgets.dateTimeToEpoch(DateTime.now())
-                // }).then((value) {
                 pr = new ProgressDialog(context,
                     type: ProgressDialogType.Normal, isDismissible: false);
                 pr.style(message: 'progress_dialog_message'.tr);
@@ -1019,25 +988,28 @@ class _SellAnimalFormState extends State<SellAnimalForm> {
                   'dateOfSaving':
                       ReusableWidgets.dateTimeToEpoch(DateTime.now()),
                   'uuid': uuid
-                }).then((res) async{
-                  SharedPreferences prefs = await SharedPreferences.getInstance();
+                }).then((res) async {
+                  SharedPreferences prefs =
+                      await SharedPreferences.getInstance();
                   FirebaseFirestore.instance
                       .collection("buyingAnimalList")
                       .doc(FirebaseAuth.instance.currentUser.uid)
                       .set({
-                    "userAnimalDescription": extraInfoData['moreInfo'],
-                    "userAnimalType": animalInfo['animalType'],
-                    "userAnimalAge": animalInfo['animalAge'],
+                    "userAnimalDescription": _descriptionText(),
+                    "userAnimalType": animalInfo['animalType'] ?? "",
+                    "userAnimalTypeOther": animalInfo['animalTypeOther'] ?? "",
+                    "userAnimalAge": animalInfo['animalAge'] ?? "",
                     "userAddress": "",
                     "userName": widget.userName,
-                    "userAnimalPrice": animalInfo['animalPrice'],
-                    "userAnimalBreed": animalInfo['animalBreed'],
-                    "userMobileNumber":
-                        FirebaseAuth.instance.currentUser.phoneNumber,
-                    "userAnimalMilk": animalInfo['animalMilk'],
-                    "userAnimalPregnancy": animalInfo['animalIsPregnant'],
+                    "userAnimalPrice": animalInfo['animalPrice'] ?? "0",
+                    "userAnimalBreed": animalInfo['animalBreed'] ?? "",
+                    "userMobileNumber": '${widget.userMobileNumber}',
+                    "userAnimalMilk": animalInfo['animalMilk'] ?? "",
+                    "userAnimalPregnancy": animalInfo['animalIsPregnant'] ?? "",
                     "userLatitude": prefs.getDouble('latitude'),
                     "userLongitude": prefs.getDouble('longitude'),
+                    'geoHash': geoHasher.encode(prefs.getDouble('longitude'),
+                        prefs.getDouble('latitude')),
                     "image1": imagesUpload['image1'] == null ||
                             imagesUpload['image1'] == ""
                         ? ""
@@ -1395,7 +1367,7 @@ class _SellAnimalFormState extends State<SellAnimalForm> {
     double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      // appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),
+      appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),
       body: GestureDetector(
         onTap: () {
           return WidgetsBinding.instance.focusManager.primaryFocus?.unfocus();

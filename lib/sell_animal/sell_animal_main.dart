@@ -10,8 +10,13 @@ import 'package:get/get.dart';
 class SellAnimalMain extends StatefulWidget {
   final List sellingAnimalInfo;
   final String userName;
+  final String userMobileNumber;
+
   SellAnimalMain(
-      {Key key, @required this.sellingAnimalInfo, @required this.userName})
+      {Key key,
+      @required this.sellingAnimalInfo,
+      @required this.userName,
+      @required this.userMobileNumber})
       : super(key: key);
 
   @override
@@ -65,10 +70,10 @@ class _SellAnimalMainState extends State<SellAnimalMain> {
     return widget.sellingAnimalInfo.length == 0
         ? SellAnimalForm(
             userName: widget.userName,
-          )
+            userMobileNumber: widget.userMobileNumber)
         : SellingAnimalInfo(
             animalInfo: widget.sellingAnimalInfo,
             userName: widget.userName,
-          );
+            userMobileNumber: widget.userMobileNumber);
   }
 }

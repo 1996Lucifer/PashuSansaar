@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:dhenu/home_screen.dart';
 import 'package:dhenu/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
@@ -38,7 +37,8 @@ class _OTPScreenState extends State<OTPScreen> {
     _verifyPhone();
     onTapRecognizer = TapGestureRecognizer()
       ..onTap = () {
-        Navigator.pop(context);
+        _verifyPhone();
+        // Navigator.pop(context);
       };
     errorController = StreamController<ErrorAnimationType>();
     checkUserLoginState();
