@@ -1,6 +1,6 @@
-import 'package:dhenu/login_screen.dart';
-import 'package:dhenu/user_details_fetch_screen.dart';
-import 'package:dhenu/utils/colors.dart';
+import 'package:pashusansaar/login_screen.dart';
+import 'package:pashusansaar/user_details_fetch_screen.dart';
+import 'package:pashusansaar/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:splash_screen_view/SplashScreenView.dart';

@@ -1,18 +1,21 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dhenu/buy_animal/buy_animal.dart';
-import 'package:dhenu/utils/reusable_widgets.dart';
+import 'package:pashusansaar/buy_animal/buy_animal.dart';
+import 'package:pashusansaar/utils/global.dart';
+import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geodesy/geodesy.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'model/push_notification_model.dart';
 import 'profile_main.dart';
 import 'sell_animal/sell_animal_main.dart';
 import 'package:get/get.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
+// import 'package:firebase_messaging/firebase_messaging.dart';
 
 // ignore: must_be_immutable
 class HomeScreen extends StatefulWidget {
@@ -28,71 +31,94 @@ class _HomeScreenState extends State<HomeScreen> {
   List _animalInfo = [], _sellingAnimalInfo = [];
   Map _profileData = {};
   final geo = Geoflutterfire();
+  PageController _pageController;
+
+// registerNotification(){
+//   PushNotification _notificationInfo;
+//     // ...
+
+//     // For handling the received notifications
+//     FirebaseMessaging.instance.configure(
+//       onMessage: (message) async {
+//         print('onMessage received: $message');
+
+//         // Parse the message received
+//         PushNotification notification = PushNotification.fromJson(message);
+
+//         setState(() {
+//           _notificationInfo = notification;
+//           _totalNotifications++;
+//         });
+//       },
+//     );
+// }
 
   @override
   void initState() {
-    super.initState();
+    _pageController = PageController(initialPage: widget.selectedIndex);
+
     loginSetup();
+    super.initState();
   }
 
   getInitialInfo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    // GeoFirePoint center = geo.point(
-    //     latitude: prefs.getDouble('latitude'),
-    //     longitude: prefs.getDouble('longitude'));
 
+    // FirebaseFirestore.instance
+    //     .collection("buyingAnimalList")
+    //     .orderBy("dateOfSaving", descending: true)
+    //     .get(GetOptions(source: Source.serverAndCache))
+    //     .then(
+    //   (value) {
+    //     List _info = [];
+
+    //     value.docs.forEach((element) {
+    //       _info.add(element.data());
+    //     });
     pr = new ProgressDialog(context,
         type: ProgressDialogType.Normal, isDismissible: false);
 
     pr.style(message: 'progress_dialog_message'.tr);
     pr.show();
 
-    // var collectionReference =
-    //     FirebaseFirestore.instance.collection("buyingAnimalList");
-    // var geoRef = geo.collection(collectionRef: collectionReference);
+    Stream<List<DocumentSnapshot>> stream = geo
+        .collection(
+            collectionRef:
+                FirebaseFirestore.instance.collection("buyingAnimalList"))
+        .within(
+            center: geo.point(
+                latitude: prefs.getDouble('latitude'),
+                longitude: prefs.getDouble('longitude')),
+            radius: 50,
+            field: 'position',
+            strictMode: true);
 
-    // var x = geoRef.within(center: center, radius: 10, field: 'geoHash');
+    stream.listen((List<DocumentSnapshot> documentList) {
+      List _temp = [];
+      documentList.forEach((e) {
+        _temp.addIf(e.reference.id != FirebaseAuth.instance.currentUser.uid, e);
+        print('=-=-=-' + e.reference.id);
+        print('=-=-=-' + e.toString());
+      });
+      setState(() {
+        dataSnapshotValue = documentList[documentList.length - 1];
+        _animalInfo = _temp;
+      });
 
-    FirebaseFirestore.instance
-        .collection("buyingAnimalList")
-        .orderBy("dateOfSaving", descending: true)
-        .get(GetOptions(source: Source.serverAndCache))
-        .then(
-      (value) {
-        List _info = [];
-        value.docs.forEach((element) {
-          _info.add(element.data());
-        });
+      print("=-=-=" + documentList.length.toString());
+    });
 
-        setState(() {
-          _animalInfo = _info;
-          _animalInfo.sort((a, b) => _getDistance(
-                  prefs.getDouble('latitude'),
-                  prefs.getDouble('longitude'),
-                  a['userLatitude'],
-                  a['userLongitude'])
-              .compareTo(_getDistance(
-                  prefs.getDouble('latitude'),
-                  prefs.getDouble('longitude'),
-                  b['userLatitude'],
-                  b['userLongitude'])));
-
-          prefs.setString('animalBuyingDetails', jsonEncode(_animalInfo));
-        });
-        // pr.hide();
-      },
-    );
     getAnimalSellingInfo();
   }
 
-  String _getDistance(lat1, long1, lat2, long2) {
-    return (Geodesy().distanceBetweenTwoGeoPoints(
-              LatLng(lat1, long1),
-              LatLng(lat2, long2),
-            ) /
-            1000)
-        .toStringAsFixed(0);
-  }
+  // String _getDistance(lat1, long1, lat2, long2) {
+  //   return (Geodesy().distanceBetweenTwoGeoPoints(
+  //             LatLng(lat1, long1),
+  //             LatLng(lat2, long2),
+  //           ) /
+  //           1000)
+  //       .toStringAsFixed(0);
+  // }
 
   getAnimalSellingInfo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -119,6 +145,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   getProfileInfo() {
+    // pr = new ProgressDialog(context,
+    //     type: ProgressDialogType.Normal, isDismissible: false);
+
+    // pr.style(message: 'progress_dialog_message'.tr);
+    // pr.show();
+
     FirebaseFirestore.instance
         .collection("userInfo")
         .doc(FirebaseAuth.instance.currentUser.uid)
@@ -149,6 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _onItemTapped(int index) {
     setState(() {
       widget.selectedIndex = index;
+      _pageController.jumpToPage(index);
     });
   }
 
@@ -179,16 +212,49 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       // appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),
-      body: getScreenOnSelection(),
+      body: PageView(
+          controller: _pageController,
+          physics: NeverScrollableScrollPhysics(),
+          children: [
+            BuyAnimal(
+              animalInfo: _animalInfo,
+              userName: _profileData['name'],
+              userMobileNumber: _profileData['mobile'],
+              userImage: _profileData['image'],
+            ),
+            SellAnimalMain(
+                sellingAnimalInfo: _sellingAnimalInfo,
+                userName: _profileData['name'],
+                userMobileNumber: _profileData['mobile']),
+            ProfileMain(profileData: _profileData),
+          ]
+          // getScreenOnSelection(),
+          ),
+      // IndexedStack(
+      //   children: [
+      //     BuyAnimal(
+      //       animalInfo: _animalInfo,
+      //       userName: _profileData['name'],
+      //       userMobileNumber: _profileData['mobile'],
+      //       userImage: _profileData['image'],
+      //     ),
+      //     SellAnimalMain(
+      //         sellingAnimalInfo: _sellingAnimalInfo,
+      //         userName: _profileData['name'],
+      //         userMobileNumber: _profileData['mobile']),
+      //     ProfileMain(profileData: _profileData),
+      //   ],
+      //   index: widget.selectedIndex,
+      // ),
       bottomNavigationBar: BottomNavigationBar(
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Image.asset('assets/images/buy3.png', height: 25, width: 25),
-            label: 'sell'.tr,
+            label: 'buy'.tr,
           ),
           BottomNavigationBarItem(
             icon: Image.asset('assets/images/Sell.png', height: 25, width: 25),
-            label: 'buy'.tr,
+            label: 'sell'.tr,
           ),
           BottomNavigationBarItem(
             icon:

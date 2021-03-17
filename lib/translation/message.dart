@@ -4,7 +4,7 @@ class Messages extends Translations {
   @override
   Map<String, Map<String, String>> get keys => {
         // 'en_US': {
-        //   'app_name': 'Dhenu',
+        //   'app_name': 'pashusansaar',
         //   'mobile_label': "Mobile Number",
         //   'mobile_hint': "Enter Mobile Number",
         //   "login_button": "LOGIN",
@@ -141,7 +141,7 @@ class Messages extends Translations {
           'kankrej': 'कांकरेज (kankrej)',
           'kapila': 'कपिला (kapila)',
           'ayrshire': 'आयरशायर (ayrshire)',
-          'hardhenu': 'हरधेनु (hardhenu)',
+          'harpashusansaar': 'हरधेनु (harpashusansaar)',
           'nagori': 'नागोरी (nagori)',
           'gujarati_cow': 'गुजराती गाय (gujarati)',
           'red_sindhi': 'रेड सिन्धी (red sindhi)',
@@ -231,8 +231,8 @@ class Messages extends Translations {
           'updated_animal': 'पशु की जानकारी ठीक कर दी गयी है |',
           'zipcode_label': 'ज़िपकोड',
           'zipcode_hint': 'अपना ज़िपकोड दर्ज करें',
-          'buy': 'पशु बेचे',
-          'sell': 'पशु खरीदे',
+          'buy': 'पशु खरीदे',
+          'sell': 'पशु बेचे',
           'profile': 'प्रोफ़ाइल',
           'animal_filter': 'पशु फ़िल्टर'
         }

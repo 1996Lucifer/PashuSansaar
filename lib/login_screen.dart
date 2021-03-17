@@ -1,6 +1,6 @@
-import 'package:dhenu/otp_screen.dart';
-import 'package:dhenu/utils/colors.dart';
-import 'package:dhenu/utils/reusable_widgets.dart';
+import 'package:pashusansaar/otp_screen.dart';
+import 'package:pashusansaar/utils/colors.dart';
+import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -34,7 +34,11 @@ class _LoginState extends State<Login> {
             ),
             Column(
               children: <Widget>[
-                Image.asset('assets/images/AppIcon.jpg', height: 200,width: 200,),
+                Image.asset(
+                  'assets/images/AppIcon.jpg',
+                  height: 200,
+                  width: 200,
+                ),
                 Padding(
                   padding: EdgeInsets.only(bottom: 10),
                   child: Text(

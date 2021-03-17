@@ -103,7 +103,7 @@ List<String> animalBreedCowOx = [
   'kankrej'.tr,
   'kapila'.tr,
   'ayrshire'.tr,
-  'hardhenu'.tr,
+  'harpashusansaar'.tr,
   'nagori'.tr,
   'gujarati_cow'.tr,
   'red_sindhi'.tr,

@@ -2,9 +2,9 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:device_info/device_info.dart';
-import 'package:dhenu/home_screen.dart';
-import 'package:dhenu/utils/colors.dart';
-import 'package:dhenu/utils/reusable_widgets.dart';
+import 'package:pashusansaar/home_screen.dart';
+import 'package:pashusansaar/utils/colors.dart';
+import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,10 +13,9 @@ import 'package:location/location.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
-import 'package:flutter/services.dart' show rootBundle;
-import 'package:csv/csv.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:dart_geohash/dart_geohash.dart';
+import 'package:geoflutterfire/geoflutterfire.dart' as geoFire;
 
 class UserDetailsFetch extends StatefulWidget {
   final String currentUser, mobile;
@@ -37,6 +36,7 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
   TextEditingController zipCodeController = new TextEditingController();
   Map<String, dynamic> mobileInfo = {};
   LocationData _locate;
+  final geo = geoFire.Geoflutterfire();
 
   GeoHasher geoHasher = GeoHasher();
 
@@ -132,10 +132,10 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
   }
 
   loadAsset() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     var addresses =
         await Geocoder.local.findAddressesFromQuery(zipCodeController.text);
     var first = addresses.first;
-    SharedPreferences prefs = await SharedPreferences.getInstance();
 
     setState(() {
       prefs.setDouble("latitude", first.coordinates.latitude);
@@ -369,6 +369,11 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                               "name": nameController.text,
                               "mobile": widget.mobile,
                               "mobileInfo": mobileInfo,
+                              'position': geo
+                                  .point(
+                                      latitude: prefs.getDouble('latitude'),
+                                      longitude: prefs.getDouble('longitude'))
+                                  .data,
                               'latitude':
                                   prefs.getDouble('latitude').toString(),
                               'longitude':
@@ -379,9 +384,6 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                                   referralCodeController.text.isNotEmpty
                                       ? referralCodeController.text
                                       : '',
-                              'geoHash': geoHasher.encode(
-                                  prefs.getDouble('longitude'),
-                                  prefs.getDouble('latitude'))
                             }).then((result) {
                               pr.hide();
                               Navigator.pushReplacement(
@@ -389,7 +391,8 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                                   MaterialPageRoute(
                                       builder: (context) =>
                                           HomeScreen(selectedIndex: 0)));
-                            }).catchError((err) => print("err->" + err));
+                            }).catchError(
+                                    (err) => print("err->" + err.toString()));
                           }
                         },
                       ),

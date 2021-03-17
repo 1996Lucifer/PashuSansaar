@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dhenu/utils/colors.dart';
-import 'package:dhenu/utils/reusable_widgets.dart';
+import 'package:pashusansaar/utils/colors.dart';
+import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -18,7 +18,7 @@ import '../utils/constants.dart' as constant;
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:intl/intl.dart';
-import 'package:dart_geohash/dart_geohash.dart';
+import 'package:geoflutterfire/geoflutterfire.dart' as geoFire;
 
 class SellAnimalEditForm extends StatefulWidget {
   final int index;
@@ -35,9 +35,9 @@ class SellAnimalEditForm extends StatefulWidget {
   _SellAnimalEditFormState createState() => _SellAnimalEditFormState();
 }
 
-class _SellAnimalEditFormState extends State<SellAnimalEditForm> {
-  GeoHasher geoHasher = GeoHasher();
-
+class _SellAnimalEditFormState extends State<SellAnimalEditForm>
+    with AutomaticKeepAliveClientMixin {
+  final geo = geoFire.Geoflutterfire();
   var animalInfo = {}, extraInfoData = {};
   String _base64Image;
   ImagePicker _picker;
@@ -57,6 +57,9 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm> {
 
   TextEditingController _controller;
   static const _locale = 'en_IN';
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -1032,8 +1035,11 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm> {
                     "userAnimalPregnancy": animalInfo['animalIsPregnant'] ?? "",
                     "userLatitude": prefs.getDouble('latitude'),
                     "userLongitude": prefs.getDouble('longitude'),
-                    'geoHash': geoHasher.encode(prefs.getDouble('longitude'),
-                        prefs.getDouble('latitude')),
+                    'position': geo
+                        .point(
+                            latitude: prefs.getDouble('latitude'),
+                            longitude: prefs.getDouble('longitude'))
+                        .data,
                     "image1": imagesUpload['image1'] == null ||
                             imagesUpload['image1'] == ""
                         ? ""

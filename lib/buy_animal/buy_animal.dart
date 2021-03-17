@@ -3,8 +3,9 @@ import 'dart:typed_data';
 import 'dart:core';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:csv/csv.dart';
-import 'package:dhenu/utils/colors.dart';
-import 'package:dhenu/utils/reusable_widgets.dart';
+import 'package:pashusansaar/utils/colors.dart';
+import 'package:pashusansaar/utils/global.dart';
+import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -22,8 +23,8 @@ import 'package:url_launcher/url_launcher.dart' as UrlLauncher;
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:share/share.dart';
 import 'package:screenshot/screenshot.dart';
-import 'package:dhenu/utils/constants.dart' as constant;
-import 'package:dart_geohash/dart_geohash.dart';
+import 'package:pashusansaar/utils/constants.dart' as constant;
+import 'package:geoflutterfire/geoflutterfire.dart' as geoFire;
 
 class BuyAnimal extends StatefulWidget {
   List animalInfo;
@@ -42,22 +43,30 @@ class BuyAnimal extends StatefulWidget {
   _BuyAnimalState createState() => _BuyAnimalState();
 }
 
-class _BuyAnimalState extends State<BuyAnimal> {
+class _BuyAnimalState extends State<BuyAnimal>
+    with AutomaticKeepAliveClientMixin {
   var formatter = intl.NumberFormat('#,##,000');
-  int _index = 0, _value;
-  GeoHasher geoHasher = GeoHasher();
+  int _index = 0, _value, _valueRadius;
+  int perPage = 10;
 
   List<String> _filterMilkValue = [
     '0-10 ' + 'litre_milk'.tr,
-    '10-15 ' + 'litre_milk'.tr,
-    '15-20 ' + 'litre_milk'.tr,
+    '11-15 ' + 'litre_milk'.tr,
+    '16-20 ' + 'litre_milk'.tr,
     '> 20 ' + 'litre_milk'.tr
   ];
+  List<String> _radius = [
+    '25 ' + 'km'.tr,
+    '50 ' + 'km'.tr,
+    '75 ' + 'km'.tr,
+    '100 ' + 'km'.tr
+  ];
+
+  final geo = geoFire.Geoflutterfire();
 
   int _current = 0;
   Map<String, dynamic> _filterDropDownMap = {};
   ProgressDialog pr;
-  String _locality = '';
   double _latitude = 0.0, _longitude = 0.0;
   ScreenshotController screenshotController = ScreenshotController();
   String _filterAnimalType;
@@ -67,13 +76,28 @@ class _BuyAnimalState extends State<BuyAnimal> {
   String _userLocality = '';
   TextEditingController _locationController = TextEditingController();
   String whatsappText = '';
+  ScrollController _scrollController = ScrollController();
+  bool _gettingMoreBuyer = false;
+  bool _moreDataAvailable = true;
+
+  @override
+  bool get wantKeepAlive => true;
+
   @override
   void initState() {
-    // dataFillOnInit();
+    dataFillOnInit();
     // _locationController.addListener(() {
     //   _onChanged();
     // });
     _getInitialData();
+    _scrollController.addListener(() {
+      double maxScroll = _scrollController.position.maxScrollExtent;
+      double currentScroll = _scrollController.position.pixels;
+      double delta = MediaQuery.of(context).size.height * 0.25;
+      if (maxScroll - currentScroll <= delta) {
+        getInitialInfo();
+      }
+    });
     super.initState();
   }
 
@@ -98,40 +122,119 @@ class _BuyAnimalState extends State<BuyAnimal> {
     });
   }
 
-  // getInitialInfo() async {
-  //   // await Firebase.initializeApp();
-  //   pr = new ProgressDialog(context,
-  //       type: ProgressDialogType.Normal, isDismissible: false);
+  getInitialInfo() async {
+    print("called funcrion");
+    // pr = new ProgressDialog(context,
+    //     type: ProgressDialogType.Normal, isDismissible: false);
 
-  //   pr.style(message: 'progress_dialog_message'.tr);
-  //   pr.show();
+    // pr.style(message: 'progress_dialog_message'.tr);
+    // pr.show();
 
-  //   FirebaseFirestore.instance
-  //       .collection("buyingAnimalList")
-  //       .get(GetOptions(source: Source.serverAndCache))
-  //       .then(
-  //     (value) {
-  //       List _info = [];
-  //       value.docs.forEach((element) {
-  //         _info.add(element.data());
-  //       });
+    if (_moreDataAvailable == false) return;
+    if (_gettingMoreBuyer == true) return;
 
-  //       setState(() {
-  //         widget.animalInfo = _info;
-  //       });
-  //       pr.hide();
-  //     },
-  //   );
-  // }
+    _gettingMoreBuyer = true;
 
-  String _getDistance(lat, long) {
-    return (Geodesy().distanceBetweenTwoGeoPoints(
-              LatLng(_latitude, _longitude),
-              LatLng(lat, long),
-            ) /
-            1000)
-        .toStringAsFixed(0);
+    FirebaseFirestore.instance
+        .collection("buyingAnimalList")
+        .orderBy("dateOfSaving", descending: true)
+        .startAfter(dataSnapshotValue.data['dateOfSaving'])
+        .limit(perPage)
+        .get(GetOptions(source: Source.serverAndCache))
+        .then(
+      (value) {
+        if (value.docs.length < perPage) {
+          setState(() {
+            _moreDataAvailable = false;
+          });
+        }
+        List _info = [];
+        value.docs.forEach((element) {
+          _info.add(element.data());
+        });
+
+        dataSnapshotValue = value.docs[value.docs.length - 1];
+        setState(() {
+          //   widget.animalInfo = _info;
+          //   widget.animalInfo.sort((a, b) => _getDistance(
+          //           prefs.getDouble('latitude'),
+          //           prefs.getDouble('longitude'),
+          //           a['userLatitude'],
+          //           a['userLongitude'])
+          //       .compareTo(_getDistance(
+          //           prefs.getDouble('latitude'),
+          //           prefs.getDouble('longitude'),
+          //           b['userLatitude'],
+          //           b['userLongitude'])));
+        });
+        // pr.hide();
+      },
+    );
+
+    _gettingMoreBuyer = false;
   }
+
+  dataFillOnInit() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    final myData = await rootBundle.loadString("assets/file/animal_data_1.csv");
+    // final myImageData1 =
+    //     await PlatformAssetBundle().load("assets/images/image_1");
+    // final myImageData2 =
+    //     await PlatformAssetBundle().load("assets/images/image_2");
+    // final myImageData3 =
+    //     await PlatformAssetBundle().load("assets/images/image_3");
+    // final myImageData4 =
+    // await PlatformAssetBundle().load("assets/images/image_4");
+    List<List<dynamic>> data = CsvToListConverter().convert(myData);
+
+    for (int i = 1; i <= data.length - 1; i++) {
+      loadAddress(data[i][3].toString());
+      // await FirebaseFirestore.instance
+      //     .collection("buyingAnimalList")
+      //     .doc()
+      //     .set({
+      //   "userAnimalDescription": data[i][0].toString(),
+      //   "userAnimalType": data[i][1].toString(),
+      //   "userAnimalAge": data[i][2].toString(),
+      //   "userAddress": data[i][3].toString(),
+      //   "userName": data[i][4].toString(),
+      //   "userAnimalPrice": data[i][5].toString(),
+      //   "userAnimalBreed": data[i][6].toString(),
+      //   "userMobileNumber": data[i][7].toString(),
+      //   "userAnimalMilk": data[i][8].toString(),
+      //   "userAnimalPregnancy": data[i][9].toString(),
+      //   "userLatitude": prefs.getDouble('userLatitude'),
+      //   "userLongitude": prefs.getDouble('userLongitude'),
+      //   'position': geo.point(
+      //       latitude: prefs.getDouble('userLatitude'),
+      //       longitude: prefs.getDouble('userLongitude')).data,
+
+      //   "image1": data[i][10] == null || data[i][10] == ""
+      //       ? ""
+      //       : data[i][10].toString(),
+      //   "image2": data[i][11] == null || data[i][11] == ""
+      //       ? ""
+      //       : data[i][11].toString(),
+      //   "image3": data[i][12] == null || data[i][12] == ""
+      //       ? ""
+      //       : data[i][12].toString(),
+      //   "image4": data[i][13] == null || data[i][13] == ""
+      //       ? ""
+      //       : data[i][13].toString(),
+      //   "dateOfSaving": ReusableWidgets.dateTimeToEpoch(DateTime.now())
+      // });
+    }
+  }
+
+  // String _getDistance(lat1, long1, lat2, long2) {
+  //   return (Geodesy().distanceBetweenTwoGeoPoints(
+  //             LatLng(lat1, long1),
+  //             LatLng(lat2, long2),
+  //           ) /
+  //           1000)
+  //       .toStringAsFixed(0);
+  // }
 
   loadAddress(address) async {
     var addresses = await Geocoder.local.findAddressesFromQuery(address);
@@ -142,50 +245,6 @@ class _BuyAnimalState extends State<BuyAnimal> {
       prefs.setDouble("userLatitude", first.coordinates.latitude);
       prefs.setDouble("userLongitude", first.coordinates.longitude);
     });
-  }
-
-  dataFillOnInit() async {
-    // await Firebase.initializeApp();
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    final myData = await rootBundle.loadString("assets/file/animal_data_1.csv");
-    List<List<dynamic>> data = CsvToListConverter().convert(myData);
-
-    for (int i = 1; i <= data.length - 1; i++) {
-      loadAddress(data[i][3].toString());
-      await FirebaseFirestore.instance
-          .collection("buyingAnimalList")
-          .doc()
-          .set({
-        "userAnimalDescription": data[i][0].toString(),
-        "userAnimalType": data[i][1].toString(),
-        "userAnimalAge": data[i][2].toString(),
-        "userAddress": data[i][3].toString(),
-        "userName": data[i][4].toString(),
-        "userAnimalPrice": data[i][5].toString(),
-        "userAnimalBreed": data[i][6].toString(),
-        "userMobileNumber": data[i][7].toString(),
-        "userAnimalMilk": data[i][8].toString(),
-        "userAnimalPregnancy": data[i][9].toString(),
-        "userLatitude": prefs.getDouble('userLatitude'),
-        "userLongitude": prefs.getDouble('userLongitude'),
-        'geoHash': geoHasher.encode(
-            prefs.getDouble('userLongitude'), prefs.getDouble('userLatitude')),
-        "image1": data[i][10] == null || data[i][10] == ""
-            ? ""
-            : data[i][10].toString(),
-        "image2": data[i][11] == null || data[i][11] == ""
-            ? ""
-            : data[i][11].toString(),
-        "image3": data[i][12] == null || data[i][12] == ""
-            ? ""
-            : data[i][12].toString(),
-        "image4": data[i][13] == null || data[i][13] == ""
-            ? ""
-            : data[i][13].toString(),
-        "dateOfSaving": ReusableWidgets.dateTimeToEpoch(DateTime.now())
-      });
-    }
   }
 
   bayaatMapping(bayaat) {
@@ -431,6 +490,41 @@ class _BuyAnimalState extends State<BuyAnimal> {
         ),
       );
 
+  _radiusLocation() => StatefulBuilder(
+        builder: (context, setState1) => Column(
+          children: [
+            Text("कितनी दुरी तक के पशु दिखाए"),
+            Wrap(
+                children: _radius
+                    .map((e) => Padding(
+                          padding: const EdgeInsets.all(3.0),
+                          child: ChoiceChip(
+                            backgroundColor: Colors.white,
+                            side: BorderSide(color: primaryColor),
+                            label: Text(
+                              e,
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                  color: _valueRadius == _radius.indexOf(e)
+                                      ? Colors.white
+                                      : primaryColor),
+                            ),
+                            selectedColor: primaryColor,
+                            selected: _valueRadius == _radius.indexOf(e),
+                            onSelected: (bool selected) {
+                              setState1(() {
+                                _valueRadius =
+                                    selected ? _radius.indexOf(e) : null;
+                              });
+                            },
+                          ),
+                        ))
+                    .toList()),
+          ],
+        ),
+      );
+
   // _onChanged() {
   //   if (_sessionToken == null) {
   //     setState(() {
@@ -471,281 +565,315 @@ class _BuyAnimalState extends State<BuyAnimal> {
       backgroundColor: Colors.grey[100],
       body: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 50.0),
-            child: _tempAnimalList.length != 0
-                ? ListView.builder(
-                    physics: BouncingScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      return Padding(
-                          padding: const EdgeInsets.only(
-                              left: 8.0, right: 8, top: 8),
-                          child: Card(
-                            key: Key(index.toString()),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            elevation: 5,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildInfowidget(index),
-                                _distanceTimeMethod(index),
-                                _animalImageWidget(index),
-                                _animalDescriptionMethod(index),
-                                Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey[100],
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.grey,
-                                          blurRadius: 1.0,
+          _tempAnimalList.length == 0 && widget.animalInfo.length == 0
+              ? Center(
+                  child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Text(
+                      'जानकारी उपलब्ध नहीं है| कोई और चुनाव करके कोशिश करे |',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      )),
+                ))
+              : Padding(
+                  padding: const EdgeInsets.only(top: 50.0),
+                  child: _tempAnimalList.length != 0
+                      ? ListView.builder(
+                          physics: BouncingScrollPhysics(),
+                          itemBuilder: (context, index) => Padding(
+                              padding: const EdgeInsets.only(
+                                  left: 8.0, right: 8, top: 8),
+                              child: Card(
+                                key: Key(index.toString()),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                elevation: 5,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _buildInfowidget(index),
+                                    _distanceTimeMethod(index),
+                                    _animalImageWidget(index),
+                                    _animalDescriptionMethod(index),
+                                    Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[100],
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.grey,
+                                              blurRadius: 1.0,
+                                            ),
+                                          ],
+                                          borderRadius:
+                                              BorderRadius.circular(8),
                                         ),
-                                      ],
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    height: 80,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Row(children: [
-                                        widget.userImage == null ||
-                                                widget.userImage == ""
-                                            ? Image.asset(
+                                        height: 80,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Row(children: [
+                                            widget.userImage == null ||
+                                                    widget.userImage == ""
+                                                ? Image.asset(
+                                                    'assets/images/profile.jpg',
+                                                    width: 40,
+                                                    height: 40)
+                                                : Image.memory(
+                                                    base64Decode(
+                                                        widget.userImage),
+                                                    width: 40,
+                                                    height: 40),
+                                            SizedBox(
+                                              width: 5,
+                                            ),
+                                            Expanded(
+                                              child: Text(
+                                                _tempAnimalList[index]
+                                                    ['userName'],
+                                                style: TextStyle(
+                                                    fontSize: 15,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.black),
+                                              ),
+                                            ),
+                                            RaisedButton.icon(
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            18.0),
+                                                    side: BorderSide(
+                                                        color:
+                                                            darkSecondaryColor)),
+                                                color: secondaryColor,
+                                                onPressed: () => UrlLauncher.launch(
+                                                    'tel:+91 ${widget.animalInfo[index]['userMobileNumber']}'),
+                                                icon: Icon(
+                                                  Icons.call,
+                                                  color: Colors.white,
+                                                  size: 14,
+                                                ),
+                                                label: Text('call'.tr,
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 14))),
+                                            SizedBox(
+                                              width: 5,
+                                            ),
+                                            RaisedButton.icon(
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            18.0),
+                                                    side: BorderSide(
+                                                        color: darkGreenColor)),
+                                                color: darkGreenColor,
+                                                onPressed: () async {
+                                                  String whatsappUrl = '';
+                                                  SharedPreferences prefs =
+                                                      await SharedPreferences
+                                                          .getInstance();
+
+                                                  whatsappText =
+                                                      'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${widget.userName}, ${prefs.getString('place')} \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
+                                                  whatsappUrl =
+                                                      "https://api.whatsapp.com/send/?phone=+91 ${_tempAnimalList[index]['userMobileNumber']}&text=$whatsappText";
+                                                  await UrlLauncher.canLaunch(
+                                                              whatsappUrl) !=
+                                                          null
+                                                      ? UrlLauncher.launch(
+                                                          Uri.encodeFull(
+                                                              whatsappUrl))
+                                                      : ScaffoldMessenger.of(
+                                                              context)
+                                                          .showSnackBar(
+                                                              SnackBar(
+                                                          content: Text(
+                                                              '${_tempAnimalList[index]['userMobileNumber']} is not present in Whatsapp'),
+                                                          duration: Duration(
+                                                              milliseconds:
+                                                                  300),
+                                                          padding: EdgeInsets
+                                                              .symmetric(
+                                                                  horizontal:
+                                                                      8),
+                                                          behavior:
+                                                              SnackBarBehavior
+                                                                  .floating,
+                                                          shape:
+                                                              RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10.0),
+                                                          ),
+                                                        ));
+                                                },
+                                                icon: FaIcon(
+                                                    FontAwesomeIcons.whatsapp,
+                                                    color: Colors.white,
+                                                    size: 14),
+                                                label: Text('message'.tr,
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 14)))
+                                          ]),
+                                        ))
+                                  ],
+                                ),
+                              )
+                              // ),
+                              ),
+                          itemCount: _tempAnimalList.length)
+                      : ListView.builder(
+                          controller: _scrollController,
+                          physics: BouncingScrollPhysics(),
+                          itemBuilder: (context, index) => Padding(
+                              padding: const EdgeInsets.only(
+                                  left: 8.0, right: 8, top: 8),
+                              child: Card(
+                                key: Key(index.toString()),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                elevation: 5,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _buildInfowidget(index),
+                                    _distanceTimeMethod(index),
+                                    _animalImageWidget(index),
+                                    _animalDescriptionMethod(index),
+                                    Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[100],
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.grey,
+                                              blurRadius: 1.0,
+                                            ),
+                                          ],
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        height: 80,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Row(children: [
+                                            Image.asset(
                                                 'assets/images/profile.jpg',
                                                 width: 40,
-                                                height: 40)
-                                            : Image.memory(
-                                                base64Decode(widget.userImage),
-                                                width: 40,
                                                 height: 40),
-                                        SizedBox(
-                                          width: 5,
-                                        ),
-                                        Expanded(
-                                          child: Text(
-                                            _tempAnimalList[index]['userName'],
-                                            style: TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black),
-                                          ),
-                                        ),
-                                        RaisedButton.icon(
-                                            shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(18.0),
-                                                side: BorderSide(
-                                                    color: darkSecondaryColor)),
-                                            color: secondaryColor,
-                                            onPressed: () => UrlLauncher.launch(
-                                                'tel:+91 ${widget.animalInfo[index]['userMobileNumber']}'),
-                                            icon: Icon(
-                                              Icons.call,
-                                              color: Colors.white,
-                                              size: 14,
+                                            SizedBox(
+                                              width: 5,
                                             ),
-                                            label: Text('call'.tr,
+                                            Expanded(
+                                              child: Text(
+                                                widget.animalInfo[index]
+                                                    ['userName'],
                                                 style: TextStyle(
-                                                    color: Colors.white,
+                                                    fontSize: 15,
                                                     fontWeight: FontWeight.bold,
-                                                    fontSize: 14))),
-                                        SizedBox(
-                                          width: 5,
-                                        ),
-                                        RaisedButton.icon(
-                                            shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(18.0),
-                                                side: BorderSide(
-                                                    color: darkGreenColor)),
-                                            color: darkGreenColor,
-                                            onPressed: () async {
-                                              String whatsappUrl = '';
-                                              SharedPreferences prefs =
-                                                  await SharedPreferences
-                                                      .getInstance();
-
-                                              whatsappText =
-                                                  'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${widget.userName}, ${prefs.getString('place')} \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
-                                              whatsappUrl =
-                                                  "https://api.whatsapp.com/send/?phone=+91 ${_tempAnimalList[index]['userMobileNumber']}&text=$whatsappText";
-                                              await UrlLauncher.canLaunch(
-                                                          whatsappUrl) !=
-                                                      null
-                                                  ? UrlLauncher.launch(
-                                                      Uri.encodeFull(
-                                                          whatsappUrl))
-                                                  : ScaffoldMessenger.of(
-                                                          context)
-                                                      .showSnackBar(SnackBar(
-                                                      content: Text(
-                                                          '${_tempAnimalList[index]['userMobileNumber']} is not present in Whatsapp'),
-                                                      duration: Duration(
-                                                          milliseconds: 300),
-                                                      padding:
-                                                          EdgeInsets.symmetric(
-                                                              horizontal: 8),
-                                                      behavior: SnackBarBehavior
-                                                          .floating,
-                                                      shape:
-                                                          RoundedRectangleBorder(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(10.0),
-                                                      ),
-                                                    ));
-                                            },
-                                            icon: FaIcon(
-                                                FontAwesomeIcons.whatsapp,
-                                                color: Colors.white,
-                                                size: 14),
-                                            label: Text('message'.tr,
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 14)))
-                                      ]),
-                                    ))
-                              ],
-                            ),
-                          )
-                          // ),
-                          );
-                    },
-                    itemCount: _tempAnimalList.length)
-                : ListView.builder(
-                    physics: BouncingScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      return Padding(
-                          padding: const EdgeInsets.only(
-                              left: 8.0, right: 8, top: 8),
-                          child: Card(
-                            key: Key(index.toString()),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            elevation: 5,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildInfowidget(index),
-                                _distanceTimeMethod(index),
-                                _animalImageWidget(index),
-                                _animalDescriptionMethod(index),
-                                Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey[100],
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.grey,
-                                          blurRadius: 1.0,
-                                        ),
-                                      ],
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    height: 80,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Row(children: [
-                                        Image.asset('assets/images/profile.jpg',
-                                            width: 40, height: 40),
-                                        SizedBox(
-                                          width: 5,
-                                        ),
-                                        Expanded(
-                                          child: Text(
-                                            widget.animalInfo[index]
-                                                ['userName'],
-                                            style: TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black),
-                                          ),
-                                        ),
-                                        RaisedButton.icon(
-                                            shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(18.0),
-                                                side: BorderSide(
-                                                    color: darkSecondaryColor)),
-                                            color: secondaryColor,
-                                            onPressed: () => UrlLauncher.launch(
-                                                'tel:+91 ${widget.animalInfo[index]['userMobileNumber']}'),
-                                            icon: Icon(
-                                              Icons.call,
-                                              color: Colors.white,
-                                              size: 14,
+                                                    color: Colors.black),
+                                              ),
                                             ),
-                                            label: Text('call'.tr,
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 14))),
-                                        SizedBox(
-                                          width: 5,
-                                        ),
-                                        RaisedButton.icon(
-                                            shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(18.0),
-                                                side: BorderSide(
-                                                    color: darkGreenColor)),
-                                            color: darkGreenColor,
-                                            onPressed: () async {
-                                              String whatsappUrl = '';
-                                              SharedPreferences prefs =
-                                                  await SharedPreferences
-                                                      .getInstance();
+                                            RaisedButton.icon(
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            18.0),
+                                                    side: BorderSide(
+                                                        color:
+                                                            darkSecondaryColor)),
+                                                color: secondaryColor,
+                                                onPressed: () => UrlLauncher.launch(
+                                                    'tel:+91 ${widget.animalInfo[index]['userMobileNumber']}'),
+                                                icon: Icon(
+                                                  Icons.call,
+                                                  color: Colors.white,
+                                                  size: 14,
+                                                ),
+                                                label: Text('call'.tr,
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 14))),
+                                            SizedBox(
+                                              width: 5,
+                                            ),
+                                            RaisedButton.icon(
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            18.0),
+                                                    side: BorderSide(
+                                                        color: darkGreenColor)),
+                                                color: darkGreenColor,
+                                                onPressed: () async {
+                                                  String whatsappUrl = '';
+                                                  SharedPreferences prefs =
+                                                      await SharedPreferences
+                                                          .getInstance();
 
-                                              whatsappText =
-                                                  'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${widget.userName}, ${prefs.getString('place')} \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
-                                              whatsappUrl =
-                                                  "https://api.whatsapp.com/send/?phone=+91 ${widget.animalInfo[index]['userMobileNumber']}&text=$whatsappText";
-                                              await UrlLauncher.canLaunch(
-                                                          whatsappUrl) !=
-                                                      null
-                                                  ? UrlLauncher.launch(
-                                                      Uri.encodeFull(
-                                                          whatsappUrl))
-                                                  : ScaffoldMessenger.of(
-                                                          context)
-                                                      .showSnackBar(SnackBar(
-                                                      content: Text(
-                                                          '${widget.animalInfo[index]['userMobileNumber']} is not present in Whatsapp'),
-                                                      duration: Duration(
-                                                          milliseconds: 300),
-                                                      padding:
-                                                          EdgeInsets.symmetric(
-                                                              horizontal: 8),
-                                                      behavior: SnackBarBehavior
-                                                          .floating,
-                                                      shape:
-                                                          RoundedRectangleBorder(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(10.0),
-                                                      ),
-                                                    ));
-                                            },
-                                            icon: FaIcon(
-                                                FontAwesomeIcons.whatsapp,
-                                                color: Colors.white,
-                                                size: 14),
-                                            label: Text('message'.tr,
-                                                style: TextStyle(
+                                                  whatsappText =
+                                                      'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${widget.userName}, ${prefs.getString('place')} \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
+                                                  whatsappUrl =
+                                                      "https://api.whatsapp.com/send/?phone=+91 ${widget.animalInfo[index]['userMobileNumber']}&text=$whatsappText";
+                                                  await UrlLauncher.canLaunch(
+                                                              whatsappUrl) !=
+                                                          null
+                                                      ? UrlLauncher.launch(
+                                                          Uri.encodeFull(
+                                                              whatsappUrl))
+                                                      : ScaffoldMessenger.of(
+                                                              context)
+                                                          .showSnackBar(
+                                                              SnackBar(
+                                                          content: Text(
+                                                              '${widget.animalInfo[index]['userMobileNumber']} is not present in Whatsapp'),
+                                                          duration: Duration(
+                                                              milliseconds:
+                                                                  300),
+                                                          padding: EdgeInsets
+                                                              .symmetric(
+                                                                  horizontal:
+                                                                      8),
+                                                          behavior:
+                                                              SnackBarBehavior
+                                                                  .floating,
+                                                          shape:
+                                                              RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10.0),
+                                                          ),
+                                                        ));
+                                                },
+                                                icon: FaIcon(
+                                                    FontAwesomeIcons.whatsapp,
                                                     color: Colors.white,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 14)))
-                                      ]),
-                                    ))
-                              ],
-                            ),
-                          )
-                          // ),
-                          );
-                    },
-                    itemCount: widget.animalInfo.length),
-          ),
+                                                    size: 14),
+                                                label: Text('message'.tr,
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 14)))
+                                          ]),
+                                        ))
+                                  ],
+                                ),
+                              )
+                              // ),
+                              ),
+                          itemCount: widget.animalInfo.length),
+                ),
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -757,39 +885,43 @@ class _BuyAnimalState extends State<BuyAnimal> {
                       context: context,
                       builder: (context) {
                         return AlertDialog(
-                            title: Text("Location Change"),
+                            title: Text("जगह बदले"),
                             content:
                                 StatefulBuilder(builder: (context, setState) {
-                              return Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  TextField(
-                                    maxLength: 6,
-                                    controller: _locationController,
-                                    inputFormatters: <TextInputFormatter>[
-                                      FilteringTextInputFormatter.digitsOnly
-                                    ],
-                                    keyboardType: TextInputType.number,
-                                    decoration: InputDecoration(
-                                      counterText: '',
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(5),
-                                      ),
-                                      icon: Container(
-                                        margin: EdgeInsets.only(left: 20),
-                                        width: 10,
-                                        height: 10,
-                                        child: Icon(
-                                          Icons.location_on,
-                                          color: Colors.black,
+                              return SingleChildScrollView(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    TextField(
+                                      maxLength: 6,
+                                      controller: _locationController,
+                                      inputFormatters: <TextInputFormatter>[
+                                        FilteringTextInputFormatter.digitsOnly
+                                      ],
+                                      keyboardType: TextInputType.number,
+                                      decoration: InputDecoration(
+                                        counterText: '',
+                                        border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(5),
                                         ),
+                                        icon: Container(
+                                          margin: EdgeInsets.only(left: 20),
+                                          width: 10,
+                                          height: 10,
+                                          child: Icon(
+                                            Icons.location_on,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                        hintText: "ज़िपकोड डाले",
+                                        contentPadding: EdgeInsets.only(
+                                            left: 8.0, top: 16.0),
                                       ),
-                                      hintText: "जिप्सोडे डाले",
-                                      contentPadding:
-                                          EdgeInsets.only(left: 8.0, top: 16.0),
                                     ),
-                                  ),
-                                ],
+                                    _radiusLocation()
+                                  ],
+                                ),
                               );
                             }),
                             actions: <Widget>[
@@ -801,27 +933,83 @@ class _BuyAnimalState extends State<BuyAnimal> {
                                   onPressed: () async {
                                     if (_locationController.text.length == 0)
                                       Navigator.pop(context);
+                                    // return;
                                     else {
                                       if (_locationController.text.length < 6)
                                         ReusableWidgets.showDialogBox(
                                             context,
                                             'error'.tr,
                                             Text('error_length_zipcode'.tr));
+                                      // SharedPreferences prefs =
+                                      //     await SharedPreferences.getInstance();
+
                                       var addresses = await Geocoder.local
                                           .findAddressesFromQuery(
                                               _locationController.text);
                                       var first = addresses.first;
-                                      List _data = [];
-                                      widget.animalInfo.map((e) => _data.addIf(
-                                          (first.locality ??
-                                                  first.featureName) ==
-                                              _locality,
-                                          e));
-
+                                      // List _data = [];
+                                      // widget.animalInfo.map((e) => _data.addIf(
+                                      //     (first.locality ??
+                                      //             first.featureName) ==
+                                      //         _locality,
+                                      //     e));
                                       setState(() {
                                         _userLocality =
                                             first.locality ?? first.featureName;
-                                        _tempAnimalList = _data;
+                                        _latitude = first.coordinates.latitude;
+                                        _longitude =
+                                            first.coordinates.longitude;
+                                        // prefs.setDouble('userLatitude',
+                                        //     first.coordinates.latitude);
+                                        // prefs.setDouble('userLongitude',
+                                        //     first.coordinates.longitude);
+                                        // _tempAnimalList = _data;
+                                      });
+
+                                      pr = new ProgressDialog(context,
+                                          type: ProgressDialogType.Normal,
+                                          isDismissible: false);
+
+                                      pr.style(
+                                          message:
+                                              'progress_dialog_message'.tr);
+                                      pr.show();
+
+                                      double _radiusData = _valueRadius == 0
+                                          ? 25
+                                          : _valueRadius == 1
+                                              ? 50
+                                              : _valueRadius == 2
+                                                  ? 75
+                                                  : 100;
+                                      Stream<
+                                          List<
+                                              DocumentSnapshot>> stream = geo
+                                          .collection(
+                                              collectionRef:
+                                                  FirebaseFirestore
+                                                      .instance
+                                                      .collection(
+                                                          "buyingAnimalList"))
+                                          .within(
+                                              center: geo.point(
+                                                  latitude: first
+                                                      .coordinates.latitude,
+                                                  longitude: first
+                                                      .coordinates.longitude),
+                                              radius: _radiusData,
+                                              field: 'position',
+                                              strictMode: true);
+
+                                      stream.listen((List<DocumentSnapshot>
+                                          documentList) {
+                                        // doSomething()
+                                        print("=-=-=12==" +
+                                            documentList.length.toString());
+                                        setState(() {
+                                          _tempAnimalList = documentList;
+                                          // widget.animalInfo = documentList;
+                                        });
                                       });
                                       Navigator.pop(context);
                                     }
@@ -1056,9 +1244,13 @@ class _BuyAnimalState extends State<BuyAnimal> {
     return StatefulBuilder(builder: (context, setState1) {
       getPositionBasedOnLatLong(
               _list[index]['userLatitude'], _list[index]['userLongitude'])
-          .then((result) => setState1(() {
-                val = result;
-              }));
+          .then((result) {
+        setState1(() {
+          val = result;
+        });
+
+        if (!mounted) return;
+      });
 
       return Padding(
         padding: const EdgeInsets.all(8.0),
@@ -1131,16 +1323,16 @@ class _BuyAnimalState extends State<BuyAnimal> {
     });
   }
 
-  _userLocalityValue(index) {
-    List _list =
-        _tempAnimalList.length != 0 ? _tempAnimalList : widget.animalInfo;
+  // _userLocalityValue(index) {
+  //   List _list =
+  //       _tempAnimalList.length != 0 ? _tempAnimalList : widget.animalInfo;
 
-    return getPositionBasedOnLatLong(
-            _list[index]['userLatitude'], _list[index]['userLongitude'])
-        .then((result) => setState(() {
-              _locality = result;
-            }));
-  }
+  //   return getPositionBasedOnLatLong(
+  //           _list[index]['userLatitude'], _list[index]['userLongitude'])
+  //       .then((result) => setState(() {
+  //             _locality = result;
+  //           }));
+  // }
 
   String _distanceBetweenTwoCoordinates(int index) {
     List _list =
@@ -1236,20 +1428,24 @@ class _BuyAnimalState extends State<BuyAnimal> {
                               RaisedButton(
                                   onPressed: () {
                                     setState(() {
-                                      _filterDropDownMap = {};
+                                      _filterDropDownMap.remove('filter1');
+                                      _filterDropDownMap.remove('filter2');
                                       _tempAnimalList = [];
                                     });
 
                                     Navigator.pop(context);
                                   },
-                                  child: Text('Cancel',
+                                  child: Text('Reset',
                                       style: TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold))),
                               RaisedButton(
                                   onPressed: () {
                                     List _data = [];
-                                    widget.animalInfo.forEach((element) {
+                                    (_tempAnimalList.length == 0
+                                            ? widget.animalInfo
+                                            : _tempAnimalList)
+                                        .forEach((element) {
                                       if (_filterDropDownMap == null ||
                                           _filterDropDownMap == {}) {
                                         _data.add(_infoList);

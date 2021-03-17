@@ -2,11 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dhenu/utils/colors.dart';
-import 'package:dhenu/utils/reusable_widgets.dart';
+import 'package:pashusansaar/utils/colors.dart';
+import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -19,7 +18,7 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
-import 'package:dart_geohash/dart_geohash.dart';
+import 'package:geoflutterfire/geoflutterfire.dart' as geoFire;
 
 class SellAnimalForm extends StatefulWidget {
   final String userName;
@@ -32,7 +31,8 @@ class SellAnimalForm extends StatefulWidget {
   _SellAnimalFormState createState() => _SellAnimalFormState();
 }
 
-class _SellAnimalFormState extends State<SellAnimalForm> {
+class _SellAnimalFormState extends State<SellAnimalForm>
+    with AutomaticKeepAliveClientMixin {
   var animalInfo = {}, extraInfoData = {};
   String _base64Image;
   ImagePicker _picker;
@@ -42,7 +42,6 @@ class _SellAnimalFormState extends State<SellAnimalForm> {
   // final _storage = new FlutterSecureStorage();
   SharedPreferences prefs;
   String desc = '';
-  GeoHasher geoHasher = GeoHasher();
 
   Map<String, dynamic> imagesUpload = {
     'image1': '',
@@ -50,9 +49,13 @@ class _SellAnimalFormState extends State<SellAnimalForm> {
     'image3': '',
     'image4': ''
   };
+  final geo = geoFire.Geoflutterfire();
 
   TextEditingController _controller;
   static const _locale = 'en_IN';
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -1008,8 +1011,11 @@ class _SellAnimalFormState extends State<SellAnimalForm> {
                     "userAnimalPregnancy": animalInfo['animalIsPregnant'] ?? "",
                     "userLatitude": prefs.getDouble('latitude'),
                     "userLongitude": prefs.getDouble('longitude'),
-                    'geoHash': geoHasher.encode(prefs.getDouble('longitude'),
-                        prefs.getDouble('latitude')),
+                    'position': geo
+                        .point(
+                            latitude: prefs.getDouble('latitude'),
+                            longitude: prefs.getDouble('longitude'))
+                        .data,
                     "image1": imagesUpload['image1'] == null ||
                             imagesUpload['image1'] == ""
                         ? ""

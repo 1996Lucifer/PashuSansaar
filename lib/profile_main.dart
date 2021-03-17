@@ -24,13 +24,16 @@ class ProfileMain extends StatefulWidget {
 }
 
 class ProfileMainState extends State<ProfileMain>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   bool _status = true;
   final FocusNode myFocusNode = FocusNode();
   ImagePicker _picker;
   String _base64Image = "";
   Map userInfo = {};
   ProgressDialog pr;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -264,7 +267,7 @@ class ProfileMainState extends State<ProfileMain>
             ReusableWidgets.getAppBar(context, "app_name".tr, false, actions: [
           GestureDetector(
             onTap: () => Share.share(
-                'पशुसंसार (पशु बेचने वाली फ्री ऐप) पर मेरे साथ जुड़ें। मेरा कोड ADFTR6 दर्ज करें और ₹50,000 जीतने का मौका पाएं। \n\n https://docs.google.com/spreadsheets/d/1PQertE_bd2Z0VfJf8G9HvYLmifqq0qGblrMlsnDzuLY/edit#gid=0')
+                'पशुसंसार (पशु बेचने वाली फ्री ऐप) पर मेरे साथ जुड़ें। मेरा कोड ADFTR6 दर्ज करें और ₹50,000 जीतने का मौका पाएं। \n\n')
             //AIzaSyDg5o_0j0MC5dueSVRYp4WkCjrJPQxm7pg
             ,
             child: Padding(

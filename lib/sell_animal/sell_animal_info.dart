@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:dhenu/utils/colors.dart';
-import 'package:dhenu/utils/reusable_widgets.dart';
+import 'package:pashusansaar/utils/colors.dart';
+import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
@@ -26,7 +26,11 @@ class SellingAnimalInfo extends StatefulWidget {
   _SellingAnimalInfoState createState() => _SellingAnimalInfoState();
 }
 
-class _SellingAnimalInfoState extends State<SellingAnimalInfo> {
+class _SellingAnimalInfoState extends State<SellingAnimalInfo>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   @override
   Widget build(BuildContext context) {
     final double width = MediaQuery.of(context).size.width;
@@ -170,7 +174,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo> {
     String stmn3 =
         'और अभी ${widget.animalInfo[index]['extraInfo']['animalIfPregnant']} है। ';
     String stmn4 = '';
-  String stmn41 = 'इसके साथ में बच्चा नहीं है| ';
+    String stmn41 = 'इसके साथ में बच्चा नहीं है| ';
     String stmn42 =
         'इसके साथ में ${widget.animalInfo[index]['extraInfo']['animalHasBaby']}। ';
     String stmn5 =

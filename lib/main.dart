@@ -1,6 +1,6 @@
-import 'package:dhenu/splash_screen.dart';
-import 'package:dhenu/translation/message.dart';
-import 'package:dhenu/utils/colors.dart';
+import 'package:pashusansaar/splash_screen.dart';
+import 'package:pashusansaar/translation/message.dart';
+import 'package:pashusansaar/utils/colors.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
     ]);
 
     return GetMaterialApp(
-        title: 'Dhenu',
+        title: 'pashusansaar',
         debugShowCheckedModeBanner: false,
         translations: Messages(), // your translations
         locale: Locale('hn', 'IN'),

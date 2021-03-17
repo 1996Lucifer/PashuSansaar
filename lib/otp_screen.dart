@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:dhenu/home_screen.dart';
-import 'package:dhenu/utils/colors.dart';
+import 'package:pashusansaar/home_screen.dart';
+import 'package:pashusansaar/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -35,11 +35,14 @@ class _OTPScreenState extends State<OTPScreen> {
   @override
   void initState() {
     _verifyPhone();
-    onTapRecognizer = TapGestureRecognizer()
-      ..onTap = () {
-        _verifyPhone();
-        // Navigator.pop(context);
-      };
+    // onTapRecognizer = TapGestureRecognizer()
+    //   ..onTap = () {
+    //     ScaffoldMessenger.of(context)
+    //         .showSnackBar(SnackBar(content: Text('OTP पुनः भेजा गया है')));
+
+    //     _verifyPhone();
+    //     // Navigator.pop(context);
+    //   };
     errorController = StreamController<ErrorAnimationType>();
     checkUserLoginState();
     super.initState();
@@ -225,6 +228,7 @@ class _OTPScreenState extends State<OTPScreen> {
                     children: [
                       TextSpan(
                           text: "resend_button".tr,
+                          // recognizer: TapGestureRecognizer()..onTap(),
                           recognizer: onTapRecognizer,
                           style: TextStyle(
                               color: primaryColor,
