@@ -4,6 +4,7 @@ import 'dart:core';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:csv/csv.dart';
 import 'package:pashusansaar/utils/colors.dart';
+import 'package:pashusansaar/utils/constants.dart';
 import 'package:pashusansaar/utils/global.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:dropdown_search/dropdown_search.dart';
@@ -49,19 +50,6 @@ class _BuyAnimalState extends State<BuyAnimal>
   int _index = 0, _value, _valueRadius;
   int perPage = 10;
 
-  List<String> _filterMilkValue = [
-    '0-10 ' + 'litre_milk'.tr,
-    '11-15 ' + 'litre_milk'.tr,
-    '16-20 ' + 'litre_milk'.tr,
-    '> 20 ' + 'litre_milk'.tr
-  ];
-  List<String> _radius = [
-    '25 ' + 'km'.tr,
-    '50 ' + 'km'.tr,
-    '75 ' + 'km'.tr,
-    '100 ' + 'km'.tr
-  ];
-
   final geo = geoFire.Geoflutterfire();
 
   int _current = 0;
@@ -71,7 +59,7 @@ class _BuyAnimalState extends State<BuyAnimal>
   ScreenshotController screenshotController = ScreenshotController();
   String _filterAnimalType;
   List _infoList = [];
-  List _tempAnimalList = [];
+  List _tempAnimalList = [], _resetFilterData = [];
   String desc = '';
   String _userLocality = '';
   TextEditingController _locationController = TextEditingController();
@@ -85,7 +73,7 @@ class _BuyAnimalState extends State<BuyAnimal>
 
   @override
   void initState() {
-    dataFillOnInit();
+    // dataFillOnInit();
     // _locationController.addListener(() {
     //   _onChanged();
     // });
@@ -177,7 +165,7 @@ class _BuyAnimalState extends State<BuyAnimal>
   dataFillOnInit() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    final myData = await rootBundle.loadString("assets/file/animal_data_1.csv");
+    final myData = await rootBundle.loadString("assets/file/animal_data.csv");
     // final myImageData1 =
     //     await PlatformAssetBundle().load("assets/images/image_1");
     // final myImageData2 =
@@ -190,40 +178,41 @@ class _BuyAnimalState extends State<BuyAnimal>
 
     for (int i = 1; i <= data.length - 1; i++) {
       loadAddress(data[i][3].toString());
-      // await FirebaseFirestore.instance
-      //     .collection("buyingAnimalList")
-      //     .doc()
-      //     .set({
-      //   "userAnimalDescription": data[i][0].toString(),
-      //   "userAnimalType": data[i][1].toString(),
-      //   "userAnimalAge": data[i][2].toString(),
-      //   "userAddress": data[i][3].toString(),
-      //   "userName": data[i][4].toString(),
-      //   "userAnimalPrice": data[i][5].toString(),
-      //   "userAnimalBreed": data[i][6].toString(),
-      //   "userMobileNumber": data[i][7].toString(),
-      //   "userAnimalMilk": data[i][8].toString(),
-      //   "userAnimalPregnancy": data[i][9].toString(),
-      //   "userLatitude": prefs.getDouble('userLatitude'),
-      //   "userLongitude": prefs.getDouble('userLongitude'),
-      //   'position': geo.point(
-      //       latitude: prefs.getDouble('userLatitude'),
-      //       longitude: prefs.getDouble('userLongitude')).data,
-
-      //   "image1": data[i][10] == null || data[i][10] == ""
-      //       ? ""
-      //       : data[i][10].toString(),
-      //   "image2": data[i][11] == null || data[i][11] == ""
-      //       ? ""
-      //       : data[i][11].toString(),
-      //   "image3": data[i][12] == null || data[i][12] == ""
-      //       ? ""
-      //       : data[i][12].toString(),
-      //   "image4": data[i][13] == null || data[i][13] == ""
-      //       ? ""
-      //       : data[i][13].toString(),
-      //   "dateOfSaving": ReusableWidgets.dateTimeToEpoch(DateTime.now())
-      // });
+      await FirebaseFirestore.instance
+          .collection("buyingAnimalList")
+          .doc()
+          .set({
+        "userAnimalDescription": data[i][0].toString(),
+        "userAnimalType": data[i][1].toString(),
+        "userAnimalAge": data[i][2].toString(),
+        "userAddress": data[i][3].toString(),
+        "userName": data[i][4].toString(),
+        "userAnimalPrice": data[i][5].toString(),
+        "userAnimalBreed": data[i][6].toString(),
+        "userMobileNumber": data[i][7].toString(),
+        "userAnimalMilk": data[i][8].toString(),
+        "userAnimalPregnancy": data[i][9].toString(),
+        "userLatitude": prefs.getDouble('userLatitude'),
+        "userLongitude": prefs.getDouble('userLongitude'),
+        'position': geo
+            .point(
+                latitude: prefs.getDouble('userLatitude'),
+                longitude: prefs.getDouble('userLongitude'))
+            .data,
+        "image1": data[i][10] == null || data[i][10] == ""
+            ? ""
+            : data[i][10].toString(),
+        "image2": data[i][11] == null || data[i][11] == ""
+            ? ""
+            : data[i][11].toString(),
+        "image3": data[i][12] == null || data[i][12] == ""
+            ? ""
+            : data[i][12].toString(),
+        "image4": data[i][13] == null || data[i][13] == ""
+            ? ""
+            : data[i][13].toString(),
+        "dateOfSaving": ReusableWidgets.dateTimeToEpoch(DateTime.now())
+      });
     }
   }
 
@@ -432,11 +421,6 @@ class _BuyAnimalState extends State<BuyAnimal>
                   setState(() {
                     _filterAnimalType = type;
                     _filterDropDownMap['filter1'] = type;
-
-                    // if (type != 'cow'.tr || type != 'buffalo_female'.tr) {
-                    //   _filterDropDownMap.remove('filter2');
-                    //   _value = null;
-                    // }
                   });
                 },
                 dropdownSearchDecoration: InputDecoration(
@@ -454,7 +438,7 @@ class _BuyAnimalState extends State<BuyAnimal>
           children: [
             Text("Milk Quantity"),
             Wrap(
-                children: _filterMilkValue
+                children: filterMilkValue
                     .map((e) => Padding(
                           padding: const EdgeInsets.all(3.0),
                           child: ChoiceChip(
@@ -465,16 +449,16 @@ class _BuyAnimalState extends State<BuyAnimal>
                               style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 15,
-                                  color: _value == _filterMilkValue.indexOf(e)
+                                  color: _value == filterMilkValue.indexOf(e)
                                       ? Colors.white
                                       : primaryColor),
                             ),
                             selectedColor: primaryColor,
-                            selected: _value == _filterMilkValue.indexOf(e),
+                            selected: _value == filterMilkValue.indexOf(e),
                             onSelected: (bool selected) {
                               setState(() {
                                 _value = selected
-                                    ? _filterMilkValue.indexOf(e)
+                                    ? filterMilkValue.indexOf(e)
                                     : null;
 
                                 _filterDropDownMap['filter2'] = _value;
@@ -493,9 +477,12 @@ class _BuyAnimalState extends State<BuyAnimal>
   _radiusLocation() => StatefulBuilder(
         builder: (context, setState1) => Column(
           children: [
-            Text("कितनी दुरी तक के पशु दिखाए"),
+            Padding(
+              padding: const EdgeInsets.only(top: 16.0, bottom: 8),
+              child: Text("कितनी दुरी तक के पशु दिखाए"),
+            ),
             Wrap(
-                children: _radius
+                children: radius
                     .map((e) => Padding(
                           padding: const EdgeInsets.all(3.0),
                           child: ChoiceChip(
@@ -506,16 +493,16 @@ class _BuyAnimalState extends State<BuyAnimal>
                               style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 15,
-                                  color: _valueRadius == _radius.indexOf(e)
+                                  color: _valueRadius == radius.indexOf(e)
                                       ? Colors.white
                                       : primaryColor),
                             ),
                             selectedColor: primaryColor,
-                            selected: _valueRadius == _radius.indexOf(e),
+                            selected: _valueRadius == radius.indexOf(e),
                             onSelected: (bool selected) {
                               setState1(() {
                                 _valueRadius =
-                                    selected ? _radius.indexOf(e) : null;
+                                    selected ? radius.indexOf(e) : null;
                               });
                             },
                           ),
@@ -549,14 +536,14 @@ class _BuyAnimalState extends State<BuyAnimal>
   //   }
   // }
 
-  void rebuildAllChildren(BuildContext context) {
-    void rebuild(Element el) {
-      el.markNeedsBuild();
-      el.visitChildren(rebuild);
-    }
+  // void rebuildAllChildren(BuildContext context) {
+  //   void rebuild(Element el) {
+  //     el.markNeedsBuild();
+  //     el.visitChildren(rebuild);
+  //   }
 
-    (context as Element).visitChildren(rebuild);
-  }
+  //   (context as Element).visitChildren(rebuild);
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -888,39 +875,42 @@ class _BuyAnimalState extends State<BuyAnimal>
                             title: Text("जगह बदले"),
                             content:
                                 StatefulBuilder(builder: (context, setState) {
-                              return SingleChildScrollView(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: <Widget>[
-                                    TextField(
-                                      maxLength: 6,
-                                      controller: _locationController,
-                                      inputFormatters: <TextInputFormatter>[
-                                        FilteringTextInputFormatter.digitsOnly
-                                      ],
-                                      keyboardType: TextInputType.number,
-                                      decoration: InputDecoration(
-                                        counterText: '',
-                                        border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(5),
-                                        ),
-                                        icon: Container(
-                                          margin: EdgeInsets.only(left: 20),
-                                          width: 10,
-                                          height: 10,
-                                          child: Icon(
-                                            Icons.location_on,
-                                            color: Colors.black,
+                              return Container(
+                                height: 200,
+                                child: SingleChildScrollView(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      TextField(
+                                        maxLength: 6,
+                                        controller: _locationController,
+                                        inputFormatters: <TextInputFormatter>[
+                                          FilteringTextInputFormatter.digitsOnly
+                                        ],
+                                        keyboardType: TextInputType.number,
+                                        decoration: InputDecoration(
+                                          counterText: '',
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(5),
                                           ),
+                                          icon: Container(
+                                            margin: EdgeInsets.only(left: 20),
+                                            width: 10,
+                                            height: 10,
+                                            child: Icon(
+                                              Icons.location_on,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                          hintText: "ज़िपकोड डाले",
+                                          contentPadding: EdgeInsets.only(
+                                              left: 8.0, top: 16.0),
                                         ),
-                                        hintText: "ज़िपकोड डाले",
-                                        contentPadding: EdgeInsets.only(
-                                            left: 8.0, top: 16.0),
                                       ),
-                                    ),
-                                    _radiusLocation()
-                                  ],
+                                      _radiusLocation()
+                                    ],
+                                  ),
                                 ),
                               );
                             }),
@@ -954,26 +944,13 @@ class _BuyAnimalState extends State<BuyAnimal>
                                       //         _locality,
                                       //     e));
                                       setState(() {
-                                        _userLocality =
-                                            first.locality ?? first.featureName;
+                                        _userLocality = first.locality ??
+                                            first.subAdminArea ??
+                                            first.featureName;
                                         _latitude = first.coordinates.latitude;
                                         _longitude =
                                             first.coordinates.longitude;
-                                        // prefs.setDouble('userLatitude',
-                                        //     first.coordinates.latitude);
-                                        // prefs.setDouble('userLongitude',
-                                        //     first.coordinates.longitude);
-                                        // _tempAnimalList = _data;
                                       });
-
-                                      pr = new ProgressDialog(context,
-                                          type: ProgressDialogType.Normal,
-                                          isDismissible: false);
-
-                                      pr.style(
-                                          message:
-                                              'progress_dialog_message'.tr);
-                                      pr.show();
 
                                       double _radiusData = _valueRadius == 0
                                           ? 25
@@ -1001,16 +978,32 @@ class _BuyAnimalState extends State<BuyAnimal>
                                               field: 'position',
                                               strictMode: true);
 
+                                      pr = new ProgressDialog(context,
+                                          type: ProgressDialogType.Normal,
+                                          isDismissible: false);
+
+                                      pr.style(
+                                          message:
+                                              'progress_dialog_message'.tr);
+
                                       stream.listen((List<DocumentSnapshot>
                                           documentList) {
-                                        // doSomething()
+                                        pr.show();
+                                        // pr.show();
                                         print("=-=-=12==" +
                                             documentList.length.toString());
+
                                         setState(() {
-                                          _tempAnimalList = documentList;
-                                          // widget.animalInfo = documentList;
+                                          // _resetFilterData = documentList;
+                                          _resetFilterData =
+                                              _tempAnimalList = documentList;
                                         });
                                       });
+                                      Future.delayed(Duration(seconds: 3))
+                                          .then((value) {
+                                        pr.hide();
+                                      });
+
                                       Navigator.pop(context);
                                     }
                                   }),
@@ -1021,7 +1014,6 @@ class _BuyAnimalState extends State<BuyAnimal>
                     decoration: BoxDecoration(
                         color: Colors.grey[100],
                         border: Border.all(color: Colors.grey[400])),
-
                     child: Padding(
                       padding: const EdgeInsets.only(top: 20.0),
                       child: Center(
@@ -1039,30 +1031,22 @@ class _BuyAnimalState extends State<BuyAnimal>
                         ),
                       )),
                     ),
-                    // color: Colors.grey[100],
                   ),
                 ),
               ),
-              // Container(
-              //   width: 1,
-              //   color: Colors.grey[400],
-              //   height: 70,
-              // ),
               Expanded(
                 flex: 2,
                 child: GestureDetector(
-                  onTap: () {
-                    return showModalBottomSheet(
-                        context: context,
-                        builder: (context) =>
-                            Container(child: _filterBottomSheet(), height: 250),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(10),
-                            topRight: Radius.circular(10),
-                          ),
-                        )).then((value) => setState(() {}));
-                  },
+                  onTap: () => showModalBottomSheet(
+                      context: context,
+                      builder: (context) =>
+                          Container(child: _filterBottomSheet(), height: 250),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(10),
+                          topRight: Radius.circular(10),
+                        ),
+                      )).then((value) => setState(() {})),
                   child: Container(
                     decoration: BoxDecoration(
                         color: Colors.grey[100],
@@ -1085,14 +1069,18 @@ class _BuyAnimalState extends State<BuyAnimal>
                               child: CircleAvatar(
                                 backgroundColor: primaryColor,
                                 radius: 10,
-                                child: Text(
-                                    _filterDropDownMap == null ||
-                                            _filterDropDownMap == {}
-                                        ? '0'
-                                        : _filterDropDownMap.length.toString(),
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold)),
+                                child: Center(
+                                  child: Text(
+                                      _filterDropDownMap == null ||
+                                              _filterDropDownMap == {}
+                                          ? '0'
+                                          : _filterDropDownMap.length
+                                              .toString(),
+                                      style: TextStyle(
+                                          fontSize: 13,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold)),
+                                ),
                               ),
                             )
                           ],
@@ -1248,8 +1236,6 @@ class _BuyAnimalState extends State<BuyAnimal>
         setState1(() {
           val = result;
         });
-
-        if (!mounted) return;
       });
 
       return Padding(
@@ -1352,15 +1338,17 @@ class _BuyAnimalState extends State<BuyAnimal>
               children: [
                 Column(
                   children: [
-                    Expanded(
-                      child: Center(
+                    GestureDetector(
+                        onTap: () => setState(() => _index = 0),
                         child: Container(
-                            width: 120,
-                            height: 125,
-                            color: _index == 0 ? primaryColor : Colors.white,
-                            child: GestureDetector(
-                              onTap: () => setState(() => _index = 0),
-                              child: Center(
+                          width: 120,
+                          height: 125,
+                          color: _index == 0 ? primaryColor : Colors.white,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Center(
                                 child: Text('animal_type'.tr,
                                     style: _index == 0
                                         ? TextStyle(
@@ -1372,34 +1360,87 @@ class _BuyAnimalState extends State<BuyAnimal>
                                             fontWeight: FontWeight.w500,
                                           )),
                               ),
-                            )),
-                      ),
-                    ),
+                              Center(
+                                child: Text(
+                                    _filterDropDownMap['filter1'] == null
+                                        ? " "
+                                        : "\u2022 " +
+                                            ' ' +
+                                            _filterDropDownMap['filter1'],
+                                    style: _index == 0
+                                        ? TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white)
+                                        : TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w500,
+                                          )),
+                              ),
+                            ],
+                          ),
+                        )),
                     Center(
                       child: SizedBox(width: 1),
                     ),
-                    Expanded(
-                        child: Center(
-                      child: Container(
-                          width: 120,
-                          height: 125,
-                          color: _index == 1 ? primaryColor : Colors.white,
-                          child: GestureDetector(
-                            onTap: () => setState(() => _index = 1),
-                            child: Center(
-                              child: Text('animal_milk_per_day'.tr,
-                                  style: _index == 1
-                                      ? TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white)
-                                      : TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w500,
-                                        )),
-                            ),
-                          )),
-                    )),
+                    GestureDetector(
+                        onTap: () => setState(() => _index = 1),
+                        child: Container(
+                            width: 120,
+                            height: 125,
+                            color: _index == 1 ? primaryColor : Colors.white,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Center(
+                                  child: Text('animal_milk_per_day'.tr,
+                                      style: _index == 1
+                                          ? TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white)
+                                          : TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w500,
+                                            )),
+                                ),
+                                Center(
+                                  child: Text(
+                                      _filterDropDownMap['filter2'] == null
+                                          ? " "
+                                          : "\u2022 " +
+                                                  ' ' +
+                                                  filterMilkValue.elementAt(
+                                                      _filterDropDownMap[
+                                                          'filter2']) ??
+                                              '',
+                                      style: _index == 1
+                                          ? TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white)
+                                          : TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w500,
+                                            )),
+                                ),
+                              ],
+                            )
+
+                            // Center(
+                            //   child: Text('animal_milk_per_day'.tr,
+                            //       style: _index == 1
+                            //           ? TextStyle(
+                            //               fontSize: 15,
+                            //               fontWeight: FontWeight.bold,
+                            //               color: Colors.white)
+                            //           : TextStyle(
+                            //               fontSize: 15,
+                            //               fontWeight: FontWeight.w500,
+                            //             )),
+                            // ),
+                            )),
                   ],
                 ),
                 SizedBox(
@@ -1430,12 +1471,14 @@ class _BuyAnimalState extends State<BuyAnimal>
                                     setState(() {
                                       _filterDropDownMap.remove('filter1');
                                       _filterDropDownMap.remove('filter2');
-                                      _tempAnimalList = [];
+                                      _tempAnimalList = _resetFilterData;
+                                      _value = null;
+                                      _filterAnimalType = null;
                                     });
 
                                     Navigator.pop(context);
                                   },
-                                  child: Text('Reset',
+                                  child: Text('reset_button'.tr,
                                       style: TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold))),
@@ -1580,6 +1623,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                                       }
                                     });
                                     setState(() {
+                                      // _resetFilterData = _tempAnimalList;
                                       _tempAnimalList = _data;
                                       // _tempAnimalList.sort((a, b) =>
                                       //     a['userAnimalMilk']
@@ -1587,13 +1631,18 @@ class _BuyAnimalState extends State<BuyAnimal>
                                     });
 
                                     Navigator.pop(context);
-                                    if (_tempAnimalList.length == 0)
+                                    if (_tempAnimalList.length == 0) {
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(SnackBar(
                                               content: Text(
                                                   'चुनाव में एक भी पशु उपलब्ध नहीं है, इसलिए सभी पशु दिखाए जा रहे है |')));
+
+                                      setState(() {
+                                        _tempAnimalList = _resetFilterData;
+                                      });
+                                    }
                                   },
-                                  child: Text('Apply',
+                                  child: Text('apply_button'.tr,
                                       style: TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold))),

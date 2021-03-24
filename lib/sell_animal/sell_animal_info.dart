@@ -196,9 +196,9 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
       if (widget.animalInfo[index]['extraInfo']['animalHasBaby'] != null &&
           widget.animalInfo[index]['extraInfo']['animalHasBaby'] ==
               'nothing'.tr)
-        stmn4 = stmn4 + stmn41;
-      else
         stmn4 = stmn4 + stmn42;
+      else
+        stmn4 = stmn4 + stmn41;
 
       desc = desc + stmn4;
       desc = desc + stmn5;

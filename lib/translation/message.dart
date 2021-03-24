@@ -234,7 +234,9 @@ class Messages extends Translations {
           'buy': 'पशु खरीदे',
           'sell': 'पशु बेचे',
           'profile': 'प्रोफ़ाइल',
-          'animal_filter': 'पशु फ़िल्टर'
+          'animal_filter': 'पशु फ़िल्टर',
+          'apply_button': 'चयन सेव करें',
+          'reset_button': 'सभी चयन हटाएँ'
         }
       };
 }

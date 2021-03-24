@@ -153,9 +153,9 @@ class _SellAnimalFormState extends State<SellAnimalForm>
       if (extraInfoData['animalIfPregnant'] != null) desc = desc + stmn3;
       if (extraInfoData['animalHasBaby'] != null &&
           extraInfoData['animalHasBaby'] == 'nothing'.tr)
-        stmn4 = stmn4 + stmn41;
-      else
         stmn4 = stmn4 + stmn42;
+      else
+        stmn4 = stmn4 + stmn41;
 
       desc = desc + stmn4;
       desc = desc + stmn5;

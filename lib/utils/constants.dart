@@ -172,3 +172,16 @@ List<String> ifPregnant = [
 
 List<String> yesNo = ['yes'.tr, 'no'.tr];
 List<String> isBaby = ['bachhra'.tr, 'bacchri'.tr, 'nothing'.tr];
+
+List<String> filterMilkValue = [
+  '0-10 ' + 'litre_milk'.tr,
+  '11-15 ' + 'litre_milk'.tr,
+  '16-20 ' + 'litre_milk'.tr,
+  '> 20 ' + 'litre_milk'.tr
+];
+List<String> radius = [
+  '25 ' + 'km'.tr,
+  '50 ' + 'km'.tr,
+  '75 ' + 'km'.tr,
+  '100 ' + 'km'.tr
+];
