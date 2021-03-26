@@ -14,7 +14,6 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
 import 'package:progress_dialog/progress_dialog.dart';
-import 'package:dart_geohash/dart_geohash.dart';
 import 'package:geoflutterfire/geoflutterfire.dart' as geoFire;
 
 class UserDetailsFetch extends StatefulWidget {
@@ -37,8 +36,6 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
   Map<String, dynamic> mobileInfo = {};
   LocationData _locate;
   final geo = geoFire.Geoflutterfire();
-
-  GeoHasher geoHasher = GeoHasher();
 
   String currentText = "";
 

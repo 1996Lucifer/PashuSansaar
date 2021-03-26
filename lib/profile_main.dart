@@ -267,7 +267,7 @@ class ProfileMainState extends State<ProfileMain>
             ReusableWidgets.getAppBar(context, "app_name".tr, false, actions: [
           GestureDetector(
             onTap: () => Share.share(
-                'पशुसंसार (पशु बेचने वाली फ्री ऐप) पर मेरे साथ जुड़ें। मेरा कोड ADFTR6 दर्ज करें और ₹50,000 जीतने का मौका पाएं। \n\n')
+                'पशुसंसार (पशु बेचने वाली फ्री ऐप) पर मेरे साथ जुड़ें। मेरा कोड ADFTR6 दर्ज करें और ₹50,000 जीतने का मौका पाएं। \n\n https://play.google.com/store/apps/details?id=dj.pashusansaar')
             //AIzaSyDg5o_0j0MC5dueSVRYp4WkCjrJPQxm7pg
             ,
             child: Padding(

@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
     ]);
 
     return GetMaterialApp(
-        title: 'pashusansaar',
+        title: 'PashuSansaar',
         debugShowCheckedModeBanner: false,
         translations: Messages(), // your translations
         locale: Locale('hn', 'IN'),
@@ -29,21 +29,6 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
             fontFamily: 'Mukta',
             primaryColor: primaryColor,
-            // colorScheme: ColorScheme(
-            //     primary: primaryColor,
-            //     // primaryVariant: primaryVariant,
-            //     secondary: secondaryColor,
-            //     // secondaryVariant: secondaryVariant,
-            //     surface: surface,
-            //     // background: background,
-            //     // error: error,
-            //     // onPrimary: onPrimary,
-            //     onSecondary: secondaryColor,
-            //     onSurface: primaryColor,
-            //     // onBackground: onBackground,
-            //     // onError: onError,
-            //     brightness: Brightness.light
-            //     ),
             buttonColor: primaryColor,
             iconTheme: IconThemeData(color: primaryColor),
             accentColor: primaryColor,
