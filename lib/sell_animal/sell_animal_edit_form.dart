@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:geocoder/geocoder.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:dropdown_search/dropdown_search.dart';
@@ -46,7 +47,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
   bool _showData = false;
   // final _storage = new FlutterSecureStorage();
   SharedPreferences prefs;
-  String uuid = '';
+  String uniqueId = '', isValidUser = '', userId = '';
 
   Map<String, dynamic> imagesUpload = {
     'image1': '',
@@ -78,7 +79,9 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
       setState(() {
         animalInfo = jsonData[widget.index]['animalInfo'];
         imagesUpload = jsonData[widget.index]['animalImages'];
-        uuid = jsonData[widget.index]['uuid'];
+        uniqueId = jsonData[widget.index]['uniqueId'];
+        userId = jsonData[widget.index]['userId'];
+        isValidUser = jsonData[widget.index]['isValidUser'];
         extraInfoData = jsonData[widget.index]['extraInfo'];
 
         _controller = TextEditingController(
@@ -896,7 +899,6 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
 
     String stmn2 = 'यह ${extraInfoData['animalAlreadyGivenBirth']} ब्यायी है ';
     String stmn3 = 'और अभी ${extraInfoData['animalIfPregnant']} है। ';
-    String stmn4 = '';
     String stmn41 = 'इसके साथ में बच्चा नहीं है। ';
     String stmn42 = 'इसके साथ में ${extraInfoData['animalHasBaby']}। ';
     String stmn5 =
@@ -912,13 +914,11 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
           'ये ${animalInfo['animalBreed']} ${animalInfo['animalType']} ${animalInfo['animalAge']} साल का है। ';
       if (extraInfoData['animalAlreadyGivenBirth'] != null) desc = desc + stmn2;
       if (extraInfoData['animalIfPregnant'] != null) desc = desc + stmn3;
-      if (extraInfoData['animalHasBaby'] != null &&
-          extraInfoData['animalHasBaby'] == 'nothing'.tr)
-        stmn4 = stmn4 + stmn42;
-      else
-        stmn4 = stmn4 + stmn41;
-
-      desc = desc + stmn4;
+      desc = desc +
+          (extraInfoData['animalHasBaby'] == null ||
+                  extraInfoData['animalHasBaby'] == 'nothing'.tr
+              ? stmn41
+              : stmn42);
       desc = desc + stmn5;
     }
 
@@ -1005,28 +1005,37 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
 
                 FirebaseFirestore.instance
                     .collection("animalSellingInfo")
-                    .doc(FirebaseAuth.instance.currentUser.uid)
+                    .doc(userId)
                     .collection('sellingAnimalList')
-                    .doc(uuid)
+                    .doc(uniqueId)
                     .update({
                   'animalInfo': animalInfo,
                   'animalImages': imagesUpload,
                   'extraInfo': extraInfoData,
                   'dateOfSaving':
                       ReusableWidgets.dateTimeToEpoch(DateTime.now()),
-                  'uuid': uuid
+                  'uniqueId': uniqueId,
+                  'isValidUser': isValidUser,
+                  'userId': userId,
+                  "animalDescription": _descriptionText(),
                 }).then((res) async {
                   SharedPreferences prefs =
                       await SharedPreferences.getInstance();
+                  var addresses = await Geocoder.local
+                      .findAddressesFromCoordinates(Coordinates(
+                          prefs.getDouble('latitude'),
+                          prefs.getDouble('longitude')));
+                  var first = addresses.first;
                   FirebaseFirestore.instance
                       .collection("buyingAnimalList")
-                      .doc(FirebaseAuth.instance.currentUser.uid)
+                      .doc(uniqueId + userId)
                       .update({
                     "userAnimalDescription": _descriptionText(),
                     "userAnimalType": animalInfo['animalType'] ?? "",
                     "userAnimalTypeOther": animalInfo['animalTypeOther'] ?? "",
                     "userAnimalAge": animalInfo['animalAge'] ?? "",
-                    "userAddress": "",
+                    "userAddress": first.addressLine ??
+                        (first.adminArea + ', ' + first.countryName),
                     "userName": widget.userName,
                     "userAnimalPrice": animalInfo['animalPrice'] ?? "0",
                     "userAnimalBreed": animalInfo['animalBreed'] ?? "",
@@ -1057,7 +1066,11 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                         ? ""
                         : imagesUpload['image4'],
                     "dateOfSaving":
-                        ReusableWidgets.dateTimeToEpoch(DateTime.now())
+                        ReusableWidgets.dateTimeToEpoch(DateTime.now()),
+                    'uniqueId': uniqueId,
+                    'isValidUser': isValidUser,
+                    'userId': userId,
+                    'extraInfo': extraInfoData
                   }).then((value) {
                     pr.hide();
                     return showDialog(
@@ -1474,7 +1487,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                     ? Padding(
                         padding: const EdgeInsets.symmetric(
                             vertical: 4, horizontal: 8),
-                        child: [0, 3].contains(
+                        child: [0, 1].contains(
                           constant.animalType.indexOf(animalInfo['animalType']),
                         )
                             ? extraINfoData()

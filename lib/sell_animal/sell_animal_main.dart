@@ -67,6 +67,7 @@ class SellAnimalMain extends StatelessWidget {
         : SellingAnimalInfo(
             animalInfo: sellingAnimalInfo,
             userName: userName,
-            userMobileNumber: userMobileNumber);
+            userMobileNumber: userMobileNumber,
+            showExtraData: true);
   }
 }

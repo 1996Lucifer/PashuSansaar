@@ -35,14 +35,14 @@ class _OTPScreenState extends State<OTPScreen> {
   @override
   void initState() {
     _verifyPhone();
-    // onTapRecognizer = TapGestureRecognizer()
-    //   ..onTap = () {
-    //     ScaffoldMessenger.of(context)
-    //         .showSnackBar(SnackBar(content: Text('OTP पुनः भेजा गया है')));
+    onTapRecognizer = TapGestureRecognizer()
+      ..onTap = () {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('OTP पुनः भेजा गया है')));
 
-    //     _verifyPhone();
-    //     // Navigator.pop(context);
-    //   };
+        _verifyPhone();
+        // Navigator.pop(context);
+      };
     errorController = StreamController<ErrorAnimationType>();
     checkUserLoginState();
     super.initState();

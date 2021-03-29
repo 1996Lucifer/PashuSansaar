@@ -7,6 +7,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart' as intl;
 
+import '../interested_buyer.dart';
 import 'sell_animal_edit_form.dart';
 import 'sell_animal_form.dart';
 
@@ -14,12 +15,14 @@ class SellingAnimalInfo extends StatefulWidget {
   final List animalInfo;
   final String userName;
   final String userMobileNumber;
+  final bool showExtraData;
 
   SellingAnimalInfo({
     Key key,
     @required this.animalInfo,
     @required this.userName,
     @required this.userMobileNumber,
+    @required this.showExtraData,
   }) : super(key: key);
 
   @override
@@ -39,104 +42,182 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
       appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),
       body: SingleChildScrollView(
         physics: BouncingScrollPhysics(),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildSellingFormButton(context),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                height: 30,
-                child: Text('your_selling_animal_info'.tr,
-                    style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black)),
-              ),
-            ),
-            // Expanded(
-            //     flex: 4,
-            //     child: Container(
-            //       child:
-            ListView.builder(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              itemCount: widget.animalInfo.length,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Card(
-                    key: Key(widget.animalInfo[index]['uuid']),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+        child: !widget.showExtraData && (widget.animalInfo.length == 0)
+            ? Center(
+                child: Column(
+                  children: [
+                    Text(
+                      'आपका कोई पशु दर्ज़ नहीं है| कृपया पशु दर्ज़ करे',
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
-                    elevation: 5,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildBreedTypeWidget(index),
-                        _buildDateWidget(index),
-                        _buildImageDescriptionWidget(width, index),
-                        Row(
-                          // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          textDirection: TextDirection.rtl,
-                          children: [
-                            // FlatButton(
-                            //     onPressed: () {},
-                            //     child: Row(
-                            //       children: [
-                            //         Text(
-                            //           'see_more_info'.tr,
-                            //           style: TextStyle(color: primaryColor),
-                            //         ),
-                            //         Icon(
-                            //           Icons.visibility,
-                            //           color: primaryColor,
-                            //         )
-                            //       ],
-                            //     )),
-                            FlatButton(
-                                onPressed: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            SellAnimalEditForm(
-                                          index: index,
-                                          userName: widget.userName,
-                                          userMobileNumber:
-                                              widget.userMobileNumber,
+                    _buildSellingFormButton(context)
+                  ],
+                ),
+              )
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  widget.showExtraData
+                      ? _buildSellingFormButton(context)
+                      : SizedBox.shrink(),
+                  widget.showExtraData
+                      ? Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            height: 30,
+                            child: Text('your_selling_animal_info'.tr,
+                                style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black)),
+                          ),
+                        )
+                      : SizedBox.shrink(),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: widget.animalInfo.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Card(
+                          key: Key(widget.animalInfo[index]['uniqueId']),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          elevation: 5,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildBreedTypeWidget(index),
+                              _buildDateWidget(index),
+                              _buildImageDescriptionWidget(width, index),
+                              widget.showExtraData
+                                  ? Row(
+                                      textDirection: TextDirection.rtl,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        FlatButton(
+                                            onPressed: () => Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        SellAnimalEditForm(
+                                                      index: index,
+                                                      userName: widget.userName,
+                                                      userMobileNumber: widget
+                                                          .userMobileNumber,
+                                                    ),
+                                                  ),
+                                                ),
+                                            child: Row(
+                                              children: [
+                                                Text(
+                                                  'change_info'.tr,
+                                                  style: TextStyle(
+                                                      color: primaryColor,
+                                                      fontSize: 15),
+                                                ),
+                                                SizedBox(
+                                                  width: 5,
+                                                ),
+                                                FaIcon(
+                                                  FontAwesomeIcons.edit,
+                                                  color: primaryColor,
+                                                  size: 16,
+                                                )
+                                              ],
+                                            )),
+                                        FlatButton(
+                                            onPressed: () => Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        InterestedBuyer(
+                                                          listId: widget.animalInfo[
+                                                                      index][
+                                                                  'uniqueId'] ??
+                                                              '',
+                                                          index: index,
+                                                          animalInfo:
+                                                              widget.animalInfo,
+                                                        ))),
+                                            child: Row(
+                                              children: [
+                                                Text(
+                                                  'इच्छुक खरीदार की सूचि',
+                                                  style: TextStyle(
+                                                      color: primaryColor,
+                                                      fontSize: 15),
+                                                ),
+                                                SizedBox(
+                                                  width: 5,
+                                                ),
+                                                FaIcon(
+                                                  FontAwesomeIcons.arrowRight,
+                                                  color: primaryColor,
+                                                  size: 16,
+                                                )
+                                              ],
+                                            )),
+                                      ],
+                                    )
+                                  : GestureDetector(
+                                      onTap: () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  InterestedBuyer(
+                                                    listId:
+                                                        widget.animalInfo[index]
+                                                                ['uniqueId'] ??
+                                                            '',
+                                                    index: index,
+                                                    animalInfo:
+                                                        widget.animalInfo,
+                                                  ))),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[100],
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.grey,
+                                              blurRadius: 1.0,
+                                            ),
+                                          ],
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        height: 50,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text("इच्छुक खरीदार की सूचि देखे",
+                                                  style: TextStyle(
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.bold)),
+                                              Icon(Icons.arrow_forward_ios)
+                                            ],
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      'change_info'.tr,
-                                      style: TextStyle(
-                                          color: primaryColor, fontSize: 15),
-                                    ),
-                                    SizedBox(
-                                      width: 5,
-                                    ),
-                                    FaIcon(
-                                      FontAwesomeIcons.edit,
-                                      color: primaryColor,
-                                      size: 16,
                                     )
-                                  ],
-                                )),
-                          ],
-                        )
-                      ],
-                    ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
-            // ))
-          ],
-        ),
+                  // ))
+                ],
+              ),
       ),
     );
   }
@@ -156,56 +237,56 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
     return base64Decode(data);
   }
 
-  _descriptionText(int index) {
-    String animalBreedCheck =
-        widget.animalInfo[index]['animalInfo']['animalBreed'] == 'not_known'.tr
-            ? ""
-            : widget.animalInfo[index]['animalInfo']['animalBreed'];
-    String animalTypeCheck = widget.animalInfo[index]['animalInfo']
-                ['animalType'] ==
-            'other_animal'.tr
-        ? widget.animalInfo[index]['animalInfo']['animalTypeOther']
-        : widget.animalInfo[index]['animalInfo']['animalType'];
+  // _descriptionText(int index) {
+  //   String animalBreedCheck =
+  //       widget.animalInfo[index]['animalInfo']['animalBreed'] == 'not_known'.tr
+  //           ? ""
+  //           : widget.animalInfo[index]['animalInfo']['animalBreed'];
+  //   String animalTypeCheck = widget.animalInfo[index]['animalInfo']
+  //               ['animalType'] ==
+  //           'other_animal'.tr
+  //       ? widget.animalInfo[index]['animalInfo']['animalTypeOther']
+  //       : widget.animalInfo[index]['animalInfo']['animalType'];
 
-    String desc = '';
+  //   String desc = '';
 
-    String stmn2 =
-        'यह ${widget.animalInfo[index]['extraInfo']['animalAlreadyGivenBirth']} ब्यायी है ';
-    String stmn3 =
-        'और अभी ${widget.animalInfo[index]['extraInfo']['animalIfPregnant']} है। ';
-    String stmn4 = '';
-    String stmn41 = 'इसके साथ में बच्चा नहीं है| ';
-    String stmn42 =
-        'इसके साथ में ${widget.animalInfo[index]['extraInfo']['animalHasBaby']}। ';
-    String stmn5 =
-        'पिछले बार के हिसाब से दूध कैपेसिटी ${widget.animalInfo[index]['animalInfo']['animalMilk']} लीटर है। ';
+  //   String stmn2 =
+  //       'यह ${widget.animalInfo[index]['extraInfo']['animalAlreadyGivenBirth']} ब्यायी है ';
+  //   String stmn3 =
+  //       'और अभी ${widget.animalInfo[index]['extraInfo']['animalIfPregnant']} है। ';
+  //   String stmn4 = '';
+  //   String stmn41 = 'इसके साथ में बच्चा नहीं है| ';
+  //   String stmn42 =
+  //       'इसके साथ में ${widget.animalInfo[index]['extraInfo']['animalHasBaby']}। ';
+  //   String stmn5 =
+  //       'पिछले बार के हिसाब से दूध कैपेसिटी ${widget.animalInfo[index]['animalInfo']['animalMilk']} लीटर है। ';
 
-    if (widget.animalInfo[index]['animalInfo']['animalType'] ==
-            'buffalo_male'.tr ||
-        widget.animalInfo[index]['animalInfo']['animalType'] == 'ox'.tr ||
-        widget.animalInfo[index]['animalType'] == 'other_animal'.tr) {
-      desc =
-          'ये $animalBreedCheck $animalTypeCheck ${widget.animalInfo[index]['animalInfo']['animalAge']} साल का है। ';
-    } else {
-      desc =
-          'ये $animalBreedCheck $animalTypeCheck ${widget.animalInfo[index]['animalInfo']['animalAge']} साल की है। ';
-      if (widget.animalInfo[index]['extraInfo']['animalAlreadyGivenBirth'] !=
-          null) desc = desc + stmn2;
-      if (widget.animalInfo[index]['extraInfo']['animalIfPregnant'] != null)
-        desc = desc + stmn3;
-      if (widget.animalInfo[index]['extraInfo']['animalHasBaby'] != null &&
-          widget.animalInfo[index]['extraInfo']['animalHasBaby'] ==
-              'nothing'.tr)
-        stmn4 = stmn4 + stmn42;
-      else
-        stmn4 = stmn4 + stmn41;
+  //   if (widget.animalInfo[index]['animalInfo']['animalType'] ==
+  //           'buffalo_male'.tr ||
+  //       widget.animalInfo[index]['animalInfo']['animalType'] == 'ox'.tr ||
+  //       widget.animalInfo[index]['animalType'] == 'other_animal'.tr) {
+  //     desc =
+  //         'ये $animalBreedCheck $animalTypeCheck ${widget.animalInfo[index]['animalInfo']['animalAge']} साल का है। ';
+  //   } else {
+  //     desc =
+  //         'ये $animalBreedCheck $animalTypeCheck ${widget.animalInfo[index]['animalInfo']['animalAge']} साल की है। ';
+  //     if (widget.animalInfo[index]['extraInfo']['animalAlreadyGivenBirth'] !=
+  //         null) desc = desc + stmn2;
+  //     if (widget.animalInfo[index]['extraInfo']['animalIfPregnant'] != null)
+  //       desc = desc + stmn3;
+  //     if (widget.animalInfo[index]['extraInfo']['animalHasBaby'] != null &&
+  //         widget.animalInfo[index]['extraInfo']['animalHasBaby'] ==
+  //             'nothing'.tr)
+  //       stmn4 = stmn4 + stmn42;
+  //     else
+  //       stmn4 = stmn4 + stmn41;
 
-      desc = desc + stmn4;
-      desc = desc + stmn5;
-    }
+  //     desc = desc + stmn4;
+  //     desc = desc + stmn5;
+  //   }
 
-    return desc + (widget.animalInfo[index]['extraInfo']['moreInfo'] ?? '');
-  }
+  //   return desc + (widget.animalInfo[index]['extraInfo']['moreInfo'] ?? '');
+  // }
 
   Padding _buildImageDescriptionWidget(double width, int index) => Padding(
         padding: const EdgeInsets.all(8.0),
@@ -231,7 +312,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                   padding:
                       const EdgeInsets.only(right: 12.0, left: 12, top: 15),
                   child: Text(
-                    _descriptionText(index),
+                    widget.animalInfo[index]['animalDescription'],
                     overflow: TextOverflow.ellipsis,
                     maxLines: 4,
                     textAlign: TextAlign.justify,
@@ -316,26 +397,6 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                   ]),
             ),
           ),
-          // GestureDetector(
-          //   onTap: () => Navigator.push(
-          //     context,
-          //     MaterialPageRoute(
-          //       builder: (context) => SellAnimalEditForm(index: index),
-          //     ),
-          //   ),
-          //   child: Pill(
-          //       child: Row(
-          //         children: [
-          //           Text('change_info'.tr),
-          //           Icon(
-          //             Icons.edit_sharp,
-          //             color: Colors.grey[700],
-          //             size: 20,
-          //           )
-          //         ],
-          //       ),
-          //       backgroundColor: Colors.grey[300]),
-          // )
         ],
       ),
     );

@@ -35,7 +35,7 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
   TextEditingController zipCodeController = new TextEditingController();
   Map<String, dynamic> mobileInfo = {};
   LocationData _locate;
-  final geo = geoFire.Geoflutterfire();
+  // final geo = geoFire.Geoflutterfire();
 
   String currentText = "";
 
@@ -366,21 +366,22 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                               "name": nameController.text,
                               "mobile": widget.mobile,
                               "mobileInfo": mobileInfo,
-                              'position': geo
-                                  .point(
-                                      latitude: prefs.getDouble('latitude'),
-                                      longitude: prefs.getDouble('longitude'))
-                                  .data,
+                              // 'position': geoFire.Geoflutterfire()
+                              //     .point(
+                              //         latitude: prefs.getDouble('latitude'),
+                              //         longitude: prefs.getDouble('longitude'))
+                              //     .data,
                               'latitude':
                                   prefs.getDouble('latitude').toString(),
                               'longitude':
                                   prefs.getDouble('longitude').toString(),
                               'referralCode':
                                   ReusableWidgets.randomCodeGenerator(),
-                              'enteredReferralCode':
-                                  referralCodeController.text.isNotEmpty
-                                      ? referralCodeController.text
-                                      : '',
+                              'enteredReferralCode': referralCodeController
+                                      .text.isNotEmpty
+                                  ? referralCodeController.text.toUpperCase()
+                                  : '',
+                              'alreadyUser': true
                             }).then((result) {
                               pr.hide();
                               Navigator.pushReplacement(

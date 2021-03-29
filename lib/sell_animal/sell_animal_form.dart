@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:geocoder/geocoder.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:dropdown_search/dropdown_search.dart';
@@ -135,7 +136,6 @@ class _SellAnimalFormState extends State<SellAnimalForm>
 
     String stmn2 = 'यह ${extraInfoData['animalAlreadyGivenBirth']} ब्यायी है ';
     String stmn3 = 'और अभी ${extraInfoData['animalIfPregnant']} है। ';
-    String stmn4 = '';
     String stmn41 = 'इसके साथ में बच्चा नहीं है। ';
     String stmn42 = 'इसके साथ में ${extraInfoData['animalHasBaby']}। ';
     String stmn5 =
@@ -151,13 +151,12 @@ class _SellAnimalFormState extends State<SellAnimalForm>
           'ये $animalBreedCheck $animalTypeCheck ${animalInfo['animalAge']} साल की है। ';
       if (extraInfoData['animalAlreadyGivenBirth'] != null) desc = desc + stmn2;
       if (extraInfoData['animalIfPregnant'] != null) desc = desc + stmn3;
-      if (extraInfoData['animalHasBaby'] != null &&
-          extraInfoData['animalHasBaby'] == 'nothing'.tr)
-        stmn4 = stmn4 + stmn42;
-      else
-        stmn4 = stmn4 + stmn41;
+      desc = desc +
+          (extraInfoData['animalHasBaby'] == null ||
+                  extraInfoData['animalHasBaby'] == 'nothing'.tr
+              ? stmn41
+              : stmn42);
 
-      desc = desc + stmn4;
       desc = desc + stmn5;
     }
 
@@ -977,32 +976,43 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                 pr.style(message: 'progress_dialog_message'.tr);
                 pr.show();
 
-                String uuid = Uuid().v1().toString();
+                String uniqueId = ReusableWidgets.randomIDGenerator();
+                // String uniqueId = Uuid().v1().toString();
 
                 FirebaseFirestore.instance
                     .collection("animalSellingInfo")
                     .doc(FirebaseAuth.instance.currentUser.uid)
                     .collection('sellingAnimalList')
-                    .doc(uuid)
+                    .doc(uniqueId)
                     .set({
                   'animalInfo': animalInfo,
                   'animalImages': imagesUpload,
                   'extraInfo': extraInfoData,
                   'dateOfSaving':
                       ReusableWidgets.dateTimeToEpoch(DateTime.now()),
-                  'uuid': uuid
+                  'uniqueId': uniqueId,
+                  'isValidUser': 'Approved',
+                  'userId': FirebaseAuth.instance.currentUser.uid,
+                  "animalDescription": _descriptionText(),
                 }).then((res) async {
                   SharedPreferences prefs =
                       await SharedPreferences.getInstance();
+                  var addresses = await Geocoder.local
+                      .findAddressesFromCoordinates(Coordinates(
+                          prefs.getDouble('latitude'),
+                          prefs.getDouble('longitude')));
+                  var first = addresses.first;
+
                   FirebaseFirestore.instance
                       .collection("buyingAnimalList")
-                      .doc(FirebaseAuth.instance.currentUser.uid)
+                      .doc(uniqueId + FirebaseAuth.instance.currentUser.uid)
                       .set({
                     "userAnimalDescription": _descriptionText(),
                     "userAnimalType": animalInfo['animalType'] ?? "",
                     "userAnimalTypeOther": animalInfo['animalTypeOther'] ?? "",
                     "userAnimalAge": animalInfo['animalAge'] ?? "",
-                    "userAddress": "",
+                    "userAddress": first.addressLine ??
+                        (first.adminArea + ', ' + first.countryName),
                     "userName": widget.userName,
                     "userAnimalPrice": animalInfo['animalPrice'] ?? "0",
                     "userAnimalBreed": animalInfo['animalBreed'] ?? "",
@@ -1033,7 +1043,11 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                         ? ""
                         : imagesUpload['image4'],
                     "dateOfSaving":
-                        ReusableWidgets.dateTimeToEpoch(DateTime.now())
+                        ReusableWidgets.dateTimeToEpoch(DateTime.now()),
+                    'isValidUser': 'Approved',
+                    'uniqueId': uniqueId,
+                    'userId': FirebaseAuth.instance.currentUser.uid,
+                    'extraInfo': extraInfoData
                   }).then((value) {
                     pr.hide();
                     return showDialog(

@@ -1,21 +1,18 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:in_app_update/in_app_update.dart';
 import 'package:pashusansaar/buy_animal/buy_animal.dart';
-import 'package:pashusansaar/utils/global.dart';
-import 'package:pashusansaar/utils/reusable_widgets.dart';
+import 'package:pashusansaar/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:geodesy/geodesy.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'model/push_notification_model.dart';
 import 'profile_main.dart';
 import 'sell_animal/sell_animal_main.dart';
 import 'package:get/get.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
-// import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:upgrader/upgrader.dart';
 
 // ignore: must_be_immutable
 class HomeScreen extends StatefulWidget {
@@ -32,31 +29,27 @@ class _HomeScreenState extends State<HomeScreen> {
   Map _profileData = {};
   final geo = Geoflutterfire();
   PageController _pageController;
+  // AppUpdateInfo _updateInfo;
 
-// registerNotification(){
-//   PushNotification _notificationInfo;
-//     // ...
+  // GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
 
-//     // For handling the received notifications
-//     FirebaseMessaging.instance.configure(
-//       onMessage: (message) async {
-//         print('onMessage received: $message');
+  // bool _flexibleUpdateAvailable = false;
 
-//         // Parse the message received
-//         PushNotification notification = PushNotification.fromJson(message);
-
-//         setState(() {
-//           _notificationInfo = notification;
-//           _totalNotifications++;
-//         });
-//       },
-//     );
-// }
+  // // Platform messages are asynchronous, so we initialize in an async method.
+  // Future<void> checkForUpdate() async {
+  //   InAppUpdate.checkForUpdate().then((info) {
+  //     setState(() {
+  //       _updateInfo = info;
+  //     });
+  //   }).catchError((e) {
+  //     print("update check==>" + e.toString());
+  //   });
+  // }
 
   @override
   void initState() {
     _pageController = PageController(initialPage: widget.selectedIndex);
-
+    // checkForUpdate();
     loginSetup();
     super.initState();
   }
@@ -64,61 +57,49 @@ class _HomeScreenState extends State<HomeScreen> {
   getInitialInfo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    // FirebaseFirestore.instance
-    //     .collection("buyingAnimalList")
-    //     .orderBy("dateOfSaving", descending: true)
-    //     .get(GetOptions(source: Source.serverAndCache))
-    //     .then(
-    //   (value) {
-    //     List _info = [];
-
-    //     value.docs.forEach((element) {
-    //       _info.add(element.data());
-    //     });
     pr = new ProgressDialog(context,
         type: ProgressDialogType.Normal, isDismissible: false);
 
     pr.style(message: 'progress_dialog_message'.tr);
     pr.show();
 
-    Stream<List<DocumentSnapshot>> stream = geo
-        .collection(
-            collectionRef:
-                FirebaseFirestore.instance.collection("buyingAnimalList"))
-        .within(
-            center: geo.point(
-                latitude: prefs.getDouble('latitude'),
-                longitude: prefs.getDouble('longitude')),
-            radius: 50,
-            field: 'position',
-            strictMode: true);
+    try {
+      Stream<List<DocumentSnapshot>> stream = geo
+          .collection(
+              collectionRef:
+                  FirebaseFirestore.instance.collection("buyingAnimalList"))
+          .within(
+              center: geo.point(
+                  latitude: prefs.getDouble('latitude'),
+                  longitude: prefs.getDouble('longitude')),
+              radius: 50,
+              field: 'position',
+              strictMode: true);
 
-    stream.listen((List<DocumentSnapshot> documentList) {
-      List _temp = [];
-      documentList.forEach((e) {
-        _temp.addIf(e.reference.id != FirebaseAuth.instance.currentUser.uid, e);
-        print('=-=-=-' + e.reference.id);
-        print('=-=-=-' + e.toString());
-      });
-      setState(() {
-        dataSnapshotValue = documentList[documentList.length - 1];
-        _animalInfo = _temp;
-      });
+      stream.listen((List<DocumentSnapshot> documentList) {
+        List _temp = [];
+        documentList.forEach((e) {
+          _temp.addIf(
+              (e.reference.id.substring(8) !=
+                      FirebaseAuth.instance.currentUser.uid) &&
+                  (e['isValidUser'] == 'Approved'),
+              e);
+          print('=-=-=-' + e.reference.id);
+          print('=-=-=-' + e.toString());
+        });
+        setState(() {
+          // dataSnapshotValue = documentList[documentList.length - 1];
+          _animalInfo = _temp;
+        });
 
-      print("=-=-=" + documentList.length.toString());
-    });
+        print("=-=-=" + documentList.length.toString());
+      });
+    } on Exception catch (e) {
+      print('=-=Error-Home-=->>>' + e.toString());
+    }
 
     getAnimalSellingInfo();
   }
-
-  // String _getDistance(lat1, long1, lat2, long2) {
-  //   return (Geodesy().distanceBetweenTwoGeoPoints(
-  //             LatLng(lat1, long1),
-  //             LatLng(lat2, long2),
-  //           ) /
-  //           1000)
-  //       .toStringAsFixed(0);
-  // }
 
   getAnimalSellingInfo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -127,6 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
         .collection("animalSellingInfo")
         .doc(FirebaseAuth.instance.currentUser.uid)
         .collection('sellingAnimalList')
+        .orderBy('dateOfSaving', descending: true)
         .get(GetOptions(source: Source.serverAndCache))
         .then(
       (value) {
@@ -145,12 +127,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   getProfileInfo() {
-    // pr = new ProgressDialog(context,
-    //     type: ProgressDialogType.Normal, isDismissible: false);
-
-    // pr.style(message: 'progress_dialog_message'.tr);
-    // pr.show();
-
     FirebaseFirestore.instance
         .collection("userInfo")
         .doc(FirebaseAuth.instance.currentUser.uid)
@@ -175,13 +151,13 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     getInitialInfo();
-    // getAnimalSellingInfo();
   }
 
   void _onItemTapped(int index) {
     setState(() {
       widget.selectedIndex = index;
-      _pageController.jumpToPage(index);
+      _pageController.animateToPage(index,
+          duration: Duration(milliseconds: 500), curve: Curves.easeInOutCirc);
     });
   }
 
@@ -202,70 +178,95 @@ class _HomeScreenState extends State<HomeScreen> {
             userMobileNumber: _profileData['mobile']);
         break;
       case 2:
-        return ProfileMain(profileData: _profileData);
+        return ProfileMain(
+            profileData: _profileData,
+            sellingAnimalInfo: _sellingAnimalInfo,
+            userName: _profileData['name'],
+            userMobileNumber: _profileData['mobile']);
         break;
       default:
     }
   }
 
+  Future<bool> _onWillPop() {
+    if (widget.selectedIndex == 0) {
+      return showDialog(
+        context: context,
+        builder: (context) => new AlertDialog(
+          title: new Text('एप बंद करे ?'),
+          content: new Text('क्या आप एप बंद करना चाहते हैं'),
+          actions: <Widget>[
+            new FlatButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: new Text('no'.tr, style: TextStyle(color: primaryColor)),
+            ),
+            new FlatButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: new Text('yes'.tr, style: TextStyle(color: primaryColor)),
+            ),
+          ],
+        ),
+      );
+    } else {
+      setState(() {
+        _pageController.animateToPage(0,
+            duration: Duration(milliseconds: 500), curve: Curves.easeInOutCirc);
+        widget.selectedIndex = 0;
+      });
+    }
+
+    return Future.value(false);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),
-      body: PageView(
-          controller: _pageController,
-          physics: NeverScrollableScrollPhysics(),
-          children: [
-            BuyAnimal(
-              animalInfo: _animalInfo,
-              userName: _profileData['name'],
-              userMobileNumber: _profileData['mobile'],
-              userImage: _profileData['image'],
-            ),
-            SellAnimalMain(
-                sellingAnimalInfo: _sellingAnimalInfo,
-                userName: _profileData['name'],
-                userMobileNumber: _profileData['mobile']),
-            ProfileMain(profileData: _profileData),
-          ]
-          // getScreenOnSelection(),
+    return WillPopScope(
+        onWillPop: _onWillPop,
+        child: Scaffold(
+          body: UpgradeAlert(
+            child: PageView(
+                controller: _pageController,
+                physics: NeverScrollableScrollPhysics(),
+                children: [
+                  BuyAnimal(
+                    animalInfo: _animalInfo,
+                    userName: _profileData['name'],
+                    userMobileNumber: _profileData['mobile'],
+                    userImage: _profileData['image'],
+                  ),
+                  SellAnimalMain(
+                      sellingAnimalInfo: _sellingAnimalInfo,
+                      userName: _profileData['name'],
+                      userMobileNumber: _profileData['mobile']),
+                  ProfileMain(
+                      profileData: _profileData,
+                      sellingAnimalInfo: _sellingAnimalInfo,
+                      userName: _profileData['name'],
+                      userMobileNumber: _profileData['mobile']),
+                ]),
           ),
-      // IndexedStack(
-      //   children: [
-      //     BuyAnimal(
-      //       animalInfo: _animalInfo,
-      //       userName: _profileData['name'],
-      //       userMobileNumber: _profileData['mobile'],
-      //       userImage: _profileData['image'],
-      //     ),
-      //     SellAnimalMain(
-      //         sellingAnimalInfo: _sellingAnimalInfo,
-      //         userName: _profileData['name'],
-      //         userMobileNumber: _profileData['mobile']),
-      //     ProfileMain(profileData: _profileData),
-      //   ],
-      //   index: widget.selectedIndex,
-      // ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Image.asset('assets/images/buy3.png', height: 25, width: 25),
-            label: 'buy'.tr,
+          bottomNavigationBar: BottomNavigationBar(
+            items: <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Image.asset('assets/images/buy3.png',
+                    height: 25, width: 25),
+                label: 'buy'.tr,
+              ),
+              BottomNavigationBarItem(
+                icon: Image.asset('assets/images/Sell.png',
+                    height: 25, width: 25),
+                label: 'sell'.tr,
+              ),
+              BottomNavigationBarItem(
+                icon: Image.asset('assets/images/profile.jpg',
+                    height: 25, width: 25),
+                label: 'profile'.tr,
+              ),
+            ],
+            currentIndex: widget.selectedIndex,
+            // selectedItemColor: themeColor,
+            onTap: _onItemTapped,
           ),
-          BottomNavigationBarItem(
-            icon: Image.asset('assets/images/Sell.png', height: 25, width: 25),
-            label: 'sell'.tr,
-          ),
-          BottomNavigationBarItem(
-            icon:
-                Image.asset('assets/images/profile.jpg', height: 25, width: 25),
-            label: 'profile'.tr,
-          ),
-        ],
-        currentIndex: widget.selectedIndex,
-        // selectedItemColor: themeColor,
-        onTap: _onItemTapped,
-      ),
-    );
+        ));
   }
 }

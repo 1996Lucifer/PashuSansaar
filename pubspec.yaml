@@ -17,7 +17,6 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 version: 1.0.0+1
 # version: 1.0.0+3(next)
-
 environment:
   sdk: ">=2.7.0 <3.0.0"
 
@@ -36,7 +35,7 @@ dependencies:
   esys_flutter_share: ^1.0.2
   firebase_auth: ^0.20.1
   firebase_core: ^0.7.0
-  # firebase_messaging: 
+  firebase_dynamic_links:
   flutter_launcher_icons: null
   flutter_native_image: ^0.0.5+3
   font_awesome_flutter: ^8.11.0
@@ -48,12 +47,14 @@ dependencies:
   intl: null
   location: ^3.2.4
   marquee: ^1.7.0
+  paginate_firestore: null
   pin_code_fields: ^6.1.0
   progress_dialog: ^1.2.4
   screenshot: ^0.3.0
   share: null
   shared_preferences: ^0.5.12+4
   splash_screen_view: ^1.0.3
+  upgrader: null
   url_launcher: null
   uuid: null
 

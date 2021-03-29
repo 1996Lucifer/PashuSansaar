@@ -59,12 +59,20 @@ class ReusableWidgets {
     return hex.encode(digest.bytes);
   }
 
-  static randomCodeGenerator() {
+  static String randomCodeGenerator() {
     const _chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
     Random _rnd = Random();
 
     return String.fromCharCodes(Iterable.generate(
         6, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
+  }
+
+  static String randomIDGenerator() {
+    const _chars = '1234567890';
+    Random _rnd = Random();
+
+    return String.fromCharCodes(Iterable.generate(
+        8, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
   }
 
   static String dateTimeToEpoch(DateTime date) {
