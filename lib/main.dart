@@ -12,6 +12,7 @@ import 'life_cycle_manager.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await FirebaseFirestore.instance.clearPersistence();
   runApp(MyApp());
 }
 

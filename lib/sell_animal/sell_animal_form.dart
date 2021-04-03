@@ -1,12 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -18,8 +21,8 @@ import '../utils/constants.dart' as constant;
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:intl/intl.dart';
-import 'package:uuid/uuid.dart';
 import 'package:geoflutterfire/geoflutterfire.dart' as geoFire;
+import 'package:flutter_video_compress/flutter_video_compress.dart';
 
 class SellAnimalForm extends StatefulWidget {
   final String userName;
@@ -42,7 +45,10 @@ class _SellAnimalFormState extends State<SellAnimalForm>
   bool _showData = false;
   // final _storage = new FlutterSecureStorage();
   SharedPreferences prefs;
-  String desc = '';
+  String desc = '', videoUrl = '';
+  final _flutterVideoCompress = FlutterVideoCompress();
+
+  Uint8List uint8list;
 
   Map<String, dynamic> imagesUpload = {
     'image1': '',
@@ -54,6 +60,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
 
   TextEditingController _controller;
   static const _locale = 'en_IN';
+  String uniqueId;
 
   @override
   bool get wantKeepAlive => true;
@@ -61,6 +68,8 @@ class _SellAnimalFormState extends State<SellAnimalForm>
   @override
   void initState() {
     _controller = TextEditingController();
+    uniqueId = ReusableWidgets.randomIDGenerator();
+
     super.initState();
   }
 
@@ -70,29 +79,56 @@ class _SellAnimalFormState extends State<SellAnimalForm>
   String get _currency =>
       NumberFormat.compactSimpleCurrency(locale: _locale).currencySymbol;
 
-  Future<void> _choose(String index) async {
+  Future<void> uploadFile(String filePath) async {
+    File file = File(filePath);
+
+    try {
+      await firebase_storage.FirebaseStorage.instance
+          .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
+          .putFile(file);
+    } on FirebaseException catch (e) {
+      // e.g, e.code == 'canceled'
+    }
+  }
+
+  Future<void> _choose(index) async {
     try {
       if (_picker == null) {
         _picker = ImagePicker();
       }
-      var file = await _picker.getImage(source: ImageSource.camera);
+      var pickedFile = await _picker.getVideo(
+          source: ImageSource.camera,
+          preferredCameraDevice: CameraDevice.rear,
+          maxDuration: Duration(minutes: 1));
 
-      switch (file) {
+      switch (pickedFile) {
         case null:
           return null;
           break;
         default:
-          File compressedFile = await FlutterNativeImage.compressImage(
-              file.path,
-              quality: 90,
-              targetWidth: 500,
-              targetHeight: 500);
-          setState(() {
-            _base64Image = base64Encode(
-              compressedFile.readAsBytesSync(),
-            );
-            imagesUpload['image$index'] = _base64Image;
-          });
+          try {
+            // pr.show();
+
+            File file = File(pickedFile.path);
+            uploadFile(file.path);
+
+            String downloadURL = await firebase_storage.FirebaseStorage.instance
+                .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
+                .getDownloadURL();
+            final uni8List = await _flutterVideoCompress.getThumbnail(file.path,
+                quality: 50, // default(100)
+                position: -1 // default(-1)
+                );
+
+            setState(() {
+              videoUrl = downloadURL;
+              uint8list = uni8List;
+            });
+            // pr.hide();
+          } on FirebaseException catch (e) {
+            print("=-=-=-===->>" + e.toString());
+            pr.hide();
+          }
       }
     } catch (e) {}
   }
@@ -102,24 +138,39 @@ class _SellAnimalFormState extends State<SellAnimalForm>
       if (_picker == null) {
         _picker = ImagePicker();
       }
-      var file = await _picker.getImage(source: ImageSource.gallery);
+      var pickedFile = await _picker.getVideo(
+          source: ImageSource.gallery,
+          preferredCameraDevice: CameraDevice.rear,
+          maxDuration: Duration(minutes: 1));
 
-      switch (file) {
-        case null:
-          return null;
-          break;
-        default:
-          File compressedFile = await FlutterNativeImage.compressImage(
-              file.path,
-              quality: 90,
-              targetWidth: 500,
-              targetHeight: 500);
-          setState(() {
-            _base64Image = base64Encode(
-              compressedFile.readAsBytesSync(),
-            );
-            imagesUpload['image$index'] = _base64Image;
-          });
+      try {
+        // pr.show();
+
+        File file = File(pickedFile.path);
+        uploadFile(file.path);
+
+        String downloadURL = await firebase_storage.FirebaseStorage.instance
+            .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
+            .getDownloadURL();
+
+        // final listUnint8 = await VideoThumbnail.thumbnailFile(
+        //     video: pickedFile.path,
+        //     imageFormat: ImageFormat.JPEG,
+        //     quality: 25,
+        //     maxHeight: 200);
+
+        setState(() {
+          // imagesUpload['video'] =
+          videoUrl = downloadURL;
+          // final file = File(listUnint8);
+
+          // _base64Image = file.path;
+          // _base64Image = file.path;
+        });
+        // pr.hide();
+      } on FirebaseException catch (e) {
+        print("=-=-=-===->>" + e.toString());
+        pr.hide();
       }
     } catch (e) {}
   }
@@ -180,7 +231,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                       IconButton(
                         icon: Icon(Icons.camera_alt),
                         onPressed: () {
-                          _choose(index);
+                          _choose('1');
                           Navigator.of(context).pop();
                         },
                       ),
@@ -188,7 +239,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                     ],
                   ),
                   onTap: () {
-                    _choose(index);
+                    _choose('1');
                     Navigator.of(context).pop();
                   },
                 ),
@@ -961,22 +1012,27 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                   'error'.tr,
                   Text('animal_price_error'.tr),
                 );
-              else if (imagesUpload['image1'].isEmpty &&
-                  imagesUpload['image2'].isEmpty &&
-                  imagesUpload['image3'].isEmpty &&
-                  imagesUpload['image4'].isEmpty)
+              else if (videoUrl == null || videoUrl.isEmpty)
                 ReusableWidgets.showDialogBox(
                   context,
                   'error'.tr,
                   Text('animal_image_error'.tr),
                 );
+              // else if (imagesUpload['image1'].isEmpty &&
+              //     imagesUpload['image2'].isEmpty &&
+              //     imagesUpload['image3'].isEmpty &&
+              //     imagesUpload['image4'].isEmpty)
+              //   ReusableWidgets.showDialogBox(
+              //     context,
+              //     'error'.tr,
+              //     Text('animal_image_error'.tr),
+              //   );
               else {
                 pr = new ProgressDialog(context,
                     type: ProgressDialogType.Normal, isDismissible: false);
                 pr.style(message: 'progress_dialog_message'.tr);
                 pr.show();
 
-                String uniqueId = ReusableWidgets.randomIDGenerator();
                 // String uniqueId = Uuid().v1().toString();
 
                 FirebaseFirestore.instance
@@ -986,7 +1042,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                     .doc(uniqueId)
                     .set({
                   'animalInfo': animalInfo,
-                  'animalImages': imagesUpload,
+                  'animalVideo': videoUrl,
                   'extraInfo': extraInfoData,
                   'dateOfSaving':
                       ReusableWidgets.dateTimeToEpoch(DateTime.now()),
@@ -1026,22 +1082,23 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                             latitude: prefs.getDouble('latitude'),
                             longitude: prefs.getDouble('longitude'))
                         .data,
-                    "image1": imagesUpload['image1'] == null ||
-                            imagesUpload['image1'] == ""
-                        ? ""
-                        : imagesUpload['image1'],
-                    "image2": imagesUpload['image2'] == null ||
-                            imagesUpload['image2'] == ""
-                        ? ""
-                        : imagesUpload['image2'],
-                    "image3": imagesUpload['image3'] == null ||
-                            imagesUpload['image3'] == ""
-                        ? ""
-                        : imagesUpload['image3'],
-                    "image4": imagesUpload['image4'] == null ||
-                            imagesUpload['image4'] == ""
-                        ? ""
-                        : imagesUpload['image4'],
+                    'video': videoUrl,
+                    // "image1": imagesUpload['image1'] == null ||
+                    //         imagesUpload['image1'] == ""
+                    //     ? ""
+                    //     : imagesUpload['image1'],
+                    // "image2": imagesUpload['image2'] == null ||
+                    //         imagesUpload['image2'] == ""
+                    //     ? ""
+                    //     : imagesUpload['image2'],
+                    // "image3": imagesUpload['image3'] == null ||
+                    //         imagesUpload['image3'] == ""
+                    //     ? ""
+                    //     : imagesUpload['image3'],
+                    // "image4": imagesUpload['image4'] == null ||
+                    //         imagesUpload['image4'] == ""
+                    //     ? ""
+                    //     : imagesUpload['image4'],
                     "dateOfSaving":
                         ReusableWidgets.dateTimeToEpoch(DateTime.now()),
                     'isValidUser': 'Approved',
@@ -1382,6 +1439,92 @@ class _SellAnimalFormState extends State<SellAnimalForm>
     );
   }
 
+  _videoStructure(width) {
+    return Padding(
+        padding: EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+        child: GestureDetector(
+          onTap: () => chooseOption('4'),
+          child: Stack(
+            children: [
+              DottedBorder(
+                strokeWidth: 2,
+                borderType: BorderType.RRect,
+                radius: Radius.circular(12),
+                padding: EdgeInsets.all(6),
+                color: Colors.grey[500],
+                child: ClipRRect(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(12),
+                    ),
+                    child: Container(
+                        height: 150,
+                        width: width * 0.3,
+                        // color: Colors.amber,
+                        child: Column(children: [
+                          Opacity(
+                            opacity: 0.5,
+                            child: Image.asset(
+                              'assets/images/photouploadside.png',
+                              height: 100,
+                            ),
+                          ),
+                          RaisedButton(
+                            onPressed: () => chooseOption('4'),
+                            child: Text(
+                              'choose_photo'.tr,
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 16),
+                            ),
+                          )
+                        ])
+                        //   Visibility(
+                        //     visible:
+                        //         _base64Image != null && _base64Image.isNotEmpty,
+                        //     child: Image(image: AssetImage(_base64Image)),
+                        //     replacement: Column(children: [
+                        //       Opacity(
+                        //         opacity: 0.5,
+                        //         child: Image.asset(
+                        //           'assets/images/photouploadside.png',
+                        //           height: 100,
+                        //         ),
+                        //       ),
+                        //       RaisedButton(
+                        //         onPressed: () => chooseOption('4'),
+                        //         child: Text(
+                        //           'choose_photo'.tr,
+                        //           style:
+                        //               TextStyle(color: Colors.white, fontSize: 16),
+                        //         ),
+                        //       )
+                        //     ]),
+                        //   ),
+                        )),
+              ),
+              Visibility(
+                visible: _base64Image != null,
+                child: Positioned(
+                  top: -1,
+                  right: -1,
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _base64Image = null;
+                      });
+                    },
+                    child: Icon(
+                      Icons.cancel_rounded,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+                replacement: SizedBox.shrink(),
+              )
+            ],
+          ),
+        ));
+  }
+
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
@@ -1447,12 +1590,13 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                   ],
                 ),
               ),
-              Row(
-                children: [imageStructure1(width), imageStructure2(width)],
-              ),
-              Row(
-                children: [imageStructure3(width), imageStructure4(width)],
-              ),
+              _videoStructure(width),
+              // Row(
+              //   children: [imageStructure1(width), imageStructure2(width)],
+              // ),
+              // Row(
+              //   children: [imageStructure3(width), imageStructure4(width)],
+              // ),
               extraInfo(),
               AnimatedOpacity(
                 opacity: _showData ? 1 : 0,

@@ -64,6 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
     pr.show();
 
     try {
+      FirebaseFirestore.instance.clearPersistence();
       Stream<List<DocumentSnapshot>> stream = geo
           .collection(
               collectionRef:
@@ -103,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   getAnimalSellingInfo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-
+    FirebaseFirestore.instance.clearPersistence();
     FirebaseFirestore.instance
         .collection("animalSellingInfo")
         .doc(FirebaseAuth.instance.currentUser.uid)
@@ -127,6 +128,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   getProfileInfo() {
+    FirebaseFirestore.instance.clearPersistence();
+
     FirebaseFirestore.instance
         .collection("userInfo")
         .doc(FirebaseAuth.instance.currentUser.uid)
