@@ -104,9 +104,9 @@ class _BuyAnimalState extends State<BuyAnimal>
     String dir1 = (await getExternalStorageDirectory()).path;
     setState(() {
       directory = dir1;
-      // count = counter + 15;
-      count = 15;
-      prefs.setInt('countData', 15);
+      count = counter + 15;
+      // count = 15;
+      prefs.setInt('countData', count);
     });
     // dataUpdateOnInit();
     dataReplication();
@@ -314,7 +314,8 @@ class _BuyAnimalState extends State<BuyAnimal>
     await FirebaseFirestore.instance
         .collection("buyingAnimalList")
         .orderBy('userId', descending: true)
-        .limitToLast(prefs.getInt('countData'))
+        
+        // .limitToLast(prefs.getInt('countData'))
         .get()
         .then((value) => value.docs.forEach((element) async {
               // if (element.reference.id.substring(0, 2) == '00')
