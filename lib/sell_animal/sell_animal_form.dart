@@ -19,10 +19,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../home_screen.dart';
 import '../utils/constants.dart' as constant;
 import 'package:dotted_border/dotted_border.dart';
-import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:intl/intl.dart';
 import 'package:geoflutterfire/geoflutterfire.dart' as geoFire;
-import 'package:flutter_video_compress/flutter_video_compress.dart';
+import 'package:video_compress/video_compress.dart';
+import 'package:video_player/video_player.dart';
 
 class SellAnimalForm extends StatefulWidget {
   final String userName;
@@ -46,9 +46,9 @@ class _SellAnimalFormState extends State<SellAnimalForm>
   // final _storage = new FlutterSecureStorage();
   SharedPreferences prefs;
   String desc = '', videoUrl = '';
-  final _flutterVideoCompress = FlutterVideoCompress();
 
-  Uint8List uint8list;
+  String videoPath = '';
+  VideoPlayerController _videoController;
 
   Map<String, dynamic> imagesUpload = {
     'image1': '',
@@ -61,6 +61,9 @@ class _SellAnimalFormState extends State<SellAnimalForm>
   TextEditingController _controller;
   static const _locale = 'en_IN';
   String uniqueId;
+  Subscription _subscription;
+  double _progressState = 0;
+  bool _isInitialised = false;
 
   @override
   bool get wantKeepAlive => true;
@@ -69,8 +72,20 @@ class _SellAnimalFormState extends State<SellAnimalForm>
   void initState() {
     _controller = TextEditingController();
     uniqueId = ReusableWidgets.randomIDGenerator();
+    _subscription = VideoCompress.compressProgress$.subscribe((progress) {
+      setState(() {
+        _progressState = progress;
+      });
+    });
 
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _subscription.unsubscribe();
+    _videoController.dispose();
   }
 
   String _formatNumber(String s) => NumberFormat.decimalPattern(_locale).format(
@@ -80,15 +95,25 @@ class _SellAnimalFormState extends State<SellAnimalForm>
       NumberFormat.compactSimpleCurrency(locale: _locale).currencySymbol;
 
   Future<void> uploadFile(String filePath) async {
-    File file = File(filePath);
+    await VideoCompress.compressVideo(
+      filePath,
+      quality: VideoQuality.MediumQuality,
+      deleteOrigin: false,
+    ).then((info) async {
+      return _progressState.toStringAsFixed(2) == '100.00'
+          ? await firebase_storage.FirebaseStorage.instance
+              .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
+              .putFile(info.file)
+          : CircularProgressIndicator();
+    });
 
-    try {
-      await firebase_storage.FirebaseStorage.instance
-          .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
-          .putFile(file);
-    } on FirebaseException catch (e) {
-      // e.g, e.code == 'canceled'
-    }
+    String downloadURL = await firebase_storage.FirebaseStorage.instance
+        .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
+        .getDownloadURL();
+
+    setState(() {
+      videoUrl = downloadURL;
+    });
   }
 
   Future<void> _choose(index) async {
@@ -106,29 +131,16 @@ class _SellAnimalFormState extends State<SellAnimalForm>
           return null;
           break;
         default:
-          try {
-            // pr.show();
-
-            File file = File(pickedFile.path);
-            uploadFile(file.path);
-
-            String downloadURL = await firebase_storage.FirebaseStorage.instance
-                .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
-                .getDownloadURL();
-            final uni8List = await _flutterVideoCompress.getThumbnail(file.path,
-                quality: 50, // default(100)
-                position: -1 // default(-1)
-                );
-
-            setState(() {
-              videoUrl = downloadURL;
-              uint8list = uni8List;
+          File file = File(pickedFile.path);
+          setState(() {
+            videoPath = file.path;
+          });
+          _videoController = VideoPlayerController.file(File(videoPath))
+            ..initialize().then((_) {
+              setState(() {
+                _isInitialised = true;
+              });
             });
-            // pr.hide();
-          } on FirebaseException catch (e) {
-            print("=-=-=-===->>" + e.toString());
-            pr.hide();
-          }
       }
     } catch (e) {}
   }
@@ -142,36 +154,20 @@ class _SellAnimalFormState extends State<SellAnimalForm>
           source: ImageSource.gallery,
           preferredCameraDevice: CameraDevice.rear,
           maxDuration: Duration(minutes: 1));
-
-      try {
-        // pr.show();
-
-        File file = File(pickedFile.path);
-        uploadFile(file.path);
-
-        String downloadURL = await firebase_storage.FirebaseStorage.instance
-            .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
-            .getDownloadURL();
-
-        // final listUnint8 = await VideoThumbnail.thumbnailFile(
-        //     video: pickedFile.path,
-        //     imageFormat: ImageFormat.JPEG,
-        //     quality: 25,
-        //     maxHeight: 200);
-
-        setState(() {
-          // imagesUpload['video'] =
-          videoUrl = downloadURL;
-          // final file = File(listUnint8);
-
-          // _base64Image = file.path;
-          // _base64Image = file.path;
-        });
-        // pr.hide();
-      } on FirebaseException catch (e) {
-        print("=-=-=-===->>" + e.toString());
-        pr.hide();
+      switch (pickedFile) {
+        case null:
+          return null;
+          break;
+        default:
+          File file = File(pickedFile.path);
+          setState(() {
+            videoPath = file.path;
+          });
       }
+      _videoController = VideoPlayerController.file(File(videoPath))
+        ..initialize().then((_) {
+          setState(() {});
+        });
     } catch (e) {}
   }
 
@@ -1034,8 +1030,9 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                 pr.show();
 
                 // String uniqueId = Uuid().v1().toString();
+                await uploadFile(videoPath);
 
-                FirebaseFirestore.instance
+                await FirebaseFirestore.instance
                     .collection("animalSellingInfo")
                     .doc(FirebaseAuth.instance.currentUser.uid)
                     .collection('sellingAnimalList')
@@ -1457,49 +1454,110 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                       Radius.circular(12),
                     ),
                     child: Container(
-                        height: 150,
-                        width: width * 0.3,
-                        // color: Colors.amber,
-                        child: Column(children: [
-                          Opacity(
-                            opacity: 0.5,
-                            child: Image.asset(
-                              'assets/images/photouploadside.png',
-                              height: 100,
+                      height: 200,
+                      width: width * 0.9,
+                      // color: Colors.amber,
+                      child: _videoController == null
+                          ? Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                  Opacity(
+                                    opacity: 0.5,
+                                    child: Image.asset(
+                                      'assets/images/photouploadside.png',
+                                      height: 100,
+                                    ),
+                                  ),
+                                  RaisedButton(
+                                    onPressed: () => chooseOption('4'),
+                                    child: Text(
+                                      'वीडियो चुने',
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 16),
+                                    ),
+                                  )
+                                ])
+                          : Visibility(
+                              visible: _isInitialised,
+                              child: Stack(
+                                children: [
+                                  Container(
+                                      // height: 150,
+                                      width: width * 0.9,
+                                      child: VideoPlayer(_videoController)),
+                                  Center(
+                                      child: Row(
+                                    children: [
+                                      RaisedButton.icon(
+                                          onPressed: () => setState(() {
+                                                _isInitialised = false;
+                                              }),
+                                          icon: Icon(Icons.cancel),
+                                          label: Text('Delete')),
+                                      RaisedButton.icon(
+                                          onPressed: () => setState(() {
+                                                _videoController.value.isPlaying
+                                                    ? _videoController.pause()
+                                                    : _videoController.play();
+                                              }),
+                                          icon: Icon(
+                                            _videoController.value.isPlaying
+                                                ? Icons.pause
+                                                : Icons.play_arrow,
+                                          ),
+                                          label: Text(
+                                              _videoController.value.isPlaying
+                                                  ? 'pause'
+                                                  : 'play')),
+                                    ],
+                                  ))
+                                ],
+                              ),
+                              replacement: Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Opacity(
+                                      opacity: 0.5,
+                                      child: Image.asset(
+                                        'assets/images/photouploadside.png',
+                                        height: 100,
+                                      ),
+                                    ),
+                                    RaisedButton(
+                                      onPressed: () => chooseOption('4'),
+                                      child: Text(
+                                        'वीडियो चुने',
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 16),
+                                      ),
+                                    )
+                                  ]),
                             ),
-                          ),
-                          RaisedButton(
-                            onPressed: () => chooseOption('4'),
-                            child: Text(
-                              'choose_photo'.tr,
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 16),
-                            ),
-                          )
-                        ])
-                        //   Visibility(
-                        //     visible:
-                        //         _base64Image != null && _base64Image.isNotEmpty,
-                        //     child: Image(image: AssetImage(_base64Image)),
-                        //     replacement: Column(children: [
-                        //       Opacity(
-                        //         opacity: 0.5,
-                        //         child: Image.asset(
-                        //           'assets/images/photouploadside.png',
-                        //           height: 100,
-                        //         ),
-                        //       ),
-                        //       RaisedButton(
-                        //         onPressed: () => chooseOption('4'),
-                        //         child: Text(
-                        //           'choose_photo'.tr,
-                        //           style:
-                        //               TextStyle(color: Colors.white, fontSize: 16),
-                        //         ),
-                        //       )
-                        //     ]),
-                        //   ),
-                        )),
+
+                      //   Visibility(
+                      //     visible:
+                      //         _base64Image != null && _base64Image.isNotEmpty,
+                      //     child: Image(image: AssetImage(_base64Image)),
+                      //     replacement: Column(children: [
+                      //       Opacity(
+                      //         opacity: 0.5,
+                      //         child: Image.asset(
+                      //           'assets/images/photouploadside.png',
+                      //           height: 100,
+                      //         ),
+                      //       ),
+                      //       RaisedButton(
+                      //         onPressed: () => chooseOption('4'),
+                      //         child: Text(
+                      //           'choose_photo'.tr,
+                      //           style:
+                      //               TextStyle(color: Colors.white, fontSize: 16),
+                      //         ),
+                      //       )
+                      //     ]),
+                      //   ),
+                    )),
               ),
               Visibility(
                 visible: _base64Image != null,
