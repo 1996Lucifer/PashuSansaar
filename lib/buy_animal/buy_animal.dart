@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:core';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -27,6 +28,8 @@ import 'package:share/share.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:pashusansaar/utils/constants.dart' as constant;
 import 'package:geoflutterfire/geoflutterfire.dart' as geoFire;
+import 'package:path_provider/path_provider.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 class BuyAnimal extends StatefulWidget {
   List animalInfo;
@@ -67,6 +70,8 @@ class _BuyAnimalState extends State<BuyAnimal>
   ScrollController _scrollController = ScrollController();
   bool _gettingMoreBuyer = false;
   bool _moreDataAvailable = true;
+  String directory = '';
+  String url1 = '', url2 = '', url3 = '', url4 = '';
 
   @override
   bool get wantKeepAlive => true;
@@ -78,17 +83,43 @@ class _BuyAnimalState extends State<BuyAnimal>
     // _locationController.addListener(() {
     //   _onChanged();
     // });
-    _getInitialData();
-    _scrollController.addListener(() {
-      double maxScroll = _scrollController.position.maxScrollExtent;
-      double currentScroll = _scrollController.position.pixels;
-      double delta = MediaQuery.of(context).size.height * 0.25;
-      if (maxScroll - currentScroll <= delta) {
-        getInitialInfo();
-      }
-    });
+    getData();
+    // _getInitialData();
+    // _scrollController.addListener(() {
+    //   double maxScroll = _scrollController.position.maxScrollExtent;
+    //   double currentScroll = _scrollController.position.pixels;
+    //   double delta = MediaQuery.of(context).size.height * 0.25;
+    //   if (maxScroll - currentScroll <= delta) {
+    //     getInitialInfo();
+    //   }
+    // });
     super.initState();
   }
+
+  getData() async {
+    await FirebaseFirestore.instance.clearPersistence();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int counter = prefs.getInt('countData') ?? 0;
+
+    String dir1 = (await getExternalStorageDirectory()).path;
+    setState(() {
+      directory = dir1;
+      // count = counter + 15;
+      count = 15;
+      prefs.setInt('countData', 15);
+    });
+    // dataUpdateOnInit();
+    dataReplication();
+    // await dataDeleteion();
+  }
+
+  // dataDeleteion() async {
+  //   await FirebaseFirestore.instance
+  //       .collection('buyingAnimalList1')
+  //       .doc()
+  //       .get()
+  //       .then((value) => value.reference.delete());
+  // }
 
   _getInitialData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -112,15 +143,6 @@ class _BuyAnimalState extends State<BuyAnimal>
       _userLocality = first.locality ?? first.featureName;
       prefs.setString('place', _userLocality);
     });
-
-    // getPositionBasedOnLatLong(
-    //         prefs.getDouble('latitude'), prefs.getDouble('longitude'))
-    //     .then((result) {
-    //   setState(() {
-    //     _userLocality = result;
-    //     prefs.setString('place', _userLocality);
-    //   });
-    // });
   }
 
   getInitialInfo() async {
@@ -175,94 +197,207 @@ class _BuyAnimalState extends State<BuyAnimal>
     _gettingMoreBuyer = false;
   }
 
-  dataUpdateOnInit() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+  _createFileFromString(encodedStr, userId, uniqueId, id) async {
+    Uint8List bytes = base64Decode(encodedStr);
+    String fullPath = '$directory/${uniqueId}_$id.jpg';
+    File file = File(fullPath);
 
-    final myData = await rootBundle.loadString("assets/file/animal_data_1.csv");
-    // List<List<dynamic>> data = CsvToListConverter().convert(myData);
+    await file.writeAsBytes(bytes);
 
-    // for (int i = 1; i <= data.length - 1; i++) {
-    // loadAddress(data[i][3].toString());
-    var randomId = '';
+    await firebase_storage.FirebaseStorage.instance
+        .ref('$userId/${uniqueId}_$id.jpg')
+        .putFile(file);
+
+    await firebase_storage.FirebaseStorage.instance
+        .ref('$userId/${uniqueId}_$id.jpg')
+        .getDownloadURL();
+  }
+
+  func1(element) async {
+    _createFileFromString(
+        element['image1'], element['userId'], element['uniqueId'], '1');
+    String downloadURL1 = await firebase_storage.FirebaseStorage.instance
+        .ref('${element['userId']}/${element['uniqueId']}_1.jpg')
+        .getDownloadURL();
+    setState(() {
+      url1 = downloadURL1;
+    });
+  }
+
+  func2(element) async {
+    _createFileFromString(
+        element['image2'], element['userId'], element['uniqueId'], '2');
+    String downloadURL2 = await firebase_storage.FirebaseStorage.instance
+        .ref('${element['userId']}/${element['uniqueId']}_2.jpg')
+        .getDownloadURL();
+    setState(() {
+      url2 = downloadURL2;
+    });
+  }
+
+  func3(element) async {
+    _createFileFromString(
+        element['image3'], element['userId'], element['uniqueId'], '3');
+    String downloadURL3 = await firebase_storage.FirebaseStorage.instance
+        .ref('${element['userId']}/${element['uniqueId']}_3.jpg')
+        .getDownloadURL();
+    setState(() {
+      url3 = downloadURL3;
+    });
+  }
+
+  func4(element) async {
+    _createFileFromString(
+        element['image4'], element['userId'], element['uniqueId'], '4');
+    String downloadURL4 = await firebase_storage.FirebaseStorage.instance
+        .ref('${element['userId']}/${element['uniqueId']}_4.jpg')
+        .getDownloadURL();
+    setState(() {
+      url4 = downloadURL4;
+    });
+  }
+
+  dataUpdateOnInit(element) async {
+    if (element['image1'] != null && element['image1'].isNotEmpty) {
+      await func1(element);
+    }
+    if (element['image2'] != null && element['image2'].isNotEmpty) {
+      await func2(element);
+    }
+    if (element['image3'] != null && element['image3'].isNotEmpty) {
+      await func3(element);
+    }
+    if (element['image4'] != null && element['image4'].isNotEmpty) {
+      await func4(element);
+    }
     await FirebaseFirestore.instance
-        .collection("buyingAnimalList")
-        .get()
-        .then((value) => value.docs.forEach((element) async {
-              // randomId = ReusableWidgets.randomIDGenerator();
-              // print(element.reference.id);
-              await FirebaseFirestore.instance
-                  .collection("buyingAnimalList")
-                  .doc(element.reference.id)
-                  .update({
-                'uniqueId': ReusableWidgets.randomIDGenerator(),
+        .collection("buyingAnimalList1")
+        .doc(element.reference.id)
+        .update({
+      'image1': url1 ?? '',
+      'image2': url2 ?? '',
+      'image3': url3 ?? '',
+      'image4': url4 ?? '',
+    });
+    // await FirebaseFirestore.instance
+    //     .collection("buyingAnimalList1")
+    //     .get()
+    //     .then((value) => value.docs.forEach((element) async {
+    //           if (element['image1'] != null && element['image1'].isNotEmpty) {
+    //             await func1(element);
+    //           }
+    //           if (element['image2'] != null && element['image2'].isNotEmpty) {
+    //             await func2(element);
+    //           }
+    //           if (element['image3'] != null && element['image3'].isNotEmpty) {
+    //             await func3(element);
+    //           }
+    //           if (element['image4'] != null && element['image4'].isNotEmpty) {
+    //             await func4(element);
+    //           }
+    //           await FirebaseFirestore.instance
+    //               .collection("buyingAnimalList1")
+    //               .doc(element.reference.id)
+    //               .update({
+    //             'image1': url1 ?? '',
+    //             'image2': url2 ?? '',
+    //             'image3': url3 ?? '',
+    //             'image4': url4 ?? '',
+    //           });
+    //         }));
 
-                // 'userAnimalTypeOther': ''
-                // 'extraInfo': {},
-                // 'userId': element.reference.id
-              });
-            }));
     // }
   }
 
-  dataFillOnInit() async {
+  dataReplication() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    final myData = await rootBundle.loadString("assets/file/animal_data_1.csv");
-    List<List<dynamic>> data = CsvToListConverter().convert(myData);
-
-    for (int i = 1; i <= data.length - 1; i++) {
-      loadAddress(data[i][3].toString());
-      var randomId = ReusableWidgets.randomIDGenerator();
-      await FirebaseFirestore.instance.collection("buyingAnimalList").doc()
-          // .collection('animalBuy')
-          // .doc(randomId)
-          .set({
-        "userAnimalDescription": data[i][0].toString(),
-        "userAnimalType": data[i][1].toString(),
-        "userAnimalAge": data[i][2].toString(),
-        "userAddress": data[i][3].toString(),
-        "userName": data[i][4].toString(),
-        "userAnimalPrice": data[i][5].toString(),
-        "userAnimalBreed": data[i][6].toString(),
-        "userMobileNumber": data[i][7].toString(),
-        "userAnimalMilk": data[i][8].toString(),
-        "userAnimalPregnancy": data[i][9].toString(),
-        "userLatitude": prefs.getDouble('userLatitude'),
-        "userLongitude": prefs.getDouble('userLongitude'),
-        'uniqueId': randomId,
-        'extraInfo': {},
-        'isValidUser': 'Approved',
-        'position': geo
-            .point(
-                latitude: prefs.getDouble('userLatitude'),
-                longitude: prefs.getDouble('userLongitude'))
-            .data,
-        "image1": data[i][10] == null || data[i][10] == ""
-            ? ""
-            : data[i][10].toString(),
-        "image2": data[i][11] == null || data[i][11] == ""
-            ? ""
-            : data[i][11].toString(),
-        "image3": data[i][12] == null || data[i][12] == ""
-            ? ""
-            : data[i][12].toString(),
-        "image4": data[i][13] == null || data[i][13] == ""
-            ? ""
-            : data[i][13].toString(),
-        "dateOfSaving": ReusableWidgets.dateTimeToEpoch(DateTime.now()),
-        'userId':
-            FirebaseFirestore.instance.collection("buyingAnimalList").doc().id
-      });
-    }
+    await FirebaseFirestore.instance
+        .collection("buyingAnimalList")
+        .orderBy('userId', descending: true)
+        .limitToLast(prefs.getInt('countData'))
+        .get()
+        .then((value) => value.docs.forEach((element) async {
+              // if (element.reference.id.substring(0, 2) == '00')
+              await FirebaseFirestore.instance
+                  .collection("buyingAnimalList1")
+                  .doc(element.reference.id)
+                  .set({
+                "userAnimalDescription": element["userAnimalDescription"],
+                "userAnimalType": element["userAnimalType"],
+                "userAnimalAge": element["userAnimalAge"],
+                "userAddress": element["userAddress"],
+                "userName": element["userName"],
+                "userAnimalPrice": element["userAnimalPrice"],
+                "userAnimalBreed": element["userAnimalBreed"],
+                "userMobileNumber": element["userMobileNumber"],
+                "userAnimalMilk": element["userAnimalMilk"],
+                "userAnimalPregnancy": element["userAnimalPregnancy"],
+                "userLatitude": element["userLatitude"],
+                "userLongitude": element["userLongitude"],
+                'uniqueId': element['uniqueId'],
+                'extraInfo': element['extraInfo'],
+                'isValidUser': element['isValidUser'],
+                'position': element['position'],
+                "image1": element["image1"],
+                "image2": element["image2"],
+                "image3": element["image3"],
+                "image4": element["image4"],
+                "dateOfSaving": element["dateOfSaving"],
+                'userId': element['userId']
+              });
+              // await dataUpdateOnInit(element);
+            }));
   }
+  // dataFillOnInit() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
 
-  // String _getDistance(lat1, long1, lat2, long2) {
-  //   return (Geodesy().distanceBetweenTwoGeoPoints(
-  //             LatLng(lat1, long1),
-  //             LatLng(lat2, long2),
-  //           ) /
-  //           1000)
-  //       .toStringAsFixed(0);
+  //   final myData = await rootBundle.loadString("assets/file/animal_data_1.csv");
+  //   List<List<dynamic>> data = CsvToListConverter().convert(myData);
+
+  //   for (int i = 1; i <= data.length - 1; i++) {
+  //     loadAddress(data[i][3].toString());
+  //     var randomId = ReusableWidgets.randomIDGenerator();
+  //     await FirebaseFirestore.instance.collection("buyingAnimalList").doc()
+  //         // .collection('animalBuy')
+  //         // .doc(randomId)
+  //         .set({
+  //       "userAnimalDescription": data[i][0].toString(),
+  //       "userAnimalType": data[i][1].toString(),
+  //       "userAnimalAge": data[i][2].toString(),
+  //       "userAddress": data[i][3].toString(),
+  //       "userName": data[i][4].toString(),
+  //       "userAnimalPrice": data[i][5].toString(),
+  //       "userAnimalBreed": data[i][6].toString(),
+  //       "userMobileNumber": data[i][7].toString(),
+  //       "userAnimalMilk": data[i][8].toString(),
+  //       "userAnimalPregnancy": data[i][9].toString(),
+  //       "userLatitude": prefs.getDouble('userLatitude'),
+  //       "userLongitude": prefs.getDouble('userLongitude'),
+  //       'uniqueId': randomId,
+  //       'extraInfo': {},
+  //       'isValidUser': 'Approved',
+  //       'position': geo
+  //           .point(
+  //               latitude: prefs.getDouble('userLatitude'),
+  //               longitude: prefs.getDouble('userLongitude'))
+  //           .data,
+  //       "image1": data[i][10] == null || data[i][10] == ""
+  //           ? ""
+  //           : data[i][10].toString(),
+  //       "image2": data[i][11] == null || data[i][11] == ""
+  //           ? ""
+  //           : data[i][11].toString(),
+  //       "image3": data[i][12] == null || data[i][12] == ""
+  //           ? ""
+  //           : data[i][12].toString(),
+  //       "image4": data[i][13] == null || data[i][13] == ""
+  //           ? ""
+  //           : data[i][13].toString(),
+  //       "dateOfSaving": ReusableWidgets.dateTimeToEpoch(DateTime.now()),
+  //       'userId':
+  //           FirebaseFirestore.instance.collection("buyingAnimalList").doc().id
+  //     });
+  //   }
   // }
 
   loadAddress(address) async {
@@ -1682,7 +1817,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                                               e.toString());
                                         }
 
-                                        Future.delayed(Duration(seconds: 2))
+                                        Future.delayed(Duration(seconds: 5))
                                             .then((value) {
                                           pr.hide();
                                           Navigator.pop(context);
@@ -1940,7 +2075,8 @@ class _BuyAnimalState extends State<BuyAnimal>
                     final DynamicLinkParameters parameters =
                         DynamicLinkParameters(
                             uriPrefix: 'https://pashusansaar.page.link',
-                            link: Uri.parse('/buyingAnimalList/spY4l92DqFfDYj5RQ1YY6BOxQrv1'),
+                            link: Uri.parse(
+                                '/buyingAnimalList/spY4l92DqFfDYj5RQ1YY6BOxQrv1'),
                             androidParameters: AndroidParameters(
                               packageName: 'dj.pashusansaar',
                               minimumVersion: 25,
@@ -2013,6 +2149,7 @@ class _BuyAnimalState extends State<BuyAnimal>
               size: 13,
             ),
             RichText(
+              overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               text: TextSpan(
                   text: ' ' + val.toString(),

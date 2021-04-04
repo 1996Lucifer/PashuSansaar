@@ -10,6 +10,8 @@
         <!-- android:name=".Application" -->
    <application
         android:requestLegacyExternalStorage="true" 
+        android:hardwareAccelerated="false"
+        android:largeHeap="true" 
         android:label="PashuSansaar"
         android:icon="@mipmap/launcher_icon">
         <activity
