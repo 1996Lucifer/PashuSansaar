@@ -68,7 +68,7 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
         setState(() {
           _zipCodeTextField = true;
         });
-        assignDeviceID();
+        await assignDeviceID();
         return;
       }
     }
@@ -80,7 +80,7 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
         setState(() {
           _zipCodeTextField = true;
         });
-        assignDeviceID();
+        await assignDeviceID();
         return;
       }
     }
@@ -91,7 +91,7 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
       prefs.setDouble("latitude", _locate.latitude);
       prefs.setDouble("longitude", _locate.longitude);
     });
-    assignDeviceID();
+    await assignDeviceID();
   }
 
   assignDeviceID() async {
@@ -352,7 +352,8 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                                 await SharedPreferences.getInstance();
 
                             if (_zipCodeTextField &&
-                                zipCodeController.text.isNotEmpty) loadAsset();
+                                zipCodeController.text.isNotEmpty)
+                              await loadAsset();
                             pr = new ProgressDialog(context,
                                 type: ProgressDialogType.Normal,
                                 isDismissible: false);
