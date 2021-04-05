@@ -108,8 +108,8 @@ class _BuyAnimalState extends State<BuyAnimal>
       // count = 15;
       prefs.setInt('countData', count);
     });
-    // dataUpdateOnInit();
-    dataReplication();
+    dataUpdateOnInit();
+    // dataReplication();
     // await dataDeleteion();
   }
 
@@ -257,97 +257,134 @@ class _BuyAnimalState extends State<BuyAnimal>
     });
   }
 
-  dataUpdateOnInit(element) async {
-    if (element['image1'] != null && element['image1'].isNotEmpty) {
-      await func1(element);
-    }
-    if (element['image2'] != null && element['image2'].isNotEmpty) {
-      await func2(element);
-    }
-    if (element['image3'] != null && element['image3'].isNotEmpty) {
-      await func3(element);
-    }
-    if (element['image4'] != null && element['image4'].isNotEmpty) {
-      await func4(element);
-    }
-    await FirebaseFirestore.instance
-        .collection("buyingAnimalList1")
-        .doc(element.reference.id)
-        .update({
-      'image1': url1 ?? '',
-      'image2': url2 ?? '',
-      'image3': url3 ?? '',
-      'image4': url4 ?? '',
-    });
+  dataUpdateOnInit() async {
+    // if (element['image1'] != null && element['image1'].isNotEmpty) {
+    //   await func1(element);
+    // }
+    // if (element['image2'] != null && element['image2'].isNotEmpty) {
+    //   await func2(element);
+    // }
+    // if (element['image3'] != null && element['image3'].isNotEmpty) {
+    //   await func3(element);
+    // }
+    // if (element['image4'] != null && element['image4'].isNotEmpty) {
+    //   await func4(element);
+    // }
     // await FirebaseFirestore.instance
     //     .collection("buyingAnimalList1")
-    //     .get()
-    //     .then((value) => value.docs.forEach((element) async {
-    //           if (element['image1'] != null && element['image1'].isNotEmpty) {
-    //             await func1(element);
-    //           }
-    //           if (element['image2'] != null && element['image2'].isNotEmpty) {
-    //             await func2(element);
-    //           }
-    //           if (element['image3'] != null && element['image3'].isNotEmpty) {
-    //             await func3(element);
-    //           }
-    //           if (element['image4'] != null && element['image4'].isNotEmpty) {
-    //             await func4(element);
-    //           }
-    //           await FirebaseFirestore.instance
-    //               .collection("buyingAnimalList1")
-    //               .doc(element.reference.id)
-    //               .update({
-    //             'image1': url1 ?? '',
-    //             'image2': url2 ?? '',
-    //             'image3': url3 ?? '',
-    //             'image4': url4 ?? '',
-    //           });
-    //         }));
-
-    // }
-  }
-
-  dataReplication() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    //     .doc(element.reference.id)
+    //     .update({
+    //   'image1': url1 ?? '',
+    //   'image2': url2 ?? '',
+    //   'image3': url3 ?? '',
+    //   'image4': url4 ?? '',
+    // });
     await FirebaseFirestore.instance
         .collection("buyingAnimalList")
-        .orderBy('userId', descending: true)
+        .orderBy('uniqueId')
+        // .where('uniqueId',
+        //     isLessThanOrEqualTo: '10000000') // 00000000 - 10000000
+        // .where('uniqueId',
+        //     isGreaterThan: '10000000', isLessThanOrEqualTo: '20000000') // 30 - 31
+        // .where('uniqueId',
+        //     isGreaterThan: '20000000', isLessThanOrEqualTo: '30000000') // 30 - 31
+        .where('uniqueId',
+            isGreaterThan: '30000000', isLessThanOrEqualTo: '40000000') // karna hai aaj
         
-        // .limitToLast(prefs.getInt('countData'))
         .get()
         .then((value) => value.docs.forEach((element) async {
-              // if (element.reference.id.substring(0, 2) == '00')
+              print("value.docs=====>" + value.docs.length.toString());
+              if (element['image1'] != null && element['image1'].isNotEmpty) {
+                await func1(element);
+              }
+              if (element['image2'] != null && element['image2'].isNotEmpty) {
+                await func2(element);
+              }
+              if (element['image3'] != null && element['image3'].isNotEmpty) {
+                await func3(element);
+              }
+              if (element['image4'] != null && element['image4'].isNotEmpty) {
+                await func4(element);
+              }
               await FirebaseFirestore.instance
                   .collection("buyingAnimalList1")
                   .doc(element.reference.id)
-                  .set({
-                "userAnimalDescription": element["userAnimalDescription"],
-                "userAnimalType": element["userAnimalType"],
-                "userAnimalAge": element["userAnimalAge"],
-                "userAddress": element["userAddress"],
-                "userName": element["userName"],
-                "userAnimalPrice": element["userAnimalPrice"],
-                "userAnimalBreed": element["userAnimalBreed"],
-                "userMobileNumber": element["userMobileNumber"],
-                "userAnimalMilk": element["userAnimalMilk"],
-                "userAnimalPregnancy": element["userAnimalPregnancy"],
-                "userLatitude": element["userLatitude"],
-                "userLongitude": element["userLongitude"],
-                'uniqueId': element['uniqueId'],
-                'extraInfo': element['extraInfo'],
-                'isValidUser': element['isValidUser'],
-                'position': element['position'],
-                "image1": element["image1"],
-                "image2": element["image2"],
-                "image3": element["image3"],
-                "image4": element["image4"],
-                "dateOfSaving": element["dateOfSaving"],
-                'userId': element['userId']
+                  .update({
+                'image1': url1 ?? '',
+                'image2': url2 ?? '',
+                'image3': url3 ?? '',
+                'image4': url4 ?? '',
               });
-              // await dataUpdateOnInit(element);
             }));
+  }
+
+  dataReplication() async {
+    // SharedPreferences prefs = await SharedPreferences.getInstance();
+    await FirebaseFirestore.instance
+        .collection("buyingAnimalList1")
+        .orderBy('dateOfSaving', descending: true)
+        // .where('dateOfSaving', isLessThanOrEqualTo: '1617148799')  // 30 se kam
+        // .where('dateOfSaving',
+        //     isGreaterThan: '1617148799', isLessThanOrEqualTo: '1617235199') // 30 - 31
+        // .where('dateOfSaving',
+        //     isGreaterThan: '1617235199', isLessThanOrEqualTo: '1617321599') // 31-1
+        // .where('dateOfSaving',
+        //     isGreaterThan: '1617321599', isLessThanOrEqualTo: '1617407999') // 1-2
+        // .where('dateOfSaving',
+        //     isGreaterThan: '1617407999', isLessThanOrEqualTo: '1617494399')//2-3
+        .where('dateOfSaving',
+            isGreaterThan: '1617494399',
+            isLessThanOrEqualTo: '1617580799') //3-4
+
+        // .limit(50)
+        .get()
+        .then((value) => print('val=====>' + value.docs.length.toString()));
+
+    // await FirebaseFirestore.instance
+    //     .collection("buyingAnimalList")
+    //     .where('dateOfSaving',
+    //         isGreaterThan: '1617235199',
+    //         isLessThanOrEqualTo: '1617321599') // 31-1
+
+    //     // .orderBy('dateOfSaving', descending: true)
+    //     // // .where('dateOfSaving',
+    //     // //     isGreaterThan: '1617299999', isLessThanOrEqualTo: '1617321599')
+    //     // .where('dateOfSaving',
+    //     //     isGreaterThan: '1617537599', isLessThanOrEqualTo: '1617580799')
+    //     // // .limitToLast(prefs.getInt('countData'))
+    //     // .limit(50)
+    //     .get()
+    //     .then((value) => value.docs.forEach((element) async {
+    //           // if (element.reference.id.substring(0, 2) == '00')
+    //           await FirebaseFirestore.instance
+    //               .collection("buyingAnimalList1")
+    //               .doc(element.reference.id)
+    //               .set({
+    //             "userAnimalDescription": element["userAnimalDescription"],
+    //             "userAnimalType": element["userAnimalType"],
+    //             "userAnimalAge": element["userAnimalAge"],
+    //             "userAddress": element["userAddress"],
+    //             "userName": element["userName"],
+    //             "userAnimalPrice": element["userAnimalPrice"],
+    //             "userAnimalBreed": element["userAnimalBreed"],
+    //             "userMobileNumber": element["userMobileNumber"],
+    //             "userAnimalMilk": element["userAnimalMilk"],
+    //             "userAnimalPregnancy": element["userAnimalPregnancy"],
+    //             "userLatitude": element["userLatitude"],
+    //             "userLongitude": element["userLongitude"],
+    //             'uniqueId': element['uniqueId'],
+    //             'extraInfo': element['extraInfo'],
+    //             'isValidUser': element['isValidUser'],
+    //             'position': element['position'],
+    //             "image1": element["image1"],
+    //             "image2": element["image2"],
+    //             "image3": element["image3"],
+    //             "image4": element["image4"],
+    //             "dateOfSaving": element["dateOfSaving"],
+    //             'userId': element['userId']
+    //           });
+    //           // await dataUpdateOnInit(element);
+    //         }));
   }
   // dataFillOnInit() async {
   //   SharedPreferences prefs = await SharedPreferences.getInstance();
