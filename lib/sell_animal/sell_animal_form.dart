@@ -135,12 +135,20 @@ class _SellAnimalFormState extends State<SellAnimalForm>
           setState(() {
             videoPath = file.path;
           });
-          _videoController = VideoPlayerController.file(File(videoPath))
-            ..initialize().then((_) {
-              setState(() {
-                _isInitialised = true;
-              });
+
+          _videoController = VideoPlayerController.file(File(videoPath));
+
+          _videoController.addListener(() {
+            setState(() {});
+          });
+          _videoController.setLooping(true);
+          _videoController.initialize().then((_) {
+            setState(() {
+              _isInitialised = true;
             });
+          });
+
+          _videoController.play();
       }
     } catch (e) {}
   }
@@ -164,10 +172,20 @@ class _SellAnimalFormState extends State<SellAnimalForm>
             videoPath = file.path;
           });
       }
-      _videoController = VideoPlayerController.file(File(videoPath))
-        ..initialize().then((_) {
-          setState(() {});
+
+      _videoController = VideoPlayerController.file(File(videoPath));
+
+      _videoController.addListener(() {
+        setState(() {});
+      });
+      _videoController.setLooping(true);
+      _videoController.initialize().then((_) {
+        setState(() {
+          _isInitialised = true;
         });
+      });
+
+      _videoController.play();
     } catch (e) {}
   }
 
@@ -1457,10 +1475,117 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                       height: 200,
                       width: width * 0.9,
                       // color: Colors.amber,
-                      child: _videoController == null
-                          ? Column(
+                      child: Visibility(
+                          visible: _videoController == null && !_isInitialised,
+                          child: Column(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
+                                Opacity(
+                                  opacity: 0.5,
+                                  child: Image.asset(
+                                    'assets/images/photouploadside.png',
+                                    height: 100,
+                                  ),
+                                ),
+                                RaisedButton(
+                                  onPressed: () => chooseOption('4'),
+                                  child: Text(
+                                    'वीडियो चुने',
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 16),
+                                  ),
+                                )
+                              ]),
+                          replacement: Visibility(
+                            visible: _isInitialised,
+                            child: Stack(
+                              alignment: Alignment.bottomCenter,
+                              children: [
+                                Container(
+                                    width: width * 0.9,
+                                    child: Stack(
+                                      alignment: Alignment.bottomCenter,
+                                      children: [
+                                        VideoPlayer(_videoController),
+                                      ],
+                                    )),
+                                Visibility(
+                                  visible: _isInitialised,
+                                  child: Positioned(
+                                    top: -1,
+                                    right: -1,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          videoPath = '';
+                                          _videoController.pause();
+                                          _isInitialised = false;
+                                        });
+                                      },
+                                      child: Icon(
+                                        Icons.cancel_rounded,
+                                        color: primaryColor,
+                                      ),
+                                    ),
+                                  ),
+                                  replacement: SizedBox.shrink(),
+                                ),
+                                _videoController == null
+                                    ? SizedBox.shrink()
+                                    : ValueListenableBuilder(
+                                        valueListenable: _videoController,
+                                        builder: (context,
+                                                VideoPlayerValue value,
+                                                child) =>
+                                            Row(
+                                          children: [
+                                            IconButton(
+                                                icon: Icon(
+                                                  _videoController
+                                                          .value.isPlaying
+                                                      ? Icons.pause
+                                                      : Icons.play_arrow,
+                                                ),
+                                                onPressed: () => setState(() {
+                                                      _videoController
+                                                              .value.isPlaying
+                                                          ? _videoController
+                                                              .pause()
+                                                          : _videoController
+                                                              .play();
+                                                    })),
+                                            Container(
+                                              width: width * 0.5,
+                                              child: VideoProgressIndicator(
+                                                  _videoController,
+                                                  allowScrubbing: true),
+                                            ),
+                                            SizedBox(
+                                              width: 10,
+                                            ),
+                                            Text(
+                                                '0' +
+                                                    value.position.inMinutes
+                                                        .toString() +
+                                                    ':' +
+                                                    value.position.inSeconds
+                                                        .toString(),
+                                                style: TextStyle(
+                                                    color: primaryColor))
+
+                                            //       Row(
+                                            // children: [
+                                            // ],
+                                            // )
+                                          ],
+                                        ),
+                                      ),
+                              ],
+                            ),
+                            replacement: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
                                   Opacity(
                                     opacity: 0.5,
                                     child: Image.asset(
@@ -1476,108 +1601,10 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                                           color: Colors.white, fontSize: 16),
                                     ),
                                   )
-                                ])
-                          : Visibility(
-                              visible: _isInitialised,
-                              child: Stack(
-                                children: [
-                                  Container(
-                                      // height: 150,
-                                      width: width * 0.9,
-                                      child: VideoPlayer(_videoController)),
-                                  Center(
-                                      child: Row(
-                                    children: [
-                                      RaisedButton.icon(
-                                          onPressed: () => setState(() {
-                                                _isInitialised = false;
-                                              }),
-                                          icon: Icon(Icons.cancel),
-                                          label: Text('Delete')),
-                                      RaisedButton.icon(
-                                          onPressed: () => setState(() {
-                                                _videoController.value.isPlaying
-                                                    ? _videoController.pause()
-                                                    : _videoController.play();
-                                              }),
-                                          icon: Icon(
-                                            _videoController.value.isPlaying
-                                                ? Icons.pause
-                                                : Icons.play_arrow,
-                                          ),
-                                          label: Text(
-                                              _videoController.value.isPlaying
-                                                  ? 'pause'
-                                                  : 'play')),
-                                    ],
-                                  ))
-                                ],
-                              ),
-                              replacement: Column(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Opacity(
-                                      opacity: 0.5,
-                                      child: Image.asset(
-                                        'assets/images/photouploadside.png',
-                                        height: 100,
-                                      ),
-                                    ),
-                                    RaisedButton(
-                                      onPressed: () => chooseOption('4'),
-                                      child: Text(
-                                        'वीडियो चुने',
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 16),
-                                      ),
-                                    )
-                                  ]),
-                            ),
-
-                      //   Visibility(
-                      //     visible:
-                      //         _base64Image != null && _base64Image.isNotEmpty,
-                      //     child: Image(image: AssetImage(_base64Image)),
-                      //     replacement: Column(children: [
-                      //       Opacity(
-                      //         opacity: 0.5,
-                      //         child: Image.asset(
-                      //           'assets/images/photouploadside.png',
-                      //           height: 100,
-                      //         ),
-                      //       ),
-                      //       RaisedButton(
-                      //         onPressed: () => chooseOption('4'),
-                      //         child: Text(
-                      //           'choose_photo'.tr,
-                      //           style:
-                      //               TextStyle(color: Colors.white, fontSize: 16),
-                      //         ),
-                      //       )
-                      //     ]),
-                      //   ),
+                                ]),
+                          )),
                     )),
               ),
-              Visibility(
-                visible: _base64Image != null,
-                child: Positioned(
-                  top: -1,
-                  right: -1,
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _base64Image = null;
-                      });
-                    },
-                    child: Icon(
-                      Icons.cancel_rounded,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-                replacement: SizedBox.shrink(),
-              )
             ],
           ),
         ));

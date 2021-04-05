@@ -7,19 +7,20 @@ import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:video_compress/video_compress.dart';
+import 'package:video_player/video_player.dart';
 import '../home_screen.dart';
 import '../utils/constants.dart' as constant;
 import 'package:dotted_border/dotted_border.dart';
-import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:intl/intl.dart';
 import 'package:geoflutterfire/geoflutterfire.dart' as geoFire;
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 class SellAnimalEditForm extends StatefulWidget {
   final int index;
@@ -47,7 +48,12 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
   bool _showData = false;
   // final _storage = new FlutterSecureStorage();
   SharedPreferences prefs;
-  String uniqueId = '', isValidUser = '', userId = '';
+  String uniqueId = '',
+      isValidUser = '',
+      userId = '',
+      videoUrl = '',
+      videoPath = '';
+  VideoPlayerController _videoController;
 
   Map<String, dynamic> imagesUpload = {
     'image1': '',
@@ -58,6 +64,9 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
 
   TextEditingController _controller;
   static const _locale = 'en_IN';
+  Subscription _subscription;
+  double _progressState = 0;
+  bool _isInitialised = false;
 
   @override
   bool get wantKeepAlive => true;
@@ -65,8 +74,21 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
   @override
   void initState() {
     _controller = TextEditingController();
+    _subscription = VideoCompress.compressProgress$.subscribe((progress) {
+      setState(() {
+        _progressState = progress;
+      });
+    });
+
     super.initState();
     inititalValues();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _subscription.unsubscribe();
+    _videoController.dispose();
   }
 
   inititalValues() async {
@@ -78,7 +100,8 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
     if (jsonData.length > 0) {
       setState(() {
         animalInfo = jsonData[widget.index]['animalInfo'];
-        imagesUpload = jsonData[widget.index]['animalImages'];
+        // imagesUpload = jsonData[widget.index]['animalImages'];
+
         uniqueId = jsonData[widget.index]['uniqueId'];
         userId = jsonData[widget.index]['userId'];
         isValidUser = jsonData[widget.index]['isValidUser'];
@@ -89,8 +112,6 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                 '${_formatNumber(animalInfo['animalPrice'].replaceAll(',', ''))}');
       });
     }
-    // print("data=====" + animalInfo.toString());
-    // print("jsonDatadata=====" + jsonData[0]['animalInfo'].toString());
   }
 
   String _formatNumber(String s) => NumberFormat.decimalPattern(_locale).format(
@@ -99,29 +120,61 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
   String get _currency =>
       NumberFormat.compactSimpleCurrency(locale: _locale).currencySymbol;
 
-  Future<void> _choose(String index) async {
+  Future<void> uploadFile(String filePath) async {
+    await VideoCompress.compressVideo(
+      filePath,
+      quality: VideoQuality.MediumQuality,
+      deleteOrigin: false,
+    ).then((info) async {
+      return _progressState.toStringAsFixed(2) == '100.00'
+          ? await firebase_storage.FirebaseStorage.instance
+              .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
+              .putFile(info.file)
+          : CircularProgressIndicator();
+    });
+
+    String downloadURL = await firebase_storage.FirebaseStorage.instance
+        .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
+        .getDownloadURL();
+
+    setState(() {
+      videoUrl = downloadURL;
+    });
+  }
+
+  Future<void> _choose(index) async {
     try {
       if (_picker == null) {
         _picker = ImagePicker();
       }
-      var file = await _picker.getImage(source: ImageSource.camera);
+      var pickedFile = await _picker.getVideo(
+          source: ImageSource.camera,
+          preferredCameraDevice: CameraDevice.rear,
+          maxDuration: Duration(minutes: 1));
 
-      switch (file) {
+      switch (pickedFile) {
         case null:
           return null;
           break;
         default:
-          File compressedFile = await FlutterNativeImage.compressImage(
-              file.path,
-              quality: 90,
-              targetWidth: 500,
-              targetHeight: 500);
+          File file = File(pickedFile.path);
           setState(() {
-            _base64Image = base64Encode(
-              compressedFile.readAsBytesSync(),
-            );
-            imagesUpload['image$index'] = _base64Image;
+            videoPath = file.path;
           });
+
+          _videoController = VideoPlayerController.file(File(videoPath));
+
+          _videoController.addListener(() {
+            setState(() {});
+          });
+          _videoController.setLooping(true);
+          _videoController.initialize().then((_) {
+            setState(() {
+              _isInitialised = true;
+            });
+          });
+
+          _videoController.play();
       }
     } catch (e) {}
   }
@@ -131,25 +184,34 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
       if (_picker == null) {
         _picker = ImagePicker();
       }
-      var file = await _picker.getImage(source: ImageSource.gallery);
-
-      switch (file) {
+      var pickedFile = await _picker.getVideo(
+          source: ImageSource.gallery,
+          preferredCameraDevice: CameraDevice.rear,
+          maxDuration: Duration(minutes: 1));
+      switch (pickedFile) {
         case null:
           return null;
           break;
         default:
-          File compressedFile = await FlutterNativeImage.compressImage(
-              file.path,
-              quality: 90,
-              targetWidth: 500,
-              targetHeight: 500);
+          File file = File(pickedFile.path);
           setState(() {
-            _base64Image = base64Encode(
-              compressedFile.readAsBytesSync(),
-            );
-            imagesUpload['image$index'] = _base64Image;
+            videoPath = file.path;
           });
       }
+
+      _videoController = VideoPlayerController.file(File(videoPath));
+
+      _videoController.addListener(() {
+        setState(() {});
+      });
+      _videoController.setLooping(true);
+      _videoController.initialize().then((_) {
+        setState(() {
+          _isInitialised = true;
+        });
+      });
+
+      _videoController.play();
     } catch (e) {}
   }
 
@@ -886,6 +948,162 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
           ],
         ),
       ));
+
+  _videoStructure(width) {
+    return Padding(
+        padding: EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+        child: GestureDetector(
+          onTap: () => chooseOption('4'),
+          child: Stack(
+            children: [
+              DottedBorder(
+                strokeWidth: 2,
+                borderType: BorderType.RRect,
+                radius: Radius.circular(12),
+                padding: EdgeInsets.all(6),
+                color: Colors.grey[500],
+                child: ClipRRect(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(12),
+                    ),
+                    child: Container(
+                      height: 200,
+                      width: width * 0.9,
+                      // color: Colors.amber,
+                      child: Visibility(
+                          visible: _videoController == null && !_isInitialised,
+                          child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Opacity(
+                                  opacity: 0.5,
+                                  child: Image.asset(
+                                    'assets/images/photouploadside.png',
+                                    height: 100,
+                                  ),
+                                ),
+                                RaisedButton(
+                                  onPressed: () => chooseOption('4'),
+                                  child: Text(
+                                    'वीडियो चुने',
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 16),
+                                  ),
+                                )
+                              ]),
+                          replacement: Visibility(
+                            visible: _isInitialised,
+                            child: Stack(
+                              alignment: Alignment.bottomCenter,
+                              children: [
+                                Container(
+                                    width: width * 0.9,
+                                    child: Stack(
+                                      alignment: Alignment.bottomCenter,
+                                      children: [
+                                        VideoPlayer(_videoController),
+                                      ],
+                                    )),
+                                Visibility(
+                                  visible: _isInitialised,
+                                  child: Positioned(
+                                    top: -1,
+                                    right: -1,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          videoPath = '';
+                                          _videoController.pause();
+                                          _isInitialised = false;
+                                        });
+                                      },
+                                      child: Icon(
+                                        Icons.cancel_rounded,
+                                        color: primaryColor,
+                                      ),
+                                    ),
+                                  ),
+                                  replacement: SizedBox.shrink(),
+                                ),
+                                _videoController == null
+                                    ? SizedBox.shrink()
+                                    : ValueListenableBuilder(
+                                        valueListenable: _videoController,
+                                        builder: (context,
+                                                VideoPlayerValue value,
+                                                child) =>
+                                            Row(
+                                          children: [
+                                            IconButton(
+                                                icon: Icon(
+                                                  _videoController
+                                                          .value.isPlaying
+                                                      ? Icons.pause
+                                                      : Icons.play_arrow,
+                                                ),
+                                                onPressed: () => setState(() {
+                                                      _videoController
+                                                              .value.isPlaying
+                                                          ? _videoController
+                                                              .pause()
+                                                          : _videoController
+                                                              .play();
+                                                    })),
+                                            Container(
+                                              width: width * 0.5,
+                                              child: VideoProgressIndicator(
+                                                  _videoController,
+                                                  allowScrubbing: true),
+                                            ),
+                                            SizedBox(
+                                              width: 10,
+                                            ),
+                                            Text(
+                                                '0' +
+                                                    value.position.inMinutes
+                                                        .toString() +
+                                                    ':' +
+                                                    value.position.inSeconds
+                                                        .toString(),
+                                                style: TextStyle(
+                                                    color: primaryColor))
+
+                                            //       Row(
+                                            // children: [
+                                            // ],
+                                            // )
+                                          ],
+                                        ),
+                                      ),
+                              ],
+                            ),
+                            replacement: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Opacity(
+                                    opacity: 0.5,
+                                    child: Image.asset(
+                                      'assets/images/photouploadside.png',
+                                      height: 100,
+                                    ),
+                                  ),
+                                  RaisedButton(
+                                    onPressed: () => chooseOption('4'),
+                                    child: Text(
+                                      'वीडियो चुने',
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 16),
+                                    ),
+                                  )
+                                ]),
+                          )),
+                    )),
+              ),
+            ],
+          ),
+        ));
+  }
 
   _descriptionText() {
     String animalBreedCheck = (animalInfo['animalBreed'] == 'not_known'.tr)
