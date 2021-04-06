@@ -83,8 +83,8 @@ class _BuyAnimalState extends State<BuyAnimal>
     // _locationController.addListener(() {
     //   _onChanged();
     // });
-    getData();
-    // _getInitialData();
+    // getData();
+    _getInitialData();
     // _scrollController.addListener(() {
     //   double maxScroll = _scrollController.position.maxScrollExtent;
     //   double currentScroll = _scrollController.position.pixels;
@@ -281,16 +281,28 @@ class _BuyAnimalState extends State<BuyAnimal>
     // });
     await FirebaseFirestore.instance
         .collection("buyingAnimalList")
-        .orderBy('uniqueId')
+        .orderBy('dateOfSaving')
         // .where('uniqueId',
         //     isLessThanOrEqualTo: '10000000') // 00000000 - 10000000
         // .where('uniqueId',
         //     isGreaterThan: '10000000', isLessThanOrEqualTo: '20000000') // 30 - 31
         // .where('uniqueId',
         //     isGreaterThan: '20000000', isLessThanOrEqualTo: '30000000') // 30 - 31
-        .where('uniqueId',
-            isGreaterThan: '30000000', isLessThanOrEqualTo: '40000000') // karna hai aaj
-        
+        // .where('uniqueId',
+        //     isGreaterThan: '30000000', isLessThanOrEqualTo: '40000000') // karna hai aaj
+        // .where('uniqueId',
+        //     isGreaterThan: '40000000', isLessThanOrEqualTo: '50000000') // karna hai aaj
+        // .where('uniqueId',
+        //     isGreaterThan: '50000000', isLessThanOrEqualTo: '60000000') // karna hai aaj
+        // .where('uniqueId',
+        //     isGreaterThan: '60000000', isLessThanOrEqualTo: '70000000') // karna hai aaj
+        // .where('uniqueId',
+        //     isGreaterThan: '70000000', isLessThanOrEqualTo: '80000000') // karna hai aaj
+        // .where('uniqueId',
+        //     isGreaterThan: '80000000', isLessThanOrEqualTo: '90000000') // karna hai aaj
+        // .where('uniqueId', isGreaterThan: '90000000') // k
+        .where('dateOfSaving',
+            isGreaterThan: '1617494400', isLessThanOrEqualTo: '1617667199')
         .get()
         .then((value) => value.docs.forEach((element) async {
               print("value.docs=====>" + value.docs.length.toString());
@@ -320,71 +332,71 @@ class _BuyAnimalState extends State<BuyAnimal>
 
   dataReplication() async {
     // SharedPreferences prefs = await SharedPreferences.getInstance();
-    await FirebaseFirestore.instance
-        .collection("buyingAnimalList1")
-        .orderBy('dateOfSaving', descending: true)
-        // .where('dateOfSaving', isLessThanOrEqualTo: '1617148799')  // 30 se kam
-        // .where('dateOfSaving',
-        //     isGreaterThan: '1617148799', isLessThanOrEqualTo: '1617235199') // 30 - 31
-        // .where('dateOfSaving',
-        //     isGreaterThan: '1617235199', isLessThanOrEqualTo: '1617321599') // 31-1
-        // .where('dateOfSaving',
-        //     isGreaterThan: '1617321599', isLessThanOrEqualTo: '1617407999') // 1-2
-        // .where('dateOfSaving',
-        //     isGreaterThan: '1617407999', isLessThanOrEqualTo: '1617494399')//2-3
-        .where('dateOfSaving',
-            isGreaterThan: '1617494399',
-            isLessThanOrEqualTo: '1617580799') //3-4
-
-        // .limit(50)
-        .get()
-        .then((value) => print('val=====>' + value.docs.length.toString()));
-
     // await FirebaseFirestore.instance
-    //     .collection("buyingAnimalList")
-    //     .where('dateOfSaving',
-    //         isGreaterThan: '1617235199',
-    //         isLessThanOrEqualTo: '1617321599') // 31-1
-
-    //     // .orderBy('dateOfSaving', descending: true)
-    //     // // .where('dateOfSaving',
-    //     // //     isGreaterThan: '1617299999', isLessThanOrEqualTo: '1617321599')
+    //     .collection("buyingAnimalList1")
+    //     .orderBy('dateOfSaving', descending: true)
+    //     // .where('dateOfSaving', isLessThanOrEqualTo: '1617148799')  // 30 se kam
     //     // .where('dateOfSaving',
-    //     //     isGreaterThan: '1617537599', isLessThanOrEqualTo: '1617580799')
-    //     // // .limitToLast(prefs.getInt('countData'))
+    //     //     isGreaterThan: '1617148799', isLessThanOrEqualTo: '1617235199') // 30 - 31
+    //     // .where('dateOfSaving',
+    //     //     isGreaterThan: '1617235199', isLessThanOrEqualTo: '1617321599') // 31-1
+    //     // .where('dateOfSaving',
+    //     //     isGreaterThan: '1617321599', isLessThanOrEqualTo: '1617407999') // 1-2
+    //     // .where('dateOfSaving',
+    //     //     isGreaterThan: '1617407999', isLessThanOrEqualTo: '1617494399')//2-3
+    //     .where('dateOfSaving',
+    //         isGreaterThan: '1617494400',
+    //         isLessThanOrEqualTo: '1617667199') //4-5
+
     //     // .limit(50)
     //     .get()
-    //     .then((value) => value.docs.forEach((element) async {
-    //           // if (element.reference.id.substring(0, 2) == '00')
-    //           await FirebaseFirestore.instance
-    //               .collection("buyingAnimalList1")
-    //               .doc(element.reference.id)
-    //               .set({
-    //             "userAnimalDescription": element["userAnimalDescription"],
-    //             "userAnimalType": element["userAnimalType"],
-    //             "userAnimalAge": element["userAnimalAge"],
-    //             "userAddress": element["userAddress"],
-    //             "userName": element["userName"],
-    //             "userAnimalPrice": element["userAnimalPrice"],
-    //             "userAnimalBreed": element["userAnimalBreed"],
-    //             "userMobileNumber": element["userMobileNumber"],
-    //             "userAnimalMilk": element["userAnimalMilk"],
-    //             "userAnimalPregnancy": element["userAnimalPregnancy"],
-    //             "userLatitude": element["userLatitude"],
-    //             "userLongitude": element["userLongitude"],
-    //             'uniqueId': element['uniqueId'],
-    //             'extraInfo': element['extraInfo'],
-    //             'isValidUser': element['isValidUser'],
-    //             'position': element['position'],
-    //             "image1": element["image1"],
-    //             "image2": element["image2"],
-    //             "image3": element["image3"],
-    //             "image4": element["image4"],
-    //             "dateOfSaving": element["dateOfSaving"],
-    //             'userId': element['userId']
-    //           });
-    //           // await dataUpdateOnInit(element);
-    //         }));
+    //     .then((value) => print('val=====>' + value.docs.length.toString()));
+
+    await FirebaseFirestore.instance
+        .collection("buyingAnimalList")
+        .where('dateOfSaving',
+            isGreaterThan: '1617494400',
+            isLessThanOrEqualTo: '1617667199') // 31-1
+
+        // .orderBy('dateOfSaving', descending: true)
+        // // .where('dateOfSaving',
+        // //     isGreaterThan: '1617299999', isLessThanOrEqualTo: '1617321599')
+        // .where('dateOfSaving',
+        //     isGreaterThan: '1617537599', isLessThanOrEqualTo: '1617580799')
+        // // .limitToLast(prefs.getInt('countData'))
+        // .limit(50)
+        .get()
+        .then((value) => value.docs.forEach((element) async {
+              // if (element.reference.id.substring(0, 2) == '00')
+              await FirebaseFirestore.instance
+                  .collection("buyingAnimalList1")
+                  .doc(element.reference.id)
+                  .set({
+                "userAnimalDescription": element["userAnimalDescription"],
+                "userAnimalType": element["userAnimalType"],
+                "userAnimalAge": element["userAnimalAge"],
+                "userAddress": element["userAddress"],
+                "userName": element["userName"],
+                "userAnimalPrice": element["userAnimalPrice"],
+                "userAnimalBreed": element["userAnimalBreed"],
+                "userMobileNumber": element["userMobileNumber"],
+                "userAnimalMilk": element["userAnimalMilk"],
+                "userAnimalPregnancy": element["userAnimalPregnancy"],
+                "userLatitude": element["userLatitude"],
+                "userLongitude": element["userLongitude"],
+                'uniqueId': element['uniqueId'],
+                'extraInfo': element['extraInfo'],
+                'isValidUser': element['isValidUser'],
+                'position': element['position'],
+                "image1": element["image1"],
+                "image2": element["image2"],
+                "image3": element["image3"],
+                "image4": element["image4"],
+                "dateOfSaving": element["dateOfSaving"],
+                'userId': element['userId']
+              });
+              // await dataUpdateOnInit(element);
+            }));
   }
   // dataFillOnInit() async {
   //   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -2186,36 +2198,40 @@ class _BuyAnimalState extends State<BuyAnimal>
               color: Colors.grey[500],
               size: 13,
             ),
-            RichText(
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                  text: ' ' + val.toString(),
-                  style: TextStyle(
-                      color: Colors.grey[500],
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13),
-                  children: [
-                    TextSpan(
-                      text: ' ( ' + 'approx'.tr + ' ',
-                      style: TextStyle(
-                          color: Colors.grey[500],
-                          // fontWeight: FontWeight.bold,
-                          fontSize: 13),
-                    ),
-                    TextSpan(
-                      text:
-                          _distanceBetweenTwoCoordinates(index) + ' ' + 'km'.tr,
-                      style: TextStyle(
-                          color: Colors.grey[800],
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13),
-                    ),
-                    TextSpan(
-                      text: ' )',
-                      style: TextStyle(color: Colors.grey[500], fontSize: 13),
-                    )
-                  ]),
+            Container(
+              width: MediaQuery.of(context).size.width * 0.6,
+              child: RichText(
+                overflow: TextOverflow.ellipsis,
+                // textAlign: TextAlign.center,
+                text: TextSpan(
+                    text: ' ' + val.toString(),
+                    style: TextStyle(
+                        color: Colors.grey[500],
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13),
+                    children: [
+                      TextSpan(
+                        text: ' ( ' + 'approx'.tr + ' ',
+                        style: TextStyle(
+                            color: Colors.grey[500],
+                            // fontWeight: FontWeight.bold,
+                            fontSize: 13),
+                      ),
+                      TextSpan(
+                        text: _distanceBetweenTwoCoordinates(index) +
+                            ' ' +
+                            'km'.tr,
+                        style: TextStyle(
+                            color: Colors.grey[800],
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13),
+                      ),
+                      TextSpan(
+                        text: ' )',
+                        style: TextStyle(color: Colors.grey[500], fontSize: 13),
+                      )
+                    ]),
+              ),
             ),
           ],
         ),
