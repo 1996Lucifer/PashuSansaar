@@ -111,7 +111,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
         default:
           File compressedFile = await FlutterNativeImage.compressImage(
               file.path,
-              quality: 90,
+              quality: 80,
               targetWidth: 500,
               targetHeight: 500);
 
@@ -143,7 +143,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
         default:
           File compressedFile = await FlutterNativeImage.compressImage(
               file.path,
-              quality: 90,
+              quality: 80,
               targetWidth: 500,
               targetHeight: 500);
 

@@ -21,6 +21,7 @@ import 'package:intl/intl.dart' as intl;
 import 'package:geoflutterfire/geoflutterfire.dart' as geoFire;
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'dart:math' as math;
+
 class SellAnimalEditForm extends StatefulWidget {
   final int index;
   final String userName;
@@ -137,7 +138,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
         default:
           File compressedFile = await FlutterNativeImage.compressImage(
               file.path,
-              quality: 90,
+              quality: 80,
               targetWidth: 500,
               targetHeight: 500);
 
@@ -169,7 +170,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
         default:
           File compressedFile = await FlutterNativeImage.compressImage(
               file.path,
-              quality: 90,
+              quality: 80,
               targetWidth: 500,
               targetHeight: 500);
 

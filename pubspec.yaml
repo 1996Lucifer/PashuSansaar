@@ -32,11 +32,10 @@ dependencies:
   dio: ^3.0.10
   dotted_border: ^1.0.7
   dropdown_search: ^0.4.9
-  esys_flutter_share: ^1.0.2
   firebase_auth: ^0.20.1
   firebase_core: ^0.7.0
   firebase_dynamic_links: null
-  firebase_in_app_messaging:
+  firebase_in_app_messaging: null
   firebase_storage: null
   flutter_launcher_icons: null
   flutter_native_image: ^0.0.5+3
@@ -53,13 +52,13 @@ dependencies:
   path_provider: null
   pin_code_fields: ^6.1.0
   progress_dialog: ^1.2.4
-  screenshot: ^0.3.0
+  # screenshot: ^0.3.0
   share: null
   shared_preferences: ^0.5.12+4
   splash_screen_view: ^1.0.3
   upgrader: null
   url_launcher: null
-  uuid: null
+  # uuid: null
 
 dev_dependencies:
   flutter_test:

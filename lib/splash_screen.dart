@@ -36,13 +36,13 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return SplashScreenView(
       // home: UserDetailsFetch(currentUser: 'G6daWncSiobuilTshX9RUVjjv8f2', mobile: '+919997098955'),
-      // home: isLoggedIn ? HomeScreen(selectedIndex: 0) : Login(),
-      home: BuyAnimal(
-        animalInfo: [],
-        userName: '',
-        userMobileNumber: '',
-        userImage: '',
-      ),
+      home: isLoggedIn ? HomeScreen(selectedIndex: 0) : Login(),
+      // home: BuyAnimal(
+      //   animalInfo: [],
+      //   userName: '',
+      //   userMobileNumber: '',
+      //   userImage: '',
+      // ),
       duration: 2000,
       imageSize: 200,
       imageSrc: "assets/images/cow.png",
