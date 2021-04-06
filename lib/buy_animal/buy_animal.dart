@@ -1980,7 +1980,7 @@ class _BuyAnimalState extends State<BuyAnimal>
       Stream<List<DocumentSnapshot>> stream = geo
           .collection(
               collectionRef:
-                  FirebaseFirestore.instance.collection("buyingAnimalList"))
+                  FirebaseFirestore.instance.collection("buyingAnimalList1"))
           .within(
               center: geo.point(
                   latitude: first.coordinates.latitude,
@@ -2126,7 +2126,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                         DynamicLinkParameters(
                             uriPrefix: 'https://pashusansaar.page.link',
                             link: Uri.parse(
-                                '/buyingAnimalList/spY4l92DqFfDYj5RQ1YY6BOxQrv1'),
+                                '/buyingAnimalList1/${_list[index]['userId']}'),
                             androidParameters: AndroidParameters(
                               packageName: 'dj.pashusansaar',
                               minimumVersion: 25,
@@ -2134,7 +2134,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                     final Uri dynamicUrl = await parameters.buildUrl();
 
                     Share.share(
-                        "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar",
+                        "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
                         subject: 'Share Animal Info');
                   },
                   icon: Icon(Icons.share, color: Colors.white, size: 14),
