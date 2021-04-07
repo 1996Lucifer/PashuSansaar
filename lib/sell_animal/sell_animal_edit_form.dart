@@ -18,9 +18,11 @@ import 'package:video_player/video_player.dart';
 import '../home_screen.dart';
 import '../utils/constants.dart' as constant;
 import 'package:dotted_border/dotted_border.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter_native_image/flutter_native_image.dart';
+import 'package:intl/intl.dart' as intl;
 import 'package:geoflutterfire/geoflutterfire.dart' as geoFire;
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'dart:math' as math;
 
 class SellAnimalEditForm extends StatefulWidget {
   final int index;
@@ -54,8 +56,17 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
       videoUrl = '',
       videoPath = '';
   VideoPlayerController _videoController;
+  // String uniqueId = '', isValidUser = '', userId = '';
+  String desc = '', fileUrl = '';
+  File filePath;
 
   Map<String, dynamic> imagesUpload = {
+    'image1': '',
+    'image2': '',
+    'image3': '',
+    'image4': ''
+  };
+  Map<String, dynamic> imagesFileUpload = {
     'image1': '',
     'image2': '',
     'image3': '',
@@ -114,11 +125,27 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
     }
   }
 
-  String _formatNumber(String s) => NumberFormat.decimalPattern(_locale).format(
+  String _formatNumber(String s) =>
+      intl.NumberFormat.decimalPattern(_locale).format(
         int.parse(s),
       );
   String get _currency =>
-      NumberFormat.compactSimpleCurrency(locale: _locale).currencySymbol;
+      intl.NumberFormat.compactSimpleCurrency(locale: _locale).currencySymbol;
+
+  // Future<void> uploadFile(File file, String index) async {
+  //   await firebase_storage.FirebaseStorage.instance
+  //       .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
+  //       .putFile(file);
+
+  //   String downloadURL = await firebase_storage.FirebaseStorage.instance
+  //       .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
+  //       .getDownloadURL();
+
+  //   setState(() {
+  //     imagesUpload['image$index'] = downloadURL;
+  //     fileUrl = downloadURL;
+  //   });
+  // }
 
   Future<void> uploadFile(String filePath) async {
     await VideoCompress.compressVideo(
@@ -175,6 +202,22 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
           });
 
           _videoController.play();
+        // File compressedFile = await FlutterNativeImage.compressImage(
+        //     file.path,
+        //     quality: 80,
+        //     targetWidth: 500,
+        //     targetHeight: 500);
+
+        // setState(() {
+        //   imagesFileUpload['image$index'] = file.path;
+        // });
+        // await uploadFile(compressedFile, index);
+        // setState(() {
+        //   _base64Image = base64Encode(
+        //     compressedFile.readAsBytesSync(),
+        //   );
+        //   imagesUpload['image$index'] = _base64Image;
+        // });
       }
     } catch (e) {}
   }
@@ -194,24 +237,45 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
           break;
         default:
           File file = File(pickedFile.path);
+          // setState(() {
+          //     File compressedFile = await FlutterNativeImage.compressImage(
+          //         file.path,
+          //         quality: 80,
+          //         targetWidth: 500,
+          //         targetHeight: 500);
+
+          //     setState(() {
+          //       imagesFileUpload['image$index'] = file.path;
+          //     });
+
+          //     await uploadFile(compressedFile, index);
+
+          //   // setState(() {
+          //   //   _base64Image = base64Encode(
+          //   //     compressedFile.readAsBytesSync(),
+          //   //   );
+          //   //   imagesUpload['image$index'] = _base64Image;
+          //   // });
+          // }
+
           setState(() {
             videoPath = file.path;
           });
+
+          _videoController = VideoPlayerController.file(File(videoPath));
+
+          _videoController.addListener(() {
+            setState(() {});
+          });
+          _videoController.setLooping(true);
+          _videoController.initialize().then((_) {
+            setState(() {
+              _isInitialised = true;
+            });
+          });
+
+          _videoController.play();
       }
-
-      _videoController = VideoPlayerController.file(File(videoPath));
-
-      _videoController.addListener(() {
-        setState(() {});
-      });
-      _videoController.setLooping(true);
-      _videoController.initialize().then((_) {
-        setState(() {
-          _isInitialised = true;
-        });
-      });
-
-      _videoController.play();
     } catch (e) {}
   }
 
@@ -696,9 +760,11 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                     child: Visibility(
                       visible: imagesUpload['image1'] != null &&
                           imagesUpload['image1'].isNotEmpty,
-                      child: Image.memory(
-                        base64Decode(imagesUpload['image1']),
-                      ),
+                      child: imagesUpload['image1'].length > 1000
+                          ? Image.memory(base64Decode(imagesUpload['image1']))
+                          : Image.network(
+                              imagesUpload['image1'],
+                            ),
                       replacement: Column(children: [
                         Opacity(
                           opacity: 0.5,
@@ -766,9 +832,11 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                     child: Visibility(
                       visible: imagesUpload['image2'] != null &&
                           imagesUpload['image2'].isNotEmpty,
-                      child: Image.memory(
-                        base64Decode(imagesUpload['image2']),
-                      ),
+                      child: imagesUpload['image2'].length > 1000
+                          ? Image.memory(base64Decode(imagesUpload['image2']))
+                          : Image.network(
+                              imagesUpload['image2'],
+                            ),
                       replacement: Column(children: [
                         Opacity(
                           opacity: 0.5,
@@ -834,9 +902,11 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                     child: Visibility(
                       visible: imagesUpload['image3'] != null &&
                           imagesUpload['image3'].isNotEmpty,
-                      child: Image.memory(
-                        base64Decode(imagesUpload['image3']),
-                      ),
+                      child: imagesUpload['image3'].length > 1000
+                          ? Image.memory(base64Decode(imagesUpload['image3']))
+                          : Image.network(
+                              imagesUpload['image3'],
+                            ),
                       replacement: Column(children: [
                         Opacity(
                           opacity: 0.5,
@@ -903,17 +973,22 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                     child: Visibility(
                       visible: imagesUpload['image4'] != null &&
                           imagesUpload['image4'].isNotEmpty,
-                      child: Image.memory(
-                        base64Decode(imagesUpload['image4']),
-                      ),
+                      child: imagesUpload['image4'].length > 1000
+                          ? Image.memory(base64Decode(imagesUpload['image4']))
+                          : Image.network(
+                              imagesUpload['image4'],
+                            ),
                       replacement: Column(children: [
                         Opacity(
-                          opacity: 0.5,
-                          child: Image.asset(
-                            'assets/images/photouploadside.png',
-                            height: 100,
-                          ),
-                        ),
+                            opacity: 0.5,
+                            child: Transform(
+                              alignment: Alignment.center,
+                              transform: Matrix4.rotationY(math.pi),
+                              child: Image.asset(
+                                'assets/images/photouploadside.png',
+                                height: 100,
+                              ),
+                            )),
                         RaisedButton(
                           onPressed: () => chooseOption('4'),
                           child: Text(
@@ -1221,7 +1296,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                 pr.style(message: 'progress_dialog_message'.tr);
                 pr.show();
 
-                FirebaseFirestore.instance
+                await FirebaseFirestore.instance
                     .collection("animalSellingInfo")
                     .doc(userId)
                     .collection('sellingAnimalList')
@@ -1244,8 +1319,8 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                           prefs.getDouble('latitude'),
                           prefs.getDouble('longitude')));
                   var first = addresses.first;
-                  FirebaseFirestore.instance
-                      .collection("buyingAnimalList")
+                  await FirebaseFirestore.instance
+                      .collection("buyingAnimalList1")
                       .doc(uniqueId + userId)
                       .update({
                     "userAnimalDescription": _descriptionText(),
@@ -1691,12 +1766,14 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                   ],
                 ),
               ),
-              Row(
-                children: [imageStructure1(width), imageStructure2(width)],
-              ),
-              Row(
-                children: [imageStructure3(width), imageStructure4(width)],
-              ),
+              _videoStructure(width),
+
+              // Row(
+              //   children: [imageStructure1(width), imageStructure2(width)],
+              // ),
+              // Row(
+              //   children: [imageStructure3(width), imageStructure4(width)],
+              // ),
               extraInfo(),
               AnimatedOpacity(
                 opacity: _showData ? 1 : 0,

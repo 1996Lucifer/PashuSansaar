@@ -24,6 +24,7 @@ class _OTPScreenState extends State<OTPScreen> {
 
   TextEditingController textEditingController = TextEditingController();
   String _verificationCode;
+  int _resendToken;
 
   StreamController<ErrorAnimationType> errorController;
 
@@ -36,11 +37,11 @@ class _OTPScreenState extends State<OTPScreen> {
   void initState() {
     _verifyPhone();
     onTapRecognizer = TapGestureRecognizer()
-      ..onTap = () {
+      ..onTap = () async {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('OTP पुनः भेजा गया है')));
 
-        _verifyPhone();
+        await _verifyPhone();
         // Navigator.pop(context);
       };
     errorController = StreamController<ErrorAnimationType>();
@@ -60,37 +61,40 @@ class _OTPScreenState extends State<OTPScreen> {
   }
 
   _verifyPhone() async {
-    // await Firebase.initializeApp();
-    await FirebaseAuth.instance.verifyPhoneNumber(
-        phoneNumber: '+91${widget.phoneNumber}',
-        verificationCompleted: (PhoneAuthCredential credential) async {
-          await FirebaseAuth.instance
-              .signInWithCredential(credential)
-              .then((value) async {
-            if (value.user != null) {
-              Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => UserDetailsFetch(
-                          currentUser: value.user.uid,
-                          mobile: widget.phoneNumber)));
-            }
-          });
-        },
-        verificationFailed: (FirebaseAuthException e) {
-          print(e.message);
-        },
-        codeSent: (String verficationID, int resendToken) {
-          setState(() {
-            _verificationCode = verficationID;
-          });
-        },
-        codeAutoRetrievalTimeout: (String verificationID) {
-          setState(() {
-            _verificationCode = verificationID;
-          });
-        },
-        timeout: Duration(seconds: 120));
+    await FirebaseAuth.instance
+        .verifyPhoneNumber(
+            phoneNumber: '+91${widget.phoneNumber}',
+            verificationCompleted: (PhoneAuthCredential credential) async {
+              await FirebaseAuth.instance
+                  .signInWithCredential(credential)
+                  .then((value) async {
+                if (value.user != null) {
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => UserDetailsFetch(
+                              currentUser: value.user.uid,
+                              mobile: widget.phoneNumber)));
+                }
+              });
+            },
+            verificationFailed: (FirebaseAuthException e) {
+              print(e.message);
+            },
+            codeSent: (String verficationID, int resendToken) {
+              setState(() {
+                _verificationCode = verficationID;
+                _resendToken = resendToken;
+              });
+            },
+            codeAutoRetrievalTimeout: (String verificationID) {
+              setState(() {
+                _verificationCode = verificationID;
+              });
+            },
+            timeout: Duration(seconds: 60),
+            forceResendingToken: _resendToken)
+        .catchError((error) => print(error.toString()));
   }
 
   @override
@@ -305,16 +309,6 @@ class _OTPScreenState extends State<OTPScreen> {
                 decoration: BoxDecoration(
                   color: primaryColor,
                   borderRadius: BorderRadius.circular(5),
-                  // boxShadow: [
-                  //   BoxShadow(
-                  //       color: themeColor,
-                  //       offset: Offset(1, -2),
-                  //       blurRadius: 1),
-                  //   BoxShadow(
-                  //       color: themeColor,
-                  //       offset: Offset(-1, 2),
-                  //       blurRadius: 1)
-                  // ]
                 ),
               ),
             ],
