@@ -67,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
       Stream<List<DocumentSnapshot>> stream = geo
           .collection(
               collectionRef:
-                  FirebaseFirestore.instance.collection("buyingAnimalList"))
+                  FirebaseFirestore.instance.collection("buyingAnimalList1"))
           .within(
               center: geo.point(
                   latitude: prefs.getDouble('latitude'),

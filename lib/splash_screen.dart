@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:splash_screen_view/SplashScreenView.dart';
 
+import 'buy_animal/buy_animal.dart';
 import 'home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -36,6 +37,12 @@ class _SplashScreenState extends State<SplashScreen> {
     return SplashScreenView(
       // home: UserDetailsFetch(currentUser: 'G6daWncSiobuilTshX9RUVjjv8f2', mobile: '+919997098955'),
       home: isLoggedIn ? HomeScreen(selectedIndex: 0) : Login(),
+      // home: BuyAnimal(
+      //   animalInfo: [],
+      //   userName: '',
+      //   userMobileNumber: '',
+      //   userImage: '',
+      // ),
       duration: 2000,
       imageSize: 200,
       imageSrc: "assets/images/cow.png",

@@ -18,8 +18,9 @@ import '../utils/constants.dart' as constant;
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:intl/intl.dart';
-import 'package:uuid/uuid.dart';
 import 'package:geoflutterfire/geoflutterfire.dart' as geoFire;
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'dart:math' as math;
 
 class SellAnimalForm extends StatefulWidget {
   final String userName;
@@ -42,9 +43,18 @@ class _SellAnimalFormState extends State<SellAnimalForm>
   bool _showData = false;
   // final _storage = new FlutterSecureStorage();
   SharedPreferences prefs;
-  String desc = '';
+  String desc = '', fileUrl = '';
+  File filePath;
+  String uniqueId;
 
   Map<String, dynamic> imagesUpload = {
+    'image1': '',
+    'image2': '',
+    'image3': '',
+    'image4': ''
+  };
+
+  Map<String, dynamic> imagesFileUpload = {
     'image1': '',
     'image2': '',
     'image3': '',
@@ -61,6 +71,8 @@ class _SellAnimalFormState extends State<SellAnimalForm>
   @override
   void initState() {
     _controller = TextEditingController();
+    uniqueId = ReusableWidgets.randomIDGenerator();
+
     super.initState();
   }
 
@@ -69,6 +81,21 @@ class _SellAnimalFormState extends State<SellAnimalForm>
       );
   String get _currency =>
       NumberFormat.compactSimpleCurrency(locale: _locale).currencySymbol;
+
+  Future<void> uploadFile(File file, String index) async {
+    await firebase_storage.FirebaseStorage.instance
+        .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
+        .putFile(file);
+
+    String downloadURL = await firebase_storage.FirebaseStorage.instance
+        .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
+        .getDownloadURL();
+
+    setState(() {
+      imagesUpload['image$index'] = downloadURL;
+      fileUrl = downloadURL;
+    });
+  }
 
   Future<void> _choose(String index) async {
     try {
@@ -84,15 +111,20 @@ class _SellAnimalFormState extends State<SellAnimalForm>
         default:
           File compressedFile = await FlutterNativeImage.compressImage(
               file.path,
-              quality: 90,
+              quality: 80,
               targetWidth: 500,
               targetHeight: 500);
+
           setState(() {
-            _base64Image = base64Encode(
-              compressedFile.readAsBytesSync(),
-            );
-            imagesUpload['image$index'] = _base64Image;
+            imagesFileUpload['image$index'] = file.path;
           });
+          await uploadFile(compressedFile, index);
+        // setState(() {
+        //   _base64Image = base64Encode(
+        //     compressedFile.readAsBytesSync(),
+        //   );
+        //   imagesUpload['image$index'] = _base64Image;
+        // });
       }
     } catch (e) {}
   }
@@ -111,15 +143,22 @@ class _SellAnimalFormState extends State<SellAnimalForm>
         default:
           File compressedFile = await FlutterNativeImage.compressImage(
               file.path,
-              quality: 90,
+              quality: 80,
               targetWidth: 500,
               targetHeight: 500);
+
           setState(() {
-            _base64Image = base64Encode(
-              compressedFile.readAsBytesSync(),
-            );
-            imagesUpload['image$index'] = _base64Image;
+            imagesFileUpload['image$index'] = file.path;
           });
+
+          await uploadFile(compressedFile, index);
+
+        // setState(() {
+        //   _base64Image = base64Encode(
+        //     compressedFile.readAsBytesSync(),
+        //   );
+        //   imagesUpload['image$index'] = _base64Image;
+        // });
       }
     } catch (e) {}
   }
@@ -644,10 +683,10 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                     height: 150,
                     width: width * 0.3,
                     child: Visibility(
-                      visible: imagesUpload['image1'] != null &&
-                          imagesUpload['image1'].isNotEmpty,
-                      child: Image.memory(
-                        base64Decode(imagesUpload['image1']),
+                      visible: imagesFileUpload['image1'] != null &&
+                          imagesFileUpload['image1'].isNotEmpty,
+                      child: Image.file(
+                        File(imagesFileUpload['image1']),
                       ),
                       replacement: Column(children: [
                         Opacity(
@@ -670,15 +709,15 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                 ),
               ),
               Visibility(
-                visible: imagesUpload['image1'] != null &&
-                    imagesUpload['image1'].isNotEmpty,
+                visible: imagesFileUpload['image1'] != null &&
+                    imagesFileUpload['image1'].isNotEmpty,
                 child: Positioned(
                   top: -1,
                   right: -1,
                   child: GestureDetector(
                     onTap: () {
                       setState(() {
-                        imagesUpload['image1'] = '';
+                        imagesFileUpload['image1'] = '';
                       });
                     },
                     child: Icon(
@@ -714,10 +753,10 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                     width: width * 0.3,
                     // color: Colors.amber,
                     child: Visibility(
-                      visible: imagesUpload['image2'] != null &&
-                          imagesUpload['image2'].isNotEmpty,
-                      child: Image.memory(
-                        base64Decode(imagesUpload['image2']),
+                      visible: imagesFileUpload['image2'] != null &&
+                          imagesFileUpload['image2'].isNotEmpty,
+                      child: Image.file(
+                        File(imagesFileUpload['image2']),
                       ),
                       replacement: Column(children: [
                         Opacity(
@@ -739,15 +778,15 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                   )),
             ),
             Visibility(
-              visible: imagesUpload['image2'] != null &&
-                  imagesUpload['image2'].isNotEmpty,
+              visible: imagesFileUpload['image2'] != null &&
+                  imagesFileUpload['image2'].isNotEmpty,
               child: Positioned(
                 top: -1,
                 right: -1,
                 child: GestureDetector(
                   onTap: () {
                     setState(() {
-                      imagesUpload['image2'] = '';
+                      imagesFileUpload['image2'] = '';
                     });
                   },
                   child: Icon(
@@ -782,10 +821,10 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                     width: width * 0.3,
                     // color: Colors.amber,
                     child: Visibility(
-                      visible: imagesUpload['image3'] != null &&
-                          imagesUpload['image3'].isNotEmpty,
-                      child: Image.memory(
-                        base64Decode(imagesUpload['image3']),
+                      visible: imagesFileUpload['image3'] != null &&
+                          imagesFileUpload['image3'].isNotEmpty,
+                      child: Image.file(
+                        File(imagesFileUpload['image3']),
                       ),
                       replacement: Column(children: [
                         Opacity(
@@ -807,15 +846,15 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                   )),
             ),
             Visibility(
-              visible: imagesUpload['image3'] != null &&
-                  imagesUpload['image3'].isNotEmpty,
+              visible: imagesFileUpload['image3'] != null &&
+                  imagesFileUpload['image3'].isNotEmpty,
               child: Positioned(
                 top: -1,
                 right: -1,
                 child: GestureDetector(
                   onTap: () {
                     setState(() {
-                      imagesUpload['image3'] = '';
+                      imagesFileUpload['image3'] = '';
                     });
                   },
                   child: Icon(
@@ -851,17 +890,21 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                     width: width * 0.3,
                     // color: Colors.amber,
                     child: Visibility(
-                      visible: imagesUpload['image4'] != null &&
-                          imagesUpload['image4'].isNotEmpty,
-                      child: Image.memory(
-                        base64Decode(imagesUpload['image4']),
+                      visible: imagesFileUpload['image4'] != null &&
+                          imagesFileUpload['image4'].isNotEmpty,
+                      child: Image.file(
+                        File(imagesFileUpload['image3']),
                       ),
                       replacement: Column(children: [
                         Opacity(
                           opacity: 0.5,
-                          child: Image.asset(
-                            'assets/images/photouploadside.png',
-                            height: 100,
+                          child: Transform(
+                            alignment: Alignment.center,
+                            transform: Matrix4.rotationY(math.pi),
+                            child: Image.asset(
+                              'assets/images/photouploadside.png',
+                              height: 100,
+                            ),
                           ),
                         ),
                         RaisedButton(
@@ -876,15 +919,15 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                   )),
             ),
             Visibility(
-              visible: imagesUpload['image4'] != null &&
-                  imagesUpload['image4'].isNotEmpty,
+              visible: imagesFileUpload['image4'] != null &&
+                  imagesFileUpload['image4'].isNotEmpty,
               child: Positioned(
                 top: -1,
                 right: -1,
                 child: GestureDetector(
                   onTap: () {
                     setState(() {
-                      imagesUpload['image4'] = '';
+                      imagesFileUpload['image4'] = '';
                     });
                   },
                   child: Icon(
@@ -961,10 +1004,10 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                   'error'.tr,
                   Text('animal_price_error'.tr),
                 );
-              else if (imagesUpload['image1'].isEmpty &&
-                  imagesUpload['image2'].isEmpty &&
-                  imagesUpload['image3'].isEmpty &&
-                  imagesUpload['image4'].isEmpty)
+              else if (imagesFileUpload['image1'].isEmpty &&
+                  imagesFileUpload['image2'].isEmpty &&
+                  imagesFileUpload['image3'].isEmpty &&
+                  imagesFileUpload['image4'].isEmpty)
                 ReusableWidgets.showDialogBox(
                   context,
                   'error'.tr,
@@ -1004,7 +1047,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                   var first = addresses.first;
 
                   FirebaseFirestore.instance
-                      .collection("buyingAnimalList")
+                      .collection("buyingAnimalList1")
                       .doc(uniqueId + FirebaseAuth.instance.currentUser.uid)
                       .set({
                     "userAnimalDescription": _descriptionText(),
@@ -1026,20 +1069,20 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                             latitude: prefs.getDouble('latitude'),
                             longitude: prefs.getDouble('longitude'))
                         .data,
-                    "image1": imagesUpload['image1'] == null ||
-                            imagesUpload['image1'] == ""
+                    "image1": imagesFileUpload['image1'] == null ||
+                            imagesFileUpload['image1'] == ""
                         ? ""
                         : imagesUpload['image1'],
-                    "image2": imagesUpload['image2'] == null ||
-                            imagesUpload['image2'] == ""
+                    "image2": imagesFileUpload['image2'] == null ||
+                            imagesFileUpload['image2'] == ""
                         ? ""
                         : imagesUpload['image2'],
-                    "image3": imagesUpload['image3'] == null ||
-                            imagesUpload['image3'] == ""
+                    "image3": imagesFileUpload['image3'] == null ||
+                            imagesFileUpload['image3'] == ""
                         ? ""
                         : imagesUpload['image3'],
-                    "image4": imagesUpload['image4'] == null ||
-                            imagesUpload['image4'] == ""
+                    "image4": imagesFileUpload['image4'] == null ||
+                            imagesFileUpload['image4'] == ""
                         ? ""
                         : imagesUpload['image4'],
                     "dateOfSaving":

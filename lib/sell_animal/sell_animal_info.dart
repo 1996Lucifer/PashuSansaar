@@ -234,7 +234,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
       data = widget.animalInfo[index]['animalImages']['image4'];
     }
 
-    return base64Decode(data);
+    return data;
   }
 
   // _descriptionText(int index) {
@@ -300,7 +300,10 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                 height: 130.0,
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                      fit: BoxFit.cover, image: MemoryImage(_imageData(index))),
+                      fit: BoxFit.cover,
+                      image: _imageData(index).length > 1000
+                          ? MemoryImage(base64Decode(_imageData(index)))
+                          : NetworkImage(_imageData(index))),
                   borderRadius: BorderRadius.all(Radius.circular(8.0)),
                   color: Colors.redAccent,
                 ),
