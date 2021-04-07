@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pashusansaar/splash_screen.dart';
 import 'package:pashusansaar/translation/message.dart';
 import 'package:pashusansaar/utils/colors.dart';
@@ -9,9 +8,50 @@ import 'package:get/get.dart';
 
 import 'life_cycle_manager.dart';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // If you're going to use other Firebase services in the background, such as Firestore,
+  // make sure you call `initializeApp` before using other Firebase services.
+  await Firebase.initializeApp();
+  print('Handling a background message ${message.messageId}');
+}
+
+/// Create a [AndroidNotificationChannel] for heads up notifications
+AndroidNotificationChannel channel = AndroidNotificationChannel(
+  'high_importance_channel', // id
+  'High Importance Notifications', // title
+  'This channel is used for important notifications.', // description
+  importance: Importance.high,
+);
+
+/// Initialize the [FlutterLocalNotificationsPlugin] package.
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  /// Create an Android Notification Channel.
+  ///
+  /// We use this channel in the `AndroidManifest.xml` file to override the
+  /// default FCM channel to enable heads up notifications.
+  await flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>()
+      ?.createNotificationChannel(channel);
+
+  /// Update the iOS foreground notification presentation options to allow
+  /// heads up notifications.
+  await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+
   runApp(MyApp());
 }
 
