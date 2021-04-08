@@ -22,6 +22,7 @@ import 'utils/reusable_widgets.dart';
 import 'package:marquee/marquee.dart';
 import 'package:url_launcher/url_launcher.dart' as UrlLauncher;
 
+// ignore: must_be_immutable
 class ProfileMain extends StatefulWidget {
   Map profileData;
   final List sellingAnimalInfo;
@@ -53,8 +54,6 @@ class ProfileMainState extends State<ProfileMain>
 
   @override
   void initState() {
-    // TODO: implement initState
-    // getCallingInfo();
     populateData();
     super.initState();
   }

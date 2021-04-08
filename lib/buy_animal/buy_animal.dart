@@ -86,6 +86,7 @@ class _BuyAnimalState extends State<BuyAnimal>
     //   _onChanged();
     // });
     // getData();
+    super.initState();
     _getInitialData();
     // _scrollController.addListener(() {
     //   double maxScroll = _scrollController.position.maxScrollExtent;
@@ -95,7 +96,6 @@ class _BuyAnimalState extends State<BuyAnimal>
     //     getInitialInfo();
     //   }
     // });
-    super.initState();
   }
 
   getData() async {
