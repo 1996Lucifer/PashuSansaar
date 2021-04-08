@@ -12,7 +12,6 @@ import 'profile_main.dart';
 import 'sell_animal/sell_animal_main.dart';
 import 'package:get/get.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
-import 'package:upgrader/upgrader.dart';
 
 // ignore: must_be_immutable
 class HomeScreen extends StatefulWidget {
@@ -221,52 +220,49 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-        onWillPop: _onWillPop,
-        child: Scaffold(
-          body: UpgradeAlert(
-            child: PageView(
-                controller: _pageController,
-                physics: NeverScrollableScrollPhysics(),
-                children: [
-                  BuyAnimal(
-                    animalInfo: _animalInfo,
-                    userName: _profileData['name'],
-                    userMobileNumber: _profileData['mobile'],
-                    userImage: _profileData['image'],
-                  ),
-                  SellAnimalMain(
-                      sellingAnimalInfo: _sellingAnimalInfo,
-                      userName: _profileData['name'],
-                      userMobileNumber: _profileData['mobile']),
-                  ProfileMain(
-                      profileData: _profileData,
-                      sellingAnimalInfo: _sellingAnimalInfo,
-                      userName: _profileData['name'],
-                      userMobileNumber: _profileData['mobile']),
-                ]),
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        body: PageView(
+            controller: _pageController,
+            physics: NeverScrollableScrollPhysics(),
+            children: [
+              BuyAnimal(
+                animalInfo: _animalInfo,
+                userName: _profileData['name'],
+                userMobileNumber: _profileData['mobile'],
+                userImage: _profileData['image'],
+              ),
+              SellAnimalMain(
+                  sellingAnimalInfo: _sellingAnimalInfo,
+                  userName: _profileData['name'],
+                  userMobileNumber: _profileData['mobile']),
+              ProfileMain(
+                  profileData: _profileData,
+                  sellingAnimalInfo: _sellingAnimalInfo,
+                  userName: _profileData['name'],
+                  userMobileNumber: _profileData['mobile']),
+            ]),
+      
+      bottomNavigationBar: BottomNavigationBar(
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Image.asset('assets/images/buy3.png', height: 25, width: 25),
+            label: 'buy'.tr,
           ),
-          bottomNavigationBar: BottomNavigationBar(
-            items: <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: Image.asset('assets/images/buy3.png',
-                    height: 25, width: 25),
-                label: 'buy'.tr,
-              ),
-              BottomNavigationBarItem(
-                icon: Image.asset('assets/images/Sell.png',
-                    height: 25, width: 25),
-                label: 'sell'.tr,
-              ),
-              BottomNavigationBarItem(
-                icon: Image.asset('assets/images/profile.jpg',
-                    height: 25, width: 25),
-                label: 'profile'.tr,
-              ),
-            ],
-            currentIndex: widget.selectedIndex,
-            // selectedItemColor: themeColor,
-            onTap: _onItemTapped,
+          BottomNavigationBarItem(
+            icon: Image.asset('assets/images/Sell.png', height: 25, width: 25),
+            label: 'sell'.tr,
           ),
-        ));
+          BottomNavigationBarItem(
+            icon:
+                Image.asset('assets/images/profile.jpg', height: 25, width: 25),
+            label: 'profile'.tr,
+          ),
+        ],
+        currentIndex: widget.selectedIndex,
+        // selectedItemColor: themeColor,
+        onTap: _onItemTapped,
+      ),
+    ));
   }
 }
