@@ -9,6 +9,7 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'user_details_fetch_screen.dart';
 import 'package:get/get.dart';
+import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 
 class OTPScreen extends StatefulWidget {
   final String phoneNumber;
@@ -28,7 +29,7 @@ class _OTPScreenState extends State<OTPScreen> {
 
   StreamController<ErrorAnimationType> errorController;
 
-  bool hasError = false, _checkUserLoginState = false;
+  bool hasError = false, _checkUserLoginState = false, _startTimer;
   String currentText = "";
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   final formKey = GlobalKey<FormState>();
@@ -36,8 +37,20 @@ class _OTPScreenState extends State<OTPScreen> {
   @override
   void initState() {
     _verifyPhone();
+    WidgetsBinding.instance.addPostFrameCallback((_) =>
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('OTP भेजा गया है'))));
+
+    setState(() {
+      _startTimer = true;
+    });
+
     onTapRecognizer = TapGestureRecognizer()
       ..onTap = () async {
+        setState(() {
+          _startTimer = true;
+        });
+
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('OTP पुनः भेजा गया है')));
 
@@ -53,6 +66,25 @@ class _OTPScreenState extends State<OTPScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     _checkUserLoginState = prefs.getBool('alreadyUser') ?? false;
   }
+
+  textWidget() => RichText(
+        textAlign: TextAlign.center,
+        text: TextSpan(
+            text: "did_not_receive_code".tr,
+            style: TextStyle(color: Colors.black54, fontSize: 15),
+            children: [
+              TextSpan(
+                  text: "resend_button".tr,
+                  // recognizer: TapGestureRecognizer()..onTap(),
+                  recognizer: onTapRecognizer,
+                  style: TextStyle(
+                      color: primaryColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16)),
+              // WidgetSpan(
+              //     child: _startTimer ? Text('Hello') : Text('.'))
+            ]),
+      );
 
   @override
   void dispose() {
@@ -79,22 +111,24 @@ class _OTPScreenState extends State<OTPScreen> {
               });
             },
             verificationFailed: (FirebaseAuthException e) {
-              print(e.message);
+              print('verificationFailed==>' + e.toString());
             },
             codeSent: (String verficationID, int resendToken) {
               setState(() {
                 _verificationCode = verficationID;
                 _resendToken = resendToken;
+                // _startTimer = true;
               });
             },
             codeAutoRetrievalTimeout: (String verificationID) {
               setState(() {
                 _verificationCode = verificationID;
+                _startTimer = false;
               });
             },
             timeout: Duration(seconds: 60),
             forceResendingToken: _resendToken)
-        .catchError((error) => print(error.toString()));
+        .catchError((error) => print('otp-error===>' + error.toString()));
   }
 
   @override
@@ -222,33 +256,44 @@ class _OTPScreenState extends State<OTPScreen> {
                 ),
               ),
               SizedBox(
-                height: 20,
+                height: 15,
               ),
-              RichText(
-                textAlign: TextAlign.center,
-                text: TextSpan(
-                    text: "did_not_receive_code".tr,
-                    style: TextStyle(color: Colors.black54, fontSize: 15),
-                    children: [
-                      TextSpan(
-                          text: "resend_button".tr,
-                          // recognizer: TapGestureRecognizer()..onTap(),
-                          recognizer: onTapRecognizer,
-                          style: TextStyle(
-                              color: primaryColor,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16))
-                    ]),
-              ),
+              !_startTimer
+                  ? textWidget()
+                  : Center(
+                      child: CountdownTimer(
+                        onEnd: () => print('onEnd'),
+                        endTime:
+                            DateTime.now().millisecondsSinceEpoch + 1000 * 60,
+                        textStyle: TextStyle(
+                            color: primaryColor,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold),
+                        endWidget: textWidget(),
+                      ),
+                    ),
+              SizedBox(width: 10),
               SizedBox(
                 height: 14,
               ),
-              Container(
-                margin:
-                    const EdgeInsets.symmetric(vertical: 16.0, horizontal: 30),
-                child: ButtonTheme(
-                  height: 50,
-                  child: FlatButton(
+              Padding(
+                padding: EdgeInsets.all(15),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: RaisedButton(
+                    padding: EdgeInsets.all(10.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    elevation: 5,
+                    color: primaryColor,
+                    child: Text(
+                      "verify_button".tr,
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold),
+                    ),
                     onPressed: () async {
                       formKey.currentState.validate();
                       // conditions for validating
@@ -296,20 +341,20 @@ class _OTPScreenState extends State<OTPScreen> {
                         }
                       }
                     },
-                    child: Center(
-                        child: Text(
-                      "verify_button".tr,
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold),
-                    )),
+                    // child: Center(
+                    //     child: Text(
+                    //   "verify_button".tr,
+                    //   style: TextStyle(
+                    //       color: Colors.white,
+                    //       fontSize: 18,
+                    //       fontWeight: FontWeight.bold),
+                    // )),
                   ),
                 ),
-                decoration: BoxDecoration(
-                  color: primaryColor,
-                  borderRadius: BorderRadius.circular(5),
-                ),
+                // decoration: BoxDecoration(
+                //   color: primaryColor,
+                //   borderRadius: BorderRadius.circular(5),
+                // ),
               ),
             ],
           ),

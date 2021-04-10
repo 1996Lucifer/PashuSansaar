@@ -59,15 +59,7 @@ class ProfileMainState extends State<ProfileMain>
   }
 
   populateData() async {
-    // pr = new ProgressDialog(context,
-    //     type: ProgressDialogType.Normal, isDismissible: false);
-
-    // pr.style(message: 'progress_dialog_message'.tr);
-    // pr.show();
-
-    if (widget.profileData == {}) {
-      // pr.show();
-
+    if (widget.profileData.isEmpty) {
       return showDialog(
           context: context,
           builder: (context) {
@@ -454,11 +446,7 @@ class ProfileMainState extends State<ProfileMain>
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 userInfo['name'] == null
-                                    ? Center(
-                                        child: CircularProgressIndicator(
-                                          backgroundColor: primaryColor,
-                                        ),
-                                      )
+                                    ? Text('progress_dialog_message'.tr)
                                     : Row(
                                         children: [
                                           Icon(Icons.account_circle_outlined),
@@ -469,12 +457,8 @@ class ProfileMainState extends State<ProfileMain>
                                                   fontSize: 14)),
                                         ],
                                       ),
-                                userInfo['name'] == null
-                                    ? Center(
-                                        child: CircularProgressIndicator(
-                                          backgroundColor: primaryColor,
-                                        ),
-                                      )
+                                userInfo['address'] == null
+                                    ? Text('progress_dialog_message'.tr)
                                     : Row(
                                         children: [
                                           Icon(Icons.location_on_outlined),

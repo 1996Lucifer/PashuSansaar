@@ -14,7 +14,7 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
 import 'package:progress_dialog/progress_dialog.dart';
-import 'package:geoflutterfire/geoflutterfire.dart' as geoFire;
+// import 'package:geoflutterfire/geoflutterfire.dart' as geoFire;
 
 class UserDetailsFetch extends StatefulWidget {
   final String currentUser, mobile;
@@ -35,6 +35,8 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
   TextEditingController zipCodeController = new TextEditingController();
   Map<String, dynamic> mobileInfo = {};
   LocationData _locate;
+  // Map _profileData = {};
+
   // final geo = geoFire.Geoflutterfire();
 
   String currentText = "";
@@ -49,9 +51,42 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
           _showReferralData = !_showReferralData;
         });
       };
+    // getInitialData();
     getLocationLocate();
     super.initState();
   }
+
+  // getInitialData() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+
+  //   pr = new ProgressDialog(context,
+  //       type: ProgressDialogType.Normal, isDismissible: false);
+
+  //   pr.style(message: 'progress_dialog_message'.tr);
+  //   pr.show();
+
+  //   FirebaseFirestore.instance
+  //       .collection("userInfo")
+  //       .doc(FirebaseAuth.instance.currentUser.uid)
+  //       .get(GetOptions(source: Source.serverAndCache))
+  //       .then(
+  //     (value) {
+  //       setState(() {
+  //         _profileData = value.data();
+  //         prefs.setString('profileData', jsonEncode(_profileData));
+  //       });
+  //       pr.hide();
+  //     },
+  //   );
+
+  //   if (_profileData.isEmpty)
+  //     getLocationLocate();
+  //   else
+  //     Navigator.pushReplacement(
+  //         context,
+  //         MaterialPageRoute(
+  //             builder: (context) => HomeScreen(selectedIndex: 0)));
+  // }
 
   getLocationLocate() async {
     Location location = new Location();
