@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:in_app_update/in_app_update.dart';
 import 'package:pashusansaar/buy_animal/buy_animal.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -28,29 +27,24 @@ class _HomeScreenState extends State<HomeScreen> {
   Map _profileData = {};
   final geo = Geoflutterfire();
   PageController _pageController;
-  // AppUpdateInfo _updateInfo;
-
-  // GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
-
-  // bool _flexibleUpdateAvailable = false;
-
-  // // Platform messages are asynchronous, so we initialize in an async method.
-  // Future<void> checkForUpdate() async {
-  //   InAppUpdate.checkForUpdate().then((info) {
-  //     setState(() {
-  //       _updateInfo = info;
-  //     });
-  //   }).catchError((e) {
-  //     print("update check==>" + e.toString());
-  //   });
-  // }
-
   @override
   void initState() {
     _pageController = PageController(initialPage: widget.selectedIndex);
     // checkForUpdate();
     loginSetup();
     super.initState();
+  }
+
+  loginSetup() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      prefs.setBool(
+          'isLoggedIn', FirebaseAuth.instance.currentUser.uid.isNotEmpty);
+      prefs.setBool(
+          'alreadyUser', FirebaseAuth.instance.currentUser.uid.isNotEmpty);
+    });
+
+    getInitialInfo();
   }
 
   getInitialInfo() async {
@@ -140,18 +134,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  loginSetup() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      prefs.setBool(
-          'isLoggedIn', FirebaseAuth.instance.currentUser.uid.isNotEmpty);
-      prefs.setBool(
-          'alreadyUser', FirebaseAuth.instance.currentUser.uid.isNotEmpty);
-    });
-
-    getInitialInfo();
-  }
-
   void _onItemTapped(int index) {
     setState(() {
       widget.selectedIndex = index;
@@ -220,49 +202,50 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: _onWillPop,
-      child: Scaffold(
-        body: PageView(
-            controller: _pageController,
-            physics: NeverScrollableScrollPhysics(),
-            children: [
-              BuyAnimal(
-                animalInfo: _animalInfo,
-                userName: _profileData['name'],
-                userMobileNumber: _profileData['mobile'],
-                userImage: _profileData['image'],
+        onWillPop: _onWillPop,
+        child: Scaffold(
+          body: PageView(
+              controller: _pageController,
+              physics: NeverScrollableScrollPhysics(),
+              children: [
+                BuyAnimal(
+                  animalInfo: _animalInfo,
+                  userName: _profileData['name'],
+                  userMobileNumber: _profileData['mobile'],
+                  userImage: _profileData['image'],
+                ),
+                SellAnimalMain(
+                    sellingAnimalInfo: _sellingAnimalInfo,
+                    userName: _profileData['name'],
+                    userMobileNumber: _profileData['mobile']),
+                ProfileMain(
+                    profileData: _profileData,
+                    sellingAnimalInfo: _sellingAnimalInfo,
+                    userName: _profileData['name'],
+                    userMobileNumber: _profileData['mobile']),
+              ]),
+          bottomNavigationBar: BottomNavigationBar(
+            items: <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Image.asset('assets/images/buy3.png',
+                    height: 25, width: 25),
+                label: 'buy'.tr,
               ),
-              SellAnimalMain(
-                  sellingAnimalInfo: _sellingAnimalInfo,
-                  userName: _profileData['name'],
-                  userMobileNumber: _profileData['mobile']),
-              ProfileMain(
-                  profileData: _profileData,
-                  sellingAnimalInfo: _sellingAnimalInfo,
-                  userName: _profileData['name'],
-                  userMobileNumber: _profileData['mobile']),
-            ]),
-      
-      bottomNavigationBar: BottomNavigationBar(
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Image.asset('assets/images/buy3.png', height: 25, width: 25),
-            label: 'buy'.tr,
+              BottomNavigationBarItem(
+                icon: Image.asset('assets/images/Sell.png',
+                    height: 25, width: 25),
+                label: 'sell'.tr,
+              ),
+              BottomNavigationBarItem(
+                icon: Image.asset('assets/images/profile.jpg',
+                    height: 25, width: 25),
+                label: 'profile'.tr,
+              ),
+            ],
+            currentIndex: widget.selectedIndex,
+            // selectedItemColor: themeColor,
+            onTap: _onItemTapped,
           ),
-          BottomNavigationBarItem(
-            icon: Image.asset('assets/images/Sell.png', height: 25, width: 25),
-            label: 'sell'.tr,
-          ),
-          BottomNavigationBarItem(
-            icon:
-                Image.asset('assets/images/profile.jpg', height: 25, width: 25),
-            label: 'profile'.tr,
-          ),
-        ],
-        currentIndex: widget.selectedIndex,
-        // selectedItemColor: themeColor,
-        onTap: _onItemTapped,
-      ),
-    ));
+        ));
   }
 }
