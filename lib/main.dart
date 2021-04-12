@@ -13,7 +13,6 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(MyApp());
   runApp(MaterialApp(debugShowCheckedModeBanner: false, home: MyApp()));
 }
 
@@ -27,19 +26,18 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final playStoreUrl =
       'https://play.google.com/store/apps/details?id=dj.pashusansaar';
-  List<String> newVersion, currentVersion;
+  String newVersion, currentVersion;
 
   @override
   void initState() {
     super.initState();
-    try {
-      SchedulerBinding.instance
-          .addPostFrameCallback((_) => versionCheck(context));
-
-      // versionCheck(context);
-    } catch (e) {
-      print(e);
-    }
+    versionCheck(context);
+    // try {
+    //   SchedulerBinding.instance
+    //       .addPostFrameCallback((_) => versionCheck(context));
+    // } catch (e) {
+    //   print(e);
+    // }
   }
 
   versionCheck(context) async {
@@ -50,15 +48,15 @@ class _MyAppState extends State<MyApp> {
       // Using default duration to force fetching from remote server.
       await remoteConfig.fetch(expiration: const Duration(seconds: 0));
       await remoteConfig.activateFetched();
-      remoteConfig.getString('force_update_current_version');
+      remoteConfig.getString('app_version_2_testing');
+      setState(() {
+        newVersion = remoteConfig.getString('app_version_2_testing');
+        currentVersion = info.version;
+      });
       List<String> currentVersion1 = info.version.split('.');
       List<String> newVersion1 =
-          remoteConfig.getString('force_update_current_version').split('.');
+          remoteConfig.getString('app_version_2_testing').split('.');
 
-      setState(() {
-        newVersion = newVersion1;
-        currentVersion = currentVersion1;
-      });
       if ((newVersion1[0].compareTo(currentVersion1[0]) == 1) ||
           (newVersion1[1].compareTo(currentVersion1[1]) == 1)) {
         await _showVersionDialog(newVersion1, currentVersion1, true);

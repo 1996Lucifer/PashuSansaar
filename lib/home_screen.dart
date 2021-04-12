@@ -27,10 +27,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Map _profileData = {};
   final geo = Geoflutterfire();
   PageController _pageController;
+
   @override
   void initState() {
     _pageController = PageController(initialPage: widget.selectedIndex);
-    // checkForUpdate();
     loginSetup();
     super.initState();
   }
@@ -44,7 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
           'alreadyUser', FirebaseAuth.instance.currentUser.uid.isNotEmpty);
     });
 
-    getInitialInfo();
+    await getInitialInfo();
   }
 
   getInitialInfo() async {
@@ -98,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
   getAnimalSellingInfo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     // FirebaseFirestore.instance.clearPersistence();
-    FirebaseFirestore.instance
+    await FirebaseFirestore.instance
         .collection("animalSellingInfo")
         .doc(FirebaseAuth.instance.currentUser.uid)
         .collection('sellingAnimalList')
@@ -120,10 +120,8 @@ class _HomeScreenState extends State<HomeScreen> {
     getProfileInfo();
   }
 
-  getProfileInfo() {
-    // FirebaseFirestore.instance.clearPersistence();
-
-    FirebaseFirestore.instance
+  getProfileInfo() async {
+    await FirebaseFirestore.instance
         .collection("userInfo")
         .doc(FirebaseAuth.instance.currentUser.uid)
         .get(GetOptions(source: Source.serverAndCache))

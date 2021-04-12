@@ -1,9 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:core';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:csv/csv.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/constants.dart';
@@ -18,7 +16,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:geodesy/geodesy.dart';
 import 'package:get/get.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -27,9 +24,10 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:share/share.dart';
 import 'package:pashusansaar/utils/constants.dart' as constant;
 import 'package:geoflutterfire/geoflutterfire.dart' as geoFire;
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
-import 'dart:ui' as ui;
 
+import 'package:video_player/video_player.dart';
+
+// ignore: must_be_immutable
 class BuyAnimal extends StatefulWidget {
   List animalInfo;
   final String userName;
@@ -68,12 +66,11 @@ class _BuyAnimalState extends State<BuyAnimal>
   TextEditingController _locationController = TextEditingController();
   String whatsappText = '';
   ScrollController _scrollController = ScrollController();
-  bool _gettingMoreBuyer = false;
-  bool _moreDataAvailable = true;
   String directory = '';
   String url1 = '', url2 = '', url3 = '', url4 = '';
 
   File fileUrl;
+  VideoPlayerController _videoController;
 
   @override
   bool get wantKeepAlive => true;
@@ -98,28 +95,28 @@ class _BuyAnimalState extends State<BuyAnimal>
     // });
   }
 
-  getData() async {
-    await FirebaseFirestore.instance.clearPersistence();
+  // getData() async {
+  //   await FirebaseFirestore.instance.clearPersistence();
 
-    dataUpdateOnInit();
-    // dataReplication();
-    // await dataDeleteion();
-  }
+  //   dataUpdateOnInit();
+  //   // dataReplication();
+  //   // await dataDeleteion();
+  // }
 
-  takeScreenShot(String uniqueId) async {
-    RenderRepaintBoundary boundary =
-        previewContainer.currentContext.findRenderObject();
-    ui.Image image = await boundary.toImage();
-    final directory = (await getApplicationDocumentsDirectory()).path;
-    ByteData byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-    Uint8List pngBytes = byteData.buffer.asUint8List();
-    print(pngBytes);
-    File imgFile = new File('$directory/pashu_$uniqueId.png');
-    await imgFile.writeAsBytes(pngBytes);
-    setState(() {
-      fileUrl = imgFile;
-    });
-  }
+  // takeScreenShot(String uniqueId) async {
+  //   RenderRepaintBoundary boundary =
+  //       previewContainer.currentContext.findRenderObject();
+  //   ui.Image image = await boundary.toImage();
+  //   final directory = (await getApplicationDocumentsDirectory()).path;
+  //   ByteData byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+  //   Uint8List pngBytes = byteData.buffer.asUint8List();
+  //   print(pngBytes);
+  //   File imgFile = new File('$directory/pashu_$uniqueId.png');
+  //   await imgFile.writeAsBytes(pngBytes);
+  //   setState(() {
+  //     fileUrl = imgFile;
+  //   });
+  // }
 
   // dataDeleteion() async {
   //   await FirebaseFirestore.instance
@@ -157,7 +154,6 @@ class _BuyAnimalState extends State<BuyAnimal>
       _userLocality = first.locality ?? first.featureName;
       prefs.setString('place', _userLocality);
     });
-
   }
 
   // getInitialInfo() async {
@@ -212,222 +208,222 @@ class _BuyAnimalState extends State<BuyAnimal>
   //   _gettingMoreBuyer = false;
   // }
 
-  _createFileFromString(encodedStr, userId, uniqueId, id) async {
-    Uint8List bytes = base64Decode(encodedStr);
-    String fullPath = '$directory/${uniqueId}_$id.jpg';
-    File file = File(fullPath);
+  // _createFileFromString(encodedStr, userId, uniqueId, id) async {
+  //   Uint8List bytes = base64Decode(encodedStr);
+  //   String fullPath = '$directory/${uniqueId}_$id.jpg';
+  //   File file = File(fullPath);
 
-    await file.writeAsBytes(bytes);
+  //   await file.writeAsBytes(bytes);
 
-    await firebase_storage.FirebaseStorage.instance
-        .ref('$userId/${uniqueId}_$id.jpg')
-        .putFile(file);
+  //   await firebase_storage.FirebaseStorage.instance
+  //       .ref('$userId/${uniqueId}_$id.jpg')
+  //       .putFile(file);
 
-    await firebase_storage.FirebaseStorage.instance
-        .ref('$userId/${uniqueId}_$id.jpg')
-        .getDownloadURL();
-  }
+  //   await firebase_storage.FirebaseStorage.instance
+  //       .ref('$userId/${uniqueId}_$id.jpg')
+  //       .getDownloadURL();
+  // }
 
-  func1(element) async {
-    _createFileFromString(
-        element['image1'], element['userId'], element['uniqueId'], '1');
-    String downloadURL1 = await firebase_storage.FirebaseStorage.instance
-        .ref('${element['userId']}/${element['uniqueId']}_1.jpg')
-        .getDownloadURL();
-    setState(() {
-      url1 = downloadURL1;
-    });
-  }
+  // func1(element) async {
+  //   _createFileFromString(
+  //       element['image1'], element['userId'], element['uniqueId'], '1');
+  //   String downloadURL1 = await firebase_storage.FirebaseStorage.instance
+  //       .ref('${element['userId']}/${element['uniqueId']}_1.jpg')
+  //       .getDownloadURL();
+  //   setState(() {
+  //     url1 = downloadURL1;
+  //   });
+  // }
 
-  func2(element) async {
-    _createFileFromString(
-        element['image2'], element['userId'], element['uniqueId'], '2');
-    String downloadURL2 = await firebase_storage.FirebaseStorage.instance
-        .ref('${element['userId']}/${element['uniqueId']}_2.jpg')
-        .getDownloadURL();
-    setState(() {
-      url2 = downloadURL2;
-    });
-  }
+  // func2(element) async {
+  //   _createFileFromString(
+  //       element['image2'], element['userId'], element['uniqueId'], '2');
+  //   String downloadURL2 = await firebase_storage.FirebaseStorage.instance
+  //       .ref('${element['userId']}/${element['uniqueId']}_2.jpg')
+  //       .getDownloadURL();
+  //   setState(() {
+  //     url2 = downloadURL2;
+  //   });
+  // }
 
-  func3(element) async {
-    _createFileFromString(
-        element['image3'], element['userId'], element['uniqueId'], '3');
-    String downloadURL3 = await firebase_storage.FirebaseStorage.instance
-        .ref('${element['userId']}/${element['uniqueId']}_3.jpg')
-        .getDownloadURL();
-    setState(() {
-      url3 = downloadURL3;
-    });
-  }
+  // func3(element) async {
+  //   _createFileFromString(
+  //       element['image3'], element['userId'], element['uniqueId'], '3');
+  //   String downloadURL3 = await firebase_storage.FirebaseStorage.instance
+  //       .ref('${element['userId']}/${element['uniqueId']}_3.jpg')
+  //       .getDownloadURL();
+  //   setState(() {
+  //     url3 = downloadURL3;
+  //   });
+  // }
 
-  func4(element) async {
-    _createFileFromString(
-        element['image4'], element['userId'], element['uniqueId'], '4');
-    String downloadURL4 = await firebase_storage.FirebaseStorage.instance
-        .ref('${element['userId']}/${element['uniqueId']}_4.jpg')
-        .getDownloadURL();
-    setState(() {
-      url4 = downloadURL4;
-    });
-  }
+  // func4(element) async {
+  //   _createFileFromString(
+  //       element['image4'], element['userId'], element['uniqueId'], '4');
+  //   String downloadURL4 = await firebase_storage.FirebaseStorage.instance
+  //       .ref('${element['userId']}/${element['uniqueId']}_4.jpg')
+  //       .getDownloadURL();
+  //   setState(() {
+  //     url4 = downloadURL4;
+  //   });
+  // }
 
-  dataUpdateOnInit() async {
-    // if (element['image1'] != null && element['image1'].isNotEmpty) {
-    //   await func1(element);
-    // }
-    // if (element['image2'] != null && element['image2'].isNotEmpty) {
-    //   await func2(element);
-    // }
-    // if (element['image3'] != null && element['image3'].isNotEmpty) {
-    //   await func3(element);
-    // }
-    // if (element['image4'] != null && element['image4'].isNotEmpty) {
-    //   await func4(element);
-    // }
-    // await FirebaseFirestore.instance
-    //     .collection("buyingAnimalList1")
-    //     .doc(element.reference.id)
-    //     .update({
-    //   'image1': url1 ?? '',
-    //   'image2': url2 ?? '',
-    //   'image3': url3 ?? '',
-    //   'image4': url4 ?? '',
-    // });
-    // await FirebaseFirestore.instance
-    //     .collection("buyingAnimalList")
-    //     .orderBy('uniqueId')
-    //     // .where('uniqueId',
-    //     //     isLessThanOrEqualTo: '10000000') // 00000000 - 10000000
-    //     // .where('uniqueId',
-    //     //     isGreaterThan: '10000000', isLessThanOrEqualTo: '20000000') // 30 - 31
-    //     // .where('uniqueId',
-    //     //     isGreaterThan: '20000000', isLessThanOrEqualTo: '30000000') // 30 - 31
-    //     // .where('uniqueId',
-    //     //     isGreaterThan: '30000000', isLessThanOrEqualTo: '40000000') // karna hai aaj
-    //     // .where('uniqueId',
-    //     //     isGreaterThan: '40000000', isLessThanOrEqualTo: '50000000') // karna hai aaj
-    //     // .where('uniqueId',
-    //     //     isGreaterThan: '50000000', isLessThanOrEqualTo: '60000000') // karna hai aaj
-    //     // .where('uniqueId',
-    //     //     isGreaterThan: '60000000', isLessThanOrEqualTo: '70000000') // karna hai aaj
-    //     // .where('uniqueId',
-    //     //     isGreaterThan: '70000000', isLessThanOrEqualTo: '80000000') // karna hai aaj
-    //     // .where('uniqueId',
-    //     //     isGreaterThan: '80000000', isLessThanOrEqualTo: '90000000') // karna hai aaj
-    //     // .where('uniqueId', isGreaterThan: '90000000') // k
-    //     .where('uniqueId',
-    //         isGreaterThanOrEqualTo: '00170146',
-    //         isLessThanOrEqualTo: '01331449') // 31-1
+  // dataUpdateOnInit() async {
+  // if (element['image1'] != null && element['image1'].isNotEmpty) {
+  //   await func1(element);
+  // }
+  // if (element['image2'] != null && element['image2'].isNotEmpty) {
+  //   await func2(element);
+  // }
+  // if (element['image3'] != null && element['image3'].isNotEmpty) {
+  //   await func3(element);
+  // }
+  // if (element['image4'] != null && element['image4'].isNotEmpty) {
+  //   await func4(element);
+  // }
+  // await FirebaseFirestore.instance
+  //     .collection("buyingAnimalList1")
+  //     .doc(element.reference.id)
+  //     .update({
+  //   'image1': url1 ?? '',
+  //   'image2': url2 ?? '',
+  //   'image3': url3 ?? '',
+  //   'image4': url4 ?? '',
+  // });
+  // await FirebaseFirestore.instance
+  //     .collection("buyingAnimalList")
+  //     .orderBy('uniqueId')
+  //     // .where('uniqueId',
+  //     //     isLessThanOrEqualTo: '10000000') // 00000000 - 10000000
+  //     // .where('uniqueId',
+  //     //     isGreaterThan: '10000000', isLessThanOrEqualTo: '20000000') // 30 - 31
+  //     // .where('uniqueId',
+  //     //     isGreaterThan: '20000000', isLessThanOrEqualTo: '30000000') // 30 - 31
+  //     // .where('uniqueId',
+  //     //     isGreaterThan: '30000000', isLessThanOrEqualTo: '40000000') // karna hai aaj
+  //     // .where('uniqueId',
+  //     //     isGreaterThan: '40000000', isLessThanOrEqualTo: '50000000') // karna hai aaj
+  //     // .where('uniqueId',
+  //     //     isGreaterThan: '50000000', isLessThanOrEqualTo: '60000000') // karna hai aaj
+  //     // .where('uniqueId',
+  //     //     isGreaterThan: '60000000', isLessThanOrEqualTo: '70000000') // karna hai aaj
+  //     // .where('uniqueId',
+  //     //     isGreaterThan: '70000000', isLessThanOrEqualTo: '80000000') // karna hai aaj
+  //     // .where('uniqueId',
+  //     //     isGreaterThan: '80000000', isLessThanOrEqualTo: '90000000') // karna hai aaj
+  //     // .where('uniqueId', isGreaterThan: '90000000') // k
+  //     .where('uniqueId',
+  //         isGreaterThanOrEqualTo: '00170146',
+  //         isLessThanOrEqualTo: '01331449') // 31-1
 
-    //     .get()
-    //     .then((value) => value.docs.forEach((element) async {
-    //           print("value.docs=====>" + value.docs.length.toString());
-    //           if (element['image1'] != null && element['image1'].isNotEmpty) {
-    //             await func1(element);
-    //           }
-    //           if (element['image2'] != null && element['image2'].isNotEmpty) {
-    //             await func2(element);
-    //           }
-    //           if (element['image3'] != null && element['image3'].isNotEmpty) {
-    //             await func3(element);
-    //           }
-    //           if (element['image4'] != null && element['image4'].isNotEmpty) {
-    //             await func4(element);
-    //           }
-    //           await FirebaseFirestore.instance
-    //               .collection("buyingAnimalList1")
-    //               .doc(element.reference.id)
-    //               .update({
-    //             'image1': url1 ?? '',
-    //             'image2': url2 ?? '',
-    //             'image3': url3 ?? '',
-    //             'image4': url4 ?? '',
-    //           });
-    //         }));
-    await FirebaseFirestore.instance
-        .collection("buyingAnimalList1")
-        .get()
-        .then((value) => value.docs.forEach((element) async {
-              await FirebaseFirestore.instance
-                  .collection("buyingAnimalList1")
-                  .doc(element.reference.id)
-                  .update({
-                'userAnimalTypeOther': '',
-              });
-            }));
-  }
+  //     .get()
+  //     .then((value) => value.docs.forEach((element) async {
+  //           print("value.docs=====>" + value.docs.length.toString());
+  //           if (element['image1'] != null && element['image1'].isNotEmpty) {
+  //             await func1(element);
+  //           }
+  //           if (element['image2'] != null && element['image2'].isNotEmpty) {
+  //             await func2(element);
+  //           }
+  //           if (element['image3'] != null && element['image3'].isNotEmpty) {
+  //             await func3(element);
+  //           }
+  //           if (element['image4'] != null && element['image4'].isNotEmpty) {
+  //             await func4(element);
+  //           }
+  //           await FirebaseFirestore.instance
+  //               .collection("buyingAnimalList1")
+  //               .doc(element.reference.id)
+  //               .update({
+  //             'image1': url1 ?? '',
+  //             'image2': url2 ?? '',
+  //             'image3': url3 ?? '',
+  //             'image4': url4 ?? '',
+  //           });
+  //         }));
+  //   await FirebaseFirestore.instance
+  //       .collection("buyingAnimalList1")
+  //       .get()
+  //       .then((value) => value.docs.forEach((element) async {
+  //             await FirebaseFirestore.instance
+  //                 .collection("buyingAnimalList1")
+  //                 .doc(element.reference.id)
+  //                 .update({
+  //               'userAnimalTypeOther': '',
+  //             });
+  //           }));
+  // }
 
-  dataReplication() async {
-    // SharedPreferences prefs = await SharedPreferences.getInstance();
-    // await FirebaseFirestore.instance
-    //     .collection("buyingAnimalList1")
-    //     .orderBy('dateOfSaving', descending: true)
-    //     // .where('dateOfSaving', isLessThanOrEqualTo: '1617148799')  // 30 se kam
-    //     // .where('dateOfSaving',
-    //     //     isGreaterThan: '1617148799', isLessThanOrEqualTo: '1617235199') // 30 - 31
-    //     // .where('dateOfSaving',
-    //     //     isGreaterThan: '1617235199', isLessThanOrEqualTo: '1617321599') // 31-1
-    //     // .where('dateOfSaving',
-    //     //     isGreaterThan: '1617321599', isLessThanOrEqualTo: '1617407999') // 1-2
-    //     // .where('dateOfSaving',
-    //     //     isGreaterThan: '1617407999', isLessThanOrEqualTo: '1617494399')//2-3
-    //     .where('dateOfSaving',
-    //         isGreaterThan: '1617494400',
-    //         isLessThanOrEqualTo: '1617667199') //4-5
+  // dataReplication() async {
+  // SharedPreferences prefs = await SharedPreferences.getInstance();
+  // await FirebaseFirestore.instance
+  //     .collection("buyingAnimalList1")
+  //     .orderBy('dateOfSaving', descending: true)
+  //     // .where('dateOfSaving', isLessThanOrEqualTo: '1617148799')  // 30 se kam
+  //     // .where('dateOfSaving',
+  //     //     isGreaterThan: '1617148799', isLessThanOrEqualTo: '1617235199') // 30 - 31
+  //     // .where('dateOfSaving',
+  //     //     isGreaterThan: '1617235199', isLessThanOrEqualTo: '1617321599') // 31-1
+  //     // .where('dateOfSaving',
+  //     //     isGreaterThan: '1617321599', isLessThanOrEqualTo: '1617407999') // 1-2
+  //     // .where('dateOfSaving',
+  //     //     isGreaterThan: '1617407999', isLessThanOrEqualTo: '1617494399')//2-3
+  //     .where('dateOfSaving',
+  //         isGreaterThan: '1617494400',
+  //         isLessThanOrEqualTo: '1617667199') //4-5
 
-    //     // .limit(50)
-    //     .get()
-    //     .then((value) => print('val=====>' + value.docs.length.toString()));
+  //     // .limit(50)
+  //     .get()
+  //     .then((value) => print('val=====>' + value.docs.length.toString()));
 
-    await FirebaseFirestore.instance
-        .collection("buyingAnimalList")
-        .where('userId', isEqualTo: 'Gd14ylVF7IZBlUm2mwSqMH592Py2')
-        .where('uniqueId', isEqualTo: '01331449')
-        // .where('dateOfSaving',
-        //     isGreaterThan: '1617580800',
-        //     isLessThanOrEqualTo: '1617753599') // 31-1
+  // await FirebaseFirestore.instance
+  //     .collection("buyingAnimalList")
+  //     .where('userId', isEqualTo: 'Gd14ylVF7IZBlUm2mwSqMH592Py2')
+  //     .where('uniqueId', isEqualTo: '01331449')
+  // .where('dateOfSaving',
+  //     isGreaterThan: '1617580800',
+  //     isLessThanOrEqualTo: '1617753599') // 31-1
 
-        // .orderBy('dateOfSaving', descending: true)
-        // // .where('dateOfSaving',
-        // //     isGreaterThan: '1617299999', isLessThanOrEqualTo: '1617321599')
-        // .where('dateOfSaving',
-        //     isGreaterThan: '1617537599', isLessThanOrEqualTo: '1617580799')
-        // // .limitToLast(prefs.getInt('countData'))
-        // .limit(50)
-        .get()
-        .then((value) => value.docs.forEach((element) async {
-              // if (element.reference.id.substring(0, 2) == '00')
-              await FirebaseFirestore.instance
-                  .collection("buyingAnimalList1")
-                  .doc(element.reference.id)
-                  .set({
-                "userAnimalDescription": element["userAnimalDescription"],
-                "userAnimalType": element["userAnimalType"],
-                "userAnimalAge": element["userAnimalAge"],
-                "userAddress": element["userAddress"],
-                "userName": element["userName"],
-                "userAnimalPrice": element["userAnimalPrice"],
-                "userAnimalBreed": element["userAnimalBreed"],
-                "userMobileNumber": element["userMobileNumber"],
-                "userAnimalMilk": element["userAnimalMilk"],
-                "userAnimalPregnancy": element["userAnimalPregnancy"],
-                "userLatitude": element["userLatitude"],
-                "userLongitude": element["userLongitude"],
-                'uniqueId': element['uniqueId'],
-                'extraInfo': element['extraInfo'],
-                'isValidUser': element['isValidUser'],
-                'position': element['position'],
-                "image1": element["image1"],
-                "image2": element["image2"],
-                "image3": element["image3"],
-                "image4": element["image4"],
-                "dateOfSaving": element["dateOfSaving"],
-                'userId': element['userId']
-              });
-              // await dataUpdateOnInit(element);
-            }));
-  }
+  // .orderBy('dateOfSaving', descending: true)
+  // // .where('dateOfSaving',
+  // //     isGreaterThan: '1617299999', isLessThanOrEqualTo: '1617321599')
+  // .where('dateOfSaving',
+  //     isGreaterThan: '1617537599', isLessThanOrEqualTo: '1617580799')
+  // // .limitToLast(prefs.getInt('countData'))
+  // .limit(50)
+  //       .get()
+  //       .then((value) => value.docs.forEach((element) async {
+  //             // if (element.reference.id.substring(0, 2) == '00')
+  //             await FirebaseFirestore.instance
+  //                 .collection("buyingAnimalList1")
+  //                 .doc(element.reference.id)
+  //                 .set({
+  //               "userAnimalDescription": element["userAnimalDescription"],
+  //               "userAnimalType": element["userAnimalType"],
+  //               "userAnimalAge": element["userAnimalAge"],
+  //               "userAddress": element["userAddress"],
+  //               "userName": element["userName"],
+  //               "userAnimalPrice": element["userAnimalPrice"],
+  //               "userAnimalBreed": element["userAnimalBreed"],
+  //               "userMobileNumber": element["userMobileNumber"],
+  //               "userAnimalMilk": element["userAnimalMilk"],
+  //               "userAnimalPregnancy": element["userAnimalPregnancy"],
+  //               "userLatitude": element["userLatitude"],
+  //               "userLongitude": element["userLongitude"],
+  //               'uniqueId': element['uniqueId'],
+  //               'extraInfo': element['extraInfo'],
+  //               'isValidUser': element['isValidUser'],
+  //               'position': element['position'],
+  //               "image1": element["image1"],
+  //               "image2": element["image2"],
+  //               "image3": element["image3"],
+  //               "image4": element["image4"],
+  //               "dateOfSaving": element["dateOfSaving"],
+  //               'userId': element['userId']
+  //             });
+  //             // await dataUpdateOnInit(element);
+  //           }));
+  // }
   // dataFillOnInit() async {
   //   SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -2174,20 +2170,27 @@ class _BuyAnimalState extends State<BuyAnimal>
     );
   }
 
-
-
   Padding _animalImageWidget(int index) {
     List _list =
         _tempAnimalList.length != 0 ? _tempAnimalList : widget.animalInfo;
 
     List<String> _images = [];
-    [
-      _list[index]['image1'],
-      _list[index]['image2'],
-      _list[index]['image3'],
-      _list[index]['image4'],
-    ].forEach((element) =>
-        _images.addIf(element != null && element.isNotEmpty, element));
+    if (_list[index]['video'] != null && _list[index]['video'].isNotEmpty) {
+      _videoController = VideoPlayerController.network(_list[index]['video']);
+      _videoController.setLooping(false);
+      _videoController.initialize();
+      _videoController.pause();
+    }
+    (_list[index]['animalVideoThumbnail'] == null
+            ? [
+                _list[index]['image1'],
+                _list[index]['image2'],
+                _list[index]['image3'],
+                _list[index]['image4'],
+              ]
+            : [_list[index]['animalVideoThumbnail']])
+        .forEach((element) =>
+            _images.addIf(element != null && element.isNotEmpty, element));
     return Padding(
         padding: EdgeInsets.only(left: 8.0, right: 8, bottom: 4),
         child: Stack(
@@ -2198,56 +2201,130 @@ class _BuyAnimalState extends State<BuyAnimal>
                   opaque: true,
                   pageBuilder: (BuildContext context, _, __) =>
                       StatefulBuilder(builder: (context, setState) {
-                    return Column(
-                      children: [
-                        CarouselSlider(
-                          options: CarouselOptions(
-                              height: MediaQuery.of(context).size.height * 0.9,
-                              viewportFraction: 1.0,
-                              initialPage: 0,
-                              enableInfiniteScroll: true,
-                              reverse: false,
-                              autoPlay: true,
-                              autoPlayInterval: Duration(seconds: 3),
-                              autoPlayAnimationDuration:
-                                  Duration(milliseconds: 800),
-                              autoPlayCurve: Curves.fastOutSlowIn,
-                              enlargeCenterPage: true,
-                              scrollDirection: Axis.horizontal,
-                              onPageChanged: (index, reason) => setState(() {
-                                    _current = index;
-                                  })),
-                          items: _images.map((i) {
-                            return Builder(
-                              builder: (BuildContext context) {
-                                return i.length > 1000
-                                    ? Image.memory(base64Decode('$i'))
-                                    // : Image.file(fileUrl);
-                                    : Image.network('$i');
-                              },
-                            );
-                          }).toList(),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: _images.map((url) {
-                            int indexData = _images.indexOf(url);
-                            return Container(
-                              width: 8.0,
-                              height: 8.0,
-                              margin: EdgeInsets.symmetric(
-                                  vertical: 10.0, horizontal: 2.0),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: _current == indexData
-                                    ? Color.fromRGBO(255, 255, 255, 1)
-                                    : Color.fromRGBO(255, 255, 255, 0.4),
+                    return _list[index]['animalVideoThumbnail'] == null
+                        ? Column(
+                            children: [
+                              CarouselSlider(
+                                options: CarouselOptions(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.9,
+                                    viewportFraction: 1.0,
+                                    initialPage: 0,
+                                    enableInfiniteScroll: true,
+                                    reverse: false,
+                                    autoPlay: true,
+                                    autoPlayInterval: Duration(seconds: 3),
+                                    autoPlayAnimationDuration:
+                                        Duration(milliseconds: 800),
+                                    autoPlayCurve: Curves.fastOutSlowIn,
+                                    enlargeCenterPage: true,
+                                    scrollDirection: Axis.horizontal,
+                                    onPageChanged: (index, reason) =>
+                                        setState(() {
+                                          _current = index;
+                                        })),
+                                items: _images.map((i) {
+                                  return Builder(
+                                    builder: (BuildContext context) {
+                                      return i.length > 1000
+                                          ? Image.memory(base64Decode('$i'))
+                                          : Image.network('$i');
+                                    },
+                                  );
+                                }).toList(),
                               ),
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                    );
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: _images.map((url) {
+                                  int indexData = _images.indexOf(url);
+                                  return Container(
+                                    width: 8.0,
+                                    height: 8.0,
+                                    margin: EdgeInsets.symmetric(
+                                        vertical: 10.0, horizontal: 2.0),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: _current == indexData
+                                          ? Color.fromRGBO(255, 255, 255, 1)
+                                          : Color.fromRGBO(255, 255, 255, 0.4),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ],
+                          )
+                        : Stack(
+                            alignment: AlignmentDirectional.bottomCenter,
+                            children: [
+                              Center(
+                                  child: StreamBuilder<Object>(
+                                      stream: null,
+                                      builder: (context, snapshot) {
+                                        return VideoPlayer(_videoController);
+                                      })),
+                              _videoController == null
+                                  ? SizedBox.shrink()
+                                  : ValueListenableBuilder(
+                                      valueListenable: _videoController,
+                                      builder: (context, VideoPlayerValue value,
+                                              child) =>
+                                          Row(
+                                        children: [
+                                          Card(
+                                            color: Colors.transparent,
+                                            child: IconButton(
+                                                icon: Icon(
+                                                  _videoController
+                                                          .value.isPlaying
+                                                      ? Icons.pause
+                                                      : Icons.play_arrow,
+                                                ),
+                                                onPressed: () => setState(() {
+                                                      if (!_videoController
+                                                              .value
+                                                              .isPlaying &&
+                                                          value.position
+                                                                  .compareTo(value
+                                                                      .duration) ==
+                                                              0) {
+                                                        _videoController
+                                                            .initialize();
+                                                      }
+                                                      _videoController
+                                                              .value.isPlaying
+                                                          ? _videoController
+                                                              .pause()
+                                                          : _videoController
+                                                              .play();
+                                                    })),
+                                          ),
+                                          Container(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.6,
+                                            child: VideoProgressIndicator(
+                                                _videoController,
+                                                allowScrubbing: true),
+                                          ),
+                                          SizedBox(
+                                            width: 10,
+                                          ),
+                                          Text(
+                                              '0' +
+                                                  value.position.inMinutes
+                                                      .toString() +
+                                                  ':' +
+                                                  value.position.inSeconds
+                                                      .toString(),
+                                              style: TextStyle(
+                                                  color: primaryColor,
+                                                  fontSize: 15))
+                                        ],
+                                      ),
+                                    ),
+                            ],
+                          );
                   }),
                 ));
               },
@@ -2264,6 +2341,13 @@ class _BuyAnimalState extends State<BuyAnimal>
                 ),
               ),
             ),
+            // Center(
+            //   child: Icon(
+            //     Icons.play_circle_outline_outlined,
+            //     size: 30,
+            //     color: primaryColor,
+            //   ),
+            // ),
             Positioned(
               right: 0,
               child: RaisedButton.icon(
@@ -2274,18 +2358,17 @@ class _BuyAnimalState extends State<BuyAnimal>
                   onPressed: () async {
                     String uriPrefix =
                         'https://console.firebase.google.com/u/0/project/pashusansaar-6e910/firestore/data~2FbuyingAnimalList1~2F';
-                    final DynamicLinkParameters parameters =
-                        DynamicLinkParameters(
-                            uriPrefix: 'https://pashusansaar.page.link/pashu',
-                            link: Uri.parse(
-                                // 'https://console.firebase.google.com/u/0/project/pashusansaar-6e910/firestore/data~2FbuyingAnimalList~2F${_list[index]['uniqueId'] + _list[index]['userId']}'),
-                                '$uriPrefix${_list[index]['uniqueId'] + _list[index]['userId']}'),
-                            androidParameters: AndroidParameters(
-                              packageName: 'dj.pashusansaar',
-                              minimumVersion: 21,
-                            ));
+                    final DynamicLinkParameters parameters = DynamicLinkParameters(
+                        uriPrefix: 'https://pashusansaar.page.link/pashu',
+                        link: Uri.parse(
+                            // 'https://console.firebase.google.com/u/0/project/pashusansaar-6e910/firestore/data~2FbuyingAnimalList~2F${_list[index]['uniqueId'] + _list[index]['userId']}'),
+                            '$uriPrefix${_list[index]['uniqueId'] + _list[index]['userId']}'),
+                        androidParameters: AndroidParameters(
+                          packageName: 'dj.pashusansaar',
+                          minimumVersion: 21,
+                        ));
                     final Uri dynamicUrl = await parameters.buildUrl();
-                    await takeScreenShot(_list[index]['uniqueId']);
+                    // await takeScreenShot(_list[index]['uniqueId']);
 
                     Share.shareFiles([fileUrl.path],
                         mimeTypes: ['images/png'],

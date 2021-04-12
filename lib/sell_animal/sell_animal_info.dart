@@ -224,14 +224,18 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
 
   _imageData(index) {
     var data = '';
-    if (widget.animalInfo[index]['animalImages']['image1'] != '') {
-      data = widget.animalInfo[index]['animalImages']['image1'];
-    } else if (widget.animalInfo[index]['animalImages']['image2'] != '') {
-      data = widget.animalInfo[index]['animalImages']['image2'];
-    } else if (widget.animalInfo[index]['animalImages']['image3'] != '') {
-      data = widget.animalInfo[index]['animalImages']['image3'];
-    } else if (widget.animalInfo[index]['animalImages']['image4'] != '') {
-      data = widget.animalInfo[index]['animalImages']['image4'];
+    if (widget.animalInfo[index]['animalVideoThumbnail'] == null) {
+      if (widget.animalInfo[index]['animalImages']['image1'] != '') {
+        data = widget.animalInfo[index]['animalImages']['image1'];
+      } else if (widget.animalInfo[index]['animalImages']['image2'] != '') {
+        data = widget.animalInfo[index]['animalImages']['image2'];
+      } else if (widget.animalInfo[index]['animalImages']['image3'] != '') {
+        data = widget.animalInfo[index]['animalImages']['image3'];
+      } else if (widget.animalInfo[index]['animalImages']['image4'] != '') {
+        data = widget.animalInfo[index]['animalImages']['image4'];
+      }
+    } else {
+      data = widget.animalInfo[index]['animalVideoThumbnail'];
     }
 
     return data;

@@ -1,9 +1,5 @@
-import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
@@ -23,7 +19,6 @@ import 'package:intl/intl.dart';
 import 'package:geoflutterfire/geoflutterfire.dart' as geoFire;
 import 'package:video_compress/video_compress.dart';
 import 'package:video_player/video_player.dart';
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'dart:math' as math;
 
 class SellAnimalForm extends StatefulWidget {
@@ -40,18 +35,16 @@ class SellAnimalForm extends StatefulWidget {
 class _SellAnimalFormState extends State<SellAnimalForm>
     with AutomaticKeepAliveClientMixin {
   var animalInfo = {}, extraInfoData = {};
-  String _base64Image;
   ImagePicker _picker;
   ProgressDialog pr;
   Color backgroundColor = Colors.red[50];
   bool _showData = false;
   // final _storage = new FlutterSecureStorage();
   SharedPreferences prefs;
-  String desc = '', videoUrl = '';
+  String desc = '', videoUrl = '', thumbnailURL = '';
 
   String videoPath = '';
   VideoPlayerController _videoController;
-  // String desc = '', fileUrl = '';
   File filePath;
   String uniqueId;
 
@@ -97,7 +90,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
   void dispose() {
     super.dispose();
     _subscription.unsubscribe();
-    _videoController.dispose();
+    // _videoController.dispose();
   }
 
   String _formatNumber(String s) => NumberFormat.decimalPattern(_locale).format(
@@ -112,6 +105,15 @@ class _SellAnimalFormState extends State<SellAnimalForm>
       quality: VideoQuality.LowQuality,
       deleteOrigin: false,
     ).then((info) async {
+      final thumbnailFile = await VideoCompress.getFileThumbnail(filePath,
+          quality: 50, // default(100)
+          position: -1 // default(-1)
+          );
+      await firebase_storage.FirebaseStorage.instance
+          .ref(
+              '${FirebaseAuth.instance.currentUser.uid}/thumbnail_$uniqueId.jpg')
+          .putFile(thumbnailFile);
+
       return _progressState.toStringAsFixed(2) == '100.00'
           ? await firebase_storage.FirebaseStorage.instance
               .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
@@ -123,8 +125,14 @@ class _SellAnimalFormState extends State<SellAnimalForm>
         .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
         .getDownloadURL();
 
+    String downloadThumbnailURL = await firebase_storage
+        .FirebaseStorage.instance
+        .ref('${FirebaseAuth.instance.currentUser.uid}/thumbnail_$uniqueId.jpg')
+        .getDownloadURL();
+
     setState(() {
       videoUrl = downloadURL;
+      thumbnailURL = downloadThumbnailURL;
     });
   }
 
@@ -1043,11 +1051,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                   'error'.tr,
                   Text('animal_price_error'.tr),
                 );
-              else if (videoUrl == null || videoUrl.isEmpty)
-                // else if (imagesFileUpload['image1'].isEmpty &&
-                //     imagesFileUpload['image2'].isEmpty &&
-                //     imagesFileUpload['image3'].isEmpty &&
-                //     imagesFileUpload['image4'].isEmpty)
+              else if (videoPath.isEmpty)
                 ReusableWidgets.showDialogBox(
                   context,
                   'error'.tr,
@@ -1079,6 +1083,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                     .set({
                   'animalInfo': animalInfo,
                   'animalVideo': videoUrl,
+                  'animalVideoThumbnail': thumbnailURL,
                   'extraInfo': extraInfoData,
                   'dateOfSaving':
                       ReusableWidgets.dateTimeToEpoch(DateTime.now()),
@@ -1119,22 +1124,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                             longitude: prefs.getDouble('longitude'))
                         .data,
                     'video': videoUrl,
-                    // "image1": imagesUpload['image1'] == null ||
-                    //         imagesUpload['image1'] == ""
-                    //     ? ""
-                    //     : imagesUpload['image1'],
-                    // "image2": imagesUpload['image2'] == null ||
-                    //         imagesUpload['image2'] == ""
-                    //     ? ""
-                    //     : imagesUpload['image2'],
-                    // "image3": imagesUpload['image3'] == null ||
-                    //         imagesUpload['image3'] == ""
-                    //     ? ""
-                    //     : imagesUpload['image3'],
-                    // "image4": imagesUpload['image4'] == null ||
-                    //         imagesUpload['image4'] == ""
-                    //     ? ""
-                    //     : imagesUpload['image4'],
+                    'animalVideoThumbnail': thumbnailURL,
                     "dateOfSaving":
                         ReusableWidgets.dateTimeToEpoch(DateTime.now()),
                     'isValidUser': 'Approved',
@@ -1509,7 +1499,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                                   ),
                                 ),
                                 RaisedButton(
-                                  onPressed: () => chooseOption('4'),
+                                  onPressed: () => chooseOption('0'),
                                   child: Text(
                                     'वीडियो चुने',
                                     style: TextStyle(
