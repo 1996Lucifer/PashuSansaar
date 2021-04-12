@@ -37,9 +37,9 @@ class _SplashScreenState extends State<SplashScreen> {
     return SplashScreenView(
       // home: UserDetailsFetch(currentUser: 'G6daWncSiobuilTshX9RUVjjv8f2', mobile: '+919997098955'),
       home: isLoggedIn &&
-              ([0, -1].contains(
+              ([0, 1].contains(
                   widget.newVersion[0].compareTo(widget.currentVersion[0]))) &&
-              ([0, -1].contains(
+              ([0, 1].contains(
                   widget.newVersion[1].compareTo(widget.currentVersion[1])))
           ? HomeScreen(selectedIndex: 0)
           : Login(),
