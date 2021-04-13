@@ -1,15 +1,15 @@
 import 'package:pashusansaar/login_screen.dart';
-import 'package:pashusansaar/user_details_fetch_screen.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:splash_screen_view/SplashScreenView.dart';
-
-import 'buy_animal/buy_animal.dart';
 import 'home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
-  SplashScreen({Key key}) : super(key: key);
+  final List<String> newVersion, currentVersion;
+  SplashScreen(
+      {Key key, @required this.currentVersion, @required this.newVersion})
+      : super(key: key);
 
   @override
   _SplashScreenState createState() => _SplashScreenState();
@@ -36,7 +36,13 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return SplashScreenView(
       // home: UserDetailsFetch(currentUser: 'G6daWncSiobuilTshX9RUVjjv8f2', mobile: '+919997098955'),
-      home: isLoggedIn ? HomeScreen(selectedIndex: 0) : Login(),
+      home: isLoggedIn &&
+              ([0, 1].contains(
+                  widget.newVersion[0].compareTo(widget.currentVersion[0]))) &&
+              ([0, 1].contains(
+                  widget.newVersion[1].compareTo(widget.currentVersion[1])))
+          ? HomeScreen(selectedIndex: 0)
+          : Login(),
       // home: BuyAnimal(
       //   animalInfo: [],
       //   userName: '',
