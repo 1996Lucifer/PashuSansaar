@@ -2174,23 +2174,41 @@ class _BuyAnimalState extends State<BuyAnimal>
     List _list =
         _tempAnimalList.length != 0 ? _tempAnimalList : widget.animalInfo;
 
-    List<String> _images = [];
-    if (_list[index]['video'] != null && _list[index]['video'].isNotEmpty) {
-      _videoController = VideoPlayerController.network(_list[index]['video']);
-      _videoController.setLooping(false);
-      _videoController.initialize();
-      _videoController.pause();
+    List<String> _images = [], list = [];
+
+
+    try {
+      if (!_list[index].getBoolean .containsKey('video')) {
+        // list = [
+        //   _list[index]['image1'],
+        //   _list[index]['image2'],
+        //   _list[index]['image3'],
+        //   _list[index]['image4'],
+        // ];
+        list.add(_list[index]['image1']);
+        list.add(_list[index]['image2']);
+        list.add(_list[index]['image3']);
+        list.add(_list[index]['image4']);
+      } else {
+        list.add(_list[index]['animalVideoThumbnail']);
+        _videoController = VideoPlayerController.network(_list[index]['video']);
+        _videoController.setLooping(false);
+        _videoController.initialize();
+        _videoController.pause();
+      }
+    } catch (e) {
+      print('erroe-=->' + e.toString());
     }
-    (_list[index]['animalVideoThumbnail'] == null
-            ? [
-                _list[index]['image1'],
-                _list[index]['image2'],
-                _list[index]['image3'],
-                _list[index]['image4'],
-              ]
-            : [_list[index]['animalVideoThumbnail']])
-        .forEach((element) =>
-            _images.addIf(element != null && element.isNotEmpty, element));
+    // (_list[index]['animalVideoThumbnail'] == null
+    //         ? [
+    //             _list[index]['image1'],
+    //             _list[index]['image2'],
+    //             _list[index]['image3'],
+    //             _list[index]['image4'],
+    //           ]
+    //         : [_list[index]['animalVideoThumbnail']])
+    list.forEach((element) =>
+        _images.addIf(element != null && element.isNotEmpty, element));
     return Padding(
         padding: EdgeInsets.only(left: 8.0, right: 8, bottom: 4),
         child: Stack(
