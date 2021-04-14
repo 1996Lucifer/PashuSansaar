@@ -5,12 +5,16 @@ import 'package:pashusansaar/buy_animal/buy_animal.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:pashusansaar/utils/global.dart';
+import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'profile_main.dart';
 import 'sell_animal/sell_animal_main.dart';
 import 'package:get/get.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
+import 'package:android_play_install_referrer/android_play_install_referrer.dart';
+import 'package:geocoder/geocoder.dart' as geoCoder;
 
 // ignore: must_be_immutable
 class HomeScreen extends StatefulWidget {
@@ -33,6 +37,42 @@ class _HomeScreenState extends State<HomeScreen> {
     // checkForUpdate();
     loginSetup();
     super.initState();
+  }
+
+  Future<void> initReferrerDetails(mobile) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var address = await geoCoder.Geocoder.local.findAddressesFromCoordinates(
+        geoCoder.Coordinates(
+            prefs.getDouble('latitude'), prefs.getDouble('longitude')));
+    var first = address.first;
+    try {
+      ReferrerDetails referrerDetails =
+          await AndroidPlayInstallReferrer.installReferrer;
+
+      List<String> str = referrerDetails.installReferrer.split('&');
+
+      Map<String, dynamic> referralInfo = {
+        'installBeginTimestampSeconds':
+            referrerDetails.installBeginTimestampSeconds,
+        'installReferrer': {
+          'utmSource': str[0].substring(11),
+          'utmMedium': str[1].substring(11)
+        },
+        'installVersion': referrerDetails.installVersion,
+        'userAddress':
+            first.addressLine ?? (first.adminArea + ', ' + first.countryName),
+        'dateOfSaving': ReusableWidgets.dateTimeToEpoch(DateTime.now()),
+        'userId': FirebaseAuth.instance.currentUser.uid,
+        'userMobile': mobile
+      };
+
+      await FirebaseFirestore.instance
+          .collection('referralData')
+          .doc(uniqueValue)
+          .update(referralInfo);
+    } catch (e) {
+      print('e-referral--->' + e.toString());
+    }
   }
 
   loginSetup() async {
@@ -119,8 +159,8 @@ class _HomeScreenState extends State<HomeScreen> {
     getProfileInfo();
   }
 
-  getProfileInfo() {
-    FirebaseFirestore.instance
+  getProfileInfo() async {
+    await FirebaseFirestore.instance
         .collection("userInfo")
         .doc(FirebaseAuth.instance.currentUser.uid)
         .get(GetOptions(source: Source.serverAndCache))
@@ -132,6 +172,7 @@ class _HomeScreenState extends State<HomeScreen> {
         pr.hide();
       },
     );
+    await initReferrerDetails(_profileData['mobile']);
   }
 
   void _onItemTapped(int index) {

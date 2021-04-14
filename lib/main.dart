@@ -1,3 +1,6 @@
+import 'package:android_play_install_referrer/android_play_install_referrer.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:pashusansaar/splash_screen.dart';
 import 'package:pashusansaar/translation/message.dart';
@@ -6,9 +9,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:pashusansaar/utils/global.dart';
 import 'package:url_launcher/url_launcher.dart' as URLauncher;
 import 'package:package_info/package_info.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
+
+import 'utils/reusable_widgets.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,6 +48,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   versionCheck(context) async {
+    String _unique = ReusableWidgets.randomIDGenerator();
+    await initReferrerDetails(_unique);
     final PackageInfo info = await PackageInfo.fromPlatform();
     final RemoteConfig remoteConfig = await RemoteConfig.instance;
 
@@ -57,6 +65,7 @@ class _MyAppState extends State<MyApp> {
       setState(() {
         newVersion = newVersion1;
         currentVersion = currentVersion1;
+        uniqueValue = _unique;
       });
       if ((newVersion1[0].compareTo(currentVersion1[0]) == 1) ||
           (newVersion1[1].compareTo(currentVersion1[1]) == 1)) {
@@ -66,6 +75,33 @@ class _MyAppState extends State<MyApp> {
         await _showVersionDialog(newVersion1, currentVersion1, false);
     } catch (exception) {
       print(exception);
+    }
+  }
+
+  Future<void> initReferrerDetails(String unique) async {
+    try {
+      ReferrerDetails referrerDetails =
+          await AndroidPlayInstallReferrer.installReferrer;
+
+      List<String> str = referrerDetails.installReferrer.split('&');
+
+      Map<String, dynamic> _referralInfo1 = {
+        'installBeginTimestampSeconds':
+            referrerDetails.installBeginTimestampSeconds,
+        'installReferrer': {
+          'utmSource': str[0].substring(11),
+          'utmMedium': str[1].substring(11)
+        },
+        'installVersion': referrerDetails.installVersion,
+        'dateOfSaving': ReusableWidgets.dateTimeToEpoch(DateTime.now()),
+      };
+
+      await FirebaseFirestore.instance
+          .collection('referralData')
+          .doc(unique)
+          .set(_referralInfo1);
+    } catch (e) {
+      print('e-referral--->' + e.toString());
     }
   }
 
