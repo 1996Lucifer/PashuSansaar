@@ -23,6 +23,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  android_play_install_referrer:
   carousel_slider: ^3.0.0
   cloud_firestore: ^0.16.0+1
   csv: ^4.1.0
@@ -38,7 +39,7 @@ dependencies:
   firebase_in_app_messaging: null
   firebase_remote_config: null
   firebase_storage: null
-  flutter_countdown_timer:
+  flutter_countdown_timer: null
   flutter_launcher_icons: null
   flutter_native_image: ^0.0.5+3
   font_awesome_flutter: ^8.11.0

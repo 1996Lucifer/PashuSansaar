@@ -6,7 +6,7 @@ import 'package:splash_screen_view/SplashScreenView.dart';
 import 'home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
-  final String newVersion, currentVersion;
+  final List<String> newVersion, currentVersion;
   SplashScreen(
       {Key key, @required this.currentVersion, @required this.newVersion})
       : super(key: key);
@@ -37,12 +37,10 @@ class _SplashScreenState extends State<SplashScreen> {
     return SplashScreenView(
       // home: UserDetailsFetch(currentUser: 'G6daWncSiobuilTshX9RUVjjv8f2', mobile: '+919997098955'),
       home: isLoggedIn &&
-              ([0, -1].contains(widget.newVersion
-                  .split('.')[0]
-                  ?.compareTo(widget.currentVersion.split('.')[0]))) &&
-              ([0, -1].contains(widget.newVersion
-                  .split('.')[1]
-                  ?.compareTo(widget.currentVersion.split('.')[1])))
+              ([0, 1].contains(
+                  widget.newVersion[0].compareTo(widget.currentVersion[0]))) &&
+              ([0, 1].contains(
+                  widget.newVersion[1].compareTo(widget.currentVersion[1])))
           ? HomeScreen(selectedIndex: 0)
           : Login(),
       // home: BuyAnimal(
