@@ -173,7 +173,7 @@ class _HomeScreenState extends State<HomeScreen> {
         pr.hide();
       },
     );
-    await initReferrerDetails(_profileData['mobile']);
+    initReferrerDetails(_profileData['mobile']);
   }
 
   void _onItemTapped(int index) {

@@ -1352,6 +1352,8 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                     'isValidUser': isValidUser,
                     'userId': userId,
                     "animalDescription": _descriptionText(),
+                    'animalVideo': '',
+                    'animalVideoThumbnail': ''
                   };
 
                   mapForBuyingListWithImage = {
@@ -1395,7 +1397,9 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                     'uniqueId': uniqueId,
                     'isValidUser': isValidUser,
                     'userId': userId,
-                    'extraInfo': extraInfoData
+                    'extraInfo': extraInfoData,
+                    'video': '',
+                    'animalVideoThumbnail': ''
                   };
                 } else {
                   mapWithVideo = {
@@ -1409,6 +1413,10 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                     'isValidUser': isValidUser,
                     'userId': userId,
                     "animalDescription": _descriptionText(),
+                    'image1': '',
+                    'image2': '',
+                    'image3': '',
+                    'image4': '',
                   };
 
                   mapForBuyingListWithVideo = {
@@ -1438,7 +1446,11 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                     'uniqueId': uniqueId,
                     'isValidUser': isValidUser,
                     'userId': userId,
-                    'extraInfo': extraInfoData
+                    'extraInfo': extraInfoData,
+                    'image1': '',
+                    'image2': '',
+                    'image3': '',
+                    'image4': '',
                   };
                 }
 

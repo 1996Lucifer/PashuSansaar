@@ -1091,6 +1091,10 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                   'isValidUser': 'Approved',
                   'userId': FirebaseAuth.instance.currentUser.uid,
                   "animalDescription": _descriptionText(),
+                  'image1': '',
+                  'image2': '',
+                  'image3': '',
+                  'image4': '',
                 }).then((res) async {
                   SharedPreferences prefs =
                       await SharedPreferences.getInstance();
@@ -1130,7 +1134,11 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                     'isValidUser': 'Approved',
                     'uniqueId': uniqueId,
                     'userId': FirebaseAuth.instance.currentUser.uid,
-                    'extraInfo': extraInfoData
+                    'extraInfo': extraInfoData,
+                    'image1': '',
+                    'image2': '',
+                    'image3': '',
+                    'image4': '',
                   }).then((value) {
                     pr.hide();
                     return showDialog(
