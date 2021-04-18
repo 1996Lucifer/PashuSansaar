@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geocoder/geocoder.dart';
@@ -44,7 +45,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
   String desc = '', videoUrl = '', thumbnailURL = '';
 
   String videoPath = '';
-  VideoPlayerController _videoController;
+  VideoPlayerController _videoController, _videoController1;
   File filePath;
   String uniqueId;
 
@@ -90,7 +91,8 @@ class _SellAnimalFormState extends State<SellAnimalForm>
   void dispose() {
     super.dispose();
     _subscription.unsubscribe();
-    // _videoController.dispose();
+    _videoController.dispose();
+    _videoController1.dispose();
   }
 
   String _formatNumber(String s) => NumberFormat.decimalPattern(_locale).format(
@@ -100,6 +102,17 @@ class _SellAnimalFormState extends State<SellAnimalForm>
       NumberFormat.compactSimpleCurrency(locale: _locale).currencySymbol;
 
   Future<void> uploadFile(String filePath) async {
+    // pr = new ProgressDialog(context,
+    //     type: ProgressDialogType.Download, isDismissible: false);
+
+    // print('_progressState===' + _progressState.toString());
+
+    // pr.style(
+    //     message: 'video_progress_dialog_message'.tr,
+    //     progress: double.parse(_progressState.toStringAsFixed(2)),
+    //     maxProgress: 100.0);
+    // pr.show();
+
     await VideoCompress.compressVideo(
       filePath,
       quality: VideoQuality.LowQuality,
@@ -134,6 +147,8 @@ class _SellAnimalFormState extends State<SellAnimalForm>
       videoUrl = downloadURL;
       thumbnailURL = downloadThumbnailURL;
     });
+
+    // pr.hide();
   }
 
   Future<void> _choose(index) async {
@@ -1072,7 +1087,6 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                 pr.style(message: 'progress_dialog_message'.tr);
                 pr.show();
 
-                // String uniqueId = Uuid().v1().toString();
                 await uploadFile(videoPath);
 
                 await FirebaseFirestore.instance
@@ -1592,20 +1606,9 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                                             SizedBox(
                                               width: 10,
                                             ),
-                                            Text(
-                                                '0' +
-                                                    value.position.inMinutes
-                                                        .toString() +
-                                                    ':' +
-                                                    value.position.inSeconds
-                                                        .toString(),
-                                                style: TextStyle(
-                                                    color: primaryColor))
-
-                                            //       Row(
-                                            // children: [
-                                            // ],
-                                            // )
+                                            Text(ReusableWidgets.printDuration(
+                                                    value.position)
+                                                .toString())
                                           ],
                                         ),
                                       ),
@@ -1685,22 +1688,135 @@ class _SellAnimalFormState extends State<SellAnimalForm>
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'upload_image_text'.tr,
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    RichText(
+                      text: TextSpan(
+                        text: 'upload_image_text'.tr,
+                        style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black),
+                        children: <TextSpan>[
+                          TextSpan(
+                              text: ' *',
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red)),
+                        ],
+                      ),
                     ),
-                    SizedBox(
-                      width: 5,
-                    ),
-                    Text(
-                      '*',
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.red),
-                    ),
+                    GestureDetector(
+                      onTap: () {
+                        _videoController1 = VideoPlayerController.network(
+                            'https://firebasestorage.googleapis.com/v0/b/pashusansaar-6e910.appspot.com/o/sample_video%2Fsample_video.mp4?alt=media&token=77ec82d0-5ce7-4a4b-84d9-a0f65915401b');
+                        _videoController1.setLooping(false);
+                        _videoController1.initialize();
+                        _videoController1.pause();
+
+                        return Navigator.of(context).push(
+                          PageRouteBuilder(
+                            opaque: true,
+                            pageBuilder: (BuildContext context, _, __) =>
+                                WillPopScope(
+                                    onWillPop: () async {
+                                      setState(() {
+                                        _videoController1.pause();
+                                      });
+                                      return true;
+                                    },
+                                    child: StatefulBuilder(
+                                        builder: (context, setState) => Stack(
+                                              alignment: AlignmentDirectional
+                                                  .bottomCenter,
+                                              children: [
+                                                Center(
+                                                    child:
+                                                        StreamBuilder<Object>(
+                                                            stream: null,
+                                                            builder: (context,
+                                                                snapshot) {
+                                                              return VideoPlayer(
+                                                                  _videoController1);
+                                                            })),
+                                                _videoController1 == null
+                                                    ? SizedBox.shrink()
+                                                    : ValueListenableBuilder(
+                                                        valueListenable:
+                                                            _videoController1,
+                                                        builder: (context,
+                                                                VideoPlayerValue
+                                                                    value,
+                                                                child) =>
+                                                            Row(
+                                                          children: [
+                                                            Card(
+                                                              color: Colors
+                                                                  .transparent,
+                                                              child: IconButton(
+                                                                  icon: Icon(
+                                                                    _videoController1
+                                                                            .value
+                                                                            .isPlaying
+                                                                        ? Icons
+                                                                            .pause
+                                                                        : Icons
+                                                                            .play_arrow,
+                                                                  ),
+                                                                  onPressed: () =>
+                                                                      setState(
+                                                                          () {
+                                                                        if (!_videoController1.value.isPlaying &&
+                                                                            value.position.compareTo(value.duration) ==
+                                                                                0) {
+                                                                          _videoController1
+                                                                              .initialize();
+                                                                        }
+                                                                        _videoController1.value.isPlaying
+                                                                            ? _videoController1.pause()
+                                                                            : _videoController1.play();
+                                                                      })),
+                                                            ),
+                                                            Container(
+                                                              width: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width *
+                                                                  0.6,
+                                                              child: VideoProgressIndicator(
+                                                                  _videoController1,
+                                                                  allowScrubbing:
+                                                                      true),
+                                                            ),
+                                                            SizedBox(
+                                                              width: 10,
+                                                            ),
+                                                            Text(
+                                                                ReusableWidgets
+                                                                        .printDuration(value
+                                                                            .position)
+                                                                    .toString(),
+                                                                style: TextStyle(
+                                                                    color:
+                                                                        primaryColor,
+                                                                    fontSize:
+                                                                        15))
+                                                          ],
+                                                        ),
+                                                      ),
+                                              ],
+                                            ))),
+                          ),
+                        );
+                      },
+                      child: Text('sample_video'.tr,
+                          style: TextStyle(
+                              decoration: TextDecoration.underline,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black)),
+                    )
                   ],
                 ),
               ),

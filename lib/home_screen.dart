@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:pashusansaar/buy_animal/buy_animal.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -35,8 +36,16 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     _pageController = PageController(initialPage: widget.selectedIndex);
+    // _notificationChannel();
     loginSetup();
     super.initState();
+  }
+
+  _notificationChannel() async {
+    RemoteMessage initialMessage =
+        await FirebaseMessaging.instance.getInitialMessage();
+    var x = initialMessage?.data['type'];
+    print('notification===>>' + x.toString());
   }
 
   Future<void> initReferrerDetails(mobile) async {
@@ -97,7 +106,6 @@ class _HomeScreenState extends State<HomeScreen> {
     pr.show();
 
     try {
-      // FirebaseFirestore.instance.clearPersistence();
       Stream<List<DocumentSnapshot>> stream = geo
           .collection(
               collectionRef:
@@ -124,6 +132,8 @@ class _HomeScreenState extends State<HomeScreen> {
         setState(() {
           // dataSnapshotValue = documentList[documentList.length - 1];
           _animalInfo = _temp;
+          _animalInfo
+              .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
         });
 
         print("=-=-=" + documentList.length.toString());
@@ -154,7 +164,6 @@ class _HomeScreenState extends State<HomeScreen> {
           _sellingAnimalInfo = _info;
           prefs.setString('animalDetails', jsonEncode(_info));
         });
-        // pr.hide();
       },
     );
     getProfileInfo();
@@ -173,7 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
         pr.hide();
       },
     );
-    initReferrerDetails(_profileData['mobile']);
+    await initReferrerDetails(_profileData['mobile']);
   }
 
   void _onItemTapped(int index) {

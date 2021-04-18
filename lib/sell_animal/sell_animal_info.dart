@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:video_player/video_player.dart';
 
 import '../interested_buyer.dart';
 import 'sell_animal_edit_form.dart';
@@ -31,6 +32,8 @@ class SellingAnimalInfo extends StatefulWidget {
 
 class _SellingAnimalInfoState extends State<SellingAnimalInfo>
     with AutomaticKeepAliveClientMixin {
+  VideoPlayerController _videoController;
+
   @override
   bool get wantKeepAlive => true;
 
@@ -236,6 +239,11 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
       }
     } else {
       data = widget.animalInfo[index]['animalVideoThumbnail'];
+      // _videoController =
+      //     VideoPlayerController.network(widget.animalInfo[index]['video']);
+      // _videoController.setLooping(false);
+      // _videoController.initialize();
+      // _videoController.pause();
     }
 
     return data;
@@ -299,21 +307,192 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
           children: [
             Expanded(
               flex: 1,
-              child: Container(
-                width: width * 0.3,
-                height: 130.0,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: _imageData(index).length > 1000
-                          ? MemoryImage(base64Decode(_imageData(index)))
-                          : NetworkImage(_imageData(index))),
-                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                  color: Colors.redAccent,
-                ),
-              ),
-            ),
-            Expanded(
+              child: 
+            _imageData(index).length > 1000
+                    ? Container(
+                        width: width * 0.3,
+                        height: 130.0,
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                              fit: BoxFit.cover,
+                              image:
+                                  MemoryImage(base64Decode(_imageData(index)))),
+                          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                          color: Colors.redAccent,
+                        ),
+                      )
+                    : Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(
+                            width: width * 0.3,
+                            height: 130.0,
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                  fit: BoxFit.cover,
+                                  image: NetworkImage(_imageData(index))),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(8.0)),
+                              color: Colors.redAccent,
+                            ),
+                          ),
+                          // Icon(
+                          //   Icons.play_circle_outline_outlined,
+                          //   color: Colors.grey,
+                          //   size: 45,
+                          // ),
+                        ],
+                      ),)
+            // WillPopScope(
+            //   onWillPop: () async {
+            //     setState(() {
+            //       _videoController.pause();
+            //     });
+            //     return true;
+            //   },
+            //   child: GestureDetector(
+            //     onTap: () {
+            //       Navigator.of(context).push(
+            //         PageRouteBuilder(
+            //           opaque: true,
+            //           pageBuilder: (BuildContext context, _, __) =>
+            //               StatefulBuilder(
+            //                   builder: (context, setState) => widget
+            //                                       .animalInfo[index]
+            //                                   ['animalVideoThumbnail'] ==
+            //                               null ||
+            //                           widget.animalInfo[index]
+            //                                   ['animalVideoThumbnail'] ==
+            //                               ''
+            //                       ? SizedBox.shrink()
+            //                       : Expanded(
+            //                           flex: 1,
+            //                           child: Stack(
+            //                             alignment:
+            //                                 AlignmentDirectional.bottomCenter,
+            //                             children: [
+            //                               Center(
+            //                                   child: StreamBuilder<Object>(
+            //                                       stream: null,
+            //                                       builder: (context, snapshot) {
+            //                                         return VideoPlayer(
+            //                                             _videoController);
+            //                                       })),
+            //                               _videoController == null
+            //                                   ? SizedBox.shrink()
+            //                                   : ValueListenableBuilder(
+            //                                       valueListenable:
+            //                                           _videoController,
+            //                                       builder: (context,
+            //                                               VideoPlayerValue
+            //                                                   value,
+            //                                               child) =>
+            //                                           Row(
+            //                                         children: [
+            //                                           Card(
+            //                                             color:
+            //                                                 Colors.transparent,
+            //                                             child: IconButton(
+            //                                                 icon: Icon(
+            //                                                   _videoController
+            //                                                           .value
+            //                                                           .isPlaying
+            //                                                       ? Icons.pause
+            //                                                       : Icons
+            //                                                           .play_arrow,
+            //                                                 ),
+            //                                                 onPressed: () =>
+            //                                                     setState(() {
+            //                                                       if (!_videoController
+            //                                                               .value
+            //                                                               .isPlaying &&
+            //                                                           value.position
+            //                                                                   .compareTo(value.duration) ==
+            //                                                               0) {
+            //                                                         _videoController
+            //                                                             .initialize();
+            //                                                       }
+            //                                                       _videoController
+            //                                                               .value
+            //                                                               .isPlaying
+            //                                                           ? _videoController
+            //                                                               .pause()
+            //                                                           : _videoController
+            //                                                               .play();
+            //                                                     })),
+            //                                           ),
+            //                                           Container(
+            //                                             width: MediaQuery.of(
+            //                                                         context)
+            //                                                     .size
+            //                                                     .width *
+            //                                                 0.6,
+            //                                             child:
+            //                                                 VideoProgressIndicator(
+            //                                                     _videoController,
+            //                                                     allowScrubbing:
+            //                                                         true),
+            //                                           ),
+            //                                           SizedBox(
+            //                                             width: 10,
+            //                                           ),
+            //                                           Text(
+            //                                               ReusableWidgets
+            //                                                       .printDuration(
+            //                                                           value
+            //                                                               .position)
+            //                                                   .toString(),
+            //                                               style: TextStyle(
+            //                                                   color:
+            //                                                       primaryColor,
+            //                                                   fontSize: 15))
+            //                                         ],
+            //                                       ),
+            //                                     ),
+            //                             ],
+            //                           ),
+            //                         )),
+            //         ),
+            //       );
+            //     },
+            //     child: _imageData(index).length > 1000
+            //         ? Container(
+            //             width: width * 0.3,
+            //             height: 130.0,
+            //             decoration: BoxDecoration(
+            //               image: DecorationImage(
+            //                   fit: BoxFit.cover,
+            //                   image:
+            //                       MemoryImage(base64Decode(_imageData(index)))),
+            //               borderRadius: BorderRadius.all(Radius.circular(8.0)),
+            //               color: Colors.redAccent,
+            //             ),
+            //           )
+            //         : Stack(
+            //             alignment: Alignment.center,
+            //             children: [
+            //               Container(
+            //                 width: width * 0.3,
+            //                 height: 130.0,
+            //                 decoration: BoxDecoration(
+            //                   image: DecorationImage(
+            //                       fit: BoxFit.cover,
+            //                       image: NetworkImage(_imageData(index))),
+            //                   borderRadius:
+            //                       BorderRadius.all(Radius.circular(8.0)),
+            //                   color: Colors.redAccent,
+            //                 ),
+            //               ),
+            //               Icon(
+            //                 Icons.play_circle_outline_outlined,
+            //                 color: Colors.grey,
+            //                 size: 45,
+            //               ),
+            //             ],
+            //           ),
+            //   ),
+            // ),
+            ,Expanded(
                 flex: 2,
                 child: Padding(
                   padding:

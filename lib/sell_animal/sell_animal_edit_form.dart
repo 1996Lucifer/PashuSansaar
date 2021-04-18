@@ -76,7 +76,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
   TextEditingController _controller;
   static const _locale = 'en_IN';
   Subscription _subscription;
-  double _progressState = 0;
+  double _progressState = 0.0;
   bool _isInitialised = false;
 
   @override
@@ -99,7 +99,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
   void dispose() {
     super.dispose();
     _subscription.unsubscribe();
-    // _videoController.dispose();
+    _videoController.dispose();
   }
 
   inititalValues() async {
@@ -148,6 +148,15 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
       intl.NumberFormat.compactSimpleCurrency(locale: _locale).currencySymbol;
 
   Future<void> uploadFile(String filePath) async {
+    // pr = new ProgressDialog(context,
+    //     type: ProgressDialogType.Download, isDismissible: false);
+
+    // pr.style(
+    //     message: 'video_progress_dialog_message'.tr,
+    //     progress: double.parse(_progressState.toStringAsFixed(2)),
+    //     maxProgress: 100.0);
+    // pr.show();
+
     await VideoCompress.compressVideo(
       filePath,
       quality: VideoQuality.LowQuality,
@@ -182,6 +191,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
       videoUrl = downloadURL;
       thumbnailURL = downloadThumbnailURL;
     });
+    // pr.hide();
   }
 
   Future<void> uploadImageFile(File file, String index) async {
@@ -1162,12 +1172,9 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                                               width: 10,
                                             ),
                                             Text(
-                                                '0' +
-                                                    value.position.inMinutes
-                                                        .toString() +
-                                                    ':' +
-                                                    value.position.inSeconds
-                                                        .toString(),
+                                                ReusableWidgets.printDuration(
+                                                        value.position)
+                                                    .toString(),
                                                 style: TextStyle(
                                                     color: primaryColor))
                                           ],
@@ -1323,10 +1330,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
               else {
                 // await Firebase.initializeApp();
                 //
-                pr = new ProgressDialog(context,
-                    type: ProgressDialogType.Normal, isDismissible: false);
-                pr.style(message: 'progress_dialog_message'.tr);
-                pr.show();
+
                 SharedPreferences prefs = await SharedPreferences.getInstance();
                 var addresses = await Geocoder.local
                     .findAddressesFromCoordinates(Coordinates(
@@ -1453,6 +1457,11 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                     'image4': '',
                   };
                 }
+
+                pr = new ProgressDialog(context,
+                    type: ProgressDialogType.Normal, isDismissible: false);
+                pr.style(message: 'progress_dialog_message'.tr);
+                pr.show();
 
                 await uploadFile(videoPath);
 

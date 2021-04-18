@@ -23,7 +23,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  android_play_install_referrer:
+  android_play_install_referrer: null
   carousel_slider: ^3.0.0
   cloud_firestore: ^0.16.0+1
   csv: ^4.1.0
@@ -37,6 +37,7 @@ dependencies:
   firebase_core: ^0.7.0
   firebase_dynamic_links: null
   firebase_in_app_messaging: null
+  firebase_messaging:
   firebase_remote_config: null
   firebase_storage: null
   flutter_countdown_timer: null
@@ -60,10 +61,8 @@ dependencies:
   shared_preferences: ^0.5.12+4
   splash_screen_view: ^1.0.3
   url_launcher: null
-  # uuid: null
   video_compress: null
-  video_player:
-  # uuid: null
+  video_player: null
 
 dev_dependencies:
   flutter_test:

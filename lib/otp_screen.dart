@@ -41,15 +41,15 @@ class _OTPScreenState extends State<OTPScreen> {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('OTP भेजा गया है'))));
 
-    // setState(() {
-    //   _startTimer = true;
-    // });
+    setState(() {
+      _startTimer = true;
+    });
 
     onTapRecognizer = TapGestureRecognizer()
       ..onTap = () async {
-        // setState(() {
-        //   _startTimer = true;
-        // });
+        setState(() {
+          _startTimer = true;
+        });
 
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('OTP पुनः भेजा गया है')));
@@ -117,7 +117,7 @@ class _OTPScreenState extends State<OTPScreen> {
               setState(() {
                 _verificationCode = verficationID;
                 _resendToken = resendToken;
-                _startTimer = true;
+                // _startTimer = true;
               });
             },
             codeAutoRetrievalTimeout: (String verificationID) {

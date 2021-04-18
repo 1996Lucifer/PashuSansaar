@@ -222,6 +222,7 @@ class Messages extends Translations {
           'years_ago': 'साल पहले',
           'animal_selling_form': 'पशु बेचने के लिए नीचे बटन दबाये',
           'progress_dialog_message': 'जानकारी लोड हो रही है..',
+          'video_progress_dialog_message': 'वीडियो लोड हो रही है..',
           'share': 'शेयर करे',
           'message': 'व्हाट्सप्प',
           'call': 'कॉल करे',
@@ -237,7 +238,8 @@ class Messages extends Translations {
           'profile': 'प्रोफ़ाइल',
           'animal_filter': 'पशु फ़िल्टर',
           'apply_button': 'चयन सेव करें',
-          'reset_button': 'सभी चयन हटाएँ'
+          'reset_button': 'सभी चयन हटाएँ',
+          'sample_video': 'सैंपल वीडियो चेक करे'
         }
       };
 }
