@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:pashusansaar/utils/global.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart' as URLauncher;
 import 'package:package_info/package_info.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
@@ -33,22 +34,26 @@ class _MyAppState extends State<MyApp> {
   final playStoreUrl =
       'https://play.google.com/store/apps/details?id=dj.pashusansaar';
   List<String> newVersion, currentVersion;
+  bool _checkReferral = false;
 
   @override
   void initState() {
     super.initState();
+    getReferralCheck();
+  }
+
+  getReferralCheck() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _checkReferral = prefs.getBool('checkReferral') ?? false;
+    });
+
     versionCheck(context);
-    // try {
-    //   SchedulerBinding.instance
-    //       .addPostFrameCallback((_) => versionCheck(context));
-    // } catch (e) {
-    //   print(e);
-    // }
   }
 
   versionCheck(context) async {
     String _unique = ReusableWidgets.randomIDGenerator();
-    await initReferrerDetails(_unique);
+    if (!_checkReferral) await initReferrerDetails(_unique);
     final PackageInfo info = await PackageInfo.fromPlatform();
     final RemoteConfig remoteConfig = await RemoteConfig.instance;
 
@@ -79,6 +84,8 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> initReferrerDetails(String unique) async {
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+
       ReferrerDetails referrerDetails =
           await AndroidPlayInstallReferrer.installReferrer;
 
@@ -99,6 +106,10 @@ class _MyAppState extends State<MyApp> {
           .collection('referralData')
           .doc(unique)
           .set(_referralInfo1);
+
+      setState(() {
+        prefs.setBool('checkReferral', true);
+      });
     } catch (e) {
       print('e-referral--->' + e.toString());
     }

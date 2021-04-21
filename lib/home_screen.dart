@@ -79,8 +79,10 @@ class _HomeScreenState extends State<HomeScreen> {
           .collection('referralData')
           .doc(uniqueValue)
           .update(referralInfo);
+      pr.hide();
     } catch (e) {
       print('e-referral--->' + e.toString());
+      pr.hide();
     }
   }
 
@@ -179,7 +181,6 @@ class _HomeScreenState extends State<HomeScreen> {
         setState(() {
           _profileData = value.data();
         });
-        pr.hide();
       },
     );
     await initReferrerDetails(_profileData['mobile']);
