@@ -219,7 +219,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
         var pickedFile = await _picker.getVideo(
             source: ImageSource.camera,
             preferredCameraDevice: CameraDevice.rear,
-            maxDuration: Duration(minutes: 1));
+            maxDuration: Duration(minutes: 2));
 
         switch (pickedFile) {
           case null:
@@ -1120,9 +1120,13 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                                           _isInitialised = false;
                                         });
                                       },
-                                      child: Icon(
-                                        Icons.cancel_rounded,
-                                        color: primaryColor,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Icon(
+                                          Icons.cancel_rounded,
+                                          color: primaryColor,
+                                          size: 30
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -1342,10 +1346,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                 Map<String, dynamic> mapWithVideo = {};
                 Map<String, dynamic> mapForBuyingListWithVideo = {};
 
-                if (videoPath == null ||
-                    videoUrl == null ||
-                    videoPath.isEmpty ||
-                    videoUrl.isEmpty) {
+                if (videoUrl.isEmpty) {
                   mapWithImage = {
                     'animalInfo': animalInfo,
                     'animalImages': imagesUpload,
@@ -1462,8 +1463,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                     type: ProgressDialogType.Normal, isDismissible: false);
                 pr.style(message: 'progress_dialog_message'.tr);
                 pr.show();
-
-                await uploadFile(videoPath);
+                if (videoUrl.isEmpty) await uploadFile(videoPath);
 
                 await FirebaseFirestore.instance
                     .collection("animalSellingInfo")

@@ -1555,9 +1555,10 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                                           _isInitialised = false;
                                         });
                                       },
-                                      child: Icon(
-                                        Icons.cancel_rounded,
-                                        color: primaryColor,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Icon(Icons.cancel_rounded,
+                                            color: primaryColor, size: 30),
                                       ),
                                     ),
                                   ),

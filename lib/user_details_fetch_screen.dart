@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:device_info/device_info.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pashusansaar/home_screen.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
@@ -35,6 +36,7 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
   TextEditingController zipCodeController = new TextEditingController();
   Map<String, dynamic> mobileInfo = {};
   LocationData _locate;
+  String _userAddress = '';
   // Map _profileData = {};
 
   // final geo = geoFire.Geoflutterfire();
@@ -170,6 +172,8 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
     var first = addresses.first;
 
     setState(() {
+      _userAddress =
+          first.addressLine ?? (first.adminArea + ', ' + first.countryName);
       prefs.setDouble("latitude", first.coordinates.latitude);
       prefs.setDouble("longitude", first.coordinates.longitude);
     });
@@ -196,6 +200,18 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
     // }
     // pr.hide();
     // return true;
+  }
+
+  getPositionBasedOnLatLong(double lat, double long) async {
+    final coordinates = new Coordinates(lat, long);
+    var addresses =
+        await Geocoder.local.findAddressesFromCoordinates(coordinates);
+    var first = addresses.first;
+
+    setState(() {
+      _userAddress =
+          first.addressLine ?? (first.adminArea + ', ' + first.countryName);
+    });
   }
 
   @override
@@ -389,11 +405,15 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                             if (_zipCodeTextField &&
                                 zipCodeController.text.isNotEmpty)
                               await loadAsset();
+
                             pr = new ProgressDialog(context,
                                 type: ProgressDialogType.Normal,
                                 isDismissible: false);
                             pr.style(message: 'progress_dialog_message'.tr);
                             pr.show();
+                            await getPositionBasedOnLatLong(
+                                prefs.getDouble('latitude'),
+                                prefs.getDouble('longitude'));
                             FirebaseFirestore.instance
                                 .collection("userInfo")
                                 .doc(widget.currentUser)
@@ -417,7 +437,15 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                                       .text.isNotEmpty
                                   ? referralCodeController.text.toUpperCase()
                                   : '',
-                              'alreadyUser': true
+                              'alreadyUser': true,
+                              'userAddress': _userAddress,
+                              'lastSignInDate': FirebaseAuth
+                                  .instance.currentUser.metadata.lastSignInTime
+                                  .toString(),
+
+                              'creationDate': FirebaseAuth
+                                  .instance.currentUser.metadata.creationTime
+                                  .toString()
                             }).then((result) {
                               pr.hide();
                               Navigator.pushReplacement(

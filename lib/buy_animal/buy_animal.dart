@@ -128,12 +128,6 @@ class _BuyAnimalState extends State<BuyAnimal>
   // }
 
   _getInitialData() async {
-    // pr = new ProgressDialog(context,
-    //     type: ProgressDialogType.Normal, isDismissible: false);
-
-    // pr.style(message: 'progress_dialog_message'.tr);
-    // pr.show();
-
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       _latitude = prefs.getDouble('latitude');
@@ -278,7 +272,7 @@ class _BuyAnimalState extends State<BuyAnimal>
   //       // .where('uniqueId',
   //       //     isGreaterThan: '80000000',
   //       //     isLessThanOrEqualTo: '90000000') // 30 - 31
-  //                 .where('uniqueId', isGreaterThan: '90000000') // k
+  //       // .where('uniqueId', isGreaterThan: '90000000') // k
 
   //       .get()
   //       .then((value) => value.docs.forEach((element) async {
@@ -1665,8 +1659,10 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                                   'longitude')));
                                                   var first = addresses.first;
 
-                                                  if (widget.animalInfo[index]
-                                                      ['video'].isEmpty) {
+                                                  if (widget
+                                                      .animalInfo[index]
+                                                          ['video']
+                                                      .isEmpty) {
                                                     callingInfo[
                                                             'userIdCurrent'] =
                                                         FirebaseAuth.instance
@@ -1974,8 +1970,10 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                                   'longitude')));
                                                   var first = addresses.first;
 
-                                                  if (widget.animalInfo[index]
-                                                      ['video'].isEmpty) {
+                                                  if (widget
+                                                      .animalInfo[index]
+                                                          ['video']
+                                                      .isEmpty) {
                                                     callingInfo[
                                                             'userIdCurrent'] =
                                                         FirebaseAuth.instance
