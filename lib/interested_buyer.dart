@@ -83,7 +83,10 @@ class _InterestedBuyerState extends State<InterestedBuyer> {
 
   _imageData(index) {
     var data = '';
-    if (widget.animalInfo[index]['animalVideoThumbnail'] == null) {
+    if (widget.animalInfo[index]['animalImages']['image1'].isNotEmpty ||
+        widget.animalInfo[index]['animalImages']['image2'].isNotEmpty ||
+        widget.animalInfo[index]['animalImages']['image3'].isNotEmpty ||
+        widget.animalInfo[index]['animalImages']['image4'].isNotEmpty) {
       if (widget.animalInfo[index]['animalImages']['image1'] != '') {
         data = widget.animalInfo[index]['animalImages']['image1'];
       } else if (widget.animalInfo[index]['animalImages']['image2'] != '') {

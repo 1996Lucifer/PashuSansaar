@@ -102,17 +102,6 @@ class _SellAnimalFormState extends State<SellAnimalForm>
       NumberFormat.compactSimpleCurrency(locale: _locale).currencySymbol;
 
   Future<void> uploadFile(String filePath) async {
-    // pr = new ProgressDialog(context,
-    //     type: ProgressDialogType.Download, isDismissible: false);
-
-    // print('_progressState===' + _progressState.toString());
-
-    // pr.style(
-    //     message: 'video_progress_dialog_message'.tr,
-    //     progress: double.parse(_progressState.toStringAsFixed(2)),
-    //     maxProgress: 100.0);
-    // pr.show();
-
     await VideoCompress.compressVideo(
       filePath,
       quality: VideoQuality.LowQuality,
@@ -133,6 +122,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
               .putFile(info.file)
           : CircularProgressIndicator();
     });
+    // pr.hide();
 
     String downloadURL = await firebase_storage.FirebaseStorage.instance
         .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
@@ -1084,7 +1074,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
               else {
                 pr = new ProgressDialog(context,
                     type: ProgressDialogType.Normal, isDismissible: false);
-                pr.style(message: 'progress_dialog_message'.tr);
+                pr.style(message: 'video_progress_dialog_message'.tr);
                 pr.show();
 
                 await uploadFile(videoPath);
@@ -1105,10 +1095,12 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                   'isValidUser': 'Approved',
                   'userId': FirebaseAuth.instance.currentUser.uid,
                   "animalDescription": _descriptionText(),
-                  'image1': '',
-                  'image2': '',
-                  'image3': '',
-                  'image4': '',
+                  'animalImages': {
+                    'image1': '',
+                    'image2': '',
+                    'image3': '',
+                    'image4': '',
+                  }
                 }).then((res) async {
                   SharedPreferences prefs =
                       await SharedPreferences.getInstance();
@@ -1607,9 +1599,12 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                                             SizedBox(
                                               width: 10,
                                             ),
-                                            Text(ReusableWidgets.printDuration(
-                                                    value.position)
-                                                .toString())
+                                            Text(
+                                                ReusableWidgets.printDuration(
+                                                        value.position)
+                                                    .toString(),
+                                                style: TextStyle(
+                                                    color: primaryColor))
                                           ],
                                         ),
                                       ),

@@ -52,6 +52,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   versionCheck(context) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     String _unique = ReusableWidgets.randomIDGenerator();
     if (!_checkReferral) await initReferrerDetails(_unique);
     final PackageInfo info = await PackageInfo.fromPlatform();
@@ -69,7 +70,8 @@ class _MyAppState extends State<MyApp> {
       setState(() {
         newVersion = newVersion1;
         currentVersion = currentVersion1;
-        uniqueValue = _unique;
+        prefs.setString('referralUniqueValue', _unique);
+        // prefs.setBool('checkReferral', true);
       });
       if ((newVersion1[0].compareTo(currentVersion1[0]) == 1) ||
           (newVersion1[1].compareTo(currentVersion1[1]) == 1)) {
@@ -84,7 +86,6 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> initReferrerDetails(String unique) async {
     try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
 
       ReferrerDetails referrerDetails =
           await AndroidPlayInstallReferrer.installReferrer;
@@ -107,9 +108,9 @@ class _MyAppState extends State<MyApp> {
           .doc(unique)
           .set(_referralInfo1);
 
-      setState(() {
-        prefs.setBool('checkReferral', true);
-      });
+      // setState(() {
+      //   prefs.setBool('checkReferral', true);
+      // });
     } catch (e) {
       print('e-referral--->' + e.toString());
     }

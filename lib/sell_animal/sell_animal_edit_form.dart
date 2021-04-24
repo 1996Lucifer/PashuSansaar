@@ -1122,11 +1122,8 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                                       },
                                       child: Padding(
                                         padding: const EdgeInsets.all(8.0),
-                                        child: Icon(
-                                          Icons.cancel_rounded,
-                                          color: primaryColor,
-                                          size: 30
-                                        ),
+                                        child: Icon(Icons.cancel_rounded,
+                                            color: primaryColor, size: 30),
                                       ),
                                     ),
                                   ),
@@ -1418,10 +1415,12 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                     'isValidUser': isValidUser,
                     'userId': userId,
                     "animalDescription": _descriptionText(),
-                    'image1': '',
-                    'image2': '',
-                    'image3': '',
-                    'image4': '',
+                    'animalImages': {
+                      'image1': '',
+                      'image2': '',
+                      'image3': '',
+                      'image4': '',
+                    }
                   };
 
                   mapForBuyingListWithVideo = {
@@ -1461,7 +1460,10 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
 
                 pr = new ProgressDialog(context,
                     type: ProgressDialogType.Normal, isDismissible: false);
-                pr.style(message: 'progress_dialog_message'.tr);
+                pr.style(
+                    message: videoUrl.isEmpty
+                        ? 'video_progress_dialog_message'.tr
+                        : 'progress_dialog_message'.tr);
                 pr.show();
                 if (videoUrl.isEmpty) await uploadFile(videoPath);
 

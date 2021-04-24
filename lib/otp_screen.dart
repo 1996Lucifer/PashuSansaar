@@ -29,7 +29,7 @@ class _OTPScreenState extends State<OTPScreen> {
 
   StreamController<ErrorAnimationType> errorController;
 
-  bool hasError = false, _checkUserLoginState = false, _startTimer=false;
+  bool hasError = false, _checkUserLoginState = false, _startTimer = false;
   String currentText = "";
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   final formKey = GlobalKey<FormState>();
@@ -37,12 +37,12 @@ class _OTPScreenState extends State<OTPScreen> {
   @override
   void initState() {
     _verifyPhone();
-    WidgetsBinding.instance.addPostFrameCallback((_) =>
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('OTP भेजा गया है'))));
-
-    setState(() {
-      _startTimer = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        _startTimer = true;
+      });
+      return ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('OTP भेजा गया है')));
     });
 
     onTapRecognizer = TapGestureRecognizer()

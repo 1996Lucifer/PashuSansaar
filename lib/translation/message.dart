@@ -222,7 +222,7 @@ class Messages extends Translations {
           'years_ago': 'साल पहले',
           'animal_selling_form': 'पशु बेचने के लिए नीचे बटन दबाये',
           'progress_dialog_message': 'जानकारी लोड हो रही है..',
-          'video_progress_dialog_message': 'वीडियो लोड हो रही है..',
+          'video_progress_dialog_message': 'आपका पशु दर्ज हो रहा है | वीडियो को अपलोड होने मैं 1-2 मिनट का समय लगेगा कृपया इसी स्क्रीन पर बने रहे|',
           'share': 'शेयर करे',
           'message': 'व्हाट्सप्प',
           'call': 'कॉल करे',

@@ -32,6 +32,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Map _profileData = {};
   final geo = Geoflutterfire();
   PageController _pageController;
+  String _referralUniqueValue = '';
+  bool _checkReferral = false;
 
   @override
   void initState() {
@@ -55,19 +57,19 @@ class _HomeScreenState extends State<HomeScreen> {
             prefs.getDouble('latitude'), prefs.getDouble('longitude')));
     var first = address.first;
     try {
-      ReferrerDetails referrerDetails =
-          await AndroidPlayInstallReferrer.installReferrer;
+      // ReferrerDetails referrerDetails =
+      //     await AndroidPlayInstallReferrer.installReferrer;
 
-      List<String> str = referrerDetails.installReferrer.split('&');
+      // List<String> str = referrerDetails.installReferrer.split('&');
 
       Map<String, dynamic> referralInfo = {
-        'installBeginTimestampSeconds':
-            referrerDetails.installBeginTimestampSeconds,
-        'installReferrer': {
-          'utmSource': str[0].substring(11),
-          'utmMedium': str[1].substring(11)
-        },
-        'installVersion': referrerDetails.installVersion,
+        // 'installBeginTimestampSeconds':
+        //     referrerDetails.installBeginTimestampSeconds,
+        // 'installReferrer': {
+        //   'utmSource': str[0].substring(11),
+        //   'utmMedium': str[1].substring(11)
+        // },
+        // 'installVersion': referrerDetails.installVersion,
         'userAddress':
             first.addressLine ?? (first.adminArea + ', ' + first.countryName),
         'dateOfSaving': ReusableWidgets.dateTimeToEpoch(DateTime.now()),
@@ -77,9 +79,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
       await FirebaseFirestore.instance
           .collection('referralData')
-          .doc(uniqueValue)
-          .update(referralInfo);
-      pr.hide();
+          .doc(_referralUniqueValue)
+          .update(referralInfo)
+          .then((value) {
+        return pr.hide();
+      }).catchError((onError) {
+        print('error-referral-=-=-${onError.toString()}');
+        pr.hide();
+      });
+
+      setState(() {
+        prefs.setBool('checkReferral', true);
+      });
     } catch (e) {
       print('e-referral--->' + e.toString());
       pr.hide();
@@ -93,9 +104,11 @@ class _HomeScreenState extends State<HomeScreen> {
           'isLoggedIn', FirebaseAuth.instance.currentUser.uid.isNotEmpty);
       prefs.setBool(
           'alreadyUser', FirebaseAuth.instance.currentUser.uid.isNotEmpty);
+      _referralUniqueValue = prefs.getString('referralUniqueValue');
+      _checkReferral = prefs.getBool('checkReferral') ?? false;
     });
 
-    await getInitialInfo();
+    getInitialInfo();
   }
 
   getInitialInfo() async {
@@ -132,7 +145,6 @@ class _HomeScreenState extends State<HomeScreen> {
           print('=-=-=-' + e.toString());
         });
         setState(() {
-          // dataSnapshotValue = documentList[documentList.length - 1];
           _animalInfo = _temp;
           _animalInfo
               .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
@@ -140,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
         print("=-=-=" + documentList.length.toString());
       });
-    } on Exception catch (e) {
+    } catch (e) {
       print('=-=Error-Home-=->>>' + e.toString());
     }
 
@@ -183,7 +195,10 @@ class _HomeScreenState extends State<HomeScreen> {
         });
       },
     );
-    await initReferrerDetails(_profileData['mobile']);
+    if (!_checkReferral)
+      await initReferrerDetails(_profileData['mobile']);
+    else
+      pr.hide();
   }
 
   void _onItemTapped(int index) {

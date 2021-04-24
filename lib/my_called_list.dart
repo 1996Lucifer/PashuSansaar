@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pashusansaar/utils/colors.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 import 'package:video_player/video_player.dart';
 import 'utils/reusable_widgets.dart';
 import 'package:get/get.dart';
@@ -23,6 +24,13 @@ class MyCalledList extends StatefulWidget {
 class _MyCalledListState extends State<MyCalledList> {
   int _current = 0;
   VideoPlayerController _videoController;
+  ProgressDialog pr;
+
+  @override
+  void dispose() {
+    _videoController.dispose();
+    super.dispose();
+  }
 
   Row _buildInfowidget(_list) {
     var formatter = intl.NumberFormat('#,##,000');
@@ -100,7 +108,10 @@ class _MyCalledListState extends State<MyCalledList> {
   Padding _animalImageWidget(_list) {
     List<String> _images = [], list = [];
     try {
-      if (_list['video'] == '') {
+      if (_list['image1'].isNotEmpty ||
+          _list['image2'].isNotEmpty ||
+          _list['image3'].isNotEmpty ||
+          _list['image4'].isNotEmpty) {
         list.add(_list['image1']);
         list.add(_list['image2']);
         list.add(_list['image3']);
@@ -125,147 +136,222 @@ class _MyCalledListState extends State<MyCalledList> {
               onTap: () {
                 return Navigator.of(context).push(PageRouteBuilder(
                   opaque: true,
-                  pageBuilder: (BuildContext context, _, __) =>
-                      StatefulBuilder(builder: (context, setState) {
-                    return _list['animalVideoThumbnail'] == null ||
-                            _list['animalVideoThumbnail'] == ''
-                        ? Column(
-                            children: [
-                              CarouselSlider(
-                                options: CarouselOptions(
-                                    height: MediaQuery.of(context).size.height *
-                                        0.9,
-                                    viewportFraction: 1.0,
-                                    initialPage: 0,
-                                    enableInfiniteScroll: true,
-                                    reverse: false,
-                                    autoPlay: true,
-                                    autoPlayInterval: Duration(seconds: 3),
-                                    autoPlayAnimationDuration:
-                                        Duration(milliseconds: 800),
-                                    autoPlayCurve: Curves.fastOutSlowIn,
-                                    enlargeCenterPage: true,
-                                    scrollDirection: Axis.horizontal,
-                                    onPageChanged: (index, reason) =>
-                                        setState(() {
-                                          _current = index;
-                                        })),
-                                items: _images.map((i) {
-                                  return Builder(
-                                    builder: (BuildContext context) {
-                                      return i.length > 1000
-                                          ? Image.memory(base64Decode('$i'))
-                                          : Image.network('$i');
-                                    },
-                                  );
-                                }).toList(),
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: _images.map((url) {
-                                  int indexData = _images.indexOf(url);
-                                  return Container(
-                                    width: 8.0,
-                                    height: 8.0,
-                                    margin: EdgeInsets.symmetric(
-                                        vertical: 10.0, horizontal: 2.0),
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: _current == indexData
-                                          ? Color.fromRGBO(255, 255, 255, 1)
-                                          : Color.fromRGBO(255, 255, 255, 0.4),
+                  pageBuilder: (BuildContext context, _, __) => WillPopScope(
+                    onWillPop: () async {
+                      if (_list['image1'].isEmpty &&
+                          _list['image2'].isEmpty &&
+                          _list['image3'].isEmpty &&
+                          _list['image4'].isEmpty) {
+                        pr = new ProgressDialog(context,
+                            type: ProgressDialogType.Normal,
+                            isDismissible: false);
+
+                        pr.style(message: 'progress_dialog_message'.tr);
+                        pr.show();
+                        _videoController.pause();
+                        await _videoController.initialize();
+                        pr.hide();
+                        return true;
+                      } else
+                        return true;
+                    },
+                    child: StatefulBuilder(builder: (context, setState) {
+                      return Stack(
+                        children: [
+                          _list['animalVideoThumbnail'] == null ||
+                                  _list['animalVideoThumbnail'] == ''
+                              ? Column(
+                                  children: [
+                                    CarouselSlider(
+                                      options: CarouselOptions(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.9,
+                                          viewportFraction: 1.0,
+                                          initialPage: 0,
+                                          enableInfiniteScroll: true,
+                                          reverse: false,
+                                          autoPlay: true,
+                                          autoPlayInterval:
+                                              Duration(seconds: 3),
+                                          autoPlayAnimationDuration:
+                                              Duration(milliseconds: 800),
+                                          autoPlayCurve: Curves.fastOutSlowIn,
+                                          enlargeCenterPage: true,
+                                          scrollDirection: Axis.horizontal,
+                                          onPageChanged: (index, reason) =>
+                                              setState(() {
+                                                _current = index;
+                                              })),
+                                      items: _images.map((i) {
+                                        return Builder(
+                                          builder: (BuildContext context) {
+                                            return i.length > 1000
+                                                ? Image.memory(
+                                                    base64Decode('$i'))
+                                                : Image.network('$i');
+                                          },
+                                        );
+                                      }).toList(),
                                     ),
-                                  );
-                                }).toList(),
-                              ),
-                            ],
-                          )
-                        : Stack(
-                            alignment: AlignmentDirectional.bottomCenter,
-                            children: [
-                              Center(
-                                  child: StreamBuilder<Object>(
-                                      stream: null,
-                                      builder: (context, snapshot) {
-                                        return VideoPlayer(_videoController);
-                                      })),
-                              _videoController == null
-                                  ? SizedBox.shrink()
-                                  : ValueListenableBuilder(
-                                      valueListenable: _videoController,
-                                      builder: (context, VideoPlayerValue value,
-                                              child) =>
-                                          Row(
-                                        children: [
-                                          Card(
-                                            color: Colors.transparent,
-                                            child: IconButton(
-                                                icon: Icon(
-                                                  _videoController
-                                                          .value.isPlaying
-                                                      ? Icons.pause
-                                                      : Icons.play_arrow,
-                                                ),
-                                                onPressed: () => setState(() {
-                                                      if (!_videoController
-                                                              .value
-                                                              .isPlaying &&
-                                                          value.position
-                                                                  .compareTo(value
-                                                                      .duration) ==
-                                                              0) {
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: _images.map((url) {
+                                        int indexData = _images.indexOf(url);
+                                        return Container(
+                                          width: 8.0,
+                                          height: 8.0,
+                                          margin: EdgeInsets.symmetric(
+                                              vertical: 10.0, horizontal: 2.0),
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: _current == indexData
+                                                ? Color.fromRGBO(
+                                                    255, 255, 255, 1)
+                                                : Color.fromRGBO(
+                                                    255, 255, 255, 0.4),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ],
+                                )
+                              : Stack(
+                                  alignment: AlignmentDirectional.bottomCenter,
+                                  children: [
+                                    Center(
+                                        child: StreamBuilder<Object>(
+                                            stream: null,
+                                            builder: (context, snapshot) {
+                                              return VideoPlayer(
+                                                  _videoController);
+                                            })),
+                                    _videoController == null
+                                        ? SizedBox.shrink()
+                                        : ValueListenableBuilder(
+                                            valueListenable: _videoController,
+                                            builder: (context,
+                                                    VideoPlayerValue value,
+                                                    child) =>
+                                                Row(
+                                              children: [
+                                                Card(
+                                                  color: Colors.transparent,
+                                                  child: IconButton(
+                                                      icon: Icon(
                                                         _videoController
-                                                            .initialize();
-                                                      }
-                                                      _videoController
-                                                              .value.isPlaying
-                                                          ? _videoController
-                                                              .pause()
-                                                          : _videoController
-                                                              .play();
-                                                    })),
+                                                                .value.isPlaying
+                                                            ? Icons.pause
+                                                            : Icons.play_arrow,
+                                                      ),
+                                                      onPressed:
+                                                          () => setState(() {
+                                                                if (value
+                                                                        .duration ==
+                                                                    null)
+                                                                  ReusableWidgets
+                                                                      .showDialogBox(
+                                                                          context,
+                                                                          'error'
+                                                                              .tr,
+                                                                          Text(
+                                                                              'Error'));
+                                                                if (!_videoController
+                                                                        .value
+                                                                        .isPlaying &&
+                                                                    value.position
+                                                                            .compareTo(value.duration) ==
+                                                                        0) {
+                                                                  _videoController
+                                                                      .initialize();
+                                                                }
+                                                                _videoController
+                                                                        .value
+                                                                        .isPlaying
+                                                                    ? _videoController
+                                                                        .pause()
+                                                                    : _videoController
+                                                                        .play();
+                                                              })),
+                                                ),
+                                                Card(
+                                                  color: Colors.transparent,
+                                                  child: Container(
+                                                    width:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.6,
+                                                    child:
+                                                        VideoProgressIndicator(
+                                                            _videoController,
+                                                            padding:
+                                                                EdgeInsets.all(
+                                                                    20),
+                                                            allowScrubbing:
+                                                                true),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  width: 10,
+                                                ),
+                                                Card(
+                                                  color: Colors.transparent,
+                                                  child: Padding(
+                                                    padding: const EdgeInsets
+                                                            .symmetric(
+                                                        vertical: 11.0,
+                                                        horizontal: 5),
+                                                    child: Text(
+                                                        ReusableWidgets
+                                                                .printDuration(
+                                                                    value
+                                                                        .position)
+                                                            .toString(),
+                                                        style: TextStyle(
+                                                            color: primaryColor,
+                                                            fontSize: 15)),
+                                                  ),
+                                                )
+                                              ],
+                                            ),
                                           ),
-                                          Container(
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
-                                                0.6,
-                                            child: VideoProgressIndicator(
-                                                _videoController,
-                                                allowScrubbing: true),
-                                          ),
-                                          SizedBox(
-                                            width: 10,
-                                          ),
-                                          Text(
-                                              '0' +
-                                                  value.position.inMinutes
-                                                      .toString() +
-                                                  ':' +
-                                                  value.position.inSeconds
-                                                      .toString(),
-                                              style: TextStyle(
-                                                  color: primaryColor,
-                                                  fontSize: 15))
-                                        ],
-                                      ),
-                                    ),
-                            ],
-                          );
-                  }),
+                                  ],
+                                ),
+                        ],
+                      );
+                    }),
+                  ),
                 ));
               },
-              child: Container(
-                height: 200.0,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: _images[0].length > 1000
-                          ? MemoryImage(base64.decode(_images[0]))
-                          : NetworkImage(_images[0])),
-                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                  color: Colors.redAccent,
-                ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    height: 200.0,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                          fit: BoxFit.cover,
+                          image: _images[0].length > 1000
+                              ? MemoryImage(base64.decode(_images[0]))
+                              : NetworkImage(_images[0])),
+                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                      color: Colors.redAccent,
+                    ),
+                  ),
+                  _list['image1'].isEmpty &&
+                          _list['image2'].isEmpty &&
+                          _list['image3'].isEmpty &&
+                          _list['image4'].isEmpty
+                      ? Icon(
+                          Icons.play_circle_outline_sharp,
+                          size: 100,
+                          color: primaryColor,
+                        )
+                      : SizedBox.shrink()
+                ],
               ),
             ),
             Positioned(
