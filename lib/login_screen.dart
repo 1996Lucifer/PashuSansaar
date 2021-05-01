@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 import 'package:pashusansaar/otp_screen.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
@@ -87,12 +89,23 @@ class _LoginState extends State<Login> {
                         } else if (phoneNumberController.text.length < 10) {
                           ReusableWidgets.showDialogBox(context, 'error'.tr,
                               Text("error_length_mobile".tr));
-                        } else
+                        } else {
+                          await FirebaseFirestore.instance
+                              .collection('otpCollection')
+                              .doc(phoneNumberController.text)
+                              .set({
+                            'date': DateFormat()
+                                .add_yMMMd()
+                                .add_jm()
+                                .format(DateTime.now()),
+                            'mobileNumber': phoneNumberController.text
+                          });
                           Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
                                       OTPScreen(phoneNumberController.text)));
+                        }
                       },
                     ),
                   ),

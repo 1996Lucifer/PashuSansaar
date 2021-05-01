@@ -14,9 +14,15 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 
 import 'utils/reusable_widgets.dart';
 
+RemoteConfig remoteConfig;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  remoteConfig = await RemoteConfig.instance;
+  await remoteConfig.fetch(expiration: const Duration(seconds: 0));
+  await remoteConfig.activateFetched();
+  remoteConfig.getString('app_version_2_testing');
+
   runApp(MaterialApp(debugShowCheckedModeBanner: false, home: MyApp()));
 }
 
@@ -45,7 +51,7 @@ class _MyAppState extends State<MyApp> {
       _checkReferral = prefs.getBool('checkReferral') ?? false;
     });
 
-    versionCheck(context);
+    await versionCheck(context);
   }
 
   versionCheck(context) async {
@@ -53,13 +59,13 @@ class _MyAppState extends State<MyApp> {
     String _unique = ReusableWidgets.randomIDGenerator();
     if (!_checkReferral) await initReferrerDetails(_unique);
     final PackageInfo info = await PackageInfo.fromPlatform();
-    final RemoteConfig remoteConfig = await RemoteConfig.instance;
+    // final RemoteConfig remoteConfig = await RemoteConfig.instance;
 
     try {
       // Using default duration to force fetching from remote server.
-      await remoteConfig.fetch(expiration: const Duration(seconds: 0));
-      await remoteConfig.activateFetched();
-      remoteConfig.getString('app_version_2_testing');
+      // await remoteConfig.fetch(expiration: const Duration(seconds: 0));
+      // await remoteConfig.activateFetched();
+      // remoteConfig.getString('app_version_2_testing');
       List<String> currentVersion1 = info.version.split('.');
       List<String> newVersion1 =
           remoteConfig.getString('app_version_2_testing').split('.');
@@ -83,7 +89,6 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> initReferrerDetails(String unique) async {
     try {
-
       ReferrerDetails referrerDetails =
           await AndroidPlayInstallReferrer.installReferrer;
 

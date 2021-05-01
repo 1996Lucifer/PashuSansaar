@@ -78,6 +78,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
   Subscription _subscription;
   double _progressState = 0.0;
   bool _isInitialised = false;
+  final globalScaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   bool get wantKeepAlive => true;
@@ -125,9 +126,9 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
         _videoController = VideoPlayerController.network(
             jsonData[widget.index]['animalVideo']);
 
-        _videoController.addListener(() {
-          setState(() {});
-        });
+        // _videoController.addListener(() {
+        //   setState(() {});
+        // });
         _videoController.setLooping(false);
         _videoController.initialize().then((_) {
           setState(() {
@@ -219,7 +220,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
         var pickedFile = await _picker.getVideo(
             source: ImageSource.camera,
             preferredCameraDevice: CameraDevice.rear,
-            maxDuration: Duration(minutes: 2));
+            maxDuration: Duration(minutes: 1));
 
         switch (pickedFile) {
           case null:
@@ -233,9 +234,9 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
 
             _videoController = VideoPlayerController.file(File(videoPath));
 
-            _videoController.addListener(() {
-              setState(() {});
-            });
+            // _videoController.addListener(() {
+            //   setState(() {});
+            // });
             _videoController.setLooping(false);
             _videoController.initialize().then((_) {
               setState(() {
@@ -281,9 +282,9 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
 
             _videoController = VideoPlayerController.file(File(videoPath));
 
-            _videoController.addListener(() {
-              setState(() {});
-            });
+            // _videoController.addListener(() {
+            //   setState(() {});
+            // });
             _videoController.setLooping(false);
             _videoController.initialize().then((_) {
               setState(() {
@@ -632,7 +633,8 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                 keyboardType: TextInputType.number,
                 onChanged: (String milk) {
                   setState(() {
-                    animalInfo['animalMilk'] = milk;
+                    animalInfo['animalMilk'] =
+                        milk.replaceFirst(new RegExp(r'^0+'), '');
                   });
                 },
                 decoration: InputDecoration(
@@ -674,7 +676,8 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                 keyboardType: TextInputType.number,
                 onChanged: (String milkCapacity) {
                   setState(() {
-                    animalInfo['animalMilkCapacity'] = milkCapacity;
+                    animalInfo['animalMilkCapacity'] =
+                        milkCapacity.replaceFirst(new RegExp(r'^0+'), '');
                   });
                 },
                 decoration: InputDecoration(
@@ -746,7 +749,8 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                       TextPosition(offset: _controller.text.length));
 
                   setState(() {
-                    animalInfo['animalPrice'] = price;
+                    animalInfo['animalPrice'] =
+                        price.replaceFirst(new RegExp(r'^0+'), '');
                   });
                 },
                 decoration: InputDecoration(
@@ -802,6 +806,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                           ),
                         ),
                         RaisedButton(
+                          color: primaryColor,
                           onPressed: () => chooseOption('1'),
                           child: Text(
                             'choose_photo'.tr,
@@ -874,6 +879,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                           ),
                         ),
                         RaisedButton(
+                          color: primaryColor,
                           onPressed: () => chooseOption('2'),
                           child: Text(
                             'choose_photo'.tr,
@@ -944,6 +950,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                           ),
                         ),
                         RaisedButton(
+                          color: primaryColor,
                           onPressed: () => chooseOption('3'),
                           child: Text(
                             'choose_photo'.tr,
@@ -1018,6 +1025,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                               ),
                             )),
                         RaisedButton(
+                          color: primaryColor,
                           onPressed: () => chooseOption('4'),
                           child: Text(
                             'choose_photo'.tr,
@@ -1086,6 +1094,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                                   ),
                                 ),
                                 RaisedButton(
+                                  color: primaryColor,
                                   onPressed: () => chooseOption('0'),
                                   child: Text(
                                     'वीडियो चुने',
@@ -1195,6 +1204,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                                     ),
                                   ),
                                   RaisedButton(
+                                    color: primaryColor,
                                     onPressed: () => chooseOption('0'),
                                     child: Text(
                                       'वीडियो चुने',
@@ -1254,6 +1264,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
         child: SizedBox(
           width: double.infinity,
           child: RaisedButton(
+            color: primaryColor,
             padding: EdgeInsets.all(10.0),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(24),
@@ -1297,41 +1308,62 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                   Text('animal_pregnancy_error'.tr),
                 );
               else if ([0, 1].contains(
-                    constant.animalType.indexOf(animalInfo['animalType']),
-                  ) &&
-                  animalInfo['animalMilk'] == null)
+                      constant.animalType.indexOf(animalInfo['animalType'])) &&
+                  (animalInfo['animalMilk'] == null ||
+                      animalInfo['animalMilk'].isEmpty))
                 ReusableWidgets.showDialogBox(
                   context,
                   'error'.tr,
                   Text('animal_milk_error'.tr),
                 );
-              else if (animalInfo['animalPrice'] == null)
+              else if ([0, 1].contains(
+                      constant.animalType.indexOf(animalInfo['animalType'])) &&
+                  (animalInfo['animalMilk'] != null ||
+                      animalInfo['animalMilk'].isNotEmpty) &&
+                  (int.parse(animalInfo['animalMilk']) > 70))
+                ReusableWidgets.showDialogBox(
+                  context,
+                  'error'.tr,
+                  Text('maximum_milk_length'.tr),
+                );
+              else if (animalInfo['animalPrice'] == null ||
+                  animalInfo['animalPrice'].isEmpty)
                 ReusableWidgets.showDialogBox(
                   context,
                   'error'.tr,
                   Text('animal_price_error'.tr),
                 );
-              else if (videoPath != null && videoPath.isEmpty)
+              else if (videoUrl.isEmpty &&
+                  videoPath == null &&
+                  videoPath.isEmpty)
+                ReusableWidgets.showDialogBox(
+                  context,
+                  'error'.tr,
+                  Text('animal_video_error'.tr),
+                );
+              else if ((videoUrl.isEmpty &&
+                      videoPath == null &&
+                      videoPath.isEmpty) &&
+                  imagesUpload['image1'].isEmpty &&
+                  imagesUpload['image2'].isEmpty &&
+                  imagesUpload['image3'].isEmpty &&
+                  imagesUpload['image4'].isEmpty &&
+                  imagesFileUpload['image1'].isEmpty &&
+                  imagesFileUpload['image2'].isEmpty &&
+                  imagesFileUpload['image3'].isEmpty &&
+                  imagesFileUpload['image4'].isEmpty)
                 ReusableWidgets.showDialogBox(
                   context,
                   'error'.tr,
                   Text('animal_image_error'.tr),
                 );
               else if (videoPath != null &&
-                  videoPath.isEmpty &&
-                  imagesUpload['image1'].isEmpty &&
-                  imagesUpload['image2'].isEmpty &&
-                  imagesUpload['image3'].isEmpty &&
-                  imagesUpload['image4'].isEmpty)
+                  videoPath.isNotEmpty &&
+                  _videoController != null &&
+                  _videoController.value.duration.inSeconds > 60.0)
                 ReusableWidgets.showDialogBox(
-                  context,
-                  'error'.tr,
-                  Text('animal_image_error'.tr),
-                );
+                    context, 'error'.tr, Text('time_duration'.tr));
               else {
-                // await Firebase.initializeApp();
-                //
-
                 SharedPreferences prefs = await SharedPreferences.getInstance();
                 var addresses = await Geocoder.local
                     .findAddressesFromCoordinates(Coordinates(
@@ -1503,6 +1535,8 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                                       style: TextStyle(color: primaryColor),
                                     ),
                                     onPressed: () {
+                                      if (_videoController != null)
+                                        _videoController.dispose();
                                       Navigator.pop(context);
                                       Navigator.pushReplacement(
                                           context,
@@ -1827,9 +1861,11 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
+      key: globalScaffoldKey,
       appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),
       body: GestureDetector(
         onTap: () {
@@ -1870,24 +1906,28 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
               animalPrice(),
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                child: Row(
-                  children: [
-                    Text(
-                      'upload_image_text'.tr,
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(
-                      width: 5,
-                    ),
-                    Text(
-                      '*',
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.red),
-                    ),
-                  ],
+                child: RichText(
+                  text: TextSpan(
+                    text: 'upload_image_text'.tr,
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black),
+                    children: <TextSpan>[
+                      TextSpan(
+                          text: 'video_supportive_text'.tr,
+                          style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey[500])),
+                      TextSpan(
+                          text: ' *',
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.red)),
+                    ],
+                  ),
                 ),
               ),
               thumbnailURL == null || thumbnailURL.isEmpty

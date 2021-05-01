@@ -171,6 +171,7 @@ class Messages extends Translations {
           'animal_milk_error': 'कृपया पशु का अभी का दूध दर्ज़ करे',
           'animal_price_error': 'कृपया मूल्य दर्ज़ करे',
           'animal_image_error': 'कम से कम एक चित्र चुने',
+          'animal_video_error': 'वीडियो चुने',
           'animal_already_pregnant': 'ब्यायी हुई है?',
           'already_pregnant_supportive_text': '(अगर हाँ तो कब ब्यायी थी?)',
           'animal_if_pregnant': 'क्या गयाभिन है?',
@@ -222,7 +223,8 @@ class Messages extends Translations {
           'years_ago': 'साल पहले',
           'animal_selling_form': 'पशु बेचने के लिए नीचे बटन दबाये',
           'progress_dialog_message': 'जानकारी लोड हो रही है..',
-          'video_progress_dialog_message': 'आपका पशु दर्ज हो रहा है | वीडियो को अपलोड होने मैं 1-2 मिनट का समय लगेगा कृपया इसी स्क्रीन पर बने रहे|',
+          'video_progress_dialog_message':
+              'आपका पशु दर्ज हो रहा है | वीडियो को अपलोड होने मैं 1-2 मिनट का समय लगेगा कृपया इसी स्क्रीन पर बने रहे|',
           'share': 'शेयर करे',
           'message': 'व्हाट्सप्प',
           'call': 'कॉल करे',
@@ -239,7 +241,14 @@ class Messages extends Translations {
           'animal_filter': 'पशु फ़िल्टर',
           'apply_button': 'चयन सेव करें',
           'reset_button': 'सभी चयन हटाएँ',
-          'sample_video': 'सैंपल वीडियो चेक करे'
+          'sample_video': 'सैंपल वीडियो देखे',
+          'video_loading_message':
+              'वीडियो लोड हो रही है, कृपया प्रतीक्षा करे..',
+          'prfile_photo_update': 'प्रोफाइल फोटो अपलोड कर दिया गया है |',
+          'time_duration': 'वीडियो 1 मिनट से ज्यादा का नहीं होना चाहिए',
+          'video_supportive_text': ' (अधिकतम 1 मिनट)',
+          'maximum_milk_length': 'अभी के दूध की सही मात्रा डाले |',
+          'maximum_milk_capacity_length': 'दूध के क्षमता की सही मात्रा डाले |'
         }
       };
 }

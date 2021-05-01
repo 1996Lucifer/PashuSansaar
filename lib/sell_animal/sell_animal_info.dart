@@ -39,6 +39,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final double width = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor: Colors.grey[100],
@@ -307,42 +308,42 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
           children: [
             Expanded(
               flex: 1,
-              child: 
-            _imageData(index).length > 1000
-                    ? Container(
-                        width: width * 0.3,
-                        height: 130.0,
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                              fit: BoxFit.cover,
-                              image:
-                                  MemoryImage(base64Decode(_imageData(index)))),
-                          borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                          color: Colors.redAccent,
-                        ),
-                      )
-                    : Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Container(
-                            width: width * 0.3,
-                            height: 130.0,
-                            decoration: BoxDecoration(
-                              image: DecorationImage(
-                                  fit: BoxFit.cover,
-                                  image: NetworkImage(_imageData(index))),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(8.0)),
-                              color: Colors.redAccent,
-                            ),
+              child: _imageData(index).length > 1000
+                  ? Container(
+                      width: width * 0.3,
+                      height: 130.0,
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                            fit: BoxFit.cover,
+                            image:
+                                MemoryImage(base64Decode(_imageData(index)))),
+                        borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                        color: Colors.redAccent,
+                      ),
+                    )
+                  : Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Container(
+                          width: width * 0.3,
+                          height: 130.0,
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                                fit: BoxFit.cover,
+                                image: NetworkImage(_imageData(index))),
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(8.0)),
+                            color: Colors.redAccent,
                           ),
-                          // Icon(
-                          //   Icons.play_circle_outline_outlined,
-                          //   color: Colors.grey,
-                          //   size: 45,
-                          // ),
-                        ],
-                      ),)
+                        ),
+                        // Icon(
+                        //   Icons.play_circle_outline_outlined,
+                        //   color: Colors.grey,
+                        //   size: 45,
+                        // ),
+                      ],
+                    ),
+            )
             // WillPopScope(
             //   onWillPop: () async {
             //     setState(() {
@@ -492,7 +493,8 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
             //           ),
             //   ),
             // ),
-            ,Expanded(
+            ,
+            Expanded(
                 flex: 2,
                 child: Padding(
                   padding:
@@ -615,6 +617,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                       child: SizedBox(
                         width: MediaQuery.of(context).size.width * 0.55,
                         child: RaisedButton(
+                          color: primaryColor,
                           padding: EdgeInsets.all(10.0),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(24),

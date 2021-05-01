@@ -70,6 +70,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
   Subscription _subscription;
   double _progressState = 0;
   bool _isInitialised = false;
+  final globalScaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   bool get wantKeepAlive => true;
@@ -122,7 +123,6 @@ class _SellAnimalFormState extends State<SellAnimalForm>
               .putFile(info.file)
           : CircularProgressIndicator();
     });
-    // pr.hide();
 
     String downloadURL = await firebase_storage.FirebaseStorage.instance
         .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
@@ -137,8 +137,6 @@ class _SellAnimalFormState extends State<SellAnimalForm>
       videoUrl = downloadURL;
       thumbnailURL = downloadThumbnailURL;
     });
-
-    // pr.hide();
   }
 
   Future<void> _choose(index) async {
@@ -150,7 +148,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
       var pickedFile = await _picker.getVideo(
           source: ImageSource.camera,
           preferredCameraDevice: CameraDevice.rear,
-          maxDuration: Duration(minutes: 2));
+          maxDuration: Duration(minutes: 1));
 
       switch (pickedFile) {
         case null:
@@ -164,9 +162,9 @@ class _SellAnimalFormState extends State<SellAnimalForm>
 
           _videoController = VideoPlayerController.file(File(videoPath));
 
-          _videoController.addListener(() {
-            setState(() {});
-          });
+          // _videoController.addListener(() {
+          //   setState(() {});
+          // });
           _videoController.setLooping(false);
           _videoController.initialize().then((_) {
             setState(() {
@@ -187,7 +185,8 @@ class _SellAnimalFormState extends State<SellAnimalForm>
       var pickedFile = await _picker.getVideo(
           source: ImageSource.gallery,
           preferredCameraDevice: CameraDevice.rear,
-          maxDuration: Duration(minutes: 2));
+          maxDuration: Duration(minutes: 1));
+
       switch (pickedFile) {
         case null:
           return null;
@@ -200,9 +199,6 @@ class _SellAnimalFormState extends State<SellAnimalForm>
 
           _videoController = VideoPlayerController.file(File(videoPath));
 
-          _videoController.addListener(() {
-            setState(() {});
-          });
           _videoController.setLooping(false);
           _videoController.initialize().then((_) {
             setState(() {
@@ -574,13 +570,14 @@ class _SellAnimalFormState extends State<SellAnimalForm>
               child: TextFormField(
                 initialValue: animalInfo['animalMilk'],
                 inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly
+                  FilteringTextInputFormatter.digitsOnly,
                 ],
                 keyboardType: TextInputType.number,
                 onChanged: (String milk) {
-                  setState(() {
-                    animalInfo['animalMilk'] = milk;
-                  });
+                  // setState(() {
+                  animalInfo['animalMilk'] =
+                      milk.replaceFirst(new RegExp(r'^0+'), '');
+                  // });
                 },
                 decoration: InputDecoration(
                     hintText: 'milk_hint_text'.tr,
@@ -620,9 +617,10 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                 ],
                 keyboardType: TextInputType.number,
                 onChanged: (String milkCapacity) {
-                  setState(() {
-                    animalInfo['animalMilkCapacity'] = milkCapacity;
-                  });
+                  // setState(() {
+                  animalInfo['animalMilkCapacity'] =
+                      milkCapacity.replaceFirst(new RegExp(r'^0+'), '');
+                  // });
                 },
                 decoration: InputDecoration(
                     hintText: 'milk_hint_text'.tr,
@@ -683,9 +681,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                 controller: _controller,
                 keyboardType: TextInputType.number,
                 onChanged: (String price) {
-                  String string = '${_formatNumber(
-                    price.replaceAll(',', ''),
-                  )}';
+                  String string = '${_formatNumber(price.replaceAll(',', ''))}';
                   _controller.value = TextEditingValue(
                     text: _currency + string,
                     selection: TextSelection.collapsed(offset: string.length),
@@ -695,7 +691,8 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                       TextPosition(offset: _controller.text.length));
 
                   setState(() {
-                    animalInfo['animalPrice'] = price;
+                    animalInfo['animalPrice'] =
+                        price.replaceFirst(new RegExp(r'^0+'), '');
                   });
                 },
                 decoration: InputDecoration(
@@ -749,6 +746,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                           ),
                         ),
                         RaisedButton(
+                          color: primaryColor,
                           onPressed: () => chooseOption('1'),
                           child: Text(
                             'choose_photo'.tr,
@@ -819,6 +817,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                           ),
                         ),
                         RaisedButton(
+                          color: primaryColor,
                           onPressed: () => chooseOption('2'),
                           child: Text(
                             'choose_photo'.tr,
@@ -887,6 +886,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                           ),
                         ),
                         RaisedButton(
+                          color: primaryColor,
                           onPressed: () => chooseOption('3'),
                           child: Text(
                             'choose_photo'.tr,
@@ -960,6 +960,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                           ),
                         ),
                         RaisedButton(
+                          color: primaryColor,
                           onPressed: () => chooseOption('4'),
                           child: Text(
                             'choose_photo'.tr,
@@ -999,185 +1000,196 @@ class _SellAnimalFormState extends State<SellAnimalForm>
         child: SizedBox(
           width: double.infinity,
           child: RaisedButton(
-            padding: EdgeInsets.all(10.0),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
-            ),
-            elevation: 5,
-            // color: themeColor,
-            child: Text(
-              'save_button'.tr,
-              style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                  fontStyle: FontStyle.normal,
-                  fontWeight: FontWeight.w600),
-            ),
-            onPressed: () async {
-              if (animalInfo['animalType'] == null)
-                ReusableWidgets.showDialogBox(
-                  context,
-                  'error'.tr,
-                  Text('animal_type_error'.tr),
-                );
-              else if (animalInfo['animalBreed'] == null)
-                ReusableWidgets.showDialogBox(
-                  context,
-                  'error'.tr,
-                  Text('animal_breed_error'.tr),
-                );
-              else if (animalInfo['animalAge'] == null)
-                ReusableWidgets.showDialogBox(
-                  context,
-                  'error'.tr,
-                  Text('animal_age_error'.tr),
-                );
-              else if ([0, 1].contains(
-                    constant.animalType.indexOf(animalInfo['animalType']),
-                  ) &&
-                  (animalInfo['animalIsPregnant'] == null))
-                ReusableWidgets.showDialogBox(
-                  context,
-                  'error'.tr,
-                  Text('animal_pregnancy_error'.tr),
-                );
-              else if ([0, 1].contains(
-                    constant.animalType.indexOf(animalInfo['animalType']),
-                  ) &&
-                  animalInfo['animalMilk'] == null)
-                ReusableWidgets.showDialogBox(
-                  context,
-                  'error'.tr,
-                  Text('animal_milk_error'.tr),
-                );
-              else if (animalInfo['animalPrice'] == null)
-                ReusableWidgets.showDialogBox(
-                  context,
-                  'error'.tr,
-                  Text('animal_price_error'.tr),
-                );
-              else if (videoPath.isEmpty)
-                ReusableWidgets.showDialogBox(
-                  context,
-                  'error'.tr,
-                  Text('animal_image_error'.tr),
-                );
-              // else if (imagesUpload['image1'].isEmpty &&
-              //     imagesUpload['image2'].isEmpty &&
-              //     imagesUpload['image3'].isEmpty &&
-              //     imagesUpload['image4'].isEmpty)
-              //   ReusableWidgets.showDialogBox(
-              //     context,
-              //     'error'.tr,
-              //     Text('animal_image_error'.tr),
-              //   );
-              else {
-                pr = new ProgressDialog(context,
-                    type: ProgressDialogType.Normal, isDismissible: false);
-                pr.style(message: 'video_progress_dialog_message'.tr);
-                pr.show();
+              color: primaryColor,
+              padding: EdgeInsets.all(10.0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
+              elevation: 5,
+              // color: themeColor,
+              child: Text(
+                'save_button'.tr,
+                style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
+                    fontStyle: FontStyle.normal,
+                    fontWeight: FontWeight.w600),
+              ),
+              onPressed: () async {
+                if (animalInfo['animalType'] == null)
+                  ReusableWidgets.showDialogBox(
+                    context,
+                    'error'.tr,
+                    Text('animal_type_error'.tr),
+                  );
+                else if (animalInfo['animalBreed'] == null)
+                  ReusableWidgets.showDialogBox(
+                    context,
+                    'error'.tr,
+                    Text('animal_breed_error'.tr),
+                  );
+                else if (animalInfo['animalAge'] == null)
+                  ReusableWidgets.showDialogBox(
+                    context,
+                    'error'.tr,
+                    Text('animal_age_error'.tr),
+                  );
+                else if ([0, 1].contains(
+                      constant.animalType.indexOf(animalInfo['animalType']),
+                    ) &&
+                    (animalInfo['animalIsPregnant'] == null))
+                  ReusableWidgets.showDialogBox(
+                    context,
+                    'error'.tr,
+                    Text('animal_pregnancy_error'.tr),
+                  );
+                else if ([0, 1].contains(
+                      constant.animalType.indexOf(animalInfo['animalType']),
+                    ) &&
+                    (animalInfo['animalMilk'] == null ||
+                        animalInfo['animalMilk'].isEmpty))
+                  ReusableWidgets.showDialogBox(
+                    context,
+                    'error'.tr,
+                    Text('animal_milk_error'.tr),
+                  );
+                else if ([0, 1].contains(constant.animalType
+                        .indexOf(animalInfo['animalType'])) &&
+                    (animalInfo['animalMilk'] != null ||
+                        animalInfo['animalMilk'].isNotEmpty) &&
+                    (int.parse(animalInfo['animalMilk']) > 70))
+                  ReusableWidgets.showDialogBox(
+                    context,
+                    'error'.tr,
+                    Text('maximum_milk_length'.tr),
+                  );
+                else if (animalInfo['animalPrice'] == null ||
+                    animalInfo['animalPrice'].isEmpty)
+                  ReusableWidgets.showDialogBox(
+                    context,
+                    'error'.tr,
+                    Text('animal_price_error'.tr),
+                  );
+                else if (videoPath.isEmpty)
+                  ReusableWidgets.showDialogBox(
+                    context,
+                    'error'.tr,
+                    Text('animal_video_error'.tr),
+                  );
+                else if (_videoController != null &&
+                    _videoController.value.duration.inSeconds > 60.0)
+                  ReusableWidgets.showDialogBox(
+                      context, 'error'.tr, Text('time_duration'.tr));
+                else {
+                  pr = new ProgressDialog(context,
+                      type: ProgressDialogType.Normal, isDismissible: false);
+                  pr.style(message: 'video_progress_dialog_message'.tr);
+                  pr.show();
 
-                await uploadFile(videoPath);
+                  await uploadFile(videoPath);
 
-                await FirebaseFirestore.instance
-                    .collection("animalSellingInfo")
-                    .doc(FirebaseAuth.instance.currentUser.uid)
-                    .collection('sellingAnimalList')
-                    .doc(uniqueId)
-                    .set({
-                  'animalInfo': animalInfo,
-                  'animalVideo': videoUrl,
-                  'animalVideoThumbnail': thumbnailURL,
-                  'extraInfo': extraInfoData,
-                  'dateOfSaving':
-                      ReusableWidgets.dateTimeToEpoch(DateTime.now()),
-                  'uniqueId': uniqueId,
-                  'isValidUser': 'Approved',
-                  'userId': FirebaseAuth.instance.currentUser.uid,
-                  "animalDescription": _descriptionText(),
-                  'animalImages': {
-                    'image1': '',
-                    'image2': '',
-                    'image3': '',
-                    'image4': '',
-                  }
-                }).then((res) async {
-                  SharedPreferences prefs =
-                      await SharedPreferences.getInstance();
-                  var addresses = await Geocoder.local
-                      .findAddressesFromCoordinates(Coordinates(
-                          prefs.getDouble('latitude'),
-                          prefs.getDouble('longitude')));
-                  var first = addresses.first;
-
-                  FirebaseFirestore.instance
-                      .collection("buyingAnimalList1")
-                      .doc(uniqueId + FirebaseAuth.instance.currentUser.uid)
+                  await FirebaseFirestore.instance
+                      .collection("animalSellingInfo")
+                      .doc(FirebaseAuth.instance.currentUser.uid)
+                      .collection('sellingAnimalList')
+                      .doc(uniqueId)
                       .set({
-                    "userAnimalDescription": _descriptionText(),
-                    "userAnimalType": animalInfo['animalType'] ?? "",
-                    "userAnimalTypeOther": animalInfo['animalTypeOther'] ?? "",
-                    "userAnimalAge": animalInfo['animalAge'] ?? "",
-                    "userAddress": first.addressLine ??
-                        (first.adminArea + ', ' + first.countryName),
-                    "userName": widget.userName,
-                    "userAnimalPrice": animalInfo['animalPrice'] ?? "0",
-                    "userAnimalBreed": animalInfo['animalBreed'] ?? "",
-                    "userMobileNumber": '${widget.userMobileNumber}',
-                    "userAnimalMilk": animalInfo['animalMilk'] ?? "",
-                    "userAnimalPregnancy": animalInfo['animalIsPregnant'] ?? "",
-                    "userLatitude": prefs.getDouble('latitude'),
-                    "userLongitude": prefs.getDouble('longitude'),
-                    'position': geo
-                        .point(
-                            latitude: prefs.getDouble('latitude'),
-                            longitude: prefs.getDouble('longitude'))
-                        .data,
-                    'video': videoUrl,
+                    'animalInfo': animalInfo,
+                    'animalVideo': videoUrl,
                     'animalVideoThumbnail': thumbnailURL,
-                    "dateOfSaving":
-                        ReusableWidgets.dateTimeToEpoch(DateTime.now()),
-                    'isValidUser': 'Approved',
-                    'uniqueId': uniqueId,
-                    'userId': FirebaseAuth.instance.currentUser.uid,
                     'extraInfo': extraInfoData,
-                    'image1': '',
-                    'image2': '',
-                    'image3': '',
-                    'image4': '',
-                  }).then((value) {
-                    pr.hide();
-                    return showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                              title: Text('pashu_registered'.tr),
-                              content: Text('new_animal'.tr),
-                              actions: <Widget>[
-                                FlatButton(
-                                    child: Text(
-                                      'Ok'.tr,
-                                      style: TextStyle(color: primaryColor),
-                                    ),
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => HomeScreen(
-                                              selectedIndex: 0,
-                                            ),
-                                          ));
-                                    }),
-                              ]);
-                        });
-                  });
-                }).catchError(
-                  (err) => print("err->" + err.toString()),
-                );
-              }
-            },
-          ),
+                    'dateOfSaving':
+                        ReusableWidgets.dateTimeToEpoch(DateTime.now()),
+                    'uniqueId': uniqueId,
+                    'isValidUser': 'Approved',
+                    'userId': FirebaseAuth.instance.currentUser.uid,
+                    "animalDescription": _descriptionText(),
+                    'animalImages': {
+                      'image1': '',
+                      'image2': '',
+                      'image3': '',
+                      'image4': '',
+                    }
+                  }).then((res) async {
+                    SharedPreferences prefs =
+                        await SharedPreferences.getInstance();
+                    var addresses = await Geocoder.local
+                        .findAddressesFromCoordinates(Coordinates(
+                            prefs.getDouble('latitude'),
+                            prefs.getDouble('longitude')));
+                    var first = addresses.first;
+
+                    FirebaseFirestore.instance
+                        .collection("buyingAnimalList1")
+                        .doc(uniqueId + FirebaseAuth.instance.currentUser.uid)
+                        .set({
+                      "userAnimalDescription": _descriptionText(),
+                      "userAnimalType": animalInfo['animalType'] ?? "",
+                      "userAnimalTypeOther":
+                          animalInfo['animalTypeOther'] ?? "",
+                      "userAnimalAge": animalInfo['animalAge'] ?? "",
+                      "userAddress": first.addressLine ??
+                          (first.adminArea + ', ' + first.countryName),
+                      "userName": widget.userName,
+                      "userAnimalPrice": animalInfo['animalPrice'] ?? "0",
+                      "userAnimalBreed": animalInfo['animalBreed'] ?? "",
+                      "userMobileNumber": '${widget.userMobileNumber}',
+                      "userAnimalMilk": animalInfo['animalMilk'] ?? "",
+                      "userAnimalPregnancy":
+                          animalInfo['animalIsPregnant'] ?? "",
+                      "userLatitude": prefs.getDouble('latitude'),
+                      "userLongitude": prefs.getDouble('longitude'),
+                      'position': geo
+                          .point(
+                              latitude: prefs.getDouble('latitude'),
+                              longitude: prefs.getDouble('longitude'))
+                          .data,
+                      'video': videoUrl,
+                      'animalVideoThumbnail': thumbnailURL,
+                      "dateOfSaving":
+                          ReusableWidgets.dateTimeToEpoch(DateTime.now()),
+                      'isValidUser': 'Approved',
+                      'uniqueId': uniqueId,
+                      'userId': FirebaseAuth.instance.currentUser.uid,
+                      'extraInfo': extraInfoData,
+                      'image1': '',
+                      'image2': '',
+                      'image3': '',
+                      'image4': '',
+                    }).then((value) {
+                      pr.hide();
+                      return showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                                title: Text('pashu_registered'.tr),
+                                content: Text('new_animal'.tr),
+                                actions: <Widget>[
+                                  FlatButton(
+                                      child: Text(
+                                        'Ok'.tr,
+                                        style: TextStyle(color: primaryColor),
+                                      ),
+                                      onPressed: () {
+                                        // if (_videoController != null)
+                                        //   _videoController.dispose();
+                                        Navigator.pop(context);
+                                        Navigator.pushReplacement(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => HomeScreen(
+                                                selectedIndex: 0,
+                                              ),
+                                            ));
+                                      }),
+                                ]);
+                          });
+                    });
+                  }).catchError(
+                    (err) => print("err->" + err.toString()),
+                  );
+                }
+              }),
         ),
       );
 
@@ -1513,6 +1525,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                                   ),
                                 ),
                                 RaisedButton(
+                                  color: primaryColor,
                                   onPressed: () => chooseOption('0'),
                                   child: Text(
                                     'वीडियो चुने',
@@ -1622,6 +1635,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                                     ),
                                   ),
                                   RaisedButton(
+                                    color: primaryColor,
                                     onPressed: () => chooseOption('4'),
                                     child: Text(
                                       'वीडियो चुने',
@@ -1640,9 +1654,11 @@ class _SellAnimalFormState extends State<SellAnimalForm>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
+      key: globalScaffoldKey,
       appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),
       body: GestureDetector(
         onTap: () {
@@ -1694,6 +1710,12 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                             fontWeight: FontWeight.bold,
                             color: Colors.black),
                         children: <TextSpan>[
+                          TextSpan(
+                              text: 'video_supportive_text'.tr,
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[500])),
                           TextSpan(
                               text: ' *',
                               style: TextStyle(
@@ -1760,6 +1782,8 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                                                                         : Icons
                                                                             .play_arrow,
                                                                   ),
+                                                                  color: Colors
+                                                                      .white,
                                                                   onPressed: () =>
                                                                       setState(
                                                                           () {
@@ -1774,30 +1798,49 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                                                                             : _videoController1.play();
                                                                       })),
                                                             ),
-                                                            Container(
-                                                              width: MediaQuery.of(
-                                                                          context)
-                                                                      .size
-                                                                      .width *
-                                                                  0.6,
-                                                              child: VideoProgressIndicator(
-                                                                  _videoController1,
-                                                                  allowScrubbing:
-                                                                      true),
+                                                            Card(
+                                                              color: Colors
+                                                                  .transparent,
+                                                              child: Container(
+                                                                width: MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .width *
+                                                                    0.6,
+                                                                child: VideoProgressIndicator(
+                                                                    _videoController1,
+                                                                    colors: VideoProgressColors(
+                                                                        playedColor:
+                                                                            Colors
+                                                                                .white),
+                                                                    allowScrubbing:
+                                                                        true),
+                                                              ),
                                                             ),
                                                             SizedBox(
                                                               width: 10,
                                                             ),
-                                                            Text(
-                                                                ReusableWidgets
-                                                                        .printDuration(value
-                                                                            .position)
-                                                                    .toString(),
-                                                                style: TextStyle(
-                                                                    color:
-                                                                        primaryColor,
-                                                                    fontSize:
-                                                                        15))
+                                                            Card(
+                                                              color: Colors
+                                                                  .transparent,
+                                                              child: Padding(
+                                                                  padding: const EdgeInsets
+                                                                          .symmetric(
+                                                                      vertical:
+                                                                          11.0,
+                                                                      horizontal:
+                                                                          5),
+                                                                  child: Text(
+                                                                    ReusableWidgets.printDuration(
+                                                                            value.position)
+                                                                        .toString(),
+                                                                    style: TextStyle(
+                                                                        color: Colors
+                                                                            .white,
+                                                                        fontSize:
+                                                                            15),
+                                                                  )),
+                                                            )
                                                           ],
                                                         ),
                                                       ),

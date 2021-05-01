@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter_countdown_timer/countdown_timer_controller.dart';
 import 'package:pashusansaar/home_screen.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,7 +10,7 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'user_details_fetch_screen.dart';
 import 'package:get/get.dart';
-import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
+import 'package:flutter_countdown_timer/index.dart';
 
 class OTPScreen extends StatefulWidget {
   final String phoneNumber;
@@ -20,7 +21,8 @@ class OTPScreen extends StatefulWidget {
   _OTPScreenState createState() => _OTPScreenState();
 }
 
-class _OTPScreenState extends State<OTPScreen> {
+class _OTPScreenState extends State<OTPScreen>
+    with SingleTickerProviderStateMixin {
   var onTapRecognizer;
 
   TextEditingController textEditingController = TextEditingController();
@@ -33,11 +35,16 @@ class _OTPScreenState extends State<OTPScreen> {
   String currentText = "";
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   final formKey = GlobalKey<FormState>();
+  int endTime = DateTime.now().millisecondsSinceEpoch + 1000 * 60;
+  CountdownTimerController countdownTimerController;
 
   @override
   void initState() {
     _verifyPhone();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      countdownTimerController =
+          CountdownTimerController(endTime: endTime, onEnd: onEnd);
       setState(() {
         _startTimer = true;
       });
@@ -47,6 +54,10 @@ class _OTPScreenState extends State<OTPScreen> {
 
     onTapRecognizer = TapGestureRecognizer()
       ..onTap = () async {
+        countdownTimerController = CountdownTimerController(
+            endTime: DateTime.now().millisecondsSinceEpoch + 1000 * 60,
+            onEnd: onEnd);
+
         setState(() {
           _startTimer = true;
         });
@@ -62,9 +73,28 @@ class _OTPScreenState extends State<OTPScreen> {
     super.initState();
   }
 
+  void onEnd() {
+    print('onEnd');
+  }
+
   checkUserLoginState() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     _checkUserLoginState = prefs.getBool('alreadyUser') ?? false;
+    // await FirebaseFirestore.instance
+    //     .collection('userInfo')
+    //     .where('mobile', isEqualTo: widget.phoneNumber)
+    //     .get()
+    //     .then((value) => setState(() {
+    //           _checkUserLoginState = value.docs[0]['alreadyUser'];
+    //           prefs.setBool('alreadyUser', true);
+    //         }))
+    //     .catchError((onError) {
+    //   setState(() {
+    //     _checkUserLoginState = false;
+    //     prefs.setBool('alreadyUser', false);
+    //   });
+    //   _verifyPhone();
+    // });
   }
 
   textWidget() => RichText(
@@ -262,9 +292,9 @@ class _OTPScreenState extends State<OTPScreen> {
                   ? textWidget()
                   : Center(
                       child: CountdownTimer(
-                        onEnd: () => print('onEnd'),
-                        endTime:
-                            DateTime.now().millisecondsSinceEpoch + 1000 * 60,
+                        controller: countdownTimerController,
+                        onEnd: onEnd,
+                        endTime: endTime,
                         textStyle: TextStyle(
                             color: primaryColor,
                             fontSize: 18,

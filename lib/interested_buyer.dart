@@ -83,21 +83,33 @@ class _InterestedBuyerState extends State<InterestedBuyer> {
 
   _imageData(index) {
     var data = '';
-    if (widget.animalInfo[index]['animalImages']['image1'].isNotEmpty ||
-        widget.animalInfo[index]['animalImages']['image2'].isNotEmpty ||
-        widget.animalInfo[index]['animalImages']['image3'].isNotEmpty ||
-        widget.animalInfo[index]['animalImages']['image4'].isNotEmpty) {
-      if (widget.animalInfo[index]['animalImages']['image1'] != '') {
-        data = widget.animalInfo[index]['animalImages']['image1'];
-      } else if (widget.animalInfo[index]['animalImages']['image2'] != '') {
-        data = widget.animalInfo[index]['animalImages']['image2'];
-      } else if (widget.animalInfo[index]['animalImages']['image3'] != '') {
-        data = widget.animalInfo[index]['animalImages']['image3'];
-      } else if (widget.animalInfo[index]['animalImages']['image4'] != '') {
-        data = widget.animalInfo[index]['animalImages']['image4'];
+    if (widget.animalInfo[index]['animalImages'] == null) {
+      if (widget.animalInfo[index]['image1'].isNotEmpty) {
+        data = widget.animalInfo[index]['image1'];
+      } else if (widget.animalInfo[index]['image2'].isNotEmpty) {
+        data = widget.animalInfo[index]['image2'];
+      } else if (widget.animalInfo[index]['image3'].isNotEmpty) {
+        data = widget.animalInfo[index]['image3'];
+      } else if (widget.animalInfo[index]['image4'].isNotEmpty) {
+        data = widget.animalInfo[index]['image4'];
+      } else {
+        data = widget.animalInfo[index]['animalVideoThumbnail'];
       }
     } else {
-      data = widget.animalInfo[index]['animalVideoThumbnail'];
+      if (widget.animalInfo[index]['animalImages']['image1'].isNotEmpty) {
+        data = widget.animalInfo[index]['animalImages']['image1'];
+      } else if (widget
+          .animalInfo[index]['animalImages']['image2'].isNotEmpty) {
+        data = widget.animalInfo[index]['animalImages']['image2'];
+      } else if (widget
+          .animalInfo[index]['animalImages']['image3'].isNotEmpty) {
+        data = widget.animalInfo[index]['animalImages']['image3'];
+      } else if (widget
+          .animalInfo[index]['animalImages']['image4'].isNotEmpty) {
+        data = widget.animalInfo[index]['animalImages']['image4'];
+      } else {
+        data = widget.animalInfo[index]['animalVideoThumbnail'];
+      }
     }
     return data;
   }
@@ -197,20 +209,21 @@ class _InterestedBuyerState extends State<InterestedBuyer> {
     return Scaffold(
         backgroundColor: Colors.grey[100],
         appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),
-        body: SingleChildScrollView(
-          child: widget.animalInfo == []
-              ? Center(
-                  child: Text(
-                    'आपका कोई पशु दर्ज़ नहीं है',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                )
-              : Column(
+        body: widget.animalInfo == []
+            ? Center(
+                child: Text(
+                  'आपका कोई पशु दर्ज़ नहीं है',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              )
+            : SingleChildScrollView(
+                child: Column(
                   children: [
                     Container(
-                      height: 210,
+                      // height: 200,
                       child: Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 3.0, horizontal: 8),
                           child: Card(
                               key: Key(
                                   widget.animalInfo[widget.index]['uniqueId']),
@@ -233,7 +246,7 @@ class _InterestedBuyerState extends State<InterestedBuyer> {
                     Container(
                       height: MediaQuery.of(context).size.height - 300,
                       child: PaginateFirestore(
-                          physics: NeverScrollableScrollPhysics(),
+                          // physics: NeverScrollableScrollPhysics(),
                           itemsPerPage: 10,
                           initialLoader: Center(
                             child: CircularProgressIndicator(
@@ -254,6 +267,7 @@ class _InterestedBuyerState extends State<InterestedBuyer> {
                           ),
                           itemBuilderType: PaginateBuilderType
                               .listView, // listview and gridview
+
                           itemBuilder: (index, context, documentSnapshot) =>
                               documentSnapshot.data() == null
                                   ? Center(
@@ -421,15 +435,14 @@ class _InterestedBuyerState extends State<InterestedBuyer> {
                           // orderBy is compulsary to enable pagination
                           query: FirebaseFirestore.instance
                               .collection('callingInfo')
-                              // .doc('08303159')
                               .doc(widget.listId)
                               .collection('interestedBuyers')
                               .orderBy('dateOfSaving'),
                           isLive: false // to fetch real-time data
                           ),
-                    )
+                    ),
                   ],
                 ),
-        ));
+              ));
   }
 }

@@ -55,19 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
             prefs.getDouble('latitude'), prefs.getDouble('longitude')));
     var first = address.first;
     try {
-      // ReferrerDetails referrerDetails =
-      //     await AndroidPlayInstallReferrer.installReferrer;
-
-      // List<String> str = referrerDetails.installReferrer.split('&');
-
       Map<String, dynamic> referralInfo = {
-        // 'installBeginTimestampSeconds':
-        //     referrerDetails.installBeginTimestampSeconds,
-        // 'installReferrer': {
-        //   'utmSource': str[0].substring(11),
-        //   'utmMedium': str[1].substring(11)
-        // },
-        // 'installVersion': referrerDetails.installVersion,
         'userAddress':
             first.addressLine ?? (first.adminArea + ', ' + first.countryName),
         'dateOfSaving': ReusableWidgets.dateTimeToEpoch(DateTime.now()),
@@ -79,19 +67,18 @@ class _HomeScreenState extends State<HomeScreen> {
           .collection('referralData')
           .doc(_referralUniqueValue)
           .update(referralInfo)
-          .then((value) {
-        return pr.hide();
-      }).catchError((onError) {
-        print('error-referral-=-=-${onError.toString()}');
-        pr.hide();
+          .then((value) => setState(() {
+                prefs.setBool('checkReferral', true);
+              }))
+          .catchError((error) {
+        print('e-referral--123->' + error.toString());
       });
 
-      setState(() {
-        prefs.setBool('checkReferral', true);
-      });
+      // setState(() {
+      //   prefs.setBool('checkReferral', true);
+      // });
     } catch (e) {
       print('e-referral--->' + e.toString());
-      pr.hide();
     }
   }
 
@@ -149,9 +136,11 @@ class _HomeScreenState extends State<HomeScreen> {
         });
 
         print("=-=-=" + documentList.length.toString());
+        pr.hide();
       });
     } catch (e) {
       print('=-=Error-Home-=->>>' + e.toString());
+      pr.hide();
     }
 
     getAnimalSellingInfo();
@@ -193,10 +182,9 @@ class _HomeScreenState extends State<HomeScreen> {
         });
       },
     );
-    if (!_checkReferral)
-      await initReferrerDetails(_profileData['mobile']);
-    else
-      pr.hide();
+    if (!_checkReferral) initReferrerDetails(_profileData['mobile']);
+    // else
+    //   pr.hide();
   }
 
   void _onItemTapped(int index) {
@@ -308,7 +296,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
             currentIndex: widget.selectedIndex,
-            // selectedItemColor: themeColor,
+            selectedItemColor: primaryColor,
             onTap: _onItemTapped,
           ),
         ));

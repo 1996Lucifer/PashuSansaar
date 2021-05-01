@@ -14,6 +14,7 @@ class ReusableWidgets {
       BuildContext context, String heading, bool automaticallyImplyLeading,
       {List<Widget> actions}) {
     return AppBar(
+      backgroundColor: primaryColor,
       title: Row(
         children: [
           Image.asset(
