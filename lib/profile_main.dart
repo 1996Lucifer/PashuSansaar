@@ -92,14 +92,14 @@ class ProfileMainState extends State<ProfileMain>
           Coordinates(
               prefs.getDouble('latitude'), prefs.getDouble('longitude')));
       var first = address.first;
-
-      setState(() {
-        userInfo['name'] = widget.profileData['name'];
-        userInfo['mobile'] = widget.profileData['mobile'];
-        userInfo['image'] = widget.profileData['image'];
-        userInfo['address'] =
-            first.addressLine ?? (first.adminArea + ', ' + first.countryName);
-      });
+      if (mounted)
+        setState(() {
+          userInfo['name'] = widget.profileData['name'];
+          userInfo['mobile'] = widget.profileData['mobile'];
+          userInfo['image'] = widget.profileData['image'];
+          userInfo['address'] =
+              first.addressLine ?? (first.adminArea + ', ' + first.countryName);
+        });
       // getCallingInfo();
     }
     // pr.hide();

@@ -117,9 +117,10 @@ class _BuyAnimalState extends State<BuyAnimal>
     print(pngBytes);
     File imgFile = new File('$directory/pashu_$uniqueId.png');
     await imgFile.writeAsBytes(pngBytes);
-    setState(() {
-      fileUrl = imgFile;
-    });
+    if (mounted)
+      setState(() {
+        fileUrl = imgFile;
+      });
   }
 
   // dataDeleteion() async {
@@ -132,10 +133,11 @@ class _BuyAnimalState extends State<BuyAnimal>
 
   _getInitialData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _latitude = prefs.getDouble('latitude');
-      _longitude = prefs.getDouble('longitude');
-    });
+    if (mounted)
+      setState(() {
+        _latitude = prefs.getDouble('latitude');
+        _longitude = prefs.getDouble('longitude');
+      });
     getLatLong();
   }
 
@@ -147,13 +149,11 @@ class _BuyAnimalState extends State<BuyAnimal>
         await Geocoder.local.findAddressesFromCoordinates(coordinates);
     var first = addresses.first;
 
-    // return first.locality ?? first.featureName;
-    setState(() {
-      _userLocality = first.locality ?? first.featureName;
-      prefs.setString('place', _userLocality);
-    });
-
-    // pr.hide();
+    if (mounted)
+      setState(() {
+        _userLocality = first.locality ?? first.featureName;
+        prefs.setString('place', _userLocality);
+      });
   }
 
   // getInitialInfo() async {
@@ -787,6 +787,7 @@ class _BuyAnimalState extends State<BuyAnimal>
     return RepaintBoundary(
       key: previewContainer,
       child: Scaffold(
+        key: widget.key,
         backgroundColor: Colors.grey[100],
         body: Stack(
           children: [
@@ -3336,9 +3337,10 @@ class _BuyAnimalState extends State<BuyAnimal>
       getPositionBasedOnLatLong(
               _list[index]['userLatitude'], _list[index]['userLongitude'])
           .then((result) {
-        setState(() {
-          val = result;
-        });
+        if (mounted)
+          setState(() {
+            val = result;
+          });
       });
 
       return Padding(

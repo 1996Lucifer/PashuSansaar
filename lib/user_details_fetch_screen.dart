@@ -207,11 +207,11 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
     var addresses =
         await Geocoder.local.findAddressesFromCoordinates(coordinates);
     var first = addresses.first;
-
-    setState(() {
-      _userAddress =
-          first.addressLine ?? (first.adminArea + ', ' + first.countryName);
-    });
+    if (mounted)
+      setState(() {
+        _userAddress =
+            first.addressLine ?? (first.adminArea + ', ' + first.countryName);
+      });
   }
 
   @override
@@ -406,14 +406,14 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                                 zipCodeController.text.isNotEmpty)
                               await loadAsset();
 
-                            await getPositionBasedOnLatLong(
-                                prefs.getDouble('latitude'),
-                                prefs.getDouble('longitude'));
                             pr = new ProgressDialog(context,
                                 type: ProgressDialogType.Normal,
                                 isDismissible: false);
                             pr.style(message: 'progress_dialog_message'.tr);
                             pr.show();
+                            await getPositionBasedOnLatLong(
+                                prefs.getDouble('latitude'),
+                                prefs.getDouble('longitude'));
                             FirebaseFirestore.instance
                                 .collection("userInfo")
                                 .doc(widget.currentUser)

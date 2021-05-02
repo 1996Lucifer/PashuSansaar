@@ -70,7 +70,6 @@ class _SellAnimalFormState extends State<SellAnimalForm>
   Subscription _subscription;
   double _progressState = 0;
   bool _isInitialised = false;
-  final globalScaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   bool get wantKeepAlive => true;
@@ -1658,7 +1657,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
     double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      key: globalScaffoldKey,
+      key: widget.key,
       appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),
       body: GestureDetector(
         onTap: () {

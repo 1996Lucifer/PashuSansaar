@@ -92,7 +92,8 @@ class _LoginState extends State<Login> {
                         } else {
                           await FirebaseFirestore.instance
                               .collection('otpCollection')
-                              .doc(phoneNumberController.text)
+                              .doc(ReusableWidgets.randomCodeGenerator() +
+                                  ReusableWidgets.randomIDGenerator())
                               .set({
                             'date': DateFormat()
                                 .add_yMMMd()
