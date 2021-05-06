@@ -1,7 +1,5 @@
 import 'package:android_play_install_referrer/android_play_install_referrer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:pashusansaar/splash_screen.dart';
 import 'package:pashusansaar/translation/message.dart';
 import 'package:pashusansaar/utils/colors.dart';
@@ -9,16 +7,22 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:pashusansaar/utils/global.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart' as URLauncher;
 import 'package:package_info/package_info.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 
 import 'utils/reusable_widgets.dart';
 
+RemoteConfig remoteConfig;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  remoteConfig = await RemoteConfig.instance;
+  await remoteConfig.fetch(expiration: const Duration(seconds: 0));
+  await remoteConfig.activateFetched();
+  remoteConfig.getString('app_version_2_testing');
+
   runApp(MaterialApp(debugShowCheckedModeBanner: false, home: MyApp()));
 }
 
@@ -33,39 +37,44 @@ class _MyAppState extends State<MyApp> {
   final playStoreUrl =
       'https://play.google.com/store/apps/details?id=dj.pashusansaar';
   List<String> newVersion, currentVersion;
+  bool _checkReferral = false;
 
   @override
   void initState() {
     super.initState();
-    try {
-      SchedulerBinding.instance
-          .addPostFrameCallback((_) => versionCheck(context));
+    getReferralCheck();
+  }
 
-      // versionCheck(context);
-    } catch (e) {
-      print(e);
-    }
+  getReferralCheck() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _checkReferral = prefs.getBool('checkReferral') ?? false;
+    });
+
+    await versionCheck(context);
   }
 
   versionCheck(context) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     String _unique = ReusableWidgets.randomIDGenerator();
-    await initReferrerDetails(_unique);
+    if (!_checkReferral) await initReferrerDetails(_unique);
     final PackageInfo info = await PackageInfo.fromPlatform();
-    final RemoteConfig remoteConfig = await RemoteConfig.instance;
+    // final RemoteConfig remoteConfig = await RemoteConfig.instance;
 
     try {
       // Using default duration to force fetching from remote server.
-      await remoteConfig.fetch(expiration: const Duration(seconds: 0));
-      await remoteConfig.activateFetched();
-      remoteConfig.getString('force_update_current_version');
+      // await remoteConfig.fetch(expiration: const Duration(seconds: 0));
+      // await remoteConfig.activateFetched();
+      // remoteConfig.getString('app_version_2_testing');
       List<String> currentVersion1 = info.version.split('.');
       List<String> newVersion1 =
-          remoteConfig.getString('force_update_current_version').split('.');
+          remoteConfig.getString('app_version_2_testing').split('.');
 
       setState(() {
         newVersion = newVersion1;
         currentVersion = currentVersion1;
-        uniqueValue = _unique;
+        prefs.setString('referralUniqueValue', _unique);
+        // prefs.setBool('checkReferral', true);
       });
       if ((newVersion1[0].compareTo(currentVersion1[0]) == 1) ||
           (newVersion1[1].compareTo(currentVersion1[1]) == 1)) {
@@ -100,6 +109,10 @@ class _MyAppState extends State<MyApp> {
           .collection('referralData')
           .doc(unique)
           .set(_referralInfo1);
+
+      // setState(() {
+      //   prefs.setBool('checkReferral', true);
+      // });
     } catch (e) {
       print('e-referral--->' + e.toString());
     }

@@ -54,8 +54,6 @@ class ProfileMainState extends State<ProfileMain>
 
   @override
   void initState() {
-    // TODO: implement initState
-    // getCallingInfo();
     populateData();
     super.initState();
   }
@@ -94,14 +92,14 @@ class ProfileMainState extends State<ProfileMain>
           Coordinates(
               prefs.getDouble('latitude'), prefs.getDouble('longitude')));
       var first = address.first;
-
-      setState(() {
-        userInfo['name'] = widget.profileData['name'];
-        userInfo['mobile'] = widget.profileData['mobile'];
-        userInfo['image'] = widget.profileData['image'];
-        userInfo['address'] =
-            first.addressLine ?? (first.adminArea + ', ' + first.countryName);
-      });
+      if (mounted)
+        setState(() {
+          userInfo['name'] = widget.profileData['name'];
+          userInfo['mobile'] = widget.profileData['mobile'];
+          userInfo['image'] = widget.profileData['image'];
+          userInfo['address'] =
+              first.addressLine ?? (first.adminArea + ', ' + first.countryName);
+        });
       // getCallingInfo();
     }
     // pr.hide();
@@ -208,7 +206,7 @@ class ProfileMainState extends State<ProfileMain>
                 builder: (context) {
                   return AlertDialog(
                       title: Text('Success'.tr),
-                      content: Text('प्रोफाइल फोटो अपलोड कर दिया गया है |'),
+                      content: Text('profile_photo_update'.tr),
                       actions: <Widget>[
                         FlatButton(
                             child: Text(
@@ -223,6 +221,21 @@ class ProfileMainState extends State<ProfileMain>
       }
     } catch (e) {}
   }
+
+  // Future<void> uploadImageFile(File file, String index) async {
+  //   await firebase_storage.FirebaseStorage.instance
+  //       .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.jpg')
+  //       .putFile(file);
+
+  //   String downloadURL = await firebase_storage.FirebaseStorage.instance
+  //       .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.jpg')
+  //       .getDownloadURL();
+
+  //   setState(() {
+  //     imagesUpload['image$index'] = downloadURL;
+  //     fileUrl = downloadURL;
+  //   });
+  // }
 
   chooseOption() => showDialog(
       context: context,
@@ -280,6 +293,7 @@ class ProfileMainState extends State<ProfileMain>
         child: SizedBox(
           width: double.infinity,
           child: RaisedButton(
+              color: primaryColor,
               padding: EdgeInsets.all(10.0),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(24),

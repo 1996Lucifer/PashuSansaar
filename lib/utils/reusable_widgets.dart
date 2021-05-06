@@ -14,6 +14,7 @@ class ReusableWidgets {
       BuildContext context, String heading, bool automaticallyImplyLeading,
       {List<Widget> actions}) {
     return AppBar(
+      backgroundColor: primaryColor,
       title: Row(
         children: [
           Image.asset(
@@ -109,5 +110,12 @@ class ReusableWidgets {
       suffix = 'years_ago'.tr;
     }
     return '${duration + ' ' + suffix}';
+  }
+
+  static String printDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, "0");
+    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
+    String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
+    return "$twoDigitMinutes:$twoDigitSeconds";
   }
 }

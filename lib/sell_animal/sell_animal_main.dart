@@ -1,11 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pashusansaar/sell_animal/sell_animal_form.dart';
 import 'package:pashusansaar/sell_animal/sell_animal_info.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:get/get.dart';
 
 // class SellAnimalMain extends StatefulWidget {
 //   final List sellingAnimalInfo;
@@ -45,6 +42,7 @@ import 'package:get/get.dart';
 //   }
 // }
 
+// ignore: must_be_immutable
 class SellAnimalMain extends StatelessWidget {
   final List sellingAnimalInfo;
   final String userName;

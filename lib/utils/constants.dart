@@ -13,14 +13,6 @@ List<String> animalType = [
   // {"id": 5, "name": 'other_animal'.tr}
 ];
 
-List<List<String>> animalType1 = [
-  ['0', 'cow'.tr],
-  ['1', 'buffalo_male'.tr],
-  ['2', 'ox'.tr],
-  ['3', 'buffalo_female'.tr],
-  ['4', 'other_animal'.tr]
-];
-
 List<String> animalTypeOther = [
   'dog_male'.tr,
   'camel_female'.tr,

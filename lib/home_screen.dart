@@ -1,11 +1,11 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:pashusansaar/buy_animal/buy_animal.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:pashusansaar/utils/global.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,7 +13,6 @@ import 'profile_main.dart';
 import 'sell_animal/sell_animal_main.dart';
 import 'package:get/get.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
-import 'package:android_play_install_referrer/android_play_install_referrer.dart';
 import 'package:geocoder/geocoder.dart' as geoCoder;
 
 // ignore: must_be_immutable
@@ -31,12 +30,22 @@ class _HomeScreenState extends State<HomeScreen> {
   Map _profileData = {};
   final geo = Geoflutterfire();
   PageController _pageController;
+  String _referralUniqueValue = '';
+  bool _checkReferral = false;
+
   @override
   void initState() {
     _pageController = PageController(initialPage: widget.selectedIndex);
-    // checkForUpdate();
+    // _notificationChannel();
     loginSetup();
     super.initState();
+  }
+
+  _notificationChannel() async {
+    RemoteMessage initialMessage =
+        await FirebaseMessaging.instance.getInitialMessage();
+    var x = initialMessage?.data['type'];
+    print('notification===>>' + x.toString());
   }
 
   Future<void> initReferrerDetails(mobile) async {
@@ -46,19 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
             prefs.getDouble('latitude'), prefs.getDouble('longitude')));
     var first = address.first;
     try {
-      ReferrerDetails referrerDetails =
-          await AndroidPlayInstallReferrer.installReferrer;
-
-      List<String> str = referrerDetails.installReferrer.split('&');
-
       Map<String, dynamic> referralInfo = {
-        'installBeginTimestampSeconds':
-            referrerDetails.installBeginTimestampSeconds,
-        'installReferrer': {
-          'utmSource': str[0].substring(11),
-          'utmMedium': str[1].substring(11)
-        },
-        'installVersion': referrerDetails.installVersion,
         'userAddress':
             first.addressLine ?? (first.adminArea + ', ' + first.countryName),
         'dateOfSaving': ReusableWidgets.dateTimeToEpoch(DateTime.now()),
@@ -68,8 +65,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
       await FirebaseFirestore.instance
           .collection('referralData')
-          .doc(uniqueValue)
-          .update(referralInfo);
+          .doc(_referralUniqueValue)
+          .update(referralInfo)
+          .then((value) => setState(() {
+                prefs.setBool('checkReferral', true);
+              }))
+          .catchError((error) {
+        print('e-referral--123->' + error.toString());
+      });
+
+      // setState(() {
+      //   prefs.setBool('checkReferral', true);
+      // });
     } catch (e) {
       print('e-referral--->' + e.toString());
     }
@@ -82,6 +89,8 @@ class _HomeScreenState extends State<HomeScreen> {
           'isLoggedIn', FirebaseAuth.instance.currentUser.uid.isNotEmpty);
       prefs.setBool(
           'alreadyUser', FirebaseAuth.instance.currentUser.uid.isNotEmpty);
+      _referralUniqueValue = prefs.getString('referralUniqueValue');
+      _checkReferral = prefs.getBool('checkReferral') ?? false;
     });
 
     getInitialInfo();
@@ -121,14 +130,17 @@ class _HomeScreenState extends State<HomeScreen> {
           print('=-=-=-' + e.toString());
         });
         setState(() {
-          // dataSnapshotValue = documentList[documentList.length - 1];
           _animalInfo = _temp;
+          _animalInfo
+              .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
         });
 
         print("=-=-=" + documentList.length.toString());
+        pr.hide();
       });
-    } on Exception catch (e) {
+    } catch (e) {
       print('=-=Error-Home-=->>>' + e.toString());
+      pr.hide();
     }
 
     getAnimalSellingInfo();
@@ -136,8 +148,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   getAnimalSellingInfo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    FirebaseFirestore.instance
+    // FirebaseFirestore.instance.clearPersistence();
+    await FirebaseFirestore.instance
         .collection("animalSellingInfo")
         .doc(FirebaseAuth.instance.currentUser.uid)
         .collection('sellingAnimalList')
@@ -153,7 +165,6 @@ class _HomeScreenState extends State<HomeScreen> {
           _sellingAnimalInfo = _info;
           prefs.setString('animalDetails', jsonEncode(_info));
         });
-        // pr.hide();
       },
     );
     getProfileInfo();
@@ -169,10 +180,11 @@ class _HomeScreenState extends State<HomeScreen> {
         setState(() {
           _profileData = value.data();
         });
-        pr.hide();
       },
     );
-    await initReferrerDetails(_profileData['mobile']);
+    if (!_checkReferral) initReferrerDetails(_profileData['mobile']);
+    // else
+    //   pr.hide();
   }
 
   void _onItemTapped(int index) {
@@ -250,16 +262,19 @@ class _HomeScreenState extends State<HomeScreen> {
               physics: NeverScrollableScrollPhysics(),
               children: [
                 BuyAnimal(
+                  key: Key(ReusableWidgets.randomIDGenerator()),
                   animalInfo: _animalInfo,
                   userName: _profileData['name'],
                   userMobileNumber: _profileData['mobile'],
                   userImage: _profileData['image'],
                 ),
                 SellAnimalMain(
+                    key: Key(ReusableWidgets.randomIDGenerator()),
                     sellingAnimalInfo: _sellingAnimalInfo,
                     userName: _profileData['name'],
                     userMobileNumber: _profileData['mobile']),
                 ProfileMain(
+                    key: Key(ReusableWidgets.randomIDGenerator()),
                     profileData: _profileData,
                     sellingAnimalInfo: _sellingAnimalInfo,
                     userName: _profileData['name'],
@@ -284,7 +299,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
             currentIndex: widget.selectedIndex,
-            // selectedItemColor: themeColor,
+            selectedItemColor: primaryColor,
             onTap: _onItemTapped,
           ),
         ));
