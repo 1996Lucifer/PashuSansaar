@@ -61,7 +61,7 @@ class ProfileMainState extends State<ProfileMain>
   }
 
   populateData() async {
-    if (widget.profileData.isEmpty) {
+    if (widget.profileData == null || widget.profileData.isEmpty) {
       return showDialog(
           context: context,
           builder: (context) {
@@ -124,6 +124,7 @@ class ProfileMainState extends State<ProfileMain>
               quality: 90,
               targetWidth: 500,
               targetHeight: 500);
+
           setState(() {
             _base64Image = base64Encode(
               compressedFile.readAsBytesSync(),
@@ -183,6 +184,7 @@ class ProfileMainState extends State<ProfileMain>
               quality: 90,
               targetWidth: 500,
               targetHeight: 500);
+
           setState(() {
             _base64Image = base64Encode(
               compressedFile.readAsBytesSync(),

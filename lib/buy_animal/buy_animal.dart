@@ -5,6 +5,7 @@ import 'dart:core';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:csv/csv.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/constants.dart';
 import 'package:pashusansaar/utils/global.dart';
@@ -32,7 +33,7 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'dart:ui' as ui;
 
 class BuyAnimal extends StatefulWidget {
-  List animalInfo;
+  final List animalInfo;
   final String userName;
   final String userMobileNumber;
   final String userImage;
@@ -117,6 +118,7 @@ class _BuyAnimalState extends State<BuyAnimal>
     print(pngBytes);
     File imgFile = new File('$directory/pashu_$uniqueId.png');
     await imgFile.writeAsBytes(pngBytes);
+
     setState(() {
       fileUrl = imgFile;
     });
@@ -148,6 +150,7 @@ class _BuyAnimalState extends State<BuyAnimal>
     var first = addresses.first;
 
     // return first.locality ?? first.featureName;
+
     setState(() {
       _userLocality = first.locality ?? first.featureName;
       prefs.setString('place', _userLocality);
@@ -206,65 +209,72 @@ class _BuyAnimalState extends State<BuyAnimal>
     _gettingMoreBuyer = false;
   }
 
-  _createFileFromString(encodedStr, userId, uniqueId, id) async {
-    Uint8List bytes = base64Decode(encodedStr);
-    String fullPath = '$directory/${uniqueId}_$id.jpg';
-    File file = File(fullPath);
+  // _createFileFromString(encodedStr, userId, uniqueId, id) async {
+  //   Uint8List bytes = base64Decode(encodedStr);
+  //   String fullPath = '$directory/${uniqueId}_$id.jpg';
+  //   File file = File(fullPath);
 
-    await file.writeAsBytes(bytes);
+  //   await file.writeAsBytes(bytes);
 
-    await firebase_storage.FirebaseStorage.instance
-        .ref('$userId/${uniqueId}_$id.jpg')
-        .putFile(file);
+  //   // await firebase_storage.FirebaseStorage.instance
+  //   //     .ref('$userId/${uniqueId}_$id.jpg')
+  //   //     .putFile(file);
 
-    await firebase_storage.FirebaseStorage.instance
-        .ref('$userId/${uniqueId}_$id.jpg')
-        .getDownloadURL();
-  }
+  //   // await firebase_storage.FirebaseStorage.instance
+  //   //     .ref('$userId/${uniqueId}_$id.jpg')
+  //   //     .getDownloadURL();
+  //         StorageReference ref = FirebaseStorage.instance.ref().child("video").child(userId).child(uniqueId);
+  // StorageUploadTask uploadTask = ref.putFile(file, StorageMetadata(contentType: 'video/mp4'));
 
-  func1(element) async {
-    _createFileFromString(
-        element['image1'], element['userId'], element['uniqueId'], '1');
-    String downloadURL1 = await firebase_storage.FirebaseStorage.instance
-        .ref('${element['userId']}/${element['uniqueId']}_1.jpg')
-        .getDownloadURL();
-    setState(() {
-      url1 = downloadURL1;
-    });
-  }
+  // Uri downloadUrl = (await uploadTask.future).downloadUrl;
 
-  func2(element) async {
-    _createFileFromString(
-        element['image2'], element['userId'], element['uniqueId'], '2');
-    String downloadURL2 = await firebase_storage.FirebaseStorage.instance
-        .ref('${element['userId']}/${element['uniqueId']}_2.jpg')
-        .getDownloadURL();
-    setState(() {
-      url2 = downloadURL2;
-    });
-  }
+  //   final String url = downloadUrl.toString();
 
-  func3(element) async {
-    _createFileFromString(
-        element['image3'], element['userId'], element['uniqueId'], '3');
-    String downloadURL3 = await firebase_storage.FirebaseStorage.instance
-        .ref('${element['userId']}/${element['uniqueId']}_3.jpg')
-        .getDownloadURL();
-    setState(() {
-      url3 = downloadURL3;
-    });
-  }
+  // }
 
-  func4(element) async {
-    _createFileFromString(
-        element['image4'], element['userId'], element['uniqueId'], '4');
-    String downloadURL4 = await firebase_storage.FirebaseStorage.instance
-        .ref('${element['userId']}/${element['uniqueId']}_4.jpg')
-        .getDownloadURL();
-    setState(() {
-      url4 = downloadURL4;
-    });
-  }
+  // func1(element) async {
+  //   _createFileFromString(
+  //       element['image1'], element['userId'], element['uniqueId'], '1');
+  //   String downloadURL1 = await firebase_storage.FirebaseStorage.instance
+  //       .ref('${element['userId']}/${element['uniqueId']}_1.jpg')
+  //       .getDownloadURL();
+  //   setState(() {
+  //     url1 = downloadURL1;
+  //   });
+  // }
+
+  // func2(element) async {
+  //   _createFileFromString(
+  //       element['image2'], element['userId'], element['uniqueId'], '2');
+  //   String downloadURL2 = await firebase_storage.FirebaseStorage.instance
+  //       .ref('${element['userId']}/${element['uniqueId']}_2.jpg')
+  //       .getDownloadURL();
+  //   setState(() {
+  //     url2 = downloadURL2;
+  //   });
+  // }
+
+  // func3(element) async {
+  //   _createFileFromString(
+  //       element['image3'], element['userId'], element['uniqueId'], '3');
+  //   String downloadURL3 = await firebase_storage.FirebaseStorage.instance
+  //       .ref('${element['userId']}/${element['uniqueId']}_3.jpg')
+  //       .getDownloadURL();
+  //   setState(() {
+  //     url3 = downloadURL3;
+  //   });
+  // }
+
+  // func4(element) async {
+  //   _createFileFromString(
+  //       element['image4'], element['userId'], element['uniqueId'], '4');
+  //   String downloadURL4 = await firebase_storage.FirebaseStorage.instance
+  //       .ref('${element['userId']}/${element['uniqueId']}_4.jpg')
+  //       .getDownloadURL();
+  //   setState(() {
+  //     url4 = downloadURL4;
+  //   });
+  // }
 
   dataUpdateOnInit() async {
     // if (element['image1'] != null && element['image1'].isNotEmpty) {
@@ -692,7 +702,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                           padding: const EdgeInsets.all(3.0),
                           child: ChoiceChip(
                             backgroundColor: Colors.white,
-                            side: BorderSide(color: primaryColor),
+                            // side: BorderSide(color: primaryColor),
                             label: Text(
                               e,
                               style: TextStyle(
@@ -736,7 +746,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                           padding: const EdgeInsets.all(3.0),
                           child: ChoiceChip(
                             backgroundColor: Colors.white,
-                            side: BorderSide(color: primaryColor),
+                            // side: BorderSide(color: primaryColor),
                             label: Text(
                               e,
                               style: TextStyle(
@@ -763,10 +773,11 @@ class _BuyAnimalState extends State<BuyAnimal>
 
   @override
   Widget build(BuildContext context) {
-    // super.build(context);
+    super.build(context);
     return RepaintBoundary(
       key: previewContainer,
       child: Scaffold(
+        key: widget.key,
         backgroundColor: Colors.grey[100],
         body: Stack(
           children: [
@@ -1273,8 +1284,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                         ? UrlLauncher.launch(
                                                             Uri.encodeFull(
                                                                 whatsappUrl))
-                                                        : ScaffoldMessenger.of(
-                                                                context)
+                                                        : Scaffold.of(context)
                                                             .showSnackBar(
                                                                 SnackBar(
                                                             content: Text(
@@ -1818,8 +1828,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                         ? UrlLauncher.launch(
                                                             Uri.encodeFull(
                                                                 whatsappUrl))
-                                                        : ScaffoldMessenger.of(
-                                                                context)
+                                                        : Scaffold.of(context)
                                                             .showSnackBar(
                                                                 SnackBar(
                                                             content: Text(
@@ -1968,8 +1977,8 @@ class _BuyAnimalState extends State<BuyAnimal>
                                           } catch (e) {
                                             print('locationerro==> ' +
                                                 e.toString());
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(SnackBar(
+                                            Scaffold.of(context).showSnackBar(
+                                                SnackBar(
                                                     content: Text(
                                                         'चुनाव में एक भी पशु उपलब्ध नहीं है, इसलिए सभी पशु दिखाए जा रहे है |')));
                                           }
@@ -2110,7 +2119,7 @@ class _BuyAnimalState extends State<BuyAnimal>
           print('=-=-=-' + e.toString());
         });
         if (_tempAnimalList.length == 0) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          Scaffold.of(context).showSnackBar(SnackBar(
               content: Text(
                   'चुनाव में एक भी पशु उपलब्ध नहीं है, इसलिए सभी पशु दिखाए जा रहे है |')));
         }
@@ -2681,10 +2690,9 @@ class _BuyAnimalState extends State<BuyAnimal>
 
                                     Navigator.pop(context);
                                     if (_tempAnimalList.length == 0) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(SnackBar(
-                                              content: Text(
-                                                  'चुनाव में एक भी पशु उपलब्ध नहीं है, इसलिए सभी पशु दिखाए जा रहे है |')));
+                                      Scaffold.of(context).showSnackBar(SnackBar(
+                                          content: Text(
+                                              'चुनाव में एक भी पशु उपलब्ध नहीं है, इसलिए सभी पशु दिखाए जा रहे है |')));
 
                                       setState(() {
                                         _tempAnimalList = _resetFilterData;

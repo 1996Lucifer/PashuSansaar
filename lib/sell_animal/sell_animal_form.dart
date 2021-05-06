@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
@@ -36,7 +37,6 @@ class SellAnimalForm extends StatefulWidget {
 class _SellAnimalFormState extends State<SellAnimalForm>
     with AutomaticKeepAliveClientMixin {
   var animalInfo = {}, extraInfoData = {};
-  String _base64Image;
   ImagePicker _picker;
   ProgressDialog pr;
   Color backgroundColor = Colors.red[50];
@@ -83,13 +83,23 @@ class _SellAnimalFormState extends State<SellAnimalForm>
       NumberFormat.compactSimpleCurrency(locale: _locale).currencySymbol;
 
   Future<void> uploadFile(File file, String index) async {
-    await firebase_storage.FirebaseStorage.instance
-        .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
-        .putFile(file);
+    // await firebase_storage.FirebaseStorage.instance
+    //     .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
+    //     .putFile(file);
 
-    String downloadURL = await firebase_storage.FirebaseStorage.instance
-        .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
-        .getDownloadURL();
+    // String downloadURL = await firebase_storage.FirebaseStorage.instance
+    //     .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
+    //     .getDownloadURL();
+    StorageReference ref = FirebaseStorage.instance
+        .ref()
+        .child(FirebaseAuth.instance.currentUser.uid)
+        .child(uniqueId);
+    StorageUploadTask uploadTask =
+        ref.putFile(file, StorageMetadata(contentType: 'video/mp4'));
+
+    var downloadUrl = (await uploadTask.future).downloadUrl;
+
+    final String downloadURL = downloadUrl.toString();
 
     setState(() {
       imagesUpload['image$index'] = downloadURL;
@@ -992,13 +1002,25 @@ class _SellAnimalFormState extends State<SellAnimalForm>
               else if ([0, 1].contains(
                     constant.animalType.indexOf(animalInfo['animalType']),
                   ) &&
-                  animalInfo['animalMilk'] == null)
+                  (animalInfo['animalMilk'] == null ||
+                      animalInfo['animalMilk'].isEmpty))
                 ReusableWidgets.showDialogBox(
                   context,
                   'error'.tr,
                   Text('animal_milk_error'.tr),
                 );
-              else if (animalInfo['animalPrice'] == null)
+              else if ([0, 1].contains(
+                      constant.animalType.indexOf(animalInfo['animalType'])) &&
+                  (animalInfo['animalMilk'] != null ||
+                      animalInfo['animalMilk'].isNotEmpty) &&
+                  (int.parse(animalInfo['animalMilk']) > 70))
+                ReusableWidgets.showDialogBox(
+                  context,
+                  'error'.tr,
+                  Text('maximum_milk_length'.tr),
+                );
+              else if (animalInfo['animalPrice'] == null ||
+                  animalInfo['animalPrice'].isEmpty)
                 ReusableWidgets.showDialogBox(
                   context,
                   'error'.tr,
@@ -1427,9 +1449,11 @@ class _SellAnimalFormState extends State<SellAnimalForm>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
+      key: widget.key,
       appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),
       body: GestureDetector(
         onTap: () {

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
@@ -41,7 +42,6 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
     with AutomaticKeepAliveClientMixin {
   final geo = geoFire.Geoflutterfire();
   var animalInfo = {}, extraInfoData = {};
-  String _base64Image;
   ImagePicker _picker;
   ProgressDialog pr;
   Color backgroundColor = Colors.red[50];
@@ -110,13 +110,24 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
       intl.NumberFormat.compactSimpleCurrency(locale: _locale).currencySymbol;
 
   Future<void> uploadFile(File file, String index) async {
-    await firebase_storage.FirebaseStorage.instance
-        .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
-        .putFile(file);
+    // await firebase_storage.FirebaseStorage.instance
+    //     .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
+    //     .putFile(file);
 
-    String downloadURL = await firebase_storage.FirebaseStorage.instance
-        .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
-        .getDownloadURL();
+    StorageReference ref = FirebaseStorage.instance
+        .ref()
+        .child(FirebaseAuth.instance.currentUser.uid)
+        .child(uniqueId);
+    StorageUploadTask uploadTask =
+        ref.putFile(file, StorageMetadata(contentType: 'video/mp4'));
+
+    var downloadUrl = (await uploadTask.future).downloadUrl;
+
+    final String downloadURL = downloadUrl.toString();
+
+    // String downloadURL = await firebase_storage.FirebaseStorage.instance
+    //     .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
+    //     .getDownloadURL();
 
     setState(() {
       imagesUpload['image$index'] = downloadURL;
@@ -146,12 +157,6 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
             imagesFileUpload['image$index'] = file.path;
           });
           await uploadFile(compressedFile, index);
-        // setState(() {
-        //   _base64Image = base64Encode(
-        //     compressedFile.readAsBytesSync(),
-        //   );
-        //   imagesUpload['image$index'] = _base64Image;
-        // });
       }
     } catch (e) {}
   }
@@ -1011,7 +1016,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                   'error'.tr,
                   Text('animal_age_error'.tr),
                 );
-              else if ([0, 3].contains(
+              else if ([0, 1].contains(
                     constant.animalType.indexOf(animalInfo['animalType']),
                   ) &&
                   (animalInfo['animalIsPregnant'] == null))
@@ -1020,16 +1025,28 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                   'error'.tr,
                   Text('animal_pregnancy_error'.tr),
                 );
-              else if ([0, 3].contains(
+              else if ([0, 1].contains(
                     constant.animalType.indexOf(animalInfo['animalType']),
                   ) &&
-                  animalInfo['animalMilk'] == null)
+                  (animalInfo['animalMilk'] == null ||
+                      animalInfo['animalMilk'].isEmpty))
                 ReusableWidgets.showDialogBox(
                   context,
                   'error'.tr,
                   Text('animal_milk_error'.tr),
                 );
-              else if (animalInfo['animalPrice'] == null)
+              else if ([0, 1].contains(
+                      constant.animalType.indexOf(animalInfo['animalType'])) &&
+                  (animalInfo['animalMilk'] != null ||
+                      animalInfo['animalMilk'].isNotEmpty) &&
+                  (int.parse(animalInfo['animalMilk']) > 70))
+                ReusableWidgets.showDialogBox(
+                  context,
+                  'error'.tr,
+                  Text('maximum_milk_length'.tr),
+                );
+              else if (animalInfo['animalPrice'] == null ||
+                  animalInfo['animalPrice'].isEmpty)
                 ReusableWidgets.showDialogBox(
                   context,
                   'error'.tr,
@@ -1458,10 +1475,11 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      // appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),
+      appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),
       body: GestureDetector(
         onTap: () {
           return WidgetsBinding.instance.focusManager.primaryFocus?.unfocus();
@@ -1483,17 +1501,17 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
               animalType(),
               animalBreed(),
               animalAge(),
-              [0, 3].contains(
+              [0, 1].contains(
                 constant.animalType.indexOf(animalInfo['animalType']),
               )
                   ? animalIsPregnant()
                   : SizedBox.shrink(),
-              [0, 3].contains(
+              [0, 1].contains(
                 constant.animalType.indexOf(animalInfo['animalType']),
               )
                   ? animalMilkPerDay()
                   : SizedBox.shrink(),
-              [0, 3].contains(
+              [0, 1].contains(
                 constant.animalType.indexOf(animalInfo['animalType']),
               )
                   ? animalMilkPerDayCapacity()

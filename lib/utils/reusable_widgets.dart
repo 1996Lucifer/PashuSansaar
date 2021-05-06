@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:crypto/crypto.dart' as crypto;
-import 'package:convert/convert.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:get/get.dart';
@@ -52,12 +51,6 @@ class ReusableWidgets {
         });
   }
 
-  static generateMd5(String data) {
-    var content = new Utf8Encoder().convert(data);
-    var md5 = crypto.md5;
-    var digest = md5.convert(content);
-    return hex.encode(digest.bytes);
-  }
 
   static String randomCodeGenerator() {
     const _chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';

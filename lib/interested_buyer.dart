@@ -371,8 +371,7 @@ class _InterestedBuyerState extends State<InterestedBuyer> {
                                                           ? UrlLauncher.launch(
                                                               Uri.encodeFull(
                                                                   whatsappUrl))
-                                                          : ScaffoldMessenger
-                                                                  .of(context)
+                                                          : Scaffold.of(context)
                                                               .showSnackBar(
                                                                   SnackBar(
                                                               content: Text(
