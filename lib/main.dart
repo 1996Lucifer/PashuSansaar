@@ -24,7 +24,7 @@ void main() async {
   remoteConfig = await RemoteConfig.instance;
   await remoteConfig.fetch(expiration: const Duration(seconds: 0));
   await remoteConfig.activateFetched();
-  remoteConfig.getString('app_version_2_testing');
+  remoteConfig.getString('force_update_current_version');
 
   runApp(MaterialApp(debugShowCheckedModeBanner: false, home: MyApp()));
 }
@@ -72,11 +72,13 @@ class _MyAppState extends State<MyApp> {
       // remoteConfig.getString('force_update_current_version');
       List<String> currentVersion1 = info.version.split('.');
       List<String> newVersion1 =
-          remoteConfig.getString('app_version_2_testing').split('.');
+          remoteConfig.getString('force_update_current_version').split('.');
 
       setState(() {
-        newVersion = newVersion1;
-        currentVersion = currentVersion1;
+        // newVersion = newVersion1;
+        // currentVersion = currentVersion1;
+        prefs.setStringList('newVersion', newVersion1);
+        prefs.setStringList('currentVersion', currentVersion1);
         prefs.setString('referralUniqueValue', _unique);
       });
       if ((newVersion1[0].compareTo(currentVersion1[0]) == 1) ||
@@ -174,7 +176,14 @@ class _MyAppState extends State<MyApp> {
         translations: Messages(), // your translations
         locale: Locale('hn', 'IN'),
         // fallbackLocale: Locale('hn', 'IN'),
-        onInit: () {},
+        // onInit: () async {
+        //   bool _logInBasedOnVersion =
+        //       ([0, 1].contains(newVersion[0].compareTo(currentVersion[0]))) &&
+        //           ([0, 1].contains(newVersion[1].compareTo(currentVersion[1])));
+        //   setState(() {
+        //     logInBasedOnVersion = _logInBasedOnVersion;
+        //   });
+        // },
         theme: ThemeData(
             fontFamily: 'Mukta',
             primaryColor: primaryColor,
@@ -185,7 +194,6 @@ class _MyAppState extends State<MyApp> {
                 TextSelectionThemeData(cursorColor: primaryColor),
             indicatorColor: primaryColor,
             scaffoldBackgroundColor: Colors.white),
-        home: SplashScreen(
-            newVersion: newVersion, currentVersion: currentVersion));
+        home: SplashScreen());
   }
 }

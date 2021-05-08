@@ -250,19 +250,17 @@ class _HomeScreenState extends State<HomeScreen> {
               physics: NeverScrollableScrollPhysics(),
               children: [
                 BuyAnimal(
-                  key: Key(ReusableWidgets.randomIDGenerator()),
+                
                   animalInfo: _animalInfo,
                   userName: _profileData['name'],
                   userMobileNumber: _profileData['mobile'],
                   userImage: _profileData['image'],
                 ),
                 SellAnimalMain(
-                    key: Key(ReusableWidgets.randomIDGenerator()),
                     sellingAnimalInfo: _sellingAnimalInfo,
                     userName: _profileData['name'],
                     userMobileNumber: _profileData['mobile']),
                 ProfileMain(
-                    key: Key(ReusableWidgets.randomIDGenerator()),
                     profileData: _profileData,
                     sellingAnimalInfo: _sellingAnimalInfo,
                     userName: _profileData['name'],

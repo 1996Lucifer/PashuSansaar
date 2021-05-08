@@ -76,30 +76,20 @@ class _SellAnimalFormState extends State<SellAnimalForm>
     super.initState();
   }
 
-  String _formatNumber(String s) => NumberFormat.decimalPattern(_locale).format(
-        int.parse(s),
-      );
+  String _formatNumber(String s) =>
+      NumberFormat.decimalPattern(_locale).format(int.parse(s));
   String get _currency =>
       NumberFormat.compactSimpleCurrency(locale: _locale).currencySymbol;
 
   Future<void> uploadFile(File file, String index) async {
-    // await firebase_storage.FirebaseStorage.instance
-    //     .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
-    //     .putFile(file);
+    // try {
+    await firebase_storage.FirebaseStorage.instance
+        .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.jpg')
+        .putFile(file);
 
-    // String downloadURL = await firebase_storage.FirebaseStorage.instance
-    //     .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
-    //     .getDownloadURL();
-    StorageReference ref = FirebaseStorage.instance
-        .ref()
-        .child(FirebaseAuth.instance.currentUser.uid)
-        .child(uniqueId);
-    StorageUploadTask uploadTask =
-        ref.putFile(file, StorageMetadata(contentType: 'video/mp4'));
-
-    var downloadUrl = (await uploadTask.future).downloadUrl;
-
-    final String downloadURL = downloadUrl.toString();
+    String downloadURL = await firebase_storage.FirebaseStorage.instance
+        .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.jpg')
+        .getDownloadURL();
 
     setState(() {
       imagesUpload['image$index'] = downloadURL;
@@ -532,7 +522,8 @@ class _SellAnimalFormState extends State<SellAnimalForm>
               child: TextFormField(
                 initialValue: animalInfo['animalMilk'],
                 inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly
+                  FilteringTextInputFormatter.digitsOnly,
+                  FilteringTextInputFormatter.deny(RegExp(r'^0+'))
                 ],
                 keyboardType: TextInputType.number,
                 onChanged: (String milk) {
@@ -574,7 +565,8 @@ class _SellAnimalFormState extends State<SellAnimalForm>
               child: TextFormField(
                 initialValue: animalInfo['animalMilkCapacity'],
                 inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly
+                  FilteringTextInputFormatter.digitsOnly,
+                  FilteringTextInputFormatter.deny(RegExp(r'^0+'))
                 ],
                 keyboardType: TextInputType.number,
                 onChanged: (String milkCapacity) {
@@ -637,18 +629,22 @@ class _SellAnimalFormState extends State<SellAnimalForm>
               child: TextFormField(
                 inputFormatters: <TextInputFormatter>[
                   FilteringTextInputFormatter.digitsOnly,
+                  FilteringTextInputFormatter.deny(RegExp(r'^0+'))
+
                 ],
                 controller: _controller,
                 keyboardType: TextInputType.number,
                 onChanged: (String price) {
-                  String string = '${_formatNumber(
-                    price.replaceAll(',', ''),
-                  )}';
+                  // String string = '${_formatNumber(price)}';
+                  String string = '${_formatNumber(price.replaceAll(',', ''))}';
+
                   _controller.value = TextEditingValue(
                     text: _currency + string,
                     selection: TextSelection.collapsed(offset: string.length),
                   );
 
+                  // _controller.selection = TextSelection(
+                  //     baseOffset: price.length, extentOffset: price.length);
                   _controller.selection = TextSelection.fromPosition(
                       TextPosition(offset: _controller.text.length));
 
@@ -1129,13 +1125,17 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                                     ),
                                     onPressed: () {
                                       Navigator.pop(context);
-                                      Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => HomeScreen(
-                                              selectedIndex: 0,
-                                            ),
+                                      Get.off(() => HomeScreen(
+                                            selectedIndex: 0,
                                           ));
+
+                                      // Navigator.pushReplacement(
+                                      //     context,
+                                      //     MaterialPageRoute(
+                                      //       builder: (context) => HomeScreen(
+                                      //         selectedIndex: 0,
+                                      //       ),
+                                      //     ));
                                     }),
                               ]);
                         });
@@ -1453,7 +1453,6 @@ class _SellAnimalFormState extends State<SellAnimalForm>
     double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      key: widget.key,
       appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),
       body: GestureDetector(
         onTap: () {

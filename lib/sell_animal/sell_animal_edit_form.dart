@@ -110,24 +110,13 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
       intl.NumberFormat.compactSimpleCurrency(locale: _locale).currencySymbol;
 
   Future<void> uploadFile(File file, String index) async {
-    // await firebase_storage.FirebaseStorage.instance
-    //     .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
-    //     .putFile(file);
+    await firebase_storage.FirebaseStorage.instance
+        .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
+        .putFile(file);
 
-    StorageReference ref = FirebaseStorage.instance
-        .ref()
-        .child(FirebaseAuth.instance.currentUser.uid)
-        .child(uniqueId);
-    StorageUploadTask uploadTask =
-        ref.putFile(file, StorageMetadata(contentType: 'video/mp4'));
-
-    var downloadUrl = (await uploadTask.future).downloadUrl;
-
-    final String downloadURL = downloadUrl.toString();
-
-    // String downloadURL = await firebase_storage.FirebaseStorage.instance
-    //     .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
-    //     .getDownloadURL();
+    String downloadURL = await firebase_storage.FirebaseStorage.instance
+        .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
+        .getDownloadURL();
 
     setState(() {
       imagesUpload['image$index'] = downloadURL;
@@ -515,7 +504,8 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
               child: TextFormField(
                 initialValue: animalInfo['animalMilk'],
                 inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly
+                  FilteringTextInputFormatter.digitsOnly,
+                  FilteringTextInputFormatter.deny(RegExp(r'^0+'))
                 ],
                 keyboardType: TextInputType.number,
                 onChanged: (String milk) {
@@ -557,7 +547,8 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
               child: TextFormField(
                 initialValue: animalInfo['animalMilkCapacity'],
                 inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly
+                  FilteringTextInputFormatter.digitsOnly,
+                  FilteringTextInputFormatter.deny(RegExp(r'^0+'))
                 ],
                 keyboardType: TextInputType.number,
                 onChanged: (String milkCapacity) {
@@ -620,6 +611,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
               child: TextFormField(
                 inputFormatters: <TextInputFormatter>[
                   FilteringTextInputFormatter.digitsOnly,
+                  FilteringTextInputFormatter.deny(RegExp(r'^0+'))
                 ],
                 controller: _controller,
                 keyboardType: TextInputType.number,
@@ -1152,13 +1144,17 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                                     ),
                                     onPressed: () {
                                       Navigator.pop(context);
-                                      Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => HomeScreen(
-                                              selectedIndex: 0,
-                                            ),
+                                      Get.off(() => HomeScreen(
+                                            selectedIndex: 0,
                                           ));
+
+                                      // Navigator.pushReplacement(
+                                      //     context,
+                                      //     MaterialPageRoute(
+                                      //       builder: (context) => HomeScreen(
+                                      //         selectedIndex: 0,
+                                      //       ),
+                                      //     ));
                                     }),
                               ]);
                         });

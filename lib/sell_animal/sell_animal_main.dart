@@ -49,6 +49,7 @@ class SellAnimalMain extends StatelessWidget {
   final List sellingAnimalInfo;
   final String userName;
   final String userMobileNumber;
+  
 
   SellAnimalMain(
       {Key key,
@@ -61,9 +62,8 @@ class SellAnimalMain extends StatelessWidget {
   Widget build(BuildContext context) {
     return sellingAnimalInfo.length == 0
         ? SellAnimalForm(
-            key: key, userName: userName, userMobileNumber: userMobileNumber)
+    userName: userName, userMobileNumber: userMobileNumber)
         : SellingAnimalInfo(
-            key: key,
             animalInfo: sellingAnimalInfo,
             userName: userName,
             userMobileNumber: userMobileNumber,

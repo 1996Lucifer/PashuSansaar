@@ -32,8 +32,9 @@ class _OTPScreenState extends State<OTPScreen>
 
   bool hasError = false, _checkUserLoginState = false, _startTimer = false;
   String currentText = "";
-  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-  final formKey = GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> scaffoldKey =
+      GlobalKey<ScaffoldState>(debugLabel: 'otpScaffoldKey');
+  final formKey = GlobalKey<FormState>(debugLabel: 'otpFormStateKey');
   int endTime = DateTime.now().millisecondsSinceEpoch + 1000 * 60;
   CountdownTimerController countdownTimerController;
 
@@ -46,7 +47,7 @@ class _OTPScreenState extends State<OTPScreen>
       setState(() {
         _startTimer = true;
       });
-      return Scaffold.of(context)
+      return ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('OTP भेजा गया है')));
     });
 
@@ -60,7 +61,7 @@ class _OTPScreenState extends State<OTPScreen>
           _startTimer = true;
         });
 
-        Scaffold.of(context)
+        ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('OTP पुनः भेजा गया है')));
 
         await _verifyPhone();
@@ -349,7 +350,7 @@ class _OTPScreenState extends State<OTPScreen>
                           });
                         } catch (e) {
                           FocusScope.of(context).unfocus();
-                          Scaffold.of(context).showSnackBar(
+                          ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text('invalid_otp'.tr)));
                         }
                       }

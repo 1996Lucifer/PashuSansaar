@@ -41,7 +41,7 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
 
   String currentText = "";
 
-  final formKey = GlobalKey<FormState>();
+  final formKey = GlobalKey<FormState>(debugLabel: 'userDetailsFetch');
 
   @override
   void initState() {

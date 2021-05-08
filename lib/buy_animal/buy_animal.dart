@@ -75,7 +75,8 @@ class _BuyAnimalState extends State<BuyAnimal>
 
   File fileUrl;
 
-  static GlobalKey previewContainer = new GlobalKey();
+  static GlobalKey previewContainer =
+      new GlobalKey(debugLabel: 'previewController');
 
   @override
   bool get wantKeepAlive => true;
@@ -495,44 +496,58 @@ class _BuyAnimalState extends State<BuyAnimal>
     });
   }
 
+  removingNumberFromBayaat(String bayaat) {
+    return bayaat.split('').reversed.skip(4).toList().reversed.join('');
+  }
+
   bayaatMapping(bayaat) {
     String bayaaat = '';
-    if (["0", "1", "2", "3", "4", "5", "6", "7"].contains(bayaat)) {
-      switch (bayaat) {
-        case '0':
-          bayaaat = 'zero'.tr;
-          break;
-        case '1':
-          bayaaat = 'first'.tr + ' ' + 'animal_is_pregnant'.tr;
-
-          break;
-        case '2':
-          bayaaat = 'second'.tr + ' ' + 'animal_is_pregnant'.tr;
-
-          break;
-        case '3':
-          bayaaat = 'third'.tr + ' ' + 'animal_is_pregnant'.tr;
-
-          break;
-        case '4':
-          bayaaat = 'fourth'.tr + ' ' + 'animal_is_pregnant'.tr;
-
-          break;
-        case '5':
-          bayaaat = 'fifth'.tr + ' ' + 'animal_is_pregnant'.tr;
-
-          break;
-        case '6':
-          bayaaat = 'sixth'.tr + ' ' + 'animal_is_pregnant'.tr;
-
-          break;
-        case '7':
-          bayaaat = 'seventh'.tr + ' ' + 'animal_is_pregnant'.tr;
-
-          break;
-      }
-    } else
-      bayaaat = bayaat;
+    // if (["0", "1", "2", "3", "4", "5", "6", "7"].contains(bayaat)) {
+    switch (bayaat) {
+      case 'ब्यायी नहीं (0)':
+        bayaaat = removingNumberFromBayaat('zero'.tr);
+        break;
+      case 'पहला (1)':
+        bayaaat = removingNumberFromBayaat('first'.tr) +
+            ' ' +
+            'animal_is_pregnant'.tr;
+        break;
+      case 'दूसरा (2)':
+        bayaaat = removingNumberFromBayaat('second'.tr) +
+            ' ' +
+            'animal_is_pregnant'.tr;
+        break;
+      case 'तीसरा (3)':
+        bayaaat = removingNumberFromBayaat('third'.tr) +
+            ' ' +
+            'animal_is_pregnant'.tr;
+        break;
+      case 'चौथा (4)':
+        bayaaat = removingNumberFromBayaat('fourth'.tr) +
+            ' ' +
+            'animal_is_pregnant'.tr;
+        break;
+      case 'पांचवा (5)':
+        bayaaat = removingNumberFromBayaat('fifth'.tr) +
+            ' ' +
+            'animal_is_pregnant'.tr;
+        break;
+      case 'छठा (6)':
+        bayaaat = removingNumberFromBayaat('sixth'.tr) +
+            ' ' +
+            'animal_is_pregnant'.tr;
+        break;
+      case 'सातवाँ (7)':
+        bayaaat = removingNumberFromBayaat('seventh'.tr) +
+            ' ' +
+            'animal_is_pregnant'.tr;
+        break;
+      default:
+        bayaaat = '';
+        break;
+    }
+    // } else
+    //   bayaaat = bayaat;
 
     return bayaaat;
   }
@@ -702,7 +717,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                           padding: const EdgeInsets.all(3.0),
                           child: ChoiceChip(
                             backgroundColor: Colors.white,
-                            // side: BorderSide(color: primaryColor),
+                            side: BorderSide(color: primaryColor),
                             label: Text(
                               e,
                               style: TextStyle(
@@ -746,7 +761,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                           padding: const EdgeInsets.all(3.0),
                           child: ChoiceChip(
                             backgroundColor: Colors.white,
-                            // side: BorderSide(color: primaryColor),
+                            side: BorderSide(color: primaryColor),
                             label: Text(
                               e,
                               style: TextStyle(
@@ -777,7 +792,6 @@ class _BuyAnimalState extends State<BuyAnimal>
     return RepaintBoundary(
       key: previewContainer,
       child: Scaffold(
-        key: widget.key,
         backgroundColor: Colors.grey[100],
         body: Stack(
           children: [
@@ -1284,7 +1298,8 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                         ? UrlLauncher.launch(
                                                             Uri.encodeFull(
                                                                 whatsappUrl))
-                                                        : Scaffold.of(context)
+                                                        : ScaffoldMessenger.of(
+                                                                context)
                                                             .showSnackBar(
                                                                 SnackBar(
                                                             content: Text(
@@ -1828,7 +1843,8 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                         ? UrlLauncher.launch(
                                                             Uri.encodeFull(
                                                                 whatsappUrl))
-                                                        : Scaffold.of(context)
+                                                        : ScaffoldMessenger.of(
+                                                                context)
                                                             .showSnackBar(
                                                                 SnackBar(
                                                             content: Text(
@@ -1977,8 +1993,8 @@ class _BuyAnimalState extends State<BuyAnimal>
                                           } catch (e) {
                                             print('locationerro==> ' +
                                                 e.toString());
-                                            Scaffold.of(context).showSnackBar(
-                                                SnackBar(
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(SnackBar(
                                                     content: Text(
                                                         'चुनाव में एक भी पशु उपलब्ध नहीं है, इसलिए सभी पशु दिखाए जा रहे है |')));
                                           }
@@ -2119,7 +2135,7 @@ class _BuyAnimalState extends State<BuyAnimal>
           print('=-=-=-' + e.toString());
         });
         if (_tempAnimalList.length == 0) {
-          Scaffold.of(context).showSnackBar(SnackBar(
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               content: Text(
                   'चुनाव में एक भी पशु उपलब्ध नहीं है, इसलिए सभी पशु दिखाए जा रहे है |')));
         }
@@ -2690,9 +2706,10 @@ class _BuyAnimalState extends State<BuyAnimal>
 
                                     Navigator.pop(context);
                                     if (_tempAnimalList.length == 0) {
-                                      Scaffold.of(context).showSnackBar(SnackBar(
-                                          content: Text(
-                                              'चुनाव में एक भी पशु उपलब्ध नहीं है, इसलिए सभी पशु दिखाए जा रहे है |')));
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(SnackBar(
+                                              content: Text(
+                                                  'चुनाव में एक भी पशु उपलब्ध नहीं है, इसलिए सभी पशु दिखाए जा रहे है |')));
 
                                       setState(() {
                                         _tempAnimalList = _resetFilterData;
