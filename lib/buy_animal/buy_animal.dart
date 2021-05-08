@@ -5,6 +5,7 @@ import 'dart:core';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:csv/csv.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/constants.dart';
 import 'package:pashusansaar/utils/global.dart';
@@ -32,7 +33,7 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'dart:ui' as ui;
 
 class BuyAnimal extends StatefulWidget {
-  List animalInfo;
+  final List animalInfo;
   final String userName;
   final String userMobileNumber;
   final String userImage;
@@ -74,7 +75,8 @@ class _BuyAnimalState extends State<BuyAnimal>
 
   File fileUrl;
 
-  static GlobalKey previewContainer = new GlobalKey();
+  static GlobalKey previewContainer =
+      new GlobalKey(debugLabel: 'previewController');
 
   @override
   bool get wantKeepAlive => true;
@@ -117,6 +119,7 @@ class _BuyAnimalState extends State<BuyAnimal>
     print(pngBytes);
     File imgFile = new File('$directory/pashu_$uniqueId.png');
     await imgFile.writeAsBytes(pngBytes);
+
     setState(() {
       fileUrl = imgFile;
     });
@@ -148,6 +151,7 @@ class _BuyAnimalState extends State<BuyAnimal>
     var first = addresses.first;
 
     // return first.locality ?? first.featureName;
+
     setState(() {
       _userLocality = first.locality ?? first.featureName;
       prefs.setString('place', _userLocality);
@@ -206,65 +210,72 @@ class _BuyAnimalState extends State<BuyAnimal>
     _gettingMoreBuyer = false;
   }
 
-  _createFileFromString(encodedStr, userId, uniqueId, id) async {
-    Uint8List bytes = base64Decode(encodedStr);
-    String fullPath = '$directory/${uniqueId}_$id.jpg';
-    File file = File(fullPath);
+  // _createFileFromString(encodedStr, userId, uniqueId, id) async {
+  //   Uint8List bytes = base64Decode(encodedStr);
+  //   String fullPath = '$directory/${uniqueId}_$id.jpg';
+  //   File file = File(fullPath);
 
-    await file.writeAsBytes(bytes);
+  //   await file.writeAsBytes(bytes);
 
-    await firebase_storage.FirebaseStorage.instance
-        .ref('$userId/${uniqueId}_$id.jpg')
-        .putFile(file);
+  //   // await firebase_storage.FirebaseStorage.instance
+  //   //     .ref('$userId/${uniqueId}_$id.jpg')
+  //   //     .putFile(file);
 
-    await firebase_storage.FirebaseStorage.instance
-        .ref('$userId/${uniqueId}_$id.jpg')
-        .getDownloadURL();
-  }
+  //   // await firebase_storage.FirebaseStorage.instance
+  //   //     .ref('$userId/${uniqueId}_$id.jpg')
+  //   //     .getDownloadURL();
+  //         StorageReference ref = FirebaseStorage.instance.ref().child("video").child(userId).child(uniqueId);
+  // StorageUploadTask uploadTask = ref.putFile(file, StorageMetadata(contentType: 'video/mp4'));
 
-  func1(element) async {
-    _createFileFromString(
-        element['image1'], element['userId'], element['uniqueId'], '1');
-    String downloadURL1 = await firebase_storage.FirebaseStorage.instance
-        .ref('${element['userId']}/${element['uniqueId']}_1.jpg')
-        .getDownloadURL();
-    setState(() {
-      url1 = downloadURL1;
-    });
-  }
+  // Uri downloadUrl = (await uploadTask.future).downloadUrl;
 
-  func2(element) async {
-    _createFileFromString(
-        element['image2'], element['userId'], element['uniqueId'], '2');
-    String downloadURL2 = await firebase_storage.FirebaseStorage.instance
-        .ref('${element['userId']}/${element['uniqueId']}_2.jpg')
-        .getDownloadURL();
-    setState(() {
-      url2 = downloadURL2;
-    });
-  }
+  //   final String url = downloadUrl.toString();
 
-  func3(element) async {
-    _createFileFromString(
-        element['image3'], element['userId'], element['uniqueId'], '3');
-    String downloadURL3 = await firebase_storage.FirebaseStorage.instance
-        .ref('${element['userId']}/${element['uniqueId']}_3.jpg')
-        .getDownloadURL();
-    setState(() {
-      url3 = downloadURL3;
-    });
-  }
+  // }
 
-  func4(element) async {
-    _createFileFromString(
-        element['image4'], element['userId'], element['uniqueId'], '4');
-    String downloadURL4 = await firebase_storage.FirebaseStorage.instance
-        .ref('${element['userId']}/${element['uniqueId']}_4.jpg')
-        .getDownloadURL();
-    setState(() {
-      url4 = downloadURL4;
-    });
-  }
+  // func1(element) async {
+  //   _createFileFromString(
+  //       element['image1'], element['userId'], element['uniqueId'], '1');
+  //   String downloadURL1 = await firebase_storage.FirebaseStorage.instance
+  //       .ref('${element['userId']}/${element['uniqueId']}_1.jpg')
+  //       .getDownloadURL();
+  //   setState(() {
+  //     url1 = downloadURL1;
+  //   });
+  // }
+
+  // func2(element) async {
+  //   _createFileFromString(
+  //       element['image2'], element['userId'], element['uniqueId'], '2');
+  //   String downloadURL2 = await firebase_storage.FirebaseStorage.instance
+  //       .ref('${element['userId']}/${element['uniqueId']}_2.jpg')
+  //       .getDownloadURL();
+  //   setState(() {
+  //     url2 = downloadURL2;
+  //   });
+  // }
+
+  // func3(element) async {
+  //   _createFileFromString(
+  //       element['image3'], element['userId'], element['uniqueId'], '3');
+  //   String downloadURL3 = await firebase_storage.FirebaseStorage.instance
+  //       .ref('${element['userId']}/${element['uniqueId']}_3.jpg')
+  //       .getDownloadURL();
+  //   setState(() {
+  //     url3 = downloadURL3;
+  //   });
+  // }
+
+  // func4(element) async {
+  //   _createFileFromString(
+  //       element['image4'], element['userId'], element['uniqueId'], '4');
+  //   String downloadURL4 = await firebase_storage.FirebaseStorage.instance
+  //       .ref('${element['userId']}/${element['uniqueId']}_4.jpg')
+  //       .getDownloadURL();
+  //   setState(() {
+  //     url4 = downloadURL4;
+  //   });
+  // }
 
   dataUpdateOnInit() async {
     // if (element['image1'] != null && element['image1'].isNotEmpty) {
@@ -485,44 +496,58 @@ class _BuyAnimalState extends State<BuyAnimal>
     });
   }
 
+  removingNumberFromBayaat(String bayaat) {
+    return bayaat.split('').reversed.skip(4).toList().reversed.join('');
+  }
+
   bayaatMapping(bayaat) {
     String bayaaat = '';
-    if (["0", "1", "2", "3", "4", "5", "6", "7"].contains(bayaat)) {
-      switch (bayaat) {
-        case '0':
-          bayaaat = 'zero'.tr;
-          break;
-        case '1':
-          bayaaat = 'first'.tr + ' ' + 'animal_is_pregnant'.tr;
-
-          break;
-        case '2':
-          bayaaat = 'second'.tr + ' ' + 'animal_is_pregnant'.tr;
-
-          break;
-        case '3':
-          bayaaat = 'third'.tr + ' ' + 'animal_is_pregnant'.tr;
-
-          break;
-        case '4':
-          bayaaat = 'fourth'.tr + ' ' + 'animal_is_pregnant'.tr;
-
-          break;
-        case '5':
-          bayaaat = 'fifth'.tr + ' ' + 'animal_is_pregnant'.tr;
-
-          break;
-        case '6':
-          bayaaat = 'sixth'.tr + ' ' + 'animal_is_pregnant'.tr;
-
-          break;
-        case '7':
-          bayaaat = 'seventh'.tr + ' ' + 'animal_is_pregnant'.tr;
-
-          break;
-      }
-    } else
-      bayaaat = bayaat;
+    // if (["0", "1", "2", "3", "4", "5", "6", "7"].contains(bayaat)) {
+    switch (bayaat) {
+      case 'ब्यायी नहीं (0)':
+        bayaaat = removingNumberFromBayaat('zero'.tr);
+        break;
+      case 'पहला (1)':
+        bayaaat = removingNumberFromBayaat('first'.tr) +
+            ' ' +
+            'animal_is_pregnant'.tr;
+        break;
+      case 'दूसरा (2)':
+        bayaaat = removingNumberFromBayaat('second'.tr) +
+            ' ' +
+            'animal_is_pregnant'.tr;
+        break;
+      case 'तीसरा (3)':
+        bayaaat = removingNumberFromBayaat('third'.tr) +
+            ' ' +
+            'animal_is_pregnant'.tr;
+        break;
+      case 'चौथा (4)':
+        bayaaat = removingNumberFromBayaat('fourth'.tr) +
+            ' ' +
+            'animal_is_pregnant'.tr;
+        break;
+      case 'पांचवा (5)':
+        bayaaat = removingNumberFromBayaat('fifth'.tr) +
+            ' ' +
+            'animal_is_pregnant'.tr;
+        break;
+      case 'छठा (6)':
+        bayaaat = removingNumberFromBayaat('sixth'.tr) +
+            ' ' +
+            'animal_is_pregnant'.tr;
+        break;
+      case 'सातवाँ (7)':
+        bayaaat = removingNumberFromBayaat('seventh'.tr) +
+            ' ' +
+            'animal_is_pregnant'.tr;
+        break;
+      default:
+        bayaaat = '';
+        break;
+    }
+    // } else
+    //   bayaaat = bayaat;
 
     return bayaaat;
   }
@@ -763,7 +788,7 @@ class _BuyAnimalState extends State<BuyAnimal>
 
   @override
   Widget build(BuildContext context) {
-    // super.build(context);
+    super.build(context);
     return RepaintBoundary(
       key: previewContainer,
       child: Scaffold(

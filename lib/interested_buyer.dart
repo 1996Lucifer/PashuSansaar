@@ -83,17 +83,36 @@ class _InterestedBuyerState extends State<InterestedBuyer> {
 
   _imageData(index) {
     var data = '';
-    if (widget.animalInfo[index]['animalImages']['image1'] != '') {
-      data = widget.animalInfo[index]['animalImages']['image1'];
-    } else if (widget.animalInfo[index]['animalImages']['image2'] != '') {
-      data = widget.animalInfo[index]['animalImages']['image2'];
-    } else if (widget.animalInfo[index]['animalImages']['image3'] != '') {
-      data = widget.animalInfo[index]['animalImages']['image3'];
-    } else if (widget.animalInfo[index]['animalImages']['image4'] != '') {
-      data = widget.animalInfo[index]['animalImages']['image4'];
+    if (widget.animalInfo[index]['animalImages'] == null) {
+      if (widget.animalInfo[index]['image1'].isNotEmpty) {
+        data = widget.animalInfo[index]['image1'];
+      } else if (widget.animalInfo[index]['image2'].isNotEmpty) {
+        data = widget.animalInfo[index]['image2'];
+      } else if (widget.animalInfo[index]['image3'].isNotEmpty) {
+        data = widget.animalInfo[index]['image3'];
+      } else if (widget.animalInfo[index]['image4'].isNotEmpty) {
+        data = widget.animalInfo[index]['image4'];
+      } else {
+        data = widget.animalInfo[index]['animalVideoThumbnail'];
+      }
+    } else {
+      if (widget.animalInfo[index]['animalImages']['image1'].isNotEmpty) {
+        data = widget.animalInfo[index]['animalImages']['image1'];
+      } else if (widget
+          .animalInfo[index]['animalImages']['image2'].isNotEmpty) {
+        data = widget.animalInfo[index]['animalImages']['image2'];
+      } else if (widget
+          .animalInfo[index]['animalImages']['image3'].isNotEmpty) {
+        data = widget.animalInfo[index]['animalImages']['image3'];
+      } else if (widget
+          .animalInfo[index]['animalImages']['image4'].isNotEmpty) {
+        data = widget.animalInfo[index]['animalImages']['image4'];
+      } else {
+        data = widget.animalInfo[index]['animalVideoThumbnail'];
+      }
     }
 
-    return base64Decode(data);
+    return data;
   }
 
   _descriptionText(int index) {
@@ -159,7 +178,10 @@ class _InterestedBuyerState extends State<InterestedBuyer> {
                 height: 130.0,
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                      fit: BoxFit.cover, image: MemoryImage(_imageData(index))),
+                      fit: BoxFit.cover,
+                      image: _imageData(index).length > 1000
+                          ? MemoryImage(base64Decode(_imageData(index)))
+                          : NetworkImage(_imageData(index))),
                   borderRadius: BorderRadius.all(Radius.circular(8.0)),
                   color: Colors.redAccent,
                 ),

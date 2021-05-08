@@ -36,6 +36,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final double width = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor: Colors.grey[100],
@@ -171,6 +172,9 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                                           MaterialPageRoute(
                                               builder: (context) =>
                                                   InterestedBuyer(
+                                                    // key:
+                                                    //     Key(widget.animalInfo[index]
+                                                    //         ['uniqueId']),
                                                     listId:
                                                         widget.animalInfo[index]
                                                                 ['uniqueId'] ??

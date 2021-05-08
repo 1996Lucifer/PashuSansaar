@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
@@ -41,7 +42,6 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
     with AutomaticKeepAliveClientMixin {
   final geo = geoFire.Geoflutterfire();
   var animalInfo = {}, extraInfoData = {};
-  String _base64Image;
   ImagePicker _picker;
   ProgressDialog pr;
   Color backgroundColor = Colors.red[50];
@@ -146,12 +146,6 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
             imagesFileUpload['image$index'] = file.path;
           });
           await uploadFile(compressedFile, index);
-        // setState(() {
-        //   _base64Image = base64Encode(
-        //     compressedFile.readAsBytesSync(),
-        //   );
-        //   imagesUpload['image$index'] = _base64Image;
-        // });
       }
     } catch (e) {}
   }
@@ -510,7 +504,8 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
               child: TextFormField(
                 initialValue: animalInfo['animalMilk'],
                 inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly
+                  FilteringTextInputFormatter.digitsOnly,
+                  FilteringTextInputFormatter.deny(RegExp(r'^0+'))
                 ],
                 keyboardType: TextInputType.number,
                 onChanged: (String milk) {
@@ -552,7 +547,8 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
               child: TextFormField(
                 initialValue: animalInfo['animalMilkCapacity'],
                 inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly
+                  FilteringTextInputFormatter.digitsOnly,
+                  FilteringTextInputFormatter.deny(RegExp(r'^0+'))
                 ],
                 keyboardType: TextInputType.number,
                 onChanged: (String milkCapacity) {
@@ -615,6 +611,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
               child: TextFormField(
                 inputFormatters: <TextInputFormatter>[
                   FilteringTextInputFormatter.digitsOnly,
+                  FilteringTextInputFormatter.deny(RegExp(r'^0+'))
                 ],
                 controller: _controller,
                 keyboardType: TextInputType.number,
@@ -1011,7 +1008,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                   'error'.tr,
                   Text('animal_age_error'.tr),
                 );
-              else if ([0, 3].contains(
+              else if ([0, 1].contains(
                     constant.animalType.indexOf(animalInfo['animalType']),
                   ) &&
                   (animalInfo['animalIsPregnant'] == null))
@@ -1020,16 +1017,28 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                   'error'.tr,
                   Text('animal_pregnancy_error'.tr),
                 );
-              else if ([0, 3].contains(
+              else if ([0, 1].contains(
                     constant.animalType.indexOf(animalInfo['animalType']),
                   ) &&
-                  animalInfo['animalMilk'] == null)
+                  (animalInfo['animalMilk'] == null ||
+                      animalInfo['animalMilk'].isEmpty))
                 ReusableWidgets.showDialogBox(
                   context,
                   'error'.tr,
                   Text('animal_milk_error'.tr),
                 );
-              else if (animalInfo['animalPrice'] == null)
+              else if ([0, 1].contains(
+                      constant.animalType.indexOf(animalInfo['animalType'])) &&
+                  (animalInfo['animalMilk'] != null ||
+                      animalInfo['animalMilk'].isNotEmpty) &&
+                  (int.parse(animalInfo['animalMilk']) > 70))
+                ReusableWidgets.showDialogBox(
+                  context,
+                  'error'.tr,
+                  Text('maximum_milk_length'.tr),
+                );
+              else if (animalInfo['animalPrice'] == null ||
+                  animalInfo['animalPrice'].isEmpty)
                 ReusableWidgets.showDialogBox(
                   context,
                   'error'.tr,
@@ -1135,13 +1144,17 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                                     ),
                                     onPressed: () {
                                       Navigator.pop(context);
-                                      Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => HomeScreen(
-                                              selectedIndex: 0,
-                                            ),
+                                      Get.off(() => HomeScreen(
+                                            selectedIndex: 0,
                                           ));
+
+                                      // Navigator.pushReplacement(
+                                      //     context,
+                                      //     MaterialPageRoute(
+                                      //       builder: (context) => HomeScreen(
+                                      //         selectedIndex: 0,
+                                      //       ),
+                                      //     ));
                                     }),
                               ]);
                         });
@@ -1458,10 +1471,11 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      // appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),
+      appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),
       body: GestureDetector(
         onTap: () {
           return WidgetsBinding.instance.focusManager.primaryFocus?.unfocus();
@@ -1483,17 +1497,17 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
               animalType(),
               animalBreed(),
               animalAge(),
-              [0, 3].contains(
+              [0, 1].contains(
                 constant.animalType.indexOf(animalInfo['animalType']),
               )
                   ? animalIsPregnant()
                   : SizedBox.shrink(),
-              [0, 3].contains(
+              [0, 1].contains(
                 constant.animalType.indexOf(animalInfo['animalType']),
               )
                   ? animalMilkPerDay()
                   : SizedBox.shrink(),
-              [0, 3].contains(
+              [0, 1].contains(
                 constant.animalType.indexOf(animalInfo['animalType']),
               )
                   ? animalMilkPerDayCapacity()

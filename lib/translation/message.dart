@@ -236,7 +236,8 @@ class Messages extends Translations {
           'profile': 'प्रोफ़ाइल',
           'animal_filter': 'पशु फ़िल्टर',
           'apply_button': 'चयन सेव करें',
-          'reset_button': 'सभी चयन हटाएँ'
+          'reset_button': 'सभी चयन हटाएँ',
+          'maximum_milk_length': 'दूध की सही मात्रा डाले'
         }
       };
 }

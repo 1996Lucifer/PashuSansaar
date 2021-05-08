@@ -9,7 +9,7 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'user_details_fetch_screen.dart';
 import 'package:get/get.dart';
-import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
+import 'package:flutter_countdown_timer/index.dart';
 
 class OTPScreen extends StatefulWidget {
   final String phoneNumber;
@@ -20,7 +20,8 @@ class OTPScreen extends StatefulWidget {
   _OTPScreenState createState() => _OTPScreenState();
 }
 
-class _OTPScreenState extends State<OTPScreen> {
+class _OTPScreenState extends State<OTPScreen>
+    with SingleTickerProviderStateMixin {
   var onTapRecognizer;
 
   TextEditingController textEditingController = TextEditingController();
@@ -29,27 +30,36 @@ class _OTPScreenState extends State<OTPScreen> {
 
   StreamController<ErrorAnimationType> errorController;
 
-  bool hasError = false, _checkUserLoginState = false, _startTimer=false;
+  bool hasError = false, _checkUserLoginState = false, _startTimer = false;
   String currentText = "";
-  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-  final formKey = GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> scaffoldKey =
+      GlobalKey<ScaffoldState>(debugLabel: 'otpScaffoldKey');
+  final formKey = GlobalKey<FormState>(debugLabel: 'otpFormStateKey');
+  int endTime = DateTime.now().millisecondsSinceEpoch + 1000 * 60;
+  CountdownTimerController countdownTimerController;
 
   @override
   void initState() {
     _verifyPhone();
-    WidgetsBinding.instance.addPostFrameCallback((_) =>
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('OTP भेजा गया है'))));
-
-    // setState(() {
-    //   _startTimer = true;
-    // });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      countdownTimerController =
+          CountdownTimerController(endTime: endTime, onEnd: onEnd);
+      setState(() {
+        _startTimer = true;
+      });
+      return ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('OTP भेजा गया है')));
+    });
 
     onTapRecognizer = TapGestureRecognizer()
       ..onTap = () async {
-        // setState(() {
-        //   _startTimer = true;
-        // });
+        countdownTimerController = CountdownTimerController(
+            endTime: DateTime.now().millisecondsSinceEpoch + 1000 * 60,
+            onEnd: onEnd);
+
+        setState(() {
+          _startTimer = true;
+        });
 
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('OTP पुनः भेजा गया है')));
@@ -60,6 +70,10 @@ class _OTPScreenState extends State<OTPScreen> {
     errorController = StreamController<ErrorAnimationType>();
     checkUserLoginState();
     super.initState();
+  }
+
+  void onEnd() {
+    print('onEnd');
   }
 
   checkUserLoginState() async {
@@ -262,9 +276,9 @@ class _OTPScreenState extends State<OTPScreen> {
                   ? textWidget()
                   : Center(
                       child: CountdownTimer(
-                        onEnd: () => print('onEnd'),
-                        endTime:
-                            DateTime.now().millisecondsSinceEpoch + 1000 * 60,
+                        controller: countdownTimerController,
+                        onEnd: onEnd,
+                        endTime: endTime,
                         textStyle: TextStyle(
                             color: primaryColor,
                             fontSize: 18,

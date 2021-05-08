@@ -49,6 +49,7 @@ class SellAnimalMain extends StatelessWidget {
   final List sellingAnimalInfo;
   final String userName;
   final String userMobileNumber;
+  
 
   SellAnimalMain(
       {Key key,
@@ -57,13 +58,11 @@ class SellAnimalMain extends StatelessWidget {
       @required this.userMobileNumber})
       : super(key: key);
 
-  ProgressDialog pr;
-  SharedPreferences prefs;
-
   @override
   Widget build(BuildContext context) {
     return sellingAnimalInfo.length == 0
-        ? SellAnimalForm(userName: userName, userMobileNumber: userMobileNumber)
+        ? SellAnimalForm(
+    userName: userName, userMobileNumber: userMobileNumber)
         : SellingAnimalInfo(
             animalInfo: sellingAnimalInfo,
             userName: userName,

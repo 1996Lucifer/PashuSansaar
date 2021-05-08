@@ -6,10 +6,7 @@ import 'package:splash_screen_view/SplashScreenView.dart';
 import 'home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
-  final List<String> newVersion, currentVersion;
-  SplashScreen(
-      {Key key, @required this.currentVersion, @required this.newVersion})
-      : super(key: key);
+  SplashScreen({Key key}) : super(key: key);
 
   @override
   _SplashScreenState createState() => _SplashScreenState();
@@ -17,6 +14,7 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   bool isLoggedIn = false;
+  List<String> newVersion = [], currentVersion = [];
 
   @override
   void initState() {
@@ -26,29 +24,25 @@ class _SplashScreenState extends State<SplashScreen> {
 
   getLoginCheck() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+
     setState(() {
       isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+      newVersion = prefs.getStringList('newVersion') ?? [];
+      currentVersion = prefs.getStringList('currentVersion') ?? [];
     });
     print('isLoggedIn===' + isLoggedIn.toString());
+    print('newVersion===' + newVersion.toString());
+    print('currentVersion===' + currentVersion.toString());
   }
 
   @override
   Widget build(BuildContext context) {
     return SplashScreenView(
-      // home: UserDetailsFetch(currentUser: 'G6daWncSiobuilTshX9RUVjjv8f2', mobile: '+919997098955'),
       home: isLoggedIn &&
-              ([0, 1].contains(
-                  widget.newVersion[0].compareTo(widget.currentVersion[0]))) &&
-              ([0, 1].contains(
-                  widget.newVersion[1].compareTo(widget.currentVersion[1])))
+              ([0, 1].contains(newVersion[0].compareTo(currentVersion[0]))) &&
+              ([0, 1].contains(newVersion[1].compareTo(currentVersion[1])))
           ? HomeScreen(selectedIndex: 0)
           : Login(),
-      // home: BuyAnimal(
-      //   animalInfo: [],
-      //   userName: '',
-      //   userMobileNumber: '',
-      //   userImage: '',
-      // ),
       duration: 2000,
       imageSize: 200,
       imageSrc: "assets/images/cow.png",

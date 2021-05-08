@@ -1,3 +1,9 @@
+import 'dart:io';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:device_info/device_info.dart';
+import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:pashusansaar/otp_screen.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
@@ -13,11 +19,46 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   final TextEditingController phoneNumberController = TextEditingController();
+  Map<String, String> mobileInfo = {};
 
   @override
   void initState() {
     super.initState();
     // initialiseFirebaseInstance();
+  }
+
+  assignDeviceID() async {
+    String deviceType, deviceId, deviceName;
+    final DeviceInfoPlugin deviceInfoPlugin = new DeviceInfoPlugin();
+    try {
+      if (Platform.isAndroid) {
+        var build = await deviceInfoPlugin.androidInfo;
+        deviceType = "android";
+        deviceId = build.androidId; //UUID for Android
+        deviceName = build.model;
+        setState(() {
+          mobileInfo = {
+            'deviceType': deviceType,
+            'deviceId': deviceId,
+            'deviceName': deviceName
+          };
+        });
+      } else if (Platform.isIOS) {
+        var data = await deviceInfoPlugin.iosInfo;
+        deviceType = "ios";
+        deviceId = data.identifierForVendor; //UUID for iOS
+        deviceName = data.model;
+        setState(() {
+          mobileInfo = {
+            'deviceType': deviceType,
+            'deviceId': deviceId,
+            'deviceName': deviceName
+          };
+        });
+      }
+    } on PlatformException {
+      print('Failed to get platform version');
+    }
   }
 
   @override
@@ -87,12 +128,29 @@ class _LoginState extends State<Login> {
                         } else if (phoneNumberController.text.length < 10) {
                           ReusableWidgets.showDialogBox(context, 'error'.tr,
                               Text("error_length_mobile".tr));
-                        } else
+                        } else {
+                          await assignDeviceID();
+                          await FirebaseFirestore.instance
+                              .collection('otpCollection')
+                              .doc(phoneNumberController.text)
+                              .collection('userActivity')
+                              .doc(ReusableWidgets.randomCodeGenerator() +
+                                  ReusableWidgets.randomIDGenerator())
+                              .set({
+                            'date': DateFormat()
+                                .add_yMMMd()
+                                .add_jm()
+                                .format(DateTime.now()),
+                            'mobileNumber': phoneNumberController.text,
+                            'mobileInfo': mobileInfo
+                          });
+
                           Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
                                       OTPScreen(phoneNumberController.text)));
+                        }
                       },
                     ),
                   ),
