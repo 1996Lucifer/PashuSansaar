@@ -523,12 +523,13 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                 initialValue: animalInfo['animalMilk'],
                 inputFormatters: <TextInputFormatter>[
                   FilteringTextInputFormatter.digitsOnly,
-                  FilteringTextInputFormatter.deny(RegExp(r'^0+'))
+                  // FilteringTextInputFormatter.deny(RegExp(r'^0+'))
                 ],
                 keyboardType: TextInputType.number,
                 onChanged: (String milk) {
                   setState(() {
-                    animalInfo['animalMilk'] = milk;
+                    animalInfo['animalMilk'] =
+                        milk.replaceAll(new RegExp(r'^0+(?=.)'), '');
                   });
                 },
                 decoration: InputDecoration(
@@ -630,7 +631,6 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                 inputFormatters: <TextInputFormatter>[
                   FilteringTextInputFormatter.digitsOnly,
                   FilteringTextInputFormatter.deny(RegExp(r'^0+'))
-
                 ],
                 controller: _controller,
                 keyboardType: TextInputType.number,
@@ -1051,6 +1051,8 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                   'extraInfo': extraInfoData,
                   'dateOfSaving':
                       ReusableWidgets.dateTimeToEpoch(DateTime.now()),
+                  'dateOfUpdation':
+                      ReusableWidgets.dateTimeToEpoch(DateTime.now()),
                   'uniqueId': uniqueId,
                   'isValidUser': 'Approved',
                   'userId': FirebaseAuth.instance.currentUser.uid,
@@ -1104,6 +1106,8 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                         ? ""
                         : imagesUpload['image4'],
                     "dateOfSaving":
+                        ReusableWidgets.dateTimeToEpoch(DateTime.now()),
+                    'dateOfUpdation':
                         ReusableWidgets.dateTimeToEpoch(DateTime.now()),
                     'isValidUser': 'Approved',
                     'uniqueId': uniqueId,
@@ -1520,21 +1524,30 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                 children: [imageStructure3(width), imageStructure4(width)],
               ),
               extraInfo(),
-              AnimatedOpacity(
-                opacity: _showData ? 1 : 0,
-                duration: Duration(seconds: 2),
-                child: _showData
-                    ? Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 4, horizontal: 8),
-                        child: [0, 1].contains(
-                          constant.animalType.indexOf(animalInfo['animalType']),
-                        )
-                            ? extraINfoData()
-                            : moreInfoTextArea(),
-                      )
-                    : SizedBox.shrink(),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                child: [0, 1].contains(
+                  constant.animalType.indexOf(animalInfo['animalType']),
+                )
+                    ? extraINfoData()
+                    : moreInfoTextArea(),
               ),
+              // AnimatedOpacity(
+              //   opacity: 1,
+              //   // opacity: _showData ? 1 : 0,
+              //   duration: Duration(seconds: 2),
+              //   child: _showData
+              //       ? Padding(
+              //           padding: const EdgeInsets.symmetric(
+              //               vertical: 4, horizontal: 8),
+              //           child: [0, 1].contains(
+              //             constant.animalType.indexOf(animalInfo['animalType']),
+              //           )
+              //               ? extraINfoData()
+              //               : moreInfoTextArea(),
+              //         )
+              //       : SizedBox.shrink(),
+              // ),
               saveButton()
             ],
           ),

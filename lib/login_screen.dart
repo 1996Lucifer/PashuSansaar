@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:pashusansaar/otp_screen.dart';
 import 'package:pashusansaar/utils/colors.dart';
+import 'package:pashusansaar/utils/global.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -134,8 +135,7 @@ class _LoginState extends State<Login> {
                               .collection('otpCollection')
                               .doc(phoneNumberController.text)
                               .collection('userActivity')
-                              .doc(ReusableWidgets.randomCodeGenerator() +
-                                  ReusableWidgets.randomIDGenerator())
+                              .doc()
                               .set({
                             'date': DateFormat()
                                 .add_yMMMd()

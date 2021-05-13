@@ -505,12 +505,13 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                 initialValue: animalInfo['animalMilk'],
                 inputFormatters: <TextInputFormatter>[
                   FilteringTextInputFormatter.digitsOnly,
-                  FilteringTextInputFormatter.deny(RegExp(r'^0+'))
+                  // FilteringTextInputFormatter.deny(RegExp(r'^0+'))
                 ],
                 keyboardType: TextInputType.number,
                 onChanged: (String milk) {
                   setState(() {
-                    animalInfo['animalMilk'] = milk;
+                    animalInfo['animalMilk'] =
+                        milk.replaceAll(new RegExp(r'^0+(?=.)'), '');
                   });
                 },
                 decoration: InputDecoration(
@@ -1069,7 +1070,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                   'animalInfo': animalInfo,
                   'animalImages': imagesUpload,
                   'extraInfo': extraInfoData,
-                  'dateOfSaving':
+                  'dateOfUpdation':
                       ReusableWidgets.dateTimeToEpoch(DateTime.now()),
                   'uniqueId': uniqueId,
                   'isValidUser': isValidUser,
@@ -1122,7 +1123,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                             imagesUpload['image4'] == ""
                         ? ""
                         : imagesUpload['image4'],
-                    "dateOfSaving":
+                    'dateOfUpdation':
                         ReusableWidgets.dateTimeToEpoch(DateTime.now()),
                     'uniqueId': uniqueId,
                     'isValidUser': isValidUser,
@@ -1542,21 +1543,29 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                 children: [imageStructure3(width), imageStructure4(width)],
               ),
               extraInfo(),
-              AnimatedOpacity(
-                opacity: _showData ? 1 : 0,
-                duration: Duration(seconds: 2),
-                child: _showData
-                    ? Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 4, horizontal: 8),
-                        child: [0, 1].contains(
-                          constant.animalType.indexOf(animalInfo['animalType']),
-                        )
-                            ? extraINfoData()
-                            : moreInfoTextArea(),
-                      )
-                    : SizedBox.shrink(),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                child: [0, 1].contains(
+                  constant.animalType.indexOf(animalInfo['animalType']),
+                )
+                    ? extraINfoData()
+                    : moreInfoTextArea(),
               ),
+              // AnimatedOpacity(
+              //   opacity: _showData ? 1 : 0,
+              //   duration: Duration(seconds: 2),
+              //   child: _showData
+              //       ? Padding(
+              //           padding: const EdgeInsets.symmetric(
+              //               vertical: 4, horizontal: 8),
+              //           child: [0, 1].contains(
+              //             constant.animalType.indexOf(animalInfo['animalType']),
+              //           )
+              //               ? extraINfoData()
+              //               : moreInfoTextArea(),
+              //         )
+              //       : SizedBox.shrink(),
+              // ),
               saveButton()
             ],
           ),

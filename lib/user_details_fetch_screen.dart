@@ -2,8 +2,12 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:device_info/device_info.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:intl/intl.dart';
 import 'package:pashusansaar/home_screen.dart';
 import 'package:pashusansaar/utils/colors.dart';
+import 'package:pashusansaar/utils/global.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -162,6 +166,18 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
       print('Failed to get platform version');
     }
   }
+
+  // fcmTokenSave(prefs) async {
+  //   await FirebaseFirestore.instance
+  //       .collection("userInfo")
+  //       .doc(widget.currentUser)
+  //       .set({
+  //     "id": widget.currentUser,
+  //     'lat': prefs.getDouble('latitude').toString(),
+  //     'long': prefs.getDouble('longitude').toString(),
+  //     'userToken': token
+  //   });
+  // }
 
   loadAsset() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -395,38 +411,70 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                             pr.style(message: 'progress_dialog_message'.tr);
                             pr.show();
                             FirebaseFirestore.instance
-                                .collection("userInfo")
+                                .collection("fcmToken")
                                 .doc(widget.currentUser)
                                 .set({
-                              "currentUser": widget.currentUser,
-                              "name": nameController.text,
-                              "mobile": widget.mobile,
-                              "mobileInfo": mobileInfo,
-                              // 'position': geoFire.Geoflutterfire()
-                              //     .point(
-                              //         latitude: prefs.getDouble('latitude'),
-                              //         longitude: prefs.getDouble('longitude'))
-                              //     .data,
-                              'latitude':
-                                  prefs.getDouble('latitude').toString(),
-                              'longitude':
-                                  prefs.getDouble('longitude').toString(),
-                              'referralCode':
-                                  ReusableWidgets.randomCodeGenerator(),
-                              'enteredReferralCode': referralCodeController
-                                      .text.isNotEmpty
-                                  ? referralCodeController.text.toUpperCase()
-                                  : '',
-                              'alreadyUser': true
-                            }).then((result) {
-                              pr.hide();
-                              Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          HomeScreen(selectedIndex: 0)));
-                            }).catchError(
-                                    (err) => print("err->" + err.toString()));
+                              "id": widget.currentUser,
+                              'lat': prefs.getDouble('latitude').toString(),
+                              'long': prefs.getDouble('longitude').toString(),
+                              'userToken': token
+                            }).then(
+                              (value) => FirebaseFirestore.instance
+                                  .collection("userInfo")
+                                  .doc(widget.currentUser)
+                                  .set({
+                                "currentUser": widget.currentUser,
+                                "name": nameController.text,
+                                "mobile": widget.mobile,
+                                "mobileInfo": mobileInfo,
+                                'latitude':
+                                    prefs.getDouble('latitude').toString(),
+                                'longitude':
+                                    prefs.getDouble('longitude').toString(),
+                                'referralCode':
+                                    ReusableWidgets.randomCodeGenerator(),
+                                'enteredReferralCode': referralCodeController
+                                        .text.isNotEmpty
+                                    ? referralCodeController.text.toUpperCase()
+                                    : '',
+                                'alreadyUser': true
+                              }).catchError(
+                                (err) async {
+                                  print(
+                                    "errToken->" + err.toString(),
+                                  );
+                                  await FirebaseFirestore.instance
+                                      .collection('logger')
+                                      .doc(widget.mobile)
+                                      .collection('userInfo-Error')
+                                      .doc()
+                                      .set({
+                                    'issue': err.toString(),
+                                    'userId': FirebaseAuth
+                                            .instance.currentUser?.uid ??
+                                        '',
+                                    'date': DateFormat()
+                                        .add_yMMMd()
+                                        .add_jm()
+                                        .format(DateTime.now()),
+                                  });
+                                },
+                              ).then((result) {
+                                pr.hide();
+                                Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            HomeScreen(selectedIndex: 0)));
+                              }).catchError(
+                                (err) {
+                                  print(
+                                    "err->" + err.toString(),
+                                  );
+                                  pr.hide();
+                                },
+                              ),
+                            );
                           }
                         },
                       ),

@@ -1,7 +1,10 @@
 import 'package:android_play_install_referrer/android_play_install_referrer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:intl/intl.dart';
 import 'package:pashusansaar/splash_screen.dart';
 import 'package:pashusansaar/translation/message.dart';
 import 'package:pashusansaar/utils/colors.dart';
@@ -14,10 +17,39 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart' as URLauncher;
 import 'package:package_info/package_info.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:check_vpn_connection/check_vpn_connection.dart';
 
 import 'utils/reusable_widgets.dart';
 
 RemoteConfig remoteConfig;
+
+var initialiseAndroidSettings = AndroidInitializationSettings('ic_launcher');
+
+const AndroidNotificationChannel channel = AndroidNotificationChannel(
+  'high_importance_channel', // id
+  'High Importance Notifications', // title
+  'This channel is used for important notifications.', // description
+  importance: Importance.high,
+);
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+
+  print('Handling a background message ${message.messageId}');
+  flutterLocalNotificationsPlugin.show(
+      message.notification.hashCode,
+      message.notification.title,
+      message.notification.body,
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          channel.id,
+          channel.name,
+          channel.description,
+          icon: message.notification.android?.smallIcon,
+        ),
+      ));
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -25,6 +57,12 @@ void main() async {
   await remoteConfig.fetch(expiration: const Duration(seconds: 0));
   await remoteConfig.activateFetched();
   remoteConfig.getString('force_update_current_version');
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  await flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>()
+      ?.createNotificationChannel(channel);
 
   runApp(MaterialApp(debugShowCheckedModeBanner: false, home: MyApp()));
 }
@@ -42,10 +80,54 @@ class _MyAppState extends State<MyApp> {
   List<String> newVersion, currentVersion;
   bool _checkReferral = false;
 
+  isVpnActive() async {
+    if (await CheckVpnConnection.isVpnActive()) {
+      await FirebaseFirestore.instance
+          .collection('logger')
+          .doc(ReusableWidgets.randomCodeGenerator() +
+              ReusableWidgets.randomIDGenerator())
+          .collection('vpn')
+          .doc()
+          .set({
+        'issue': 'VPN is connected',
+        'userId': FirebaseAuth.instance.currentUser?.uid ?? '',
+        'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
+      });
+      return ReusableWidgets.showDialogBox(
+          context, 'error'.tr, Text('vpn_issue'.tr), true);
+    } else {
+      getToken();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    getReferralCheck();
+
+    var initialisingSettings =
+        InitializationSettings(android: initialiseAndroidSettings);
+
+    flutterLocalNotificationsPlugin.initialize(initialisingSettings);
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      RemoteNotification notification = message.notification;
+      AndroidNotification android = message.notification?.android;
+      if (notification != null && android != null) {
+        flutterLocalNotificationsPlugin.show(
+            notification.hashCode,
+            notification.title,
+            notification.body,
+            NotificationDetails(
+              android: AndroidNotificationDetails(
+                channel.id,
+                channel.name,
+                channel.description,
+              ),
+            ));
+      }
+    });
+
+    isVpnActive();
   }
 
   getReferralCheck() async {
@@ -63,20 +145,13 @@ class _MyAppState extends State<MyApp> {
     String _unique = ReusableWidgets.randomIDGenerator();
     if (!_checkReferral) await initReferrerDetails(_unique);
     final PackageInfo info = await PackageInfo.fromPlatform();
-    // final RemoteConfig remoteConfig = await RemoteConfig.instance;
 
     try {
-      // Using default duration to force fetching from remote server.
-      // await remoteConfig.fetch(expiration: const Duration(seconds: 0));
-      // await remoteConfig.activateFetched();
-      // remoteConfig.getString('force_update_current_version');
       List<String> currentVersion1 = info.version.split('.');
       List<String> newVersion1 =
           remoteConfig.getString('force_update_current_version').split('.');
 
       setState(() {
-        // newVersion = newVersion1;
-        // currentVersion = currentVersion1;
         prefs.setStringList('newVersion', newVersion1);
         prefs.setStringList('currentVersion', currentVersion1);
         prefs.setString('referralUniqueValue', _unique);
@@ -161,6 +236,15 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
+  getToken() async {
+    String _token = await FirebaseMessaging.instance.getToken();
+    setState(() {
+      token = _token;
+    });
+    print(token);
+    await getReferralCheck();
+  }
+
   bool logInBasedOnVersion;
 
   @override
@@ -173,17 +257,8 @@ class _MyAppState extends State<MyApp> {
     return GetMaterialApp(
         title: 'PashuSansaar',
         debugShowCheckedModeBanner: false,
-        translations: Messages(), // your translations
+        translations: Messages(), // translations
         locale: Locale('hn', 'IN'),
-        // fallbackLocale: Locale('hn', 'IN'),
-        // onInit: () async {
-        //   bool _logInBasedOnVersion =
-        //       ([0, 1].contains(newVersion[0].compareTo(currentVersion[0]))) &&
-        //           ([0, 1].contains(newVersion[1].compareTo(currentVersion[1])));
-        //   setState(() {
-        //     logInBasedOnVersion = _logInBasedOnVersion;
-        //   });
-        // },
         theme: ThemeData(
             fontFamily: 'Mukta',
             primaryColor: primaryColor,

@@ -3,16 +3,13 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:core';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:csv/csv.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/constants.dart';
 import 'package:pashusansaar/utils/global.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -29,7 +26,6 @@ import 'package:share/share.dart';
 import 'package:pashusansaar/utils/constants.dart' as constant;
 import 'package:geoflutterfire/geoflutterfire.dart' as geoFire;
 import 'package:path_provider/path_provider.dart';
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'dart:ui' as ui;
 
 class BuyAnimal extends StatefulWidget {
@@ -2108,7 +2104,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                 ? 75
                 : _valueRadius == 3
                     ? 75
-                    : 100;
+                    : 50;
     try {
       Stream<List<DocumentSnapshot>> stream = geo
           .collection(
@@ -2143,6 +2139,8 @@ class _BuyAnimalState extends State<BuyAnimal>
         setState(() {
           // _resetFilterData = documentList;
           _resetFilterData = _tempAnimalList = _temp;
+          _tempAnimalList
+              .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
         });
       });
     } catch (e) {
@@ -2352,39 +2350,59 @@ class _BuyAnimalState extends State<BuyAnimal>
               color: Colors.grey[500],
               size: 13,
             ),
-            Container(
-              width: MediaQuery.of(context).size.width * 0.55,
-              child: RichText(
-                overflow: TextOverflow.ellipsis,
-                // textAlign: TextAlign.center,
-                text: TextSpan(
-                    text: ' ' + val.toString(),
-                    style: TextStyle(
-                        color: Colors.grey[500],
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13),
-                    children: [
-                      TextSpan(
-                        text: ' ( ' + 'approx'.tr + ' ',
+            val.runes.length > 20
+                ? Container(
+                    width: MediaQuery.of(context).size.width * 0.3,
+                    child: RichText(
+                        overflow: TextOverflow.ellipsis,
+                        text: TextSpan(
+                            text: val.toString(),
+                            style: TextStyle(
+                                color: Colors.grey[500],
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13))),
+                  )
+                : RichText(
+                    text: TextSpan(
+                        text: val.toString(),
                         style: TextStyle(
                             color: Colors.grey[500],
-                            // fontWeight: FontWeight.bold,
-                            fontSize: 13),
-                      ),
-                      TextSpan(
-                        text: _distanceBetweenTwoCoordinates(index) +
-                            ' ' +
-                            'km'.tr,
-                        style: TextStyle(
-                            color: Colors.grey[800],
                             fontWeight: FontWeight.bold,
-                            fontSize: 13),
-                      ),
-                      TextSpan(
-                        text: ' )',
-                        style: TextStyle(color: Colors.grey[500], fontSize: 13),
-                      )
-                    ]),
+                            fontSize: 13))),
+            RichText(
+              text: TextSpan(
+                text: ' (',
+                style: TextStyle(
+                    color: Colors.grey[500],
+                    // fontWeight: FontWeight.bold,
+                    fontSize: 13),
+
+                // TextSpan(
+                //     text: ' ' + val.toString(),
+                //     style: TextStyle(
+                //         color: Colors.grey[500],
+                //         fontWeight: FontWeight.bold,
+                //         fontSize: 13),
+                children: [
+                  // TextSpan(
+                  //   text: ' (',
+                  //   style: TextStyle(
+                  //       color: Colors.grey[500],
+                  //       // fontWeight: FontWeight.bold,
+                  //       fontSize: 13),
+                  // ),
+                  TextSpan(
+                    text: _distanceBetweenTwoCoordinates(index) + ' ' + 'km'.tr,
+                    style: TextStyle(
+                        color: Colors.grey[800],
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13),
+                  ),
+                  TextSpan(
+                    text: ' )',
+                    style: TextStyle(color: Colors.grey[500], fontSize: 13),
+                  )
+                ],
               ),
             ),
           ],
