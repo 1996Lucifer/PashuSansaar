@@ -408,9 +408,7 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                             pr = new ProgressDialog(context,
                                 type: ProgressDialogType.Normal,
                                 isDismissible: false);
-                            pr.style(message: 'progress_dialog_message'.tr);
-                            pr.show();
-                            FirebaseFirestore.instance
+                            await FirebaseFirestore.instance
                                 .collection("fcmToken")
                                 .doc(widget.currentUser)
                                 .set({
@@ -418,62 +416,77 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                               'lat': prefs.getDouble('latitude').toString(),
                               'long': prefs.getDouble('longitude').toString(),
                               'userToken': token
-                            }).then(
-                              (value) => FirebaseFirestore.instance
-                                  .collection("userInfo")
-                                  .doc(widget.currentUser)
+                            }).catchError((err) {
+                              print(
+                                "errToken->" + err.toString(),
+                              );
+                              FirebaseFirestore.instance
+                                  .collection('logger')
+                                  .doc(widget.mobile)
+                                  .collection('token')
+                                  .doc()
                                   .set({
-                                "currentUser": widget.currentUser,
-                                "name": nameController.text,
-                                "mobile": widget.mobile,
-                                "mobileInfo": mobileInfo,
-                                'latitude':
-                                    prefs.getDouble('latitude').toString(),
-                                'longitude':
-                                    prefs.getDouble('longitude').toString(),
-                                'referralCode':
-                                    ReusableWidgets.randomCodeGenerator(),
-                                'enteredReferralCode': referralCodeController
-                                        .text.isNotEmpty
-                                    ? referralCodeController.text.toUpperCase()
-                                    : '',
-                                'alreadyUser': true
-                              }).catchError(
-                                (err) async {
-                                  print(
-                                    "errToken->" + err.toString(),
-                                  );
-                                  await FirebaseFirestore.instance
-                                      .collection('logger')
-                                      .doc(widget.mobile)
-                                      .collection('userInfo-Error')
-                                      .doc()
-                                      .set({
-                                    'issue': err.toString(),
-                                    'userId': FirebaseAuth
-                                            .instance.currentUser?.uid ??
+                                'issue': err.toString(),
+                                'userId':
+                                    FirebaseAuth.instance.currentUser?.uid ??
                                         '',
-                                    'date': DateFormat()
-                                        .add_yMMMd()
-                                        .add_jm()
-                                        .format(DateTime.now()),
-                                  });
-                                },
-                              ).then((result) {
+                                'date': DateFormat()
+                                    .add_yMMMd()
+                                    .add_jm()
+                                    .format(DateTime.now()),
+                              });
+                            });
+                            pr.style(message: 'progress_dialog_message'.tr);
+                            pr.show();
+                            FirebaseFirestore.instance
+                                .collection("userInfo")
+                                .doc(widget.currentUser)
+                                .set({
+                              "currentUser": widget.currentUser,
+                              "name": nameController.text,
+                              "mobile": widget.mobile,
+                              "mobileInfo": mobileInfo,
+                              'latitude':
+                                  prefs.getDouble('latitude').toString(),
+                              'longitude':
+                                  prefs.getDouble('longitude').toString(),
+                              'referralCode':
+                                  ReusableWidgets.randomCodeGenerator(),
+                              'enteredReferralCode': referralCodeController
+                                      .text.isNotEmpty
+                                  ? referralCodeController.text.toUpperCase()
+                                  : '',
+                              'alreadyUser': true
+                            }).then((result) {
+                              pr.hide();
+                              Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          HomeScreen(selectedIndex: 0)));
+                            }).catchError(
+                              (err) {
+                                print(
+                                  "err->" + err.toString(),
+                                );
+                                FirebaseFirestore.instance
+                                    .collection('logger')
+                                    .doc(widget.mobile)
+                                    .collection('userDetails')
+                                    .doc()
+                                    .set({
+                                  'issue': err.toString(),
+                                  'userId':
+                                      FirebaseAuth.instance.currentUser?.uid ??
+                                          '',
+                                  'date': DateFormat()
+                                      .add_yMMMd()
+                                      .add_jm()
+                                      .format(DateTime.now()),
+                                });
+
                                 pr.hide();
-                                Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            HomeScreen(selectedIndex: 0)));
-                              }).catchError(
-                                (err) {
-                                  print(
-                                    "err->" + err.toString(),
-                                  );
-                                  pr.hide();
-                                },
-                              ),
+                              },
                             );
                           }
                         },

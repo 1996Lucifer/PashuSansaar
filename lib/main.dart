@@ -21,10 +21,6 @@ import 'package:check_vpn_connection/check_vpn_connection.dart';
 
 import 'utils/reusable_widgets.dart';
 
-RemoteConfig remoteConfig;
-
-var initialiseAndroidSettings = AndroidInitializationSettings('ic_launcher');
-
 const AndroidNotificationChannel channel = AndroidNotificationChannel(
   'high_importance_channel', // id
   'High Importance Notifications', // title
@@ -36,19 +32,24 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
 
   print('Handling a background message ${message.messageId}');
-  flutterLocalNotificationsPlugin.show(
-      message.notification.hashCode,
-      message.notification.title,
-      message.notification.body,
-      NotificationDetails(
-        android: AndroidNotificationDetails(
-          channel.id,
-          channel.name,
-          channel.description,
-          icon: message.notification.android?.smallIcon,
-        ),
-      ));
+  // RemoteNotification notification = message.notification;
+  // AndroidNotification android = message.notification?.android;
+  // if (notification != null && android != null) {
+  //   flutterLocalNotificationsPlugin.show(
+  //       notification.hashCode,
+  //       notification.title,
+  //       notification.body,
+  //       NotificationDetails(
+  //         android: AndroidNotificationDetails(
+  //           channel.id,
+  //           channel.name,
+  //           channel.description,
+  //         ),
+  //       ));
+  // }
 }
+
+RemoteConfig remoteConfig;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -103,6 +104,9 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+
+    var initialiseAndroidSettings =
+        AndroidInitializationSettings('ic_notification');
 
     var initialisingSettings =
         InitializationSettings(android: initialiseAndroidSettings);

@@ -133,7 +133,7 @@ class _OTPScreenState extends State<OTPScreen>
             },
             verificationFailed: (FirebaseAuthException e) async {
               print('verificationFailed==>' + e.toString());
-              await FirebaseFirestore.instance
+              FirebaseFirestore.instance
                   .collection('logger')
                   .doc(widget.phoneNumber)
                   .collection('OTP-VerificationFailed')
@@ -147,35 +147,29 @@ class _OTPScreenState extends State<OTPScreen>
               });
             },
             codeSent: (String verficationID, int resendToken) async {
-              setState(() {
-                _verificationCode = verficationID;
-                _resendToken = resendToken;
-                _startTimer = true;
-              });
-
-              await FirebaseFirestore.instance
+              FirebaseFirestore.instance
                   .collection('logger')
                   .doc(widget.phoneNumber)
                   .collection('OTP-Sent')
                   .doc()
                   .set({
                 'otp': verficationID,
+                'resendToken': resendToken,
                 'mobile': widget.phoneNumber,
                 'userId': FirebaseAuth.instance.currentUser?.uid ?? '',
                 'date':
                     DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
-              });
+              }).then((value) => setState(() {
+                        _verificationCode = verficationID;
+                        _resendToken = resendToken;
+                        _startTimer = true;
+                      }));
             },
-            codeAutoRetrievalTimeout: (String verificationID) async {
-              setState(() {
-                _verificationCode = verificationID;
-                _startTimer = false;
-              });
-
-              await FirebaseFirestore.instance
+            codeAutoRetrievalTimeout: (String verificationID) {
+              FirebaseFirestore.instance
                   .collection('logger')
                   .doc(widget.phoneNumber)
-                  .collection('OTP-CodeAutoRetrievalTimeout')
+                  .collection('OTP-CodeAutoRetrieval')
                   .doc()
                   .set({
                 'otp': verificationID,
@@ -183,13 +177,16 @@ class _OTPScreenState extends State<OTPScreen>
                 'userId': FirebaseAuth.instance.currentUser?.uid ?? '',
                 'date':
                     DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
-              });
+              }).then((value) => setState(() {
+                        _verificationCode = verificationID;
+                        _startTimer = false;
+                      }));
             },
             timeout: Duration(seconds: 60),
             forceResendingToken: _resendToken)
         .catchError((error) async {
       print('otp-error===>' + error.toString());
-      await FirebaseFirestore.instance
+      FirebaseFirestore.instance
           .collection('logger')
           .doc(widget.phoneNumber)
           .collection('OTP-Error')

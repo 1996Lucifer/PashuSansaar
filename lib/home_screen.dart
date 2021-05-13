@@ -68,9 +68,9 @@ class _HomeScreenState extends State<HomeScreen> {
           .then((value) => setState(() {
                 prefs.setBool('checkReferral', true);
               }))
-          .catchError((error) async {
+          .catchError((error) {
         print('e-referral--123->' + error.toString());
-        await FirebaseFirestore.instance
+        FirebaseFirestore.instance
             .collection('logger')
             .doc(_mobileNumber)
             .collection('home-referralInner')
@@ -83,7 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     } catch (e) {
       print('e-referral--->' + e.toString());
-      await FirebaseFirestore.instance
+      FirebaseFirestore.instance
           .collection('logger')
           .doc(_mobileNumber)
           .collection('home-referralOuter')
@@ -150,12 +150,12 @@ class _HomeScreenState extends State<HomeScreen> {
               .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
         });
 
+        pr.hide();
         print("=-=-=" + documentList.length.toString());
       });
-      pr.hide();
     } catch (e) {
       print('=-=Error-Home-=->>>' + e.toString());
-      await FirebaseFirestore.instance
+      FirebaseFirestore.instance
           .collection('logger')
           .doc(_mobileNumber)
           .collection('home-buying')
@@ -195,7 +195,7 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       );
     } catch (e) {
-      await FirebaseFirestore.instance
+      FirebaseFirestore.instance
           .collection('logger')
           .doc(_mobileNumber)
           .collection('home')
@@ -224,7 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       );
     } catch (e) {
-      await FirebaseFirestore.instance
+      FirebaseFirestore.instance
           .collection('logger')
           .doc(_mobileNumber)
           .collection('home-profile')
