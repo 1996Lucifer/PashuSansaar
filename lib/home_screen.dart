@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:geodesy/geodesy.dart';
 import 'package:intl/intl.dart';
 import 'package:pashusansaar/buy_animal/buy_animal.dart';
 import 'package:pashusansaar/main.dart';
@@ -18,6 +19,7 @@ import 'sell_animal/sell_animal_main.dart';
 import 'package:get/get.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:geocoder/geocoder.dart' as geoCoder;
+import 'dart:math' show cos, sqrt, asin;
 
 // ignore: must_be_immutable
 class HomeScreen extends StatefulWidget {
@@ -34,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Map _profileData = {};
   final geo = Geoflutterfire();
   PageController _pageController;
-  String _referralUniqueValue = '', _mobileNumber = '';
+  String _referralUniqueValue = '', _mobileNumber = '', _lastAnimal = '';
   bool _checkReferral = false;
   double lat = 0.0, long = 0.0;
 
@@ -114,47 +116,66 @@ class _HomeScreenState extends State<HomeScreen> {
     getInitialInfo();
   }
 
+  double calculateDistance(lat1, lon1, lat2, lon2) {
+    var p = 0.017453292519943295;
+    var c = cos;
+    var a = 0.5 -
+        c((lat2 - lat1) * p) / 2 +
+        c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p)) / 2;
+    return 12742 * asin(sqrt(a));
+  }
+
   getInitialInfo() async {
     pr = new ProgressDialog(context,
         type: ProgressDialogType.Normal, isDismissible: false);
 
     pr.style(message: 'progress_dialog_message'.tr);
     pr.show();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
 
     try {
-      Stream<List<DocumentSnapshot>> stream = geo
-          .collection(
-              collectionRef:
-                  FirebaseFirestore.instance.collection("buyingAnimalList1"))
-          .within(
-              center: geo.point(latitude: lat, longitude: long),
-              radius: 50,
-              field: 'position',
-              strictMode: true);
+      final now = DateTime.now();
 
-      stream.listen((List<DocumentSnapshot> documentList) {
+      FirebaseFirestore.instance
+          .collection('buyingAnimalList1')
+          .where('dateOfSaving',
+              isLessThanOrEqualTo: ReusableWidgets.dateTimeToEpoch(now))
+          .orderBy('dateOfSaving', descending: true)
+          .limit(20)
+          .get()
+          .then((value) {
         List _temp = [];
-        documentList.forEach((e) {
-          // _temp.addIf(
-          //     (e.reference.id.substring(8) !=
-          //             FirebaseAuth.instance.currentUser.uid) &&
-          //         (e['isValidUser'] == 'Approved'),
-          //     e);
-          _temp.addIf(e['isValidUser'] == 'Approved', e);
+        value.docs.forEach((e) {
+          _temp.addIf(
+              e['isValidUser'] == 'Approved' &&
+                  double.parse((Geodesy().distanceBetweenTwoGeoPoints(
+                                  LatLng(lat, long),
+                                  LatLng(
+                                      e['userLatitude'], e['userLongitude'])) /
+                              1000)
+                          .toStringAsPrecision(2)) <=
+                      50.0,
+              e);
+
           print('=-=-=-' + e.reference.id);
-          print('=-=-=-' + e.toString());
+          print('=-=-=->' + e.toString());
         });
+
+        print('=-=-=-<>' + value.docs.last['dateOfSaving'].toString());
+
         setState(() {
+          prefs.setString('lastAnimal', value.docs.last['dateOfSaving']);
+          // _lastAnimal = value.docs.last['dateOfSaving'];
           _animalInfo = _temp;
           _animalInfo
               .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
         });
 
         pr.hide();
-        print("=-=-=" + documentList.length.toString());
+        print("=-=-=" + value.docs.length.toString());
       });
     } catch (e) {
-      print('=-=Error-Home-=->>>' + e.toString());
+      print('=-=Error-Home=->>>' + e.toString());
       FirebaseFirestore.instance
           .collection('logger')
           .doc(_mobileNumber)
@@ -250,11 +271,10 @@ class _HomeScreenState extends State<HomeScreen> {
     switch (widget.selectedIndex) {
       case 0:
         return BuyAnimal(
-          animalInfo: _animalInfo,
-          userName: _profileData['name'],
-          userMobileNumber: _profileData['mobile'],
-          userImage: _profileData['image'],
-        );
+            animalInfo: _animalInfo,
+            userName: _profileData['name'],
+            userMobileNumber: _profileData['mobile'],
+            userImage: _profileData['image']);
         break;
       case 1:
         return SellAnimalMain(
