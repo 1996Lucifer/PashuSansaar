@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -31,7 +32,8 @@ class ReusableWidgets {
     );
   }
 
-  static showDialogBox(BuildContext context, String type, Widget content) {
+  static showDialogBox(BuildContext context, String type, Widget content,
+      [bool cta]) {
     return showDialog(
         context: context,
         builder: (context) {
@@ -45,12 +47,11 @@ class ReusableWidgets {
                       style: TextStyle(color: primaryColor),
                     ),
                     onPressed: () {
-                      Navigator.pop(context);
+                      cta ? exit(0) : Navigator.pop(context);
                     }),
               ]);
         });
   }
-
 
   static String randomCodeGenerator() {
     const _chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';

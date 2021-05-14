@@ -162,7 +162,8 @@ class Messages extends Translations {
           'fifth': 'पांचवा (5)',
           'sixth': 'छठा (6)',
           'seventh': 'सातवाँ (7)',
-          'extra_info': 'और जानकारी देने के लिए नीचे क्लिक करे',
+          'extra_info': 'अधिक जानकारी',
+          // 'extra_info': 'और जानकारी देने के लिए नीचे क्लिक करे',
           'animal_type_error': 'कृपया पशु चुने',
           'animal_breed_error': 'कृपया पशु की नस्ल चुने',
           'animal_age_error': 'कृपया पशु की उम्र चुने',
@@ -237,7 +238,9 @@ class Messages extends Translations {
           'animal_filter': 'पशु फ़िल्टर',
           'apply_button': 'चयन सेव करें',
           'reset_button': 'सभी चयन हटाएँ',
-          'maximum_milk_length': 'दूध की सही मात्रा डाले'
+          'maximum_milk_length': 'दूध की सही मात्रा डाले',
+
+          'vpn_issue': 'आपने VPN चलाया हुआ है , इससे एप लोड नहीं होगी ।'
         }
       };
 }

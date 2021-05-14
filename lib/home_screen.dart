@@ -1,7 +1,11 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:intl/intl.dart';
 import 'package:pashusansaar/buy_animal/buy_animal.dart';
+import 'package:pashusansaar/main.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -30,8 +34,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Map _profileData = {};
   final geo = Geoflutterfire();
   PageController _pageController;
-  String _referralUniqueValue = '';
+  String _referralUniqueValue = '', _mobileNumber = '';
   bool _checkReferral = false;
+  double lat = 0.0, long = 0.0;
 
   @override
   void initState() {
@@ -51,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
       Map<String, dynamic> referralInfo = {
         'userAddress':
             first.addressLine ?? (first.adminArea + ', ' + first.countryName),
-        'dateOfSaving': ReusableWidgets.dateTimeToEpoch(DateTime.now()),
+        'dateOfUpdation': ReusableWidgets.dateTimeToEpoch(DateTime.now()),
         'userId': FirebaseAuth.instance.currentUser.uid,
         'userMobile': mobile
       };
@@ -65,9 +70,29 @@ class _HomeScreenState extends State<HomeScreen> {
               }))
           .catchError((error) {
         print('e-referral--123->' + error.toString());
+        FirebaseFirestore.instance
+            .collection('logger')
+            .doc(_mobileNumber)
+            .collection('home-referralInner')
+            .doc()
+            .set({
+          'issue': error.toString(),
+          'userId': FirebaseAuth.instance.currentUser?.uid ?? '',
+          'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
+        });
       });
     } catch (e) {
       print('e-referral--->' + e.toString());
+      FirebaseFirestore.instance
+          .collection('logger')
+          .doc(_mobileNumber)
+          .collection('home-referralOuter')
+          .doc()
+          .set({
+        'issue': e.toString(),
+        'userId': FirebaseAuth.instance.currentUser?.uid ?? '',
+        'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
+      });
     }
   }
 
@@ -80,14 +105,16 @@ class _HomeScreenState extends State<HomeScreen> {
           'alreadyUser', FirebaseAuth.instance.currentUser.uid.isNotEmpty);
       _referralUniqueValue = prefs.getString('referralUniqueValue');
       _checkReferral = prefs.getBool('checkReferral') ?? false;
+      _mobileNumber = prefs.getString('mobileNumber');
+
+      lat = prefs.getDouble('latitude');
+      long = prefs.getDouble('longitude');
     });
 
     getInitialInfo();
   }
 
   getInitialInfo() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
     pr = new ProgressDialog(context,
         type: ProgressDialogType.Normal, isDismissible: false);
 
@@ -100,9 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
               collectionRef:
                   FirebaseFirestore.instance.collection("buyingAnimalList1"))
           .within(
-              center: geo.point(
-                  latitude: prefs.getDouble('latitude'),
-                  longitude: prefs.getDouble('longitude')),
+              center: geo.point(latitude: lat, longitude: long),
               radius: 50,
               field: 'position',
               strictMode: true);
@@ -110,11 +135,12 @@ class _HomeScreenState extends State<HomeScreen> {
       stream.listen((List<DocumentSnapshot> documentList) {
         List _temp = [];
         documentList.forEach((e) {
-          _temp.addIf(
-              (e.reference.id.substring(8) !=
-                      FirebaseAuth.instance.currentUser.uid) &&
-                  (e['isValidUser'] == 'Approved'),
-              e);
+          // _temp.addIf(
+          //     (e.reference.id.substring(8) !=
+          //             FirebaseAuth.instance.currentUser.uid) &&
+          //         (e['isValidUser'] == 'Approved'),
+          //     e);
+          _temp.addIf(e['isValidUser'] == 'Approved', e);
           print('=-=-=-' + e.reference.id);
           print('=-=-=-' + e.toString());
         });
@@ -124,11 +150,21 @@ class _HomeScreenState extends State<HomeScreen> {
               .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
         });
 
-        print("=-=-=" + documentList.length.toString());
         pr.hide();
+        print("=-=-=" + documentList.length.toString());
       });
     } catch (e) {
       print('=-=Error-Home-=->>>' + e.toString());
+      FirebaseFirestore.instance
+          .collection('logger')
+          .doc(_mobileNumber)
+          .collection('home-buying')
+          .doc()
+          .set({
+        'issue': e.toString(),
+        'userId': FirebaseAuth.instance.currentUser?.uid ?? '',
+        'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
+      });
       pr.hide();
     }
 
@@ -138,40 +174,67 @@ class _HomeScreenState extends State<HomeScreen> {
   getAnimalSellingInfo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    await FirebaseFirestore.instance
-        .collection("animalSellingInfo")
-        .doc(FirebaseAuth.instance.currentUser.uid)
-        .collection('sellingAnimalList')
-        .orderBy('dateOfSaving', descending: true)
-        .get(GetOptions(source: Source.serverAndCache))
-        .then(
-      (value) {
-        List _info = [];
-        value.docs.forEach((element) {
-          _info.add(element.data());
-        });
+    try {
+      await FirebaseFirestore.instance
+          .collection("animalSellingInfo")
+          .doc(FirebaseAuth.instance.currentUser.uid)
+          .collection('sellingAnimalList')
+          .orderBy('dateOfSaving', descending: true)
+          .get(GetOptions(source: Source.serverAndCache))
+          .then(
+        (value) {
+          List _info = [];
+          value.docs.forEach((element) {
+            _info.add(element.data());
+          });
 
-        setState(() {
-          _sellingAnimalInfo = _info;
-          prefs.setString('animalDetails', jsonEncode(_info));
-        });
-      },
-    );
+          setState(() {
+            _sellingAnimalInfo = _info;
+            prefs.setString('animalDetails', jsonEncode(_info));
+          });
+        },
+      );
+    } catch (e) {
+      FirebaseFirestore.instance
+          .collection('logger')
+          .doc(_mobileNumber)
+          .collection('home')
+          .doc('home-selling')
+          .set({
+        'issue': e.toString(),
+        'userId': FirebaseAuth.instance.currentUser?.uid ?? '',
+        'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
+      });
+    }
+
     getProfileInfo();
   }
 
   getProfileInfo() async {
-    await FirebaseFirestore.instance
-        .collection("userInfo")
-        .doc(FirebaseAuth.instance.currentUser.uid)
-        .get(GetOptions(source: Source.serverAndCache))
-        .then(
-      (value) {
-        setState(() {
-          _profileData = value.data();
-        });
-      },
-    );
+    try {
+      await FirebaseFirestore.instance
+          .collection("userInfo")
+          .doc(FirebaseAuth.instance.currentUser.uid)
+          .get(GetOptions(source: Source.serverAndCache))
+          .then(
+        (value) {
+          setState(() {
+            _profileData = value.data();
+          });
+        },
+      );
+    } catch (e) {
+      FirebaseFirestore.instance
+          .collection('logger')
+          .doc(_mobileNumber)
+          .collection('home-profile')
+          .doc()
+          .set({
+        'issue': e.toString(),
+        'userId': FirebaseAuth.instance.currentUser?.uid ?? '',
+        'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
+      });
+    }
     if (!_checkReferral) initReferrerDetails(_profileData['mobile']);
   }
 
@@ -250,7 +313,6 @@ class _HomeScreenState extends State<HomeScreen> {
               physics: NeverScrollableScrollPhysics(),
               children: [
                 BuyAnimal(
-                
                   animalInfo: _animalInfo,
                   userName: _profileData['name'],
                   userMobileNumber: _profileData['mobile'],
