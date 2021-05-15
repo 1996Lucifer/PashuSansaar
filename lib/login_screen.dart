@@ -92,6 +92,10 @@ class _LoginState extends State<Login> {
                     padding: EdgeInsets.all(15),
                     child: Container(
                         child: TextFormField(
+                      inputFormatters: <TextInputFormatter>[
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
+                      keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                           prefixIcon: Icon(Icons.account_box),
                           border: OutlineInputBorder(),
@@ -101,7 +105,6 @@ class _LoginState extends State<Login> {
                       maxLength: 10,
                       autofocus: false,
                       controller: phoneNumberController,
-                      keyboardType: TextInputType.phone,
                     ))),
                 SizedBox(
                   height: 20,

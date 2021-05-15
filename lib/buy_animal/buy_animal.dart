@@ -82,10 +82,10 @@ class _BuyAnimalState extends State<BuyAnimal>
   void initState() {
     _getInitialData();
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent) {
-        getNextSetOfBuyingAnimal();
-      }
+      // if (_scrollController.position.pixels ==
+      //     _scrollController.position.maxScrollExtent) {
+      //   getNextSetOfBuyingAnimal();
+      // }
 
       setState(() {
         if (_scrollController.offset >= 400) {
@@ -836,15 +836,16 @@ class _BuyAnimalState extends State<BuyAnimal>
     return RepaintBoundary(
       key: previewContainer,
       child: Scaffold(
-        floatingActionButton: _showBackToTopButton == false
-            ? null
-            : FloatingActionButton(
-                child: Icon(
-                  Icons.arrow_upward,
-                ),
-                onPressed: () => _scrollController.animateTo(0,
-                    duration: Duration(seconds: 2), curve: Curves.bounceInOut),
-              ),
+        // floatingActionButton: _showBackToTopButton == false
+        //     ? null
+        //     : FloatingActionButton(
+        //         child: Icon(
+        //           Icons.arrow_upward,
+        //         ),
+        //         onPressed: () => _scrollController.jumpTo(0)
+        //         // .animateTo(0,
+        //         //     duration: Duration(seconds: 2), curve: Curves.linear),
+        //         ),
         backgroundColor: Colors.grey[100],
         body: Stack(
           children: [
@@ -866,7 +867,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                             alignment: Alignment.bottomCenter,
                             children: [
                               ListView.builder(
-                                  controller: _scrollController,
+                                  // controller: _scrollController,
                                   physics: BouncingScrollPhysics(),
                                   itemBuilder: (context, index) => Padding(
                                         padding: const EdgeInsets.only(
@@ -1545,7 +1546,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                             alignment: Alignment.bottomCenter,
                             children: [
                               ListView.builder(
-                                  controller: _scrollController,
+                                  // controller: _scrollController,
                                   physics: BouncingScrollPhysics(),
                                   itemBuilder: (context, index) => Padding(
                                       padding: const EdgeInsets.only(
@@ -2328,7 +2329,13 @@ class _BuyAnimalState extends State<BuyAnimal>
                                             });
                                             _getLocationBasedList(
                                                 context, first);
+
+                                            // pr.hide();
+                                            // Navigator.pop(context);
                                           } catch (e) {
+                                            // pr.hide();
+                                            // Navigator.pop(context);
+
                                             print('locationerro==> ' +
                                                 e.toString());
                                             ScaffoldMessenger.of(context)
@@ -2337,11 +2344,13 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                         'चुनाव में एक भी पशु उपलब्ध नहीं है, इसलिए सभी पशु दिखाए जा रहे है |')));
                                           }
 
-                                          Future.delayed(Duration(seconds: 3))
-                                              .then((value) {
-                                            pr.hide();
-                                            Navigator.pop(context);
-                                          });
+                                          // Navigator.pop(context);
+
+                                          // Future.delayed(Duration(seconds: 3))
+                                          //     .then((value) {
+                                          //   pr.hide();
+                                          //   Navigator.pop(context);
+                                          // });
                                         }
                                       }),
                                 ]);
@@ -2484,8 +2493,13 @@ class _BuyAnimalState extends State<BuyAnimal>
           _tempAnimalList
               .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
         });
+        pr.hide();
+        Navigator.pop(context);
       });
     } catch (e) {
+      pr.hide();
+      Navigator.pop(context);
+
       print('=-=Error-=->>>' + e.toString());
     }
     // pr.hide();
@@ -2647,7 +2661,6 @@ class _BuyAnimalState extends State<BuyAnimal>
     List _list =
         _tempAnimalList.length != 0 ? _tempAnimalList : widget.animalInfo;
 
-    // _userLocalityValue(index);
     return StatefulBuilder(builder: (context, setState1) {
       getPositionBasedOnLatLong(
               _list[index]['userLatitude'], _list[index]['userLongitude'])
