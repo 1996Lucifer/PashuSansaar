@@ -45,7 +45,7 @@ class ProfileMainState extends State<ProfileMain>
   bool _status = true;
   final FocusNode myFocusNode = FocusNode();
   ImagePicker _picker;
-  String _base64Image = "";
+  String _base64Image = "", _currentVersion = '';
   Map userInfo = {};
   ProgressDialog pr;
 
@@ -101,6 +101,7 @@ class ProfileMainState extends State<ProfileMain>
         userInfo['image'] = widget.profileData['image'];
         userInfo['address'] =
             first.addressLine ?? (first.adminArea + ', ' + first.countryName);
+        _currentVersion = prefs.getStringList('currentVersion').join('.');
       });
       // getCallingInfo();
     }
@@ -350,15 +351,25 @@ class ProfileMainState extends State<ProfileMain>
         appBar:
             ReusableWidgets.getAppBar(context, "app_name".tr, false, actions: [
           GestureDetector(
+            onTap: () => ReusableWidgets.showDialogBox(
+                context, 'info'.tr, Text('ver_info'.tr)),
+            child: Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: Center(
+                  child: Text(
+                    'v' + _currentVersion,
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                  ),
+                )),
+          ),
+          GestureDetector(
             onTap: () => Share.share(
-                'पशुसंसार (पशु बेचने वाली फ्री ऐप) पर मेरे साथ जुड़ें। मेरा कोड ADFTR6 दर्ज करें और ₹50,000 जीतने का मौका पाएं। \n\n ऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar')
-            //AIzaSyDg5o_0j0MC5dueSVRYp4WkCjrJPQxm7pg
-            ,
+                'पशुसंसार (पशु बेचने वाली फ्री ऐप) पर मेरे साथ जुड़ें। मेरा कोड ADFTR6 दर्ज करें और ₹50,000 जीतने का मौका पाएं। \n\n ऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar'),
             child: Padding(
               padding: const EdgeInsets.only(right: 8.0),
               child: Icon(Icons.share),
             ),
-          )
+          ),
         ]),
         body: new Container(
           color: Colors.white,

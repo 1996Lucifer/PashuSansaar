@@ -19,7 +19,7 @@ import 'sell_animal/sell_animal_main.dart';
 import 'package:get/get.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:geocoder/geocoder.dart' as geoCoder;
-import 'dart:math' show cos, sqrt, asin;
+// import 'dart:math' show cos, sqrt, asin;
 
 // ignore: must_be_immutable
 class HomeScreen extends StatefulWidget {
@@ -116,14 +116,14 @@ class _HomeScreenState extends State<HomeScreen> {
     getInitialInfo();
   }
 
-  double calculateDistance(lat1, lon1, lat2, lon2) {
-    var p = 0.017453292519943295;
-    var c = cos;
-    var a = 0.5 -
-        c((lat2 - lat1) * p) / 2 +
-        c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p)) / 2;
-    return 12742 * asin(sqrt(a));
-  }
+  // double calculateDistance(lat1, lon1, lat2, lon2) {
+  //   var p = 0.017453292519943295;
+  //   var c = cos;
+  //   var a = 0.5 -
+  //       c((lat2 - lat1) * p) / 2 +
+  //       c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p)) / 2;
+  //   return 12742 * asin(sqrt(a));
+  // }
 
   getInitialInfo() async {
     pr = new ProgressDialog(context,
@@ -131,51 +131,88 @@ class _HomeScreenState extends State<HomeScreen> {
 
     pr.style(message: 'progress_dialog_message'.tr);
     pr.show();
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    // SharedPreferences prefs = await SharedPreferences.getInstance();
 
+    // try {
+    //   final now = DateTime.now();
+
+    //   FirebaseFirestore.instance
+    //       .collection('buyingAnimalList1')
+    //       .where('dateOfSaving',
+    //           isLessThanOrEqualTo: ReusableWidgets.dateTimeToEpoch(now))
+    //       .orderBy('dateOfSaving', descending: true)
+    //       .limit(20)
+    //       .get()
+    //       .then((value) {
+    //     List _temp = [];
+    //     value.docs.forEach((e) {
+    //       _temp.addIf(
+    //           e['isValidUser'] == 'Approved' &&
+    //               double.parse((Geodesy().distanceBetweenTwoGeoPoints(
+    //                               LatLng(lat, long),
+    //                               LatLng(
+    //                                   e['userLatitude'], e['userLongitude'])) /
+    //                           1000)
+    //                       .toStringAsPrecision(2)) <=
+    //                   50.0,
+    //           e);
+
+    //       print('=-=-=-' + e.reference.id);
+    //       print('=-=-=->' + e.toString());
+    //     });
+
+    //     print('=-=-=-<>' + value.docs.last['dateOfSaving'].toString());
+
+    //     setState(() {
+    //       prefs.setString('lastAnimal', value.docs.last['dateOfSaving']);
+    //       // _lastAnimal = value.docs.last['dateOfSaving'];
+    //       _animalInfo = _temp;
+    //       _animalInfo
+    //           .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
+    //     });
+
+    //     pr.hide();
+    //     print("=-=-=" + value.docs.length.toString());
+    //   });
+    // }
     try {
-      final now = DateTime.now();
+      // final now = DateTime.now();
+      Stream<List<DocumentSnapshot>> stream = geo
+          .collection(
+              collectionRef:
+                  FirebaseFirestore.instance.collection("buyingAnimalList1"))
+          .within(
+              center: geo.point(latitude: lat, longitude: long),
+              radius: 50,
+              field: 'position',
+              strictMode: true);
 
-      FirebaseFirestore.instance
-          .collection('buyingAnimalList1')
-          .where('dateOfSaving',
-              isLessThanOrEqualTo: ReusableWidgets.dateTimeToEpoch(now))
-          .orderBy('dateOfSaving', descending: true)
-          .limit(20)
-          .get()
-          .then((value) {
+      stream.listen((List<DocumentSnapshot> documentList) {
         List _temp = [];
-        value.docs.forEach((e) {
-          _temp.addIf(
-              e['isValidUser'] == 'Approved' &&
-                  double.parse((Geodesy().distanceBetweenTwoGeoPoints(
-                                  LatLng(lat, long),
-                                  LatLng(
-                                      e['userLatitude'], e['userLongitude'])) /
-                              1000)
-                          .toStringAsPrecision(2)) <=
-                      50.0,
-              e);
-
+        documentList.forEach((e) {
+          // _temp.addIf(
+          //     (e.reference.id.substring(8) !=
+          //             FirebaseAuth.instance.currentUser.uid) &&
+          //         (e['isValidUser'] == 'Approved'),
+          //     e);
+          _temp.addIf(e['isValidUser'] == 'Approved', e);
           print('=-=-=-' + e.reference.id);
-          print('=-=-=->' + e.toString());
+          print('=-=-=-' + e.toString());
+          print('=-=-=-' + documentList.last.toString());
         });
-
-        print('=-=-=-<>' + value.docs.last['dateOfSaving'].toString());
-
         setState(() {
-          prefs.setString('lastAnimal', value.docs.last['dateOfSaving']);
-          // _lastAnimal = value.docs.last['dateOfSaving'];
+          // lastDocument = documentList[documentList.length - 1];
           _animalInfo = _temp;
           _animalInfo
               .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
         });
 
+        print("=-=-=" + documentList.length.toString());
         pr.hide();
-        print("=-=-=" + value.docs.length.toString());
       });
     } catch (e) {
       print('=-=Error-Home=->>>' + e.toString());
+      pr.hide();
       FirebaseFirestore.instance
           .collection('logger')
           .doc(_mobileNumber)
@@ -186,7 +223,6 @@ class _HomeScreenState extends State<HomeScreen> {
         'userId': FirebaseAuth.instance.currentUser?.uid ?? '',
         'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
       });
-      pr.hide();
     }
 
     getAnimalSellingInfo();

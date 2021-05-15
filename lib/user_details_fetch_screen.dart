@@ -456,7 +456,10 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                                       .text.isNotEmpty
                                   ? referralCodeController.text.toUpperCase()
                                   : '',
-                              'alreadyUser': true
+                              'alreadyUser': true,
+                              'appVersion': prefs
+                                  .getStringList('currentVersion')
+                                  .join('.')
                             }).then((result) {
                               pr.hide();
                               Navigator.pushReplacement(

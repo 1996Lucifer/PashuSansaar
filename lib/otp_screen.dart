@@ -45,6 +45,7 @@ class _OTPScreenState extends State<OTPScreen>
   @override
   void initState() {
     _verifyPhone();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       countdownTimerController =
           CountdownTimerController(endTime: endTime, onEnd: onEnd);
@@ -56,7 +57,8 @@ class _OTPScreenState extends State<OTPScreen>
     });
 
     onTapRecognizer = TapGestureRecognizer()
-      ..onTap = () async {
+      ..onTap = () {
+        _verifyPhone();
         countdownTimerController = CountdownTimerController(
             endTime: DateTime.now().millisecondsSinceEpoch + 1000 * 60,
             onEnd: onEnd);
@@ -68,7 +70,6 @@ class _OTPScreenState extends State<OTPScreen>
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('OTP पुनः भेजा गया है')));
 
-        await _verifyPhone();
         // Navigator.pop(context);
       };
     errorController = StreamController<ErrorAnimationType>();

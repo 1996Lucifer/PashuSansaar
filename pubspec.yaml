@@ -51,7 +51,6 @@ dependencies:
   get: ^3.26.0
   image_picker: ^0.6.7+7
   intl: any
-  lazy_load_scrollview: any
   location: ^3.2.4
   marquee: ^1.7.0
   package_info: any

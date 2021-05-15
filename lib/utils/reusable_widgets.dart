@@ -33,7 +33,7 @@ class ReusableWidgets {
   }
 
   static showDialogBox(BuildContext context, String type, Widget content,
-      [bool cta]) {
+      [bool cta = false]) {
     return showDialog(
         context: context,
         builder: (context) {

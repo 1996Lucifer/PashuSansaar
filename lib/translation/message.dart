@@ -239,8 +239,9 @@ class Messages extends Translations {
           'apply_button': 'चयन सेव करें',
           'reset_button': 'सभी चयन हटाएँ',
           'maximum_milk_length': 'दूध की सही मात्रा डाले',
-
-          'vpn_issue': 'आपने VPN चलाया हुआ है , इससे एप लोड नहीं होगी ।'
+          'vpn_issue': 'आपने VPN चलाया हुआ है , इससे एप लोड नहीं होगी ।',
+          'info': 'जानकारी',
+          'ver_info': 'ये आपके एप का वर्शन है ।'
         }
       };
 }
