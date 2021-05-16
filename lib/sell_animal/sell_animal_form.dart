@@ -84,11 +84,11 @@ class _SellAnimalFormState extends State<SellAnimalForm>
   Future<void> uploadFile(File file, String index) async {
     // try {
     await firebase_storage.FirebaseStorage.instance
-        .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.jpg')
+        .ref('${FirebaseAuth.instance.currentUser.uid}/${uniqueId}_$index.jpg')
         .putFile(file);
 
     String downloadURL = await firebase_storage.FirebaseStorage.instance
-        .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.jpg')
+        .ref('${FirebaseAuth.instance.currentUser.uid}/${uniqueId}_$index.jpg')
         .getDownloadURL();
 
     setState(() {
@@ -1037,7 +1037,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                 pr.style(message: 'progress_dialog_message'.tr);
                 pr.show();
 
-                String uniqueId = ReusableWidgets.randomIDGenerator();
+                // String uniqueId = ReusableWidgets.randomIDGenerator();
                 // String uniqueId = Uuid().v1().toString();
 
                 FirebaseFirestore.instance

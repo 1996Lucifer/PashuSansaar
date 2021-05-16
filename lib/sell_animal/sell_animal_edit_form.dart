@@ -111,11 +111,11 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
 
   Future<void> uploadFile(File file, String index) async {
     await firebase_storage.FirebaseStorage.instance
-        .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
+        .ref('${FirebaseAuth.instance.currentUser.uid}/${uniqueId}_$index.jpg')
         .putFile(file);
 
     String downloadURL = await firebase_storage.FirebaseStorage.instance
-        .ref('${FirebaseAuth.instance.currentUser.uid}/$uniqueId.mp4')
+        .ref('${FirebaseAuth.instance.currentUser.uid}/${uniqueId}_$index.jpg')
         .getDownloadURL();
 
     setState(() {

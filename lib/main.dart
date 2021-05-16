@@ -5,6 +5,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
+import 'package:pashusansaar/home_screen.dart';
 import 'package:pashusansaar/splash_screen.dart';
 import 'package:pashusansaar/translation/message.dart';
 import 'package:pashusansaar/utils/colors.dart';
@@ -129,6 +130,14 @@ class _MyAppState extends State<MyApp> {
               ),
             ));
       }
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print('A new onMessageOpenedApp event was published!');
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => HomeScreen(selectedIndex: 0)));
     });
 
     isVpnActive();
