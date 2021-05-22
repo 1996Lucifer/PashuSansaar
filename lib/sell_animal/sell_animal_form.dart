@@ -1073,7 +1073,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                     "userName": widget.userName,
                     "userAnimalPrice": animalInfo['animalPrice'] ?? "0",
                     "userAnimalBreed": animalInfo['animalBreed'] ?? "",
-                    "userMobileNumber": '${widget.userMobileNumber}',
+                    "userMobileNumber": widget.userMobileNumber,
                     "userAnimalMilk": animalInfo['animalMilk'] ?? "",
                     "userAnimalPregnancy": animalInfo['animalIsPregnant'] ?? "",
                     "userLatitude": prefs.getDouble('latitude'),
