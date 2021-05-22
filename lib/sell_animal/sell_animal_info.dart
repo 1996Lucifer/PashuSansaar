@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart' as intl;
 
 import '../interested_buyer.dart';
+import 'remove_animal.dart';
 import 'sell_animal_edit_form.dart';
 import 'sell_animal_form.dart';
 
@@ -241,57 +242,6 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
     return data;
   }
 
-  // _descriptionText(int index) {
-  //   String animalBreedCheck =
-  //       widget.animalInfo[index]['animalInfo']['animalBreed'] == 'not_known'.tr
-  //           ? ""
-  //           : widget.animalInfo[index]['animalInfo']['animalBreed'];
-  //   String animalTypeCheck = widget.animalInfo[index]['animalInfo']
-  //               ['animalType'] ==
-  //           'other_animal'.tr
-  //       ? widget.animalInfo[index]['animalInfo']['animalTypeOther']
-  //       : widget.animalInfo[index]['animalInfo']['animalType'];
-
-  //   String desc = '';
-
-  //   String stmn2 =
-  //       'यह ${widget.animalInfo[index]['extraInfo']['animalAlreadyGivenBirth']} ब्यायी है ';
-  //   String stmn3 =
-  //       'और अभी ${widget.animalInfo[index]['extraInfo']['animalIfPregnant']} है। ';
-  //   String stmn4 = '';
-  //   String stmn41 = 'इसके साथ में बच्चा नहीं है| ';
-  //   String stmn42 =
-  //       'इसके साथ में ${widget.animalInfo[index]['extraInfo']['animalHasBaby']}। ';
-  //   String stmn5 =
-  //       'पिछले बार के हिसाब से दूध कैपेसिटी ${widget.animalInfo[index]['animalInfo']['animalMilk']} लीटर है। ';
-
-  //   if (widget.animalInfo[index]['animalInfo']['animalType'] ==
-  //           'buffalo_male'.tr ||
-  //       widget.animalInfo[index]['animalInfo']['animalType'] == 'ox'.tr ||
-  //       widget.animalInfo[index]['animalType'] == 'other_animal'.tr) {
-  //     desc =
-  //         'ये $animalBreedCheck $animalTypeCheck ${widget.animalInfo[index]['animalInfo']['animalAge']} साल का है। ';
-  //   } else {
-  //     desc =
-  //         'ये $animalBreedCheck $animalTypeCheck ${widget.animalInfo[index]['animalInfo']['animalAge']} साल की है। ';
-  //     if (widget.animalInfo[index]['extraInfo']['animalAlreadyGivenBirth'] !=
-  //         null) desc = desc + stmn2;
-  //     if (widget.animalInfo[index]['extraInfo']['animalIfPregnant'] != null)
-  //       desc = desc + stmn3;
-  //     if (widget.animalInfo[index]['extraInfo']['animalHasBaby'] != null &&
-  //         widget.animalInfo[index]['extraInfo']['animalHasBaby'] ==
-  //             'nothing'.tr)
-  //       stmn4 = stmn4 + stmn42;
-  //     else
-  //       stmn4 = stmn4 + stmn41;
-
-  //     desc = desc + stmn4;
-  //     desc = desc + stmn5;
-  //   }
-
-  //   return desc + (widget.animalInfo[index]['extraInfo']['moreInfo'] ?? '');
-  // }
-
   Padding _buildImageDescriptionWidget(double width, int index) => Padding(
         padding: const EdgeInsets.all(8.0),
         child: Row(
@@ -333,7 +283,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
   Padding _buildDateWidget(int index) => Padding(
         padding: const EdgeInsets.all(8.0),
         child: RichText(
-          overflow: TextOverflow.ellipsis,
+          // overflow: TextOverflow.ellipsis,
           text: TextSpan(
             style:
                 TextStyle(color: Colors.grey[500], fontWeight: FontWeight.bold),
@@ -362,48 +312,55 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(
-            child: RichText(
-              overflow: TextOverflow.ellipsis,
-              text: TextSpan(
-                  style: TextStyle(
-                      color: greyColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16),
-                  text: (widget.animalInfo[index]['animalInfo']
-                                  ['animalBreed'] ==
-                              'not_known'.tr
-                          ? ""
-                          : widget.animalInfo[index]['animalInfo']
-                              ['animalBreed']) +
-                      ' ',
-                  children: <InlineSpan>[
-                    TextSpan(
-                      text: (widget.animalInfo[index]['animalInfo']
-                                      ['animalType'] ==
-                                  'other_animal'.tr
-                              ? widget.animalInfo[index]['animalInfo']
-                                  ['animalTypeOther']
-                              : widget.animalInfo[index]['animalInfo']
-                                  ['animalType']) +
-                          ', ',
-                      style: TextStyle(
-                          color: greyColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16),
-                    ),
-                    TextSpan(
-                      text: '₹ ' +
-                          formatter.format(int.parse(widget.animalInfo[index]
-                              ['animalInfo']['animalPrice'])),
-                      style: TextStyle(
-                          color: greyColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16),
-                    )
-                  ]),
-            ),
+          RichText(
+            overflow: TextOverflow.ellipsis,
+            text: TextSpan(
+                style: TextStyle(
+                    color: greyColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16),
+                text: (widget.animalInfo[index]['animalInfo']['animalBreed'] ==
+                            'not_known'.tr
+                        ? ""
+                        : ReusableWidgets.removeEnglisgDataFromName(widget
+                            .animalInfo[index]['animalInfo']['animalBreed'])) +
+                    ' ',
+                children: <InlineSpan>[
+                  TextSpan(
+                    text: (widget.animalInfo[index]['animalInfo']
+                                    ['animalType'] ==
+                                'other_animal'.tr
+                            ? widget.animalInfo[index]['animalInfo']
+                                ['animalTypeOther']
+                            : widget.animalInfo[index]['animalInfo']
+                                ['animalType']) +
+                        ', ',
+                    style: TextStyle(
+                        color: greyColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16),
+                  ),
+                  TextSpan(
+                    text: '₹ ' +
+                        formatter.format(int.parse(widget.animalInfo[index]
+                            ['animalInfo']['animalPrice'])),
+                    style: TextStyle(
+                        color: greyColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16),
+                  )
+                ]),
           ),
+          // RaisedButton.icon(
+          //     onPressed: () => showRemoveAnimalDialog(index),
+          //     icon: Icon(
+          //       Icons.delete,
+          //       color: Colors.white,
+          //     ),
+          //     label: Text('remove_animal'.tr,
+          //         textDirection: TextDirection.ltr,
+          //         style: TextStyle(
+          //             color: Colors.white, fontWeight: FontWeight.bold)))
         ],
       ),
     );
@@ -472,4 +429,47 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
           ),
         ),
       );
+
+  _openAddEntryDialog(int index) {
+    Navigator.of(context).push(new MaterialPageRoute<Null>(
+        builder: (BuildContext context) {
+          return RemoveAnimal(
+              listId: widget.animalInfo[index]['uniqueId'],
+              price: widget.animalInfo[index]['animalInfo']['animalPrice']);
+        },
+        fullscreenDialog: true));
+  }
+
+  showRemoveAnimalDialog(index) {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+              title: Text('warning'.tr),
+              content: Text('remove_animal_warning_text'.tr),
+              actions: <Widget>[
+                RaisedButton(
+                    child: Text(
+                      'no'.tr,
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16),
+                    ),
+                    onPressed: () => Navigator.of(context).pop()),
+                RaisedButton(
+                    child: Text(
+                      'yes'.tr,
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _openAddEntryDialog(index);
+                    }),
+              ]);
+        });
+  }
 }

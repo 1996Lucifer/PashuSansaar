@@ -1,12 +1,10 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:geodesy/geodesy.dart';
 import 'package:intl/intl.dart';
 import 'package:pashusansaar/buy_animal/buy_animal.dart';
-import 'package:pashusansaar/main.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -36,7 +34,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Map _profileData = {};
   final geo = Geoflutterfire();
   PageController _pageController;
-  String _referralUniqueValue = '', _mobileNumber = '', _lastAnimal = '';
+  String _referralUniqueValue = '', _mobileNumber = '';
+  // QueryDocumentSnapshot _lastAnimal;
   bool _checkReferral = false;
   double lat = 0.0, long = 0.0;
 
@@ -79,7 +78,9 @@ class _HomeScreenState extends State<HomeScreen> {
             .doc()
             .set({
           'issue': error.toString(),
-          'userId': FirebaseAuth.instance.currentUser?.uid ?? '',
+          'userId': FirebaseAuth.instance.currentUser == null
+              ? ''
+              : FirebaseAuth.instance.currentUser.uid,
           'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
         });
       });
@@ -92,7 +93,9 @@ class _HomeScreenState extends State<HomeScreen> {
           .doc()
           .set({
         'issue': e.toString(),
-        'userId': FirebaseAuth.instance.currentUser?.uid ?? '',
+        'userId': FirebaseAuth.instance.currentUser == null
+            ? ''
+            : FirebaseAuth.instance.currentUser.uid,
         'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
       });
     }
@@ -114,15 +117,54 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     getInitialInfo();
+    // updateData();
   }
 
-  // double calculateDistance(lat1, lon1, lat2, lon2) {
-  //   var p = 0.017453292519943295;
-  //   var c = cos;
-  //   var a = 0.5 -
-  //       c((lat2 - lat1) * p) / 2 +
-  //       c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p)) / 2;
-  //   return 12742 * asin(sqrt(a));
+  // updateData() async {
+  // SharedPreferences prefs = await SharedPreferences.getInstance();
+
+  // await FirebaseFirestore.instance
+  //     .collection("buyingAnimalList1")
+  //     .orderBy('uniqueId')
+  //     .where('uniqueId', isGreaterThan: '90000000')
+  //     .get()
+  //     .then((value) => value.docs.forEach((element) async {
+  //           var addresses = await geoCoder.Geocoder.local
+  //               .findAddressesFromCoordinates(geoCoder.Coordinates(
+  //                   element['userLatitude'], element['userLongitude']));
+  //           var first = addresses.first;
+  //           // print((first.subAdminArea ?? first.locality));
+  //           await FirebaseFirestore.instance
+  //               .collection("buyingAnimalList1")
+  //               .doc(element.reference.id)
+  //               .update({
+  //             'district': first.subAdminArea ?? first.locality,
+  //             'zipCode': first.postalCode
+  //           });
+  //         }));
+
+  // .where('uniqueId',
+  //     isLessThanOrEqualTo: '10000000') // 00000000 - 10000000
+  // .where('uniqueId',
+  //     isGreaterThan: '10000000', isLessThanOrEqualTo: '20000000') // 30 - 31
+  // .where('uniqueId',
+  //     isGreaterThan: '20000000', isLessThanOrEqualTo: '30000000') // 30 - 31
+  // .where('uniqueId',
+  //     isGreaterThan: '30000000', isLessThanOrEqualTo: '40000000') // karna hai aaj
+  // .where('uniqueId',
+  //     isGreaterThan: '40000000', isLessThanOrEqualTo: '50000000') // karna hai aaj
+  // .where('uniqueId',
+  //     isGreaterThan: '50000000', isLessThanOrEqualTo: '60000000') // karna hai aaj
+  // .where('uniqueId',
+  //     isGreaterThan: '60000000', isLessThanOrEqualTo: '70000000') // karna hai aaj
+  // .where('uniqueId',
+  //     isGreaterThan: '70000000', isLessThanOrEqualTo: '80000000') // karna hai aaj
+  // .where('uniqueId',
+  //     isGreaterThan: '80000000', isLessThanOrEqualTo: '90000000') // karna hai aaj
+  // .where('uniqueId', isGreaterThan: '90000000') // k
+
+  // .get()
+  // .then((value) => value.docs.forEach((element) async {}));
   // }
 
   getInitialInfo() async {
@@ -131,85 +173,99 @@ class _HomeScreenState extends State<HomeScreen> {
 
     pr.style(message: 'progress_dialog_message'.tr);
     pr.show();
-    // SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    // try {
-    //   final now = DateTime.now();
-
-    //   FirebaseFirestore.instance
-    //       .collection('buyingAnimalList1')
-    //       .where('dateOfSaving',
-    //           isLessThanOrEqualTo: ReusableWidgets.dateTimeToEpoch(now))
-    //       .orderBy('dateOfSaving', descending: true)
-    //       .limit(20)
-    //       .get()
-    //       .then((value) {
-    //     List _temp = [];
-    //     value.docs.forEach((e) {
-    //       _temp.addIf(
-    //           e['isValidUser'] == 'Approved' &&
-    //               double.parse((Geodesy().distanceBetweenTwoGeoPoints(
-    //                               LatLng(lat, long),
-    //                               LatLng(
-    //                                   e['userLatitude'], e['userLongitude'])) /
-    //                           1000)
-    //                       .toStringAsPrecision(2)) <=
-    //                   50.0,
-    //           e);
-
-    //       print('=-=-=-' + e.reference.id);
-    //       print('=-=-=->' + e.toString());
-    //     });
-
-    //     print('=-=-=-<>' + value.docs.last['dateOfSaving'].toString());
-
-    //     setState(() {
-    //       prefs.setString('lastAnimal', value.docs.last['dateOfSaving']);
-    //       // _lastAnimal = value.docs.last['dateOfSaving'];
-    //       _animalInfo = _temp;
-    //       _animalInfo
-    //           .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
-    //     });
-
-    //     pr.hide();
-    //     print("=-=-=" + value.docs.length.toString());
-    //   });
-    // }
     try {
-      // final now = DateTime.now();
-      Stream<List<DocumentSnapshot>> stream = geo
-          .collection(
-              collectionRef:
-                  FirebaseFirestore.instance.collection("buyingAnimalList1"))
-          .within(
-              center: geo.point(latitude: lat, longitude: long),
-              radius: 50,
-              field: 'position',
-              strictMode: true);
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final now = DateTime.now();
+      List district = [];
+      RemoteConfig remoteConfig = await RemoteConfig.instance;
+      await remoteConfig.fetch(expiration: const Duration(seconds: 0));
+      await remoteConfig.activateFetched();
+      var address = await geoCoder.Geocoder.local.findAddressesFromCoordinates(
+          geoCoder.Coordinates(
+              prefs.getDouble('latitude'), prefs.getDouble('longitude')));
+      var first = address.first;
 
-      stream.listen((List<DocumentSnapshot> documentList) {
-        List _temp = [];
-        documentList.forEach((e) {
-          // _temp.addIf(
-          //     (e.reference.id.substring(8) !=
-          //             FirebaseAuth.instance.currentUser.uid) &&
-          //         (e['isValidUser'] == 'Approved'),
-          //     e);
-          _temp.addIf(e['isValidUser'] == 'Approved', e);
-          print('=-=-=-' + e.reference.id);
-          print('=-=-=-' + e.toString());
-          print('=-=-=-' + documentList.last.toString());
-        });
-        setState(() {
-          // lastDocument = documentList[documentList.length - 1];
-          _animalInfo = _temp;
-          _animalInfo
-              .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
-        });
-
-        print("=-=-=" + documentList.length.toString());
-        pr.hide();
+      json
+          .decode(remoteConfig.getValue("district_map").asString())
+          .forEach((element) {
+        district.addIf(element[first.subAdminArea ?? first.locality] != null,
+            element[first.subAdminArea ?? first.locality]);
       });
+
+      if (district.isEmpty) {
+        Stream<List<DocumentSnapshot>> stream = geo
+            .collection(
+                collectionRef:
+                    FirebaseFirestore.instance.collection("buyingAnimalList1"))
+            .within(
+                center: geo.point(latitude: lat, longitude: long),
+                radius: 50,
+                field: 'position',
+                strictMode: true);
+
+        stream.listen((List<DocumentSnapshot> documentList) {
+          List _temp = [];
+          documentList.forEach((e) {
+            // _temp.addIf(
+            //     (e.reference.id.substring(8) !=
+            //             FirebaseAuth.instance.currentUser.uid) &&
+            //         (e['isValidUser'] == 'Approved'),
+            //     e);
+            _temp.addIf(e['isValidUser'] == 'Approved', e);
+            print('=-=-=-' + e.reference.id);
+            print('=-=-=-' + e.toString());
+          });
+          setState(() {
+            _animalInfo = _temp;
+            _animalInfo
+                .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
+          });
+
+          print("=-=-=" + documentList.length.toString());
+          pr.hide();
+        });
+      } else {
+        FirebaseFirestore.instance
+            .collection('buyingAnimalList1')
+            .orderBy('dateOfSaving', descending: true)
+            .where('dateOfSaving',
+                isLessThanOrEqualTo: ReusableWidgets.dateTimeToEpoch(now))
+            .where('district', whereIn: district[0])
+            .limit(25)
+            .get()
+            .then((value) {
+          List _temp = [];
+          value.docs.forEach((e) {
+            _temp.addIf(
+                e['isValidUser'] == 'Approved' &&
+                    double.parse((Geodesy().distanceBetweenTwoGeoPoints(
+                                    LatLng(lat, long),
+                                    LatLng(e['userLatitude'],
+                                        e['userLongitude'])) /
+                                1000)
+                            .toStringAsPrecision(2)) <=
+                        50.0,
+                e);
+
+            print('=-=-=-' + e.reference.id);
+            print('=-=-=->' + e.toString());
+          });
+
+          print('=-=-=-<>' + value.docs.last['dateOfSaving'].toString());
+
+          setState(() {
+            lastDocument = value.docs.last['dateOfSaving'];
+            districtList = district[0];
+            _animalInfo = _temp;
+            _animalInfo
+                .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
+          });
+
+          pr.hide();
+          print("=-=-=" + value.docs.length.toString());
+        });
+      }
     } catch (e) {
       print('=-=Error-Home=->>>' + e.toString());
       pr.hide();
@@ -220,7 +276,9 @@ class _HomeScreenState extends State<HomeScreen> {
           .doc()
           .set({
         'issue': e.toString(),
-        'userId': FirebaseAuth.instance.currentUser?.uid ?? '',
+        'userId': FirebaseAuth.instance.currentUser == null
+            ? ''
+            : FirebaseAuth.instance.currentUser.uid,
         'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
       });
     }
@@ -242,7 +300,8 @@ class _HomeScreenState extends State<HomeScreen> {
         (value) {
           List _info = [];
           value.docs.forEach((element) {
-            _info.add(element.data());
+            _info.addIf(
+                element.data()['isValidUser'] == 'Approved', element.data());
           });
 
           setState(() {
@@ -259,7 +318,9 @@ class _HomeScreenState extends State<HomeScreen> {
           .doc('home-selling')
           .set({
         'issue': e.toString(),
-        'userId': FirebaseAuth.instance.currentUser?.uid ?? '',
+        'userId': FirebaseAuth.instance.currentUser == null
+            ? ''
+            : FirebaseAuth.instance.currentUser.uid,
         'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
       });
     }
@@ -288,7 +349,9 @@ class _HomeScreenState extends State<HomeScreen> {
           .doc()
           .set({
         'issue': e.toString(),
-        'userId': FirebaseAuth.instance.currentUser?.uid ?? '',
+        'userId': FirebaseAuth.instance.currentUser == null
+            ? ''
+            : FirebaseAuth.instance.currentUser.uid,
         'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
       });
     }

@@ -189,29 +189,6 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
       prefs.setDouble("latitude", first.coordinates.latitude);
       prefs.setDouble("longitude", first.coordinates.longitude);
     });
-
-    // pr = new ProgressDialog(context,
-    //     type: ProgressDialogType.Normal, isDismissible: false);
-    // pr.style(message: 'progress_dialog_message'.tr);
-    // pr.show();
-    // final myData = await rootBundle.loadString("assets/file/zipcode.csv");
-    // List<List<dynamic>> data = CsvToListConverter().convert(myData);
-
-    // for (int i = 0; i <= data.length - 1; i++) {
-    //   if (data[i][0].toString() == zipCodeController.text) {
-    //     setState(() {
-    //       prefs.setDouble("latitude", data[i][1]);
-    //       prefs.setDouble("longitude", data[i][2]);
-    //     });
-    //   } else {
-    //     setState(() {
-    //       prefs.setDouble("latitude", 0.0);
-    //       prefs.setDouble("longitude", 0.0);
-    //     });
-    //   }
-    // }
-    // pr.hide();
-    // return true;
   }
 
   @override
@@ -428,8 +405,9 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                                   .set({
                                 'issue': err.toString(),
                                 'userId':
-                                    FirebaseAuth.instance.currentUser?.uid ??
-                                        '',
+                                    FirebaseAuth.instance.currentUser == null
+                                        ? ''
+                                        : FirebaseAuth.instance.currentUser.uid,
                                 'date': DateFormat()
                                     .add_yMMMd()
                                     .add_jm()
@@ -479,9 +457,10 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                                     .doc()
                                     .set({
                                   'issue': err.toString(),
-                                  'userId':
-                                      FirebaseAuth.instance.currentUser?.uid ??
-                                          '',
+                                  'userId': FirebaseAuth.instance.currentUser ==
+                                          null
+                                      ? ''
+                                      : FirebaseAuth.instance.currentUser.uid,
                                   'date': DateFormat()
                                       .add_yMMMd()
                                       .add_jm()

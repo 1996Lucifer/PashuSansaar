@@ -141,7 +141,9 @@ class _OTPScreenState extends State<OTPScreen>
                   .set({
                 'issue': e.toString(),
                 'mobile': widget.phoneNumber,
-                'userId': FirebaseAuth.instance.currentUser?.uid ?? '',
+                'userId': FirebaseAuth.instance.currentUser == null
+                    ? ''
+                    : FirebaseAuth.instance.currentUser.uid,
                 'date':
                     DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
               });
@@ -156,7 +158,9 @@ class _OTPScreenState extends State<OTPScreen>
                 'otp': verficationID,
                 'resendToken': resendToken,
                 'mobile': widget.phoneNumber,
-                'userId': FirebaseAuth.instance.currentUser?.uid ?? '',
+                'userId': FirebaseAuth.instance.currentUser == null
+                    ? ''
+                    : FirebaseAuth.instance.currentUser.uid,
                 'date':
                     DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
               }).then((value) => setState(() {
@@ -174,7 +178,9 @@ class _OTPScreenState extends State<OTPScreen>
                   .set({
                 'otp': verificationID,
                 'mobile': widget.phoneNumber,
-                'userId': FirebaseAuth.instance.currentUser?.uid ?? '',
+                'userId': FirebaseAuth.instance.currentUser == null
+                    ? ''
+                    : FirebaseAuth.instance.currentUser.uid,
                 'date':
                     DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
               }).then((value) => setState(() {
@@ -194,7 +200,9 @@ class _OTPScreenState extends State<OTPScreen>
           .set({
         'issue': error.toString(),
         'mobile': widget.phoneNumber,
-        'userId': FirebaseAuth.instance.currentUser?.uid ?? '',
+        'userId': FirebaseAuth.instance.currentUser == null
+            ? ''
+            : FirebaseAuth.instance.currentUser.uid,
         'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
       });
     });
