@@ -33,18 +33,22 @@ class ReusableWidgets {
   }
 
   static showDialogBox(BuildContext context, String type, Widget content,
-      [bool cta = false]) {
+      {bool cta = false, bool barrierDismissible = true}) {
     return showDialog(
         context: context,
+        barrierDismissible: barrierDismissible,
         builder: (context) {
           return AlertDialog(
               title: Text(type),
               content: content,
               actions: <Widget>[
-                FlatButton(
+                RaisedButton(
                     child: Text(
                       'Ok'.tr,
-                      style: TextStyle(color: primaryColor),
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16),
                     ),
                     onPressed: () {
                       cta ? exit(0) : Navigator.pop(context);
@@ -103,5 +107,12 @@ class ReusableWidgets {
       suffix = 'years_ago'.tr;
     }
     return '${duration + ' ' + suffix}';
+  }
+
+  static removeEnglisgDataFromName(String str) {
+    List<String> x = str.split(' (')[0].split(' ');
+    String str1 = x.length > 2 ? x[0] + ' ' + x[1] : x.join(' ');
+
+    return str1;
   }
 }

@@ -136,11 +136,8 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
           return null;
           break;
         default:
-          File compressedFile = await FlutterNativeImage.compressImage(
-              file.path,
-              quality: 80,
-              targetWidth: 500,
-              targetHeight: 500);
+          File compressedFile =
+              await FlutterNativeImage.compressImage(file.path, quality: 80);
 
           setState(() {
             imagesFileUpload['image$index'] = file.path;
@@ -1055,7 +1052,6 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                   Text('animal_image_error'.tr),
                 );
               else {
-                // await Firebase.initializeApp();
                 pr = new ProgressDialog(context,
                     type: ProgressDialogType.Normal, isDismissible: false);
                 pr.style(message: 'progress_dialog_message'.tr);
@@ -1097,7 +1093,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                     "userName": widget.userName,
                     "userAnimalPrice": animalInfo['animalPrice'] ?? "0",
                     "userAnimalBreed": animalInfo['animalBreed'] ?? "",
-                    "userMobileNumber": '${widget.userMobileNumber}',
+                    "userMobileNumber": widget.userMobileNumber,
                     "userAnimalMilk": animalInfo['animalMilk'] ?? "",
                     "userAnimalPregnancy": animalInfo['animalIsPregnant'] ?? "",
                     "userLatitude": prefs.getDouble('latitude'),

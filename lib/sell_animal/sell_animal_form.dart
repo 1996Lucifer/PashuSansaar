@@ -109,11 +109,8 @@ class _SellAnimalFormState extends State<SellAnimalForm>
           return null;
           break;
         default:
-          File compressedFile = await FlutterNativeImage.compressImage(
-              file.path,
-              quality: 80,
-              targetWidth: 500,
-              targetHeight: 500);
+          File compressedFile =
+              await FlutterNativeImage.compressImage(file.path, quality: 80);
 
           setState(() {
             imagesFileUpload['image$index'] = file.path;
@@ -1037,9 +1034,6 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                 pr.style(message: 'progress_dialog_message'.tr);
                 pr.show();
 
-                // String uniqueId = ReusableWidgets.randomIDGenerator();
-                // String uniqueId = Uuid().v1().toString();
-
                 FirebaseFirestore.instance
                     .collection("animalSellingInfo")
                     .doc(FirebaseAuth.instance.currentUser.uid)
@@ -1079,7 +1073,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                     "userName": widget.userName,
                     "userAnimalPrice": animalInfo['animalPrice'] ?? "0",
                     "userAnimalBreed": animalInfo['animalBreed'] ?? "",
-                    "userMobileNumber": '${widget.userMobileNumber}',
+                    "userMobileNumber": widget.userMobileNumber,
                     "userAnimalMilk": animalInfo['animalMilk'] ?? "",
                     "userAnimalPregnancy": animalInfo['animalIsPregnant'] ?? "",
                     "userLatitude": prefs.getDouble('latitude'),
@@ -1112,7 +1106,10 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                     'isValidUser': 'Approved',
                     'uniqueId': uniqueId,
                     'userId': FirebaseAuth.instance.currentUser.uid,
-                    'extraInfo': extraInfoData
+                    'extraInfo': extraInfoData,
+                    'district': (first.subAdminArea ?? first.locality),
+                    'zipCode': first.postalCode,
+                    // 'state': first.adminArea,
                   }).then((value) {
                     pr.hide();
                     return showDialog(

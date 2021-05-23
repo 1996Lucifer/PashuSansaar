@@ -92,11 +92,14 @@ class _MyAppState extends State<MyApp> {
           .doc()
           .set({
         'issue': 'VPN is connected',
-        'userId': FirebaseAuth.instance.currentUser?.uid ?? '',
+        'userId': FirebaseAuth.instance.currentUser == null
+            ? ''
+            : FirebaseAuth.instance.currentUser.uid,
         'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
       });
       return ReusableWidgets.showDialogBox(
-          context, 'error'.tr, Text('vpn_issue'.tr), true);
+          context, 'error'.tr, Text('vpn_issue'.tr),
+          cta: true, barrierDismissible: false);
     } else {
       getToken();
     }

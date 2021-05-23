@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'dart:core';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:intl/intl.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/constants.dart';
@@ -67,8 +68,7 @@ class _BuyAnimalState extends State<BuyAnimal>
   ScrollController _scrollController = ScrollController();
   String directory = '';
   String url1 = '', url2 = '', url3 = '', url4 = '';
-  DocumentSnapshot _lastAnimal;
-  bool _isLoading = false, _showBackToTopButton = false;
+  bool _isLoading = false;
 
   File fileUrl;
 
@@ -82,18 +82,10 @@ class _BuyAnimalState extends State<BuyAnimal>
   void initState() {
     _getInitialData();
     _scrollController.addListener(() {
-      // if (_scrollController.position.pixels ==
-      //     _scrollController.position.maxScrollExtent) {
-      //   getNextSetOfBuyingAnimal();
-      // }
-
-      setState(() {
-        if (_scrollController.offset >= 400) {
-          _showBackToTopButton = true; // show the back-to-top button
-        } else {
-          _showBackToTopButton = false; // hide the back-to-top button
-        }
-      });
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        _getNextSetOfBuyingAnimal();
+      }
     });
     super.initState();
   }
@@ -104,94 +96,88 @@ class _BuyAnimalState extends State<BuyAnimal>
     super.dispose();
   }
 
-  // getData() async {
-  //   await FirebaseFirestore.instance.clearPersistence();
-
-  //   dataUpdateOnInit();
-  // dataReplication();
-  // await dataDeleteion();
-  // }
-
-  getNextSetOfBuyingAnimal() async {
-    // try {
-    //   final now = DateTime.now();
-    //   setState(() {
-    //     _isLoading = true;
-    //   });
-
-    //   FirebaseFirestore.instance
-    //       .collection('buyingAnimalList1')
-    //       .orderBy('dateOfSaving', descending: true)
-    //       .where('dateOfSaving',
-    //           isLessThanOrEqualTo: ReusableWidgets.dateTimeToEpoch(now))
-    //       .startAfter([_lastAnimal])
-    //       .limit(20)
-    //       .get()
-    //       .then((value) {
-    //         List _temp = widget.animalInfo;
-    //         value.docs.forEach((e) {
-    //           _temp.addIf(
-    //               e['isValidUser'] == 'Approved' &&
-    //                   double.parse((Geodesy().distanceBetweenTwoGeoPoints(
-    //                                   LatLng(_latitude, _longitude),
-    //                                   LatLng(e['userLatitude'],
-    //                                       e['userLongitude'])) /
-    //                               1000)
-    //                           .toStringAsPrecision(2)) <=
-    //                       50.0,
-    //               e);
-
-    //           print('=-=-re=-' + e.reference.id);
-    //           print('=-=-re=->' + e.toString());
-    //         });
-
-    //         setState(() {
-    //           _lastAnimal = value.docs.last['dateOfSaving'];
-    //           widget.animalInfo = _temp;
-    //           widget.animalInfo.sort(
-    //               (a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
-    //           _isLoading = false;
-    //         });
-
-    //         print("=-=-=" + value.docs.length.toString());
-    //       });
-    // }
-
+  _getNextSetOfBuyingAnimal() async {
     try {
-      Stream<List<DocumentSnapshot>> stream = geo
-          .collection(
-              collectionRef:
-                  FirebaseFirestore.instance.collection("buyingAnimalList1"))
-          // .limit(20)
-          // .startAfterDocument(lastDocument))
-          .within(
-              center: geo.point(latitude: _latitude, longitude: _longitude),
-              radius: 50,
-              field: 'position',
-              strictMode: true);
+      if (lastDocument == null || lastDocument.isEmpty) {
+        Stream<List<DocumentSnapshot>> stream = geo
+            .collection(
+                collectionRef:
+                    FirebaseFirestore.instance.collection("buyingAnimalList1"))
+            .within(
+                center: geo.point(latitude: _latitude, longitude: _longitude),
+                radius: 50,
+                field: 'position',
+                strictMode: true);
 
-      stream.listen((List<DocumentSnapshot> documentList) {
-        List _temp = widget.animalInfo;
-        documentList.forEach((e) {
-          // _temp.addIf(
-          //     (e.reference.id.substring(8) !=
-          //             FirebaseAuth.instance.currentUser.uid) &&
-          //         (e['isValidUser'] == 'Approved'),
-          //     e);
-          _temp.addIf(e['isValidUser'] == 'Approved', e);
-          print('=-=-=-' + e.reference.id);
-          print('=-=-=-' + e.toString());
+        stream.listen((List<DocumentSnapshot> documentList) {
+          List _temp = widget.animalInfo;
+          documentList.forEach((e) {
+            _temp.addIf(e['isValidUser'] == 'Approved', e);
+            print('=-=-=-' + e.reference.id);
+            print('=-=-=-' + e.toString());
+          });
+          setState(() {
+            widget.animalInfo = _temp;
+            widget.animalInfo
+                .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
+          });
+
+          pr.hide();
+          print("=-=-=" + documentList.length.toString());
         });
+      } else {
         setState(() {
-          lastDocument = documentList[documentList.length - 1];
-          widget.animalInfo = _temp;
-          widget.animalInfo
-              .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
+          _isLoading = true;
         });
+        FirebaseFirestore.instance
+            .collection('buyingAnimalList1')
+            .orderBy('dateOfSaving', descending: true)
+            .where('dateOfSaving', isLessThan: lastDocument)
+            .where('district', whereIn: districtList)
+            .limit(25)
+            .get()
+            .then((value) {
+          List _temp =
+              _tempAnimalList.isEmpty ? widget.animalInfo : _tempAnimalList;
+          value.docs.forEach((e) {
+            _temp.addIf(
+                e['isValidUser'] == 'Approved' &&
+                    double.parse((Geodesy().distanceBetweenTwoGeoPoints(
+                                    LatLng(_latitude, _longitude),
+                                    LatLng(e['userLatitude'],
+                                        e['userLongitude'])) /
+                                1000)
+                            .toStringAsPrecision(2)) <=
+                        50.0,
+                e);
 
-        pr.hide();
-        print("=-=-=" + documentList.length.toString());
-      });
+            print('=-=-=-' + e.reference.id);
+            print('=-=-=->' + e.toString());
+          });
+
+          print('=-=-=-<>' + value.docs.last['dateOfSaving']);
+
+          if (_tempAnimalList.isEmpty) {
+            setState(() {
+              lastDocument = value.docs.last['dateOfSaving'];
+              _isLoading = false;
+              widget.animalInfo = _temp;
+              widget.animalInfo.sort(
+                  (a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
+            });
+          } else {
+            setState(() {
+              lastDocument = value.docs.last['dateOfSaving'];
+              _isLoading = false;
+              _tempAnimalList = _temp;
+              _tempAnimalList.sort(
+                  (a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
+            });
+          }
+
+          print("=-=-=" + value.docs.length.toString());
+        });
+      }
     } catch (e) {
       print('=-=Error-Re-Buying-=->>>' + e.toString());
       FirebaseFirestore.instance
@@ -201,7 +187,9 @@ class _BuyAnimalState extends State<BuyAnimal>
           .doc()
           .set({
         'issue': e.toString(),
-        'userId': FirebaseAuth.instance.currentUser?.uid ?? '',
+        'userId': FirebaseAuth.instance.currentUser == null
+            ? ''
+            : FirebaseAuth.instance.currentUser.uid,
         'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
       });
     }
@@ -236,7 +224,6 @@ class _BuyAnimalState extends State<BuyAnimal>
     setState(() {
       _latitude = prefs.getDouble('latitude');
       _longitude = prefs.getDouble('longitude');
-      // _lastAnimal = json.decode(prefs.getString('lastAnimal'));
     });
     getLatLong();
   }
@@ -248,8 +235,6 @@ class _BuyAnimalState extends State<BuyAnimal>
     var addresses =
         await Geocoder.local.findAddressesFromCoordinates(coordinates);
     var first = addresses.first;
-
-    // return first.locality ?? first.featureName;
 
     setState(() {
       _userLocality = first.locality ?? first.featureName;
@@ -410,139 +395,6 @@ class _BuyAnimalState extends State<BuyAnimal>
   //           }));
   // }
 
-  // dataReplication() async {
-  // SharedPreferences prefs = await SharedPreferences.getInstance();
-  // await FirebaseFirestore.instance
-  //     .collection("buyingAnimalList1")
-  //     .orderBy('dateOfSaving', descending: true)
-  //     // .where('dateOfSaving', isLessThanOrEqualTo: '1617148799')  // 30 se kam
-  //     // .where('dateOfSaving',
-  //     //     isGreaterThan: '1617148799', isLessThanOrEqualTo: '1617235199') // 30 - 31
-  //     // .where('dateOfSaving',
-  //     //     isGreaterThan: '1617235199', isLessThanOrEqualTo: '1617321599') // 31-1
-  //     // .where('dateOfSaving',
-  //     //     isGreaterThan: '1617321599', isLessThanOrEqualTo: '1617407999') // 1-2
-  //     // .where('dateOfSaving',
-  //     //     isGreaterThan: '1617407999', isLessThanOrEqualTo: '1617494399')//2-3
-  //     .where('dateOfSaving',
-  //         isGreaterThan: '1617494400',
-  //         isLessThanOrEqualTo: '1617667199') //4-5
-
-  //     // .limit(50)
-  //     .get()
-  //     .then((value) => print('val=====>' + value.docs.length.toString()));
-
-  // await FirebaseFirestore.instance
-  //     .collection("buyingAnimalList")
-  //     .where('userId', isEqualTo: 'Gd14ylVF7IZBlUm2mwSqMH592Py2')
-  //     .where('uniqueId', isEqualTo: '01331449')
-  // .where('dateOfSaving',
-  //     isGreaterThan: '1617580800',
-  //     isLessThanOrEqualTo: '1617753599') // 31-1
-
-  // .orderBy('dateOfSaving', descending: true)
-  // // .where('dateOfSaving',
-  // //     isGreaterThan: '1617299999', isLessThanOrEqualTo: '1617321599')
-  // .where('dateOfSaving',
-  //     isGreaterThan: '1617537599', isLessThanOrEqualTo: '1617580799')
-  // // .limitToLast(prefs.getInt('countData'))
-  // .limit(50)
-  //       .get()
-  //       .then((value) => value.docs.forEach((element) async {
-  //             // if (element.reference.id.substring(0, 2) == '00')
-  //             await FirebaseFirestore.instance
-  //                 .collection("buyingAnimalList1")
-  //                 .doc(element.reference.id)
-  //                 .set({
-  //               "userAnimalDescription": element["userAnimalDescription"],
-  //               "userAnimalType": element["userAnimalType"],
-  //               "userAnimalAge": element["userAnimalAge"],
-  //               "userAddress": element["userAddress"],
-  //               "userName": element["userName"],
-  //               "userAnimalPrice": element["userAnimalPrice"],
-  //               "userAnimalBreed": element["userAnimalBreed"],
-  //               "userMobileNumber": element["userMobileNumber"],
-  //               "userAnimalMilk": element["userAnimalMilk"],
-  //               "userAnimalPregnancy": element["userAnimalPregnancy"],
-  //               "userLatitude": element["userLatitude"],
-  //               "userLongitude": element["userLongitude"],
-  //               'uniqueId': element['uniqueId'],
-  //               'extraInfo': element['extraInfo'],
-  //               'isValidUser': element['isValidUser'],
-  //               'position': element['position'],
-  //               "image1": element["image1"],
-  //               "image2": element["image2"],
-  //               "image3": element["image3"],
-  //               "image4": element["image4"],
-  //               "dateOfSaving": element["dateOfSaving"],
-  //               'userId': element['userId']
-  //             });
-  //             // await dataUpdateOnInit(element);
-  //           }));
-  // }
-  // dataFillOnInit() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-
-  //   final myData = await rootBundle.loadString("assets/file/animal_data_1.csv");
-  //   List<List<dynamic>> data = CsvToListConverter().convert(myData);
-
-  //   for (int i = 1; i <= data.length - 1; i++) {
-  //     loadAddress(data[i][3].toString());
-  //     var randomId = ReusableWidgets.randomIDGenerator();
-  //     await FirebaseFirestore.instance.collection("buyingAnimalList").doc()
-  //         // .collection('animalBuy')
-  //         // .doc(randomId)
-  //         .set({
-  //       "userAnimalDescription": data[i][0].toString(),
-  //       "userAnimalType": data[i][1].toString(),
-  //       "userAnimalAge": data[i][2].toString(),
-  //       "userAddress": data[i][3].toString(),
-  //       "userName": data[i][4].toString(),
-  //       "userAnimalPrice": data[i][5].toString(),
-  //       "userAnimalBreed": data[i][6].toString(),
-  //       "userMobileNumber": data[i][7].toString(),
-  //       "userAnimalMilk": data[i][8].toString(),
-  //       "userAnimalPregnancy": data[i][9].toString(),
-  //       "userLatitude": prefs.getDouble('userLatitude'),
-  //       "userLongitude": prefs.getDouble('userLongitude'),
-  //       'uniqueId': randomId,
-  //       'extraInfo': {},
-  //       'isValidUser': 'Approved',
-  //       'position': geo
-  //           .point(
-  //               latitude: prefs.getDouble('userLatitude'),
-  //               longitude: prefs.getDouble('userLongitude'))
-  //           .data,
-  //       "image1": data[i][10] == null || data[i][10] == ""
-  //           ? ""
-  //           : data[i][10].toString(),
-  //       "image2": data[i][11] == null || data[i][11] == ""
-  //           ? ""
-  //           : data[i][11].toString(),
-  //       "image3": data[i][12] == null || data[i][12] == ""
-  //           ? ""
-  //           : data[i][12].toString(),
-  //       "image4": data[i][13] == null || data[i][13] == ""
-  //           ? ""
-  //           : data[i][13].toString(),
-  //       "dateOfSaving": ReusableWidgets.dateTimeToEpoch(DateTime.now()),
-  //       'userId':
-  //           FirebaseFirestore.instance.collection("buyingAnimalList").doc().id
-  //     });
-  //   }
-  // }
-
-  loadAddress(address) async {
-    var addresses = await Geocoder.local.findAddressesFromQuery(address);
-    var first = addresses.first;
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    setState(() {
-      prefs.setDouble("userLatitude", first.coordinates.latitude);
-      prefs.setDouble("userLongitude", first.coordinates.longitude);
-    });
-  }
-
   removingNumberFromBayaat(String bayaat) {
     return bayaat.split('').reversed.skip(4).toList().reversed.join('');
   }
@@ -677,7 +529,8 @@ class _BuyAnimalState extends State<BuyAnimal>
                     : TextSpan(
                         text: _list[index]['userAnimalBreed'] == 'not_known'.tr
                             ? ""
-                            : _list[index]['userAnimalBreed'],
+                            : ReusableWidgets.removeEnglisgDataFromName(
+                                _list[index]['userAnimalBreed']),
                         style: TextStyle(
                             color: Colors.grey[700],
                             fontWeight: FontWeight.bold,
@@ -867,7 +720,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                             alignment: Alignment.bottomCenter,
                             children: [
                               ListView.builder(
-                                  // controller: _scrollController,
+                                  controller: _scrollController,
                                   physics: BouncingScrollPhysics(),
                                   itemBuilder: (context, index) => Padding(
                                         padding: const EdgeInsets.only(
@@ -1546,7 +1399,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                             alignment: Alignment.bottomCenter,
                             children: [
                               ListView.builder(
-                                  // controller: _scrollController,
+                                  controller: _scrollController,
                                   physics: BouncingScrollPhysics(),
                                   itemBuilder: (context, index) => Padding(
                                       padding: const EdgeInsets.only(
@@ -2293,7 +2146,6 @@ class _BuyAnimalState extends State<BuyAnimal>
                                         if (_locationController.text.length ==
                                             0)
                                           Navigator.pop(context);
-                                        // return;
                                         else {
                                           if (_locationController.text.length <
                                               6)
@@ -2302,55 +2154,52 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                 'error'.tr,
                                                 Text(
                                                     'error_length_zipcode'.tr));
-                                          pr = new ProgressDialog(context,
-                                              type: ProgressDialogType.Normal,
-                                              isDismissible: false);
+                                          else {
+                                            _tempAnimalList = [];
+                                            pr = new ProgressDialog(context,
+                                                type: ProgressDialogType.Normal,
+                                                isDismissible: false);
 
-                                          pr.style(
-                                              message:
-                                                  'progress_dialog_message'.tr);
-                                          pr.show();
+                                            pr.style(
+                                                message:
+                                                    'progress_dialog_message'
+                                                        .tr);
+                                            pr.show();
 
-                                          try {
-                                            var address = await Geocoder.local
-                                                .findAddressesFromQuery(
-                                                    _locationController.text);
+                                            try {
+                                              var address = await Geocoder.local
+                                                  .findAddressesFromQuery(
+                                                      _locationController.text);
 
-                                            // .then((value) {
-                                            var first = address.first;
-                                            setState(() {
-                                              _userLocality = first.locality ??
-                                                  first.subAdminArea ??
-                                                  first.featureName;
-                                              _latitude =
-                                                  first.coordinates.latitude;
-                                              _longitude =
-                                                  first.coordinates.longitude;
-                                            });
-                                            _getLocationBasedList(
-                                                context, first);
+                                              // .then((value) {
+                                              var first = address.first;
+                                              setState(() {
+                                                _userLocality =
+                                                    first.locality ??
+                                                        first.subAdminArea ??
+                                                        first.featureName;
+                                                _latitude =
+                                                    first.coordinates.latitude;
+                                                _longitude =
+                                                    first.coordinates.longitude;
+                                              });
+                                              _getLocationBasedList(
+                                                  context, first);
 
-                                            // pr.hide();
-                                            // Navigator.pop(context);
-                                          } catch (e) {
-                                            // pr.hide();
-                                            // Navigator.pop(context);
+                                              // pr.hide();
+                                              // Navigator.pop(context);
+                                            } catch (e) {
+                                              // pr.hide();
+                                              // Navigator.pop(context);
 
-                                            print('locationerro==> ' +
-                                                e.toString());
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(SnackBar(
-                                                    content: Text(
-                                                        'चुनाव में एक भी पशु उपलब्ध नहीं है, इसलिए सभी पशु दिखाए जा रहे है |')));
+                                              print('locationerro==> ' +
+                                                  e.toString());
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(SnackBar(
+                                                      content: Text(
+                                                          'चुनाव में एक भी पशु उपलब्ध नहीं है, इसलिए सभी पशु दिखाए जा रहे है |')));
+                                            }
                                           }
-
-                                          // Navigator.pop(context);
-
-                                          // Future.delayed(Duration(seconds: 3))
-                                          //     .then((value) {
-                                          //   pr.hide();
-                                          //   Navigator.pop(context);
-                                          // });
                                         }
                                       }),
                                 ]);
@@ -2446,7 +2295,7 @@ class _BuyAnimalState extends State<BuyAnimal>
     );
   }
 
-  _getLocationBasedList(BuildContext context, Address first) {
+  _getLocationBasedList(BuildContext context, Address first) async {
     double _radiusData = _valueRadius == 0
         ? 25
         : _valueRadius == 1
@@ -2456,53 +2305,109 @@ class _BuyAnimalState extends State<BuyAnimal>
                 : _valueRadius == 3
                     ? 75
                     : 50;
+
     try {
-      Stream<List<DocumentSnapshot>> stream = geo
-          .collection(
-              collectionRef:
-                  FirebaseFirestore.instance.collection("buyingAnimalList1"))
-          .within(
-              center: geo.point(
-                  latitude: first.coordinates.latitude,
-                  longitude: first.coordinates.longitude),
-              radius: _radiusData,
-              field: 'position',
-              strictMode: true);
+      List district = [];
+      RemoteConfig remoteConfig = await RemoteConfig.instance;
+      await remoteConfig.fetch(expiration: const Duration(seconds: 0));
+      await remoteConfig.activateFetched();
 
-      stream.listen((List<DocumentSnapshot> documentList) {
-        print("=-=-=12==" + documentList.length.toString());
-        List _temp = [];
-        documentList.forEach((e) {
-          _temp.addIf(
-              (e.reference.id.substring(8) !=
-                      FirebaseAuth.instance.currentUser.uid) &&
-                  (e['isValidUser'] == 'Approved'),
-              e);
-          print('=-=-=-' + e.reference.id);
-          print('=-=-=-' + e.toString());
-        });
-        if (_tempAnimalList.length == 0) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text(
-                  'चुनाव में एक भी पशु उपलब्ध नहीं है, इसलिए सभी पशु दिखाए जा रहे है |')));
-        }
-
-        setState(() {
-          // _resetFilterData = documentList;
-          _resetFilterData = _tempAnimalList = _temp;
-          _tempAnimalList
-              .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
-        });
-        pr.hide();
-        Navigator.pop(context);
+      json
+          .decode(remoteConfig.getValue("district_map").asString())
+          .forEach((element) {
+        district.addIf(element[first.subAdminArea ?? first.locality] != null,
+            element[first.subAdminArea ?? first.locality]);
       });
+
+      if (district.isEmpty) {
+        Stream<List<DocumentSnapshot>> stream = geo
+            .collection(
+                collectionRef:
+                    FirebaseFirestore.instance.collection("buyingAnimalList1"))
+            .within(
+                center: geo.point(
+                    latitude: first.coordinates.latitude,
+                    longitude: first.coordinates.longitude),
+                radius: _radiusData,
+                field: 'position',
+                strictMode: true);
+
+        stream.listen((List<DocumentSnapshot> documentList) {
+          print("=-=-=12==" + documentList.length.toString());
+          List _temp = [];
+          documentList.forEach((e) {
+            _temp.addIf(
+                (e.reference.id.substring(8) !=
+                        FirebaseAuth.instance.currentUser.uid) &&
+                    (e['isValidUser'] == 'Approved'),
+                e);
+            print('=-=-=-' + e.reference.id);
+            print('=-=-=-' + e.toString());
+          });
+          if (_tempAnimalList.length == 0) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text(
+                    'चुनाव में एक भी पशु उपलब्ध नहीं है, इसलिए सभी पशु दिखाए जा रहे है |')));
+          }
+
+          setState(() {
+            _resetFilterData = _tempAnimalList = _temp;
+            _tempAnimalList
+                .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
+          });
+          pr.hide();
+          Navigator.pop(context);
+        });
+      } else {
+        FirebaseFirestore.instance
+            .collection('buyingAnimalList1')
+            .orderBy('dateOfSaving', descending: true)
+            .where('dateOfSaving',
+                isLessThanOrEqualTo:
+                    ReusableWidgets.dateTimeToEpoch(DateTime.now()))
+            .where('district', whereIn: district[0])
+            .limit(25)
+            .get()
+            .then((value) {
+          List _temp = [];
+          value.docs.forEach((e) {
+            _temp.addIf(
+                e['isValidUser'] == 'Approved' &&
+                    double.parse((Geodesy().distanceBetweenTwoGeoPoints(
+                                    LatLng(first.coordinates.latitude,
+                                        first.coordinates.longitude),
+                                    LatLng(e['userLatitude'],
+                                        e['userLongitude'])) /
+                                1000)
+                            .toStringAsPrecision(2)) <=
+                        50.0,
+                e);
+
+            print('=-=-=-' + e.reference.id);
+            print('=-=-=->' + e.toString());
+          });
+
+          print('=-=-=-<>' + value.docs.last['dateOfSaving'].toString());
+
+          setState(() {
+            lastDocument = value.docs.last['dateOfSaving'];
+            districtList = district[0];
+            _resetFilterData = _tempAnimalList = _temp;
+            _tempAnimalList
+                .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
+          });
+
+          pr.hide();
+          Navigator.pop(context);
+          print("=-=-=" + value.docs.length.toString());
+        });
+      }
     } catch (e) {
       pr.hide();
       Navigator.pop(context);
 
       print('=-=Error-=->>>' + e.toString());
     }
-    // pr.hide();
   }
 
   Padding _animalDescriptionMethod(int index) {
@@ -2562,14 +2467,29 @@ class _BuyAnimalState extends State<BuyAnimal>
                                     _current = index;
                                   })),
                           items: _images.map((i) {
-                            return Builder(
-                              builder: (BuildContext context) {
-                                return i.length > 1000
+                            return InteractiveViewer(
+                                boundaryMargin: const EdgeInsets.all(20.0),
+                                minScale: 0.1,
+                                maxScale: 1.6,
+                                child: i.length > 1000
                                     ? Image.memory(base64Decode('$i'))
-                                    // : Image.file(fileUrl);
-                                    : Image.network('$i');
-                              },
-                            );
+                                    : Image.network('$i'));
+                            // return AspectRatio(
+                            //   aspectRatio: 16 / 9,
+                            //   child: Container(
+                            //     margin: EdgeInsets.all(6.0),
+                            //     decoration: BoxDecoration(
+                            //       borderRadius: BorderRadius.circular(8.0),
+                            //       image: DecorationImage(
+                            //         image: i.length > 1000
+                            //             ? MemoryImage(base64Decode('$i'))
+                            //             // : Image.file(fileUrl);
+                            //             : NetworkImage('$i'),
+                            //         fit: BoxFit.cover,
+                            //       ),
+                            //     ),
+                            //   ),
+                            // );
                           }).toList(),
                         ),
                         Row(
