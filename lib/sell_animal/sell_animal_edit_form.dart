@@ -159,11 +159,8 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
           return null;
           break;
         default:
-          File compressedFile = await FlutterNativeImage.compressImage(
-              file.path,
-              quality: 80,
-              targetWidth: 500,
-              targetHeight: 500);
+          File compressedFile =
+              await FlutterNativeImage.compressImage(file.path, quality: 80);
 
           setState(() {
             imagesFileUpload['image$index'] = file.path;

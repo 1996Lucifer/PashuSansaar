@@ -23,7 +23,7 @@ class RemoveAnimal extends StatefulWidget {
 
 class _RemoveAnimalState extends State<RemoveAnimal> {
   static const _locale = 'en_IN';
-  bool _isError = false;
+  bool _isError = false, _isErrorEmpty = false;
   String _price = '';
   ProgressDialog pr;
 
@@ -64,143 +64,148 @@ class _RemoveAnimalState extends State<RemoveAnimal> {
                   borderRadius: BorderRadius.circular(5),
                 )),
           ),
-          if (_isError) ...[
-            Text(
-              'removal_price_error'.trParams(
-                {
-                  'minPrice': '${(int.parse(widget.price) ~/ 2).toString()}',
-                  'maxPrice': '${widget.price}'
-                },
-              ),
-              style: TextStyle(color: primaryColor),
-            )
-          ]
+          _isErrorEmpty
+              ? Text(
+                  'empty_removal_price_error'.tr,
+                  style: TextStyle(color: primaryColor),
+                )
+              : _isError
+                  ? Text(
+                      'removal_price_error'.tr,
+                      style: TextStyle(color: primaryColor),
+                    )
+                  : SizedBox.shrink()
         ],
       );
 
-  _showPriceDialog(data) {
-    return showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: Text('info'.tr),
-          content: Padding(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(data['userName'].isEmpty
-                    ? 'tell_price'.tr
-                    : 'tell_price_with_name'.trParams({
-                        'name': '${data['userName']}',
-                      })),
-                SizedBox(height: 5),
-                _priceTextBox()
-              ],
+  _showPriceDialog(data) => showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => StatefulBuilder(
+          builder: (context, setState) => AlertDialog(
+            title: Text('info'.tr),
+            content: Padding(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(data['userName'].isEmpty
+                      ? 'tell_price'.tr
+                      : 'tell_price_with_name'.trParams({
+                          'name': '${data['userName']}',
+                        })),
+                  SizedBox(height: 5),
+                  _priceTextBox()
+                ],
+              ),
+              padding: EdgeInsets.symmetric(vertical: 2, horizontal: 3),
             ),
-            padding: EdgeInsets.symmetric(vertical: 2, horizontal: 3),
-          ),
-          actions: <Widget>[
-            RaisedButton(
+            actions: <Widget>[
+              RaisedButton(
+                  child: Text(
+                    'cancel'.tr,
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _controller.clear();
+                      _isError = false;
+                      _isErrorEmpty = false;
+                      _price = '';
+                    });
+                    Navigator.of(context).pop();
+                  }),
+              RaisedButton(
                 child: Text(
-                  'cancel'.tr,
+                  'Ok'.tr,
                   style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 16),
                 ),
                 onPressed: () {
-                  setState(() {
-                    _controller.clear();
-                    _isError = false;
-                  });
-                  Navigator.of(context).pop();
-                }),
-            RaisedButton(
-              child: Text(
-                'Ok'.tr,
-                style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16),
-              ),
-              onPressed: () {
-                print(_price);
-                print(widget.price);
-                if ((int.parse(_price) < (int.parse(widget.price) ~/ 2)) ||
-                    (int.parse(_price) > int.parse(widget.price))) {
-                  setState(() {
-                    _isError = true;
-                  });
-                } else {
-                  pr = new ProgressDialog(context,
-                      type: ProgressDialogType.Normal, isDismissible: false);
-                  pr.style(message: 'progress_dialog_message'.tr);
-                  pr.show();
-
-                  Map<String, dynamic> userMap = Map();
-                  if (data['userName'].isEmpty) {
-                    userMap = {'soldFromApp': true, 'price': _price};
-                  } else {
-                    userMap = {
-                      'soldFromApp': true,
-                      'id': data['userIdCurrent'],
-                      'name': data['userName'],
-                      'price': _price
-                    };
+                  if (_price.isEmpty) {
+                    setState(() {
+                      _isError = false;
+                      _isErrorEmpty = true;
+                    });
                   }
+                  if ((int.parse(_price) < (int.parse(widget.price) ~/ 2)) ||
+                      (int.parse(_price) > int.parse(widget.price))) {
+                    setState(() {
+                      _isErrorEmpty = false;
+                      _isError = true;
+                    });
+                  } else {
+                    pr = new ProgressDialog(context,
+                        type: ProgressDialogType.Normal, isDismissible: false);
+                    pr.style(message: 'progress_dialog_message'.tr);
+                    pr.show();
 
-                  FirebaseFirestore.instance
-                      .collection("animalSellingInfo")
-                      .doc(FirebaseAuth.instance.currentUser.uid)
-                      .collection('sellingAnimalList')
-                      .doc(widget.listId)
-                      .update(
-                          {'animalRemove': userMap, 'isValidUser': 'Removed'})
-                      .then((value) => FirebaseFirestore.instance
-                              .collection('buyingAnimalList1')
-                              .doc(widget.listId +
-                                  FirebaseAuth.instance.currentUser.uid)
-                              .update({
-                            'animalRemove': userMap,
-                            'isValidUser': 'Removed'
-                          }).then((value) {
-                            pr.hide();
-                            return showDialog(
-                                context: context,
-                                builder: (context) {
-                                  return AlertDialog(
-                                      title: Text('info'.tr),
-                                      content: Text('pashu_removed'.tr),
-                                      actions: <Widget>[
-                                        FlatButton(
-                                            child: Text(
-                                              'Ok'.tr,
-                                              style: TextStyle(
-                                                  color: primaryColor),
-                                            ),
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                              Navigator.pop(context);
-                                              Get.off(() => HomeScreen(
-                                                    selectedIndex: 0,
-                                                  ));
-                                            }),
-                                      ]);
-                                });
-                          }).catchError((err) => print(
-                                  'removeAnimalError==>${err.toString()}')))
-                      .catchError((err) =>
-                          print('removeAnimalOuterError==>${err.toString()}'));
-                }
-              },
-            ),
-          ],
+                    Map<String, dynamic> userMap = Map();
+                    if (data['userName'].isEmpty) {
+                      userMap = {'soldFromApp': true, 'price': _price};
+                    } else {
+                      userMap = {
+                        'soldFromApp': true,
+                        'id': data['userIdCurrent'],
+                        'name': data['userName'],
+                        'price': _price
+                      };
+                    }
+
+                    FirebaseFirestore.instance
+                        .collection("animalSellingInfo")
+                        .doc(FirebaseAuth.instance.currentUser.uid)
+                        .collection('sellingAnimalList')
+                        .doc(widget.listId)
+                        .update(
+                            {'animalRemove': userMap, 'isValidUser': 'Removed'})
+                        .then((value) => FirebaseFirestore.instance
+                                .collection('buyingAnimalList1')
+                                .doc(widget.listId +
+                                    FirebaseAuth.instance.currentUser.uid)
+                                .update({
+                              'animalRemove': userMap,
+                              'isValidUser': 'Removed'
+                            }).then((value) {
+                              pr.hide();
+                              return showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                        title: Text('info'.tr),
+                                        content: Text('pashu_removed'.tr),
+                                        actions: <Widget>[
+                                          FlatButton(
+                                              child: Text(
+                                                'Ok'.tr,
+                                                style: TextStyle(
+                                                    color: primaryColor),
+                                              ),
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                                Navigator.pop(context);
+                                                Get.off(() => HomeScreen(
+                                                      selectedIndex: 0,
+                                                    ));
+                                              }),
+                                        ]);
+                                  });
+                            }).catchError((err) => print(
+                                    'removeAnimalError==>${err.toString()}')))
+                        .catchError((err) => print(
+                            'removeAnimalOuterError==>${err.toString()}'));
+                  }
+                },
+              ),
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
 
   @override
   Widget build(BuildContext context) {
