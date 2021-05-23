@@ -121,50 +121,56 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // updateData() async {
-  // SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
 
-  // await FirebaseFirestore.instance
-  //     .collection("buyingAnimalList1")
-  //     .orderBy('uniqueId')
-  //     .where('uniqueId', isGreaterThan: '90000000')
-  //     .get()
-  //     .then((value) => value.docs.forEach((element) async {
-  //           var addresses = await geoCoder.Geocoder.local
-  //               .findAddressesFromCoordinates(geoCoder.Coordinates(
-  //                   element['userLatitude'], element['userLongitude']));
-  //           var first = addresses.first;
-  //           // print((first.subAdminArea ?? first.locality));
-  //           await FirebaseFirestore.instance
-  //               .collection("buyingAnimalList1")
-  //               .doc(element.reference.id)
-  //               .update({
-  //             'district': first.subAdminArea ?? first.locality,
-  //             'zipCode': first.postalCode
-  //           });
-  //         }));
+  //   var addresses = await geoCoder.Geocoder.local.findAddressesFromCoordinates(
+  //       geoCoder.Coordinates(25.5314475, 83.2280148));
+  //   var first = addresses.first;
 
-  // .where('uniqueId',
-  //     isLessThanOrEqualTo: '10000000') // 00000000 - 10000000
-  // .where('uniqueId',
-  //     isGreaterThan: '10000000', isLessThanOrEqualTo: '20000000') // 30 - 31
-  // .where('uniqueId',
-  //     isGreaterThan: '20000000', isLessThanOrEqualTo: '30000000') // 30 - 31
-  // .where('uniqueId',
-  //     isGreaterThan: '30000000', isLessThanOrEqualTo: '40000000') // karna hai aaj
-  // .where('uniqueId',
-  //     isGreaterThan: '40000000', isLessThanOrEqualTo: '50000000') // karna hai aaj
-  // .where('uniqueId',
-  //     isGreaterThan: '50000000', isLessThanOrEqualTo: '60000000') // karna hai aaj
-  // .where('uniqueId',
-  //     isGreaterThan: '60000000', isLessThanOrEqualTo: '70000000') // karna hai aaj
-  // .where('uniqueId',
-  //     isGreaterThan: '70000000', isLessThanOrEqualTo: '80000000') // karna hai aaj
-  // .where('uniqueId',
-  //     isGreaterThan: '80000000', isLessThanOrEqualTo: '90000000') // karna hai aaj
-  // .where('uniqueId', isGreaterThan: '90000000') // k
+  //   print(first);
 
-  // .get()
-  // .then((value) => value.docs.forEach((element) async {}));
+    // await FirebaseFirestore.instance
+    //     .collection("buyingAnimalList1")
+    //     .orderBy('dateOfSaving')
+    //     .where('dateOfSaving', isLessThanOrEqualTo: '1621692916', isGreaterThanOrEqualTo: '1621555200')
+    //     .get()
+    //     .then((value) => value.docs.forEach((element) async {
+    //           var addresses = await geoCoder.Geocoder.local
+    //               .findAddressesFromCoordinates(geoCoder.Coordinates(
+    //                   element['userLatitude'], element['userLongitude']));
+    //           var first = addresses.first;
+    //           // print((first.subAdminArea ?? first.locality));
+    //           await FirebaseFirestore.instance
+    //               .collection("buyingAnimalList1")
+    //               .doc(element.reference.id)
+    //               .update({
+    //             'district': first.subAdminArea ?? first.locality,
+    //             'zipCode': first.postalCode
+    //           });
+    //         }));
+
+    // .where('uniqueId',
+    //     isLessThanOrEqualTo: '10000000') // 00000000 - 10000000
+    // .where('uniqueId',
+    //     isGreaterThan: '10000000', isLessThanOrEqualTo: '20000000') // 30 - 31
+    // .where('uniqueId',
+    //     isGreaterThan: '20000000', isLessThanOrEqualTo: '30000000') // 30 - 31
+    // .where('uniqueId',
+    //     isGreaterThan: '30000000', isLessThanOrEqualTo: '40000000') // karna hai aaj
+    // .where('uniqueId',
+    //     isGreaterThan: '40000000', isLessThanOrEqualTo: '50000000') // karna hai aaj
+    // .where('uniqueId',
+    //     isGreaterThan: '50000000', isLessThanOrEqualTo: '60000000') // karna hai aaj
+    // .where('uniqueId',
+    //     isGreaterThan: '60000000', isLessThanOrEqualTo: '70000000') // karna hai aaj
+    // .where('uniqueId',
+    //     isGreaterThan: '70000000', isLessThanOrEqualTo: '80000000') // karna hai aaj
+    // .where('uniqueId',
+    //     isGreaterThan: '80000000', isLessThanOrEqualTo: '90000000') // karna hai aaj
+    // .where('uniqueId', isGreaterThan: '90000000') // k
+
+    // .get()
+    // .then((value) => value.docs.forEach((element) async {}));
   // }
 
   getInitialInfo() async {
