@@ -456,7 +456,7 @@ class ProfileMainState extends State<ProfileMain>
                         ),
                         Expanded(
                             child: Padding(
-                          padding: EdgeInsets.only(top: 50.0),
+                          padding: EdgeInsets.only(top: 30.0),
                           child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -472,9 +472,24 @@ class ProfileMainState extends State<ProfileMain>
                                                   fontSize: 14)),
                                         ],
                                       ),
+                                SizedBox(height: 5),
+                                userInfo['mobile'] == null
+                                    ? Text('progress_dialog_message'.tr)
+                                    : Row(
+                                        children: [
+                                          Icon(Icons.call),
+                                          SizedBox(width: 5),
+                                          Text(userInfo['mobile'],
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 14)),
+                                        ],
+                                      ),
+                                SizedBox(height: 5),
                                 userInfo['address'] == null
                                     ? Text('progress_dialog_message'.tr)
                                     : Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Icon(Icons.location_on_outlined),
                                           SizedBox(width: 5),
@@ -678,6 +693,7 @@ class ProfileMainState extends State<ProfileMain>
                       ),
                     ),
                   ),
+                  
 
                   // ListView.builder(
                   //   shrinkWrap: true,

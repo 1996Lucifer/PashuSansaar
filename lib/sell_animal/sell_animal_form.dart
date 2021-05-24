@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -116,14 +117,19 @@ class _SellAnimalFormState extends State<SellAnimalForm>
             imagesFileUpload['image$index'] = file.path;
           });
           await uploadFile(compressedFile, index);
-        // setState(() {
-        //   _base64Image = base64Encode(
-        //     compressedFile.readAsBytesSync(),
-        //   );
-        //   imagesUpload['image$index'] = _base64Image;
-        // });
       }
     } catch (e) {}
+  }
+
+  getFileSize(String filepath, int decimals) async {
+    var file = File(filepath);
+    int bytes = await file.length();
+    if (bytes <= 0) return "0 B";
+    const suffixes = ["B", "KB", "MB"];
+    var i = (log(bytes) / log(1024)).floor();
+    return ((bytes / pow(1024, i)).toStringAsFixed(decimals)) +
+        ' ' +
+        suffixes[i];
   }
 
   Future<void> _chooseFromGallery(String index) async {
@@ -138,22 +144,44 @@ class _SellAnimalFormState extends State<SellAnimalForm>
           return null;
           break;
         default:
-          File compressedFile = await FlutterNativeImage.compressImage(
-              file.path,
-              quality: 80);
+          getFileSize(file.path, 1).then((val) async {
+            double size = double.parse(val.split(' ')[0]);
+            String type = val.split(' ')[1];
+            File compressedFile;
 
-          setState(() {
-            imagesFileUpload['image$index'] = file.path;
+            switch (type.compareTo('KB')) {
+              case 0:
+                if (size <= 300.0) {
+                  compressedFile = await FlutterNativeImage.compressImage(
+                      file.path,
+                      quality: 98);
+                } else if (size > 300.0 && size <= 600.0) {
+                  compressedFile = await FlutterNativeImage.compressImage(
+                      file.path,
+                      quality: 85);
+                } else if (size > 600.0 && size <= 1000.0) {
+                  compressedFile = await FlutterNativeImage.compressImage(
+                      file.path,
+                      quality: 80);
+                } else {
+                  compressedFile = await FlutterNativeImage.compressImage(
+                      file.path,
+                      quality: 70);
+                }
+                break;
+              case 1:
+                compressedFile = await FlutterNativeImage.compressImage(
+                    file.path,
+                    quality: 70);
+                break;
+            }
+
+            setState(() {
+              imagesFileUpload['image$index'] = file.path;
+            });
+
+            await uploadFile(compressedFile, index);
           });
-
-          await uploadFile(compressedFile, index);
-
-        // setState(() {
-        //   _base64Image = base64Encode(
-        //     compressedFile.readAsBytesSync(),
-        //   );
-        //   imagesUpload['image$index'] = _base64Image;
-        // });
       }
     } catch (e) {}
   }
@@ -1076,6 +1104,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                     "userAnimalPregnancy": animalInfo['animalIsPregnant'] ?? "",
                     "userLatitude": prefs.getDouble('latitude'),
                     "userLongitude": prefs.getDouble('longitude'),
+                    'extraInfo': extraInfoData,
                     'position': geo
                         .point(
                             latitude: prefs.getDouble('latitude'),

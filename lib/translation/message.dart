@@ -253,7 +253,8 @@ class Messages extends Translations {
           'removal_price_error': 'आपके पशु बेचने का दाम गलत लग रहा हैं, कृपया सही दाम डाले',
           // 'removal_price_error': 'galti @minPrice and @maxPrice',
           'tell_price_with_name': '@name को कितने में बेचीं ?',
-          'pashu_removed': 'आपका पशु हटा दिया गया हैं'
+          'pashu_removed': 'आपका पशु हटा दिया गया हैं',
+          'cancel': 'कैंसिल करे'
         }
       };
 }

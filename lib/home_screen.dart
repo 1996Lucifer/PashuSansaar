@@ -129,48 +129,48 @@ class _HomeScreenState extends State<HomeScreen> {
 
   //   print(first);
 
-    // await FirebaseFirestore.instance
-    //     .collection("buyingAnimalList1")
-    //     .orderBy('dateOfSaving')
-    //     .where('dateOfSaving', isLessThanOrEqualTo: '1621692916', isGreaterThanOrEqualTo: '1621555200')
-    //     .get()
-    //     .then((value) => value.docs.forEach((element) async {
-    //           var addresses = await geoCoder.Geocoder.local
-    //               .findAddressesFromCoordinates(geoCoder.Coordinates(
-    //                   element['userLatitude'], element['userLongitude']));
-    //           var first = addresses.first;
-    //           // print((first.subAdminArea ?? first.locality));
-    //           await FirebaseFirestore.instance
-    //               .collection("buyingAnimalList1")
-    //               .doc(element.reference.id)
-    //               .update({
-    //             'district': first.subAdminArea ?? first.locality,
-    //             'zipCode': first.postalCode
-    //           });
-    //         }));
+  // await FirebaseFirestore.instance
+  //     .collection("buyingAnimalList1")
+  //     .orderBy('dateOfSaving')
+  //     .where('dateOfSaving', isLessThanOrEqualTo: '1621692916', isGreaterThanOrEqualTo: '1621555200')
+  //     .get()
+  //     .then((value) => value.docs.forEach((element) async {
+  //           var addresses = await geoCoder.Geocoder.local
+  //               .findAddressesFromCoordinates(geoCoder.Coordinates(
+  //                   element['userLatitude'], element['userLongitude']));
+  //           var first = addresses.first;
+  //           // print((first.subAdminArea ?? first.locality));
+  //           await FirebaseFirestore.instance
+  //               .collection("buyingAnimalList1")
+  //               .doc(element.reference.id)
+  //               .update({
+  //             'district': first.subAdminArea ?? first.locality,
+  //             'zipCode': first.postalCode
+  //           });
+  //         }));
 
-    // .where('uniqueId',
-    //     isLessThanOrEqualTo: '10000000') // 00000000 - 10000000
-    // .where('uniqueId',
-    //     isGreaterThan: '10000000', isLessThanOrEqualTo: '20000000') // 30 - 31
-    // .where('uniqueId',
-    //     isGreaterThan: '20000000', isLessThanOrEqualTo: '30000000') // 30 - 31
-    // .where('uniqueId',
-    //     isGreaterThan: '30000000', isLessThanOrEqualTo: '40000000') // karna hai aaj
-    // .where('uniqueId',
-    //     isGreaterThan: '40000000', isLessThanOrEqualTo: '50000000') // karna hai aaj
-    // .where('uniqueId',
-    //     isGreaterThan: '50000000', isLessThanOrEqualTo: '60000000') // karna hai aaj
-    // .where('uniqueId',
-    //     isGreaterThan: '60000000', isLessThanOrEqualTo: '70000000') // karna hai aaj
-    // .where('uniqueId',
-    //     isGreaterThan: '70000000', isLessThanOrEqualTo: '80000000') // karna hai aaj
-    // .where('uniqueId',
-    //     isGreaterThan: '80000000', isLessThanOrEqualTo: '90000000') // karna hai aaj
-    // .where('uniqueId', isGreaterThan: '90000000') // k
+  // .where('uniqueId',
+  //     isLessThanOrEqualTo: '10000000') // 00000000 - 10000000
+  // .where('uniqueId',
+  //     isGreaterThan: '10000000', isLessThanOrEqualTo: '20000000') // 30 - 31
+  // .where('uniqueId',
+  //     isGreaterThan: '20000000', isLessThanOrEqualTo: '30000000') // 30 - 31
+  // .where('uniqueId',
+  //     isGreaterThan: '30000000', isLessThanOrEqualTo: '40000000') // karna hai aaj
+  // .where('uniqueId',
+  //     isGreaterThan: '40000000', isLessThanOrEqualTo: '50000000') // karna hai aaj
+  // .where('uniqueId',
+  //     isGreaterThan: '50000000', isLessThanOrEqualTo: '60000000') // karna hai aaj
+  // .where('uniqueId',
+  //     isGreaterThan: '60000000', isLessThanOrEqualTo: '70000000') // karna hai aaj
+  // .where('uniqueId',
+  //     isGreaterThan: '70000000', isLessThanOrEqualTo: '80000000') // karna hai aaj
+  // .where('uniqueId',
+  //     isGreaterThan: '80000000', isLessThanOrEqualTo: '90000000') // karna hai aaj
+  // .where('uniqueId', isGreaterThan: '90000000') // k
 
-    // .get()
-    // .then((value) => value.docs.forEach((element) async {}));
+  // .get()
+  // .then((value) => value.docs.forEach((element) async {}));
   // }
 
   getInitialInfo() async {
@@ -202,8 +202,9 @@ class _HomeScreenState extends State<HomeScreen> {
       if (district.isEmpty) {
         Stream<List<DocumentSnapshot>> stream = geo
             .collection(
-                collectionRef:
-                    FirebaseFirestore.instance.collection("buyingAnimalList1"))
+                collectionRef: FirebaseFirestore.instance
+                    .collection("buyingAnimalList1")
+                    .where('isValidUser', isEqualTo: 'Approved'))
             .within(
                 center: geo.point(latitude: lat, longitude: long),
                 radius: 50,
@@ -211,25 +212,26 @@ class _HomeScreenState extends State<HomeScreen> {
                 strictMode: true);
 
         stream.listen((List<DocumentSnapshot> documentList) {
-          List _temp = [];
-          documentList.forEach((e) {
-            // _temp.addIf(
-            //     (e.reference.id.substring(8) !=
-            //             FirebaseAuth.instance.currentUser.uid) &&
-            //         (e['isValidUser'] == 'Approved'),
-            //     e);
-            _temp.addIf(e['isValidUser'] == 'Approved', e);
-            print('=-=-=-' + e.reference.id);
-            print('=-=-=-' + e.toString());
-          });
+          pr.hide();
+          // List _temp = [];
+          // documentList.forEach((e) {
+          //   // _temp.addIf(
+          //   //     (e.reference.id.substring(8) !=
+          //   //             FirebaseAuth.instance.currentUser.uid) &&
+          //   //         (e['isValidUser'] == 'Approved'),
+          //   //     e);
+          //   _temp.addIf(e['isValidUser'] == 'Approved', e);
+          //   print('=-=-=-' + e.reference.id);
+          //   print('=-=-=-' + e.toString());
+          // });
           setState(() {
-            _animalInfo = _temp;
+            _animalInfo = documentList;
+            // _animalInfo = _temp;
             _animalInfo
                 .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
           });
 
           print("=-=-=" + documentList.length.toString());
-          pr.hide();
         });
       } else {
         FirebaseFirestore.instance
@@ -238,43 +240,46 @@ class _HomeScreenState extends State<HomeScreen> {
             .where('dateOfSaving',
                 isLessThanOrEqualTo: ReusableWidgets.dateTimeToEpoch(now))
             .where('district', whereIn: district[0])
+            .where('isValidUser', isEqualTo: 'Approved')
             .limit(25)
-            .get()
+            .get(GetOptions(source: Source.serverAndCache))
             .then((value) {
-          List _temp = [];
-          value.docs.forEach((e) {
-            _temp.addIf(
-                e['isValidUser'] == 'Approved' &&
-                    double.parse((Geodesy().distanceBetweenTwoGeoPoints(
-                                    LatLng(lat, long),
-                                    LatLng(e['userLatitude'],
-                                        e['userLongitude'])) /
-                                1000)
-                            .toStringAsPrecision(2)) <=
-                        50.0,
-                e);
+          // List _temp = [];
+          // value.docs.forEach((e) {
+          // _temp.addIf(
+          //     // e['isValidUser'] == 'Approved' &&
+          //         double.parse((Geodesy().distanceBetweenTwoGeoPoints(
+          //                         LatLng(lat, long),
+          //                         LatLng(e['userLatitude'],
+          //                             e['userLongitude'])) /
+          //                     1000)
+          //                 .toStringAsPrecision(2)) <=
+          //             50.0,
+          //     e);
 
-            print('=-=-=-' + e.reference.id);
-            print('=-=-=->' + e.toString());
-          });
+          //   print('=-=-=-' + e.reference.id);
+          //   print('=-=-=->' + e.toString());
+          // });
 
-          print('=-=-=-<>' + value.docs.last['dateOfSaving'].toString());
+          // print('=-=-=-<>' + value.docs.last['dateOfSaving'].toString());
 
+          pr.hide();
           setState(() {
             lastDocument = value.docs.last['dateOfSaving'];
             districtList = district[0];
-            _animalInfo = _temp;
+            _animalInfo = value.docs;
+            // _animalInfo = _temp;
             _animalInfo
                 .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
           });
 
-          pr.hide();
           print("=-=-=" + value.docs.length.toString());
         });
       }
     } catch (e) {
       print('=-=Error-Home=->>>' + e.toString());
       pr.hide();
+
       FirebaseFirestore.instance
           .collection('logger')
           .doc(_mobileNumber)

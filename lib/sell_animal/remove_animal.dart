@@ -89,7 +89,7 @@ class _RemoveAnimalState extends State<RemoveAnimal> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(data['userName'].isEmpty
+                  Text(data.isEmpty
                       ? 'tell_price'.tr
                       : 'tell_price_with_name'.trParams({
                           'name': '${data['userName']}',
@@ -146,7 +146,7 @@ class _RemoveAnimalState extends State<RemoveAnimal> {
                     pr.show();
 
                     Map<String, dynamic> userMap = Map();
-                    if (data['userName'].isEmpty) {
+                    if (data.isEmpty) {
                       userMap = {'soldFromApp': true, 'price': _price};
                     } else {
                       userMap = {
@@ -162,15 +162,17 @@ class _RemoveAnimalState extends State<RemoveAnimal> {
                         .doc(FirebaseAuth.instance.currentUser.uid)
                         .collection('sellingAnimalList')
                         .doc(widget.listId)
-                        .update(
-                            {'animalRemove': userMap, 'isValidUser': 'Removed'})
+                        .update({
+                          'animalRemove': userMap,
+                          'isValidUser': 'RemovedByUser'
+                        })
                         .then((value) => FirebaseFirestore.instance
                                 .collection('buyingAnimalList1')
                                 .doc(widget.listId +
                                     FirebaseAuth.instance.currentUser.uid)
                                 .update({
                               'animalRemove': userMap,
-                              'isValidUser': 'Removed'
+                              'isValidUser': 'RemovedByUser'
                             }).then((value) {
                               pr.hide();
                               return showDialog(
@@ -217,14 +219,19 @@ class _RemoveAnimalState extends State<RemoveAnimal> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            RaisedButton(
-              onPressed: () => _showPriceDialog(''),
-              child: Text(
-                'sold_outside_pashusansaar'.tr,
-                style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16),
+            Center(
+              child: RaisedButton(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+                padding: EdgeInsets.all(10),
+                onPressed: () => _showPriceDialog(''),
+                child: Text(
+                  'sold_outside_pashusansaar'.tr,
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18),
+                ),
               ),
             ),
             SizedBox(
@@ -348,6 +355,9 @@ class _RemoveAnimalState extends State<RemoveAnimal> {
                                     Expanded(
                                       flex: 2,
                                       child: RaisedButton(
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10)),
                                         onPressed: () => _showPriceDialog(
                                           documentSnapshot.data(),
                                         ),

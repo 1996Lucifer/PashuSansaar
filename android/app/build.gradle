@@ -46,8 +46,8 @@ android {
         applicationId "dj.pashusansaar"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 17
-        versionName "1.4.0"
+        versionCode 18
+        versionName "1.4.1"
         // versionCode flutterVersionCode.toInteger()
         // versionName flutterVersionName
         multiDexEnabled true

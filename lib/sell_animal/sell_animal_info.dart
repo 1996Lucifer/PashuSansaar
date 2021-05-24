@@ -368,6 +368,8 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                 ]),
           ),
           RaisedButton.icon(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
               onPressed: () => showRemoveAnimalDialog(index),
               icon: Icon(
                 Icons.delete,
@@ -595,7 +597,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                             'soldFromApp': true,
                             'price': _price
                           },
-                          'isValidUser': 'Removed'
+                          'isValidUser': 'RemovedByUser'
                         })
                         .then((value) => FirebaseFirestore.instance
                                 .collection('buyingAnimalList1')
@@ -606,7 +608,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                                 'soldFromApp': true,
                                 'price': _price
                               },
-                              'isValidUser': 'Removed'
+                              'isValidUser': 'RemovedByUser'
                             }).then((value) {
                               pr.hide();
                               return showDialog(
@@ -670,7 +672,6 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                     ),
                     onPressed: () {
                       Navigator.of(context).pop();
-                      int _lengthOfInterestedBuyer = 0;
                       FirebaseFirestore.instance
                           .collection('callingInfo')
                           .doc(widget.animalInfo[index]['uniqueId'])
@@ -678,12 +679,13 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                           .orderBy('dateOfSaving')
                           .limit(1)
                           .get()
-                          .then((value) => _lengthOfInterestedBuyer = 1);
-
-                      if (_lengthOfInterestedBuyer == 0) {
-                        _showPriceDialog(index);
-                      } else
-                        _openAddEntryDialog(index);
+                          .then((value) {
+                        if (value.docs.length == 0) {
+                          _showPriceDialog(index);
+                        } else {
+                          _openAddEntryDialog(index);
+                        }
+                      });
                     }),
               ]);
         });
