@@ -84,7 +84,7 @@ class _BuyAnimalState extends State<BuyAnimal>
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
-        _getNextSetOfBuyingAnimal();
+        if (lastDocument.isNotEmpty) _getNextSetOfBuyingAnimal();
       }
     });
     super.initState();
@@ -98,91 +98,92 @@ class _BuyAnimalState extends State<BuyAnimal>
 
   _getNextSetOfBuyingAnimal() async {
     try {
-      if (lastDocument == null || lastDocument.isEmpty) {
-        Stream<List<DocumentSnapshot>> stream = geo
-            .collection(
-                collectionRef: FirebaseFirestore.instance
-                    .collection("buyingAnimalList1")
-                    .where('isValidUser', isEqualTo: 'Approved'))
-            .within(
-                center: geo.point(latitude: _latitude, longitude: _longitude),
-                radius: 50,
-                field: 'position',
-                strictMode: true);
+      // if (lastDocument == null || lastDocument.isEmpty) {
+      //   Stream<List<DocumentSnapshot>> stream = geo
+      //       .collection(
+      //           collectionRef: FirebaseFirestore.instance
+      //               .collection("buyingAnimalList1")
+      //               .where('isValidUser', isEqualTo: 'Approved'))
+      //       .within(
+      //           center: geo.point(latitude: _latitude, longitude: _longitude),
+      //           radius: 50,
+      //           field: 'position',
+      //           strictMode: true);
 
-        stream.listen((List<DocumentSnapshot> documentList) {
-          List _temp = widget.animalInfo;
-          documentList.forEach((e) {
-            _temp.add(e);
-            // print('=-=-=-' + e.reference.id);
-            // print('=-=-=-' + e.toString());
-          });
+      //   stream.listen((List<DocumentSnapshot> documentList) {
+      //     List _temp = widget.animalInfo;
+      //     documentList.forEach((e) {
+      //       _temp.add(e);
+      //       // print('=-=-=-' + e.reference.id);
+      //       // print('=-=-=-' + e.toString());
+      //     });
+      //     setState(() {
+      //       widget.animalInfo = _temp;
+      //       widget.animalInfo
+      //           .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
+      //     });
+
+      //     pr.hide();
+      //     print("=-=-=" + documentList.length.toString());
+      //   });
+      // } else {
+
+      setState(() {
+        _isLoading = true;
+      });
+      FirebaseFirestore.instance
+          .collection('buyingAnimalList1')
+          .orderBy('dateOfSaving', descending: true)
+          .where('dateOfSaving', isLessThan: lastDocument)
+          .where('district', whereIn: districtList)
+          .where('isValidUser', isEqualTo: 'Approved')
+          .limit(25)
+          .get()
+          .then((value) {
+        List _temp =
+            _tempAnimalList.isEmpty ? widget.animalInfo : _tempAnimalList;
+        value.docs.forEach((e) {
+          _temp.add(e);
+        });
+        // value.docs.forEach((e) {
+        //   _temp.addIf(
+        //       e['isValidUser'] == 'Approved' &&
+        //           double.parse((Geodesy().distanceBetweenTwoGeoPoints(
+        //                           LatLng(_latitude, _longitude),
+        //                           LatLng(e['userLatitude'],
+        //                               e['userLongitude'])) /
+        //                       1000)
+        //                   .toStringAsPrecision(2)) <=
+        //               50.0,
+        //       e);
+
+        //   print('=-=-=-' + e.reference.id);
+        //   print('=-=-=->' + e.toString());
+        // });
+
+        print('=-=-=-<>' + value.docs.last['dateOfSaving']);
+
+        if (_tempAnimalList.isEmpty) {
           setState(() {
+            lastDocument = value.docs.last['dateOfSaving'];
+            _isLoading = false;
             widget.animalInfo = _temp;
             widget.animalInfo
                 .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
           });
-
-          pr.hide();
-          print("=-=-=" + documentList.length.toString());
-        });
-      } else {
-        setState(() {
-          _isLoading = true;
-        });
-        FirebaseFirestore.instance
-            .collection('buyingAnimalList1')
-            .orderBy('dateOfSaving', descending: true)
-            .where('dateOfSaving', isLessThan: lastDocument)
-            .where('district', whereIn: districtList)
-            .where('isValidUser', isEqualTo: 'Approved')
-            .limit(25)
-            .get()
-            .then((value) {
-          List _temp =
-              _tempAnimalList.isEmpty ? widget.animalInfo : _tempAnimalList;
-          value.docs.forEach((e) {
-            _temp.add(e);
+        } else {
+          setState(() {
+            lastDocument = value.docs.last['dateOfSaving'];
+            _isLoading = false;
+            _tempAnimalList = _temp;
+            _tempAnimalList
+                .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
           });
-          // value.docs.forEach((e) {
-          //   _temp.addIf(
-          //       e['isValidUser'] == 'Approved' &&
-          //           double.parse((Geodesy().distanceBetweenTwoGeoPoints(
-          //                           LatLng(_latitude, _longitude),
-          //                           LatLng(e['userLatitude'],
-          //                               e['userLongitude'])) /
-          //                       1000)
-          //                   .toStringAsPrecision(2)) <=
-          //               50.0,
-          //       e);
+        }
 
-          //   print('=-=-=-' + e.reference.id);
-          //   print('=-=-=->' + e.toString());
-          // });
-
-          print('=-=-=-<>' + value.docs.last['dateOfSaving']);
-
-          if (_tempAnimalList.isEmpty) {
-            setState(() {
-              lastDocument = value.docs.last['dateOfSaving'];
-              _isLoading = false;
-              widget.animalInfo = _temp;
-              widget.animalInfo.sort(
-                  (a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
-            });
-          } else {
-            setState(() {
-              lastDocument = value.docs.last['dateOfSaving'];
-              _isLoading = false;
-              _tempAnimalList = _temp;
-              _tempAnimalList.sort(
-                  (a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
-            });
-          }
-
-          print("=-=-=" + value.docs.length.toString());
-        });
-      }
+        print("=-=-=" + value.docs.length.toString());
+      });
+      // }
     } catch (e) {
       print('=-=Error-Re-Buying-=->>>' + e.toString());
       FirebaseFirestore.instance
@@ -687,7 +688,6 @@ class _BuyAnimalState extends State<BuyAnimal>
           ],
         ),
       );
-
 
   @override
   Widget build(BuildContext context) {

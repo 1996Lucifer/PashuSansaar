@@ -174,13 +174,13 @@ class _HomeScreenState extends State<HomeScreen> {
   // }
 
   getInitialInfo() async {
-    pr = new ProgressDialog(context,
-        type: ProgressDialogType.Normal, isDismissible: false);
-
-    pr.style(message: 'progress_dialog_message'.tr);
-    pr.show();
-
     try {
+      pr = new ProgressDialog(context,
+          type: ProgressDialogType.Normal, isDismissible: false);
+
+      pr.style(message: 'progress_dialog_message'.tr);
+      pr.show();
+
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final now = DateTime.now();
       List district = [];
@@ -203,8 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Stream<List<DocumentSnapshot>> stream = geo
             .collection(
                 collectionRef: FirebaseFirestore.instance
-                    .collection("buyingAnimalList1")
-                    .where('isValidUser', isEqualTo: 'Approved'))
+                    .collection("buyingAnimalList1"))
             .within(
                 center: geo.point(latitude: lat, longitude: long),
                 radius: 50,
@@ -213,20 +212,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
         stream.listen((List<DocumentSnapshot> documentList) {
           pr.hide();
-          // List _temp = [];
-          // documentList.forEach((e) {
-          //   // _temp.addIf(
-          //   //     (e.reference.id.substring(8) !=
-          //   //             FirebaseAuth.instance.currentUser.uid) &&
-          //   //         (e['isValidUser'] == 'Approved'),
-          //   //     e);
-          //   _temp.addIf(e['isValidUser'] == 'Approved', e);
-          //   print('=-=-=-' + e.reference.id);
-          //   print('=-=-=-' + e.toString());
-          // });
+          List _temp = [];
+          documentList.forEach((e) {
+            // _temp.addIf(
+            //     (e.reference.id.substring(8) !=
+            //             FirebaseAuth.instance.currentUser.uid) &&
+            //         (e['isValidUser'] == 'Approved'),
+            //     e);
+            _temp.addIf(e['isValidUser'] == 'Approved', e);
+            print('=-=-=-' + e.reference.id);
+            print('=-=-=-' + e.toString());
+          });
           setState(() {
-            _animalInfo = documentList;
-            // _animalInfo = _temp;
+            // _animalInfo = documentList;
+            _animalInfo = _temp;
             _animalInfo
                 .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
           });
@@ -278,7 +277,7 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     } catch (e) {
       print('=-=Error-Home=->>>' + e.toString());
-      pr.hide();
+      // pr.hide();
 
       FirebaseFirestore.instance
           .collection('logger')

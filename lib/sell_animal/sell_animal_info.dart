@@ -367,18 +367,18 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                   )
                 ]),
           ),
-          RaisedButton.icon(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-              onPressed: () => showRemoveAnimalDialog(index),
-              icon: Icon(
-                Icons.delete,
-                color: Colors.white,
-              ),
-              label: Text('remove_animal'.tr,
-                  textDirection: TextDirection.ltr,
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold)))
+          // RaisedButton.icon(
+          //     shape: RoundedRectangleBorder(
+          //         borderRadius: BorderRadius.circular(10)),
+          //     onPressed: () => showRemoveAnimalDialog(index),
+          //     icon: Icon(
+          //       Icons.delete,
+          //       color: Colors.white,
+          //     ),
+          //     label: Text('remove_animal'.tr,
+          //         textDirection: TextDirection.ltr,
+          //         style: TextStyle(
+          //             color: Colors.white, fontWeight: FontWeight.bold)))
         ],
       ),
     );
@@ -594,7 +594,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                         .doc(widget.animalInfo[index]['uniqueId'])
                         .update({
                           'animalRemove': {
-                            'soldFromApp': true,
+                            'soldFromApp': false,
                             'price': _price
                           },
                           'isValidUser': 'RemovedByUser'
@@ -605,7 +605,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                                     FirebaseAuth.instance.currentUser.uid)
                                 .update({
                               'animalRemove': {
-                                'soldFromApp': true,
+                                'soldFromApp': false,
                                 'price': _price
                               },
                               'isValidUser': 'RemovedByUser'

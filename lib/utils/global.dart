@@ -15,5 +15,5 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
 String token;
-String lastDocument;
+String lastDocument='';
 List districtList;

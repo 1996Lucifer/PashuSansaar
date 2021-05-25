@@ -1133,7 +1133,6 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                     'isValidUser': 'Approved',
                     'uniqueId': uniqueId,
                     'userId': FirebaseAuth.instance.currentUser.uid,
-                    'extraInfo': extraInfoData,
                     'district': (first.subAdminArea ?? first.locality),
                     'zipCode': first.postalCode,
                     // 'state': first.adminArea,
