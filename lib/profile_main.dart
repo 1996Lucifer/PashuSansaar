@@ -456,7 +456,7 @@ class ProfileMainState extends State<ProfileMain>
                         ),
                         Expanded(
                             child: Padding(
-                          padding: EdgeInsets.only(top: 50.0),
+                          padding: EdgeInsets.only(top: 30.0),
                           child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -472,9 +472,24 @@ class ProfileMainState extends State<ProfileMain>
                                                   fontSize: 14)),
                                         ],
                                       ),
+                                SizedBox(height: 5),
+                                userInfo['mobile'] == null
+                                    ? Text('progress_dialog_message'.tr)
+                                    : Row(
+                                        children: [
+                                          Icon(Icons.call),
+                                          SizedBox(width: 5),
+                                          Text(userInfo['mobile'],
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 14)),
+                                        ],
+                                      ),
+                                SizedBox(height: 5),
                                 userInfo['address'] == null
                                     ? Text('progress_dialog_message'.tr)
                                     : Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Icon(Icons.location_on_outlined),
                                           SizedBox(width: 5),
@@ -629,7 +644,56 @@ class ProfileMainState extends State<ProfileMain>
                         ),
                       ),
                     ),
-                  )
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: GestureDetector(
+                      onTap: () => Share.share(
+                          'पशुसंसार (पशु बेचने वाली फ्री ऐप) पर मेरे साथ जुड़ें। मेरा कोड ADFTR6 दर्ज करें और ₹10,000 जीतने का मौका पाएं। \n\n ऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar'),
+                      child: DottedBorder(
+                        strokeWidth: 2,
+                        borderType: BorderType.RRect,
+                        radius: Radius.circular(12),
+                        padding: EdgeInsets.all(6),
+                        color: Colors.grey[500],
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(12),
+                          ),
+                          child: Container(
+                            height: 60,
+                            width: double.infinity,
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  flex: 5,
+                                  child: RichText(
+                                    // overflow: TextOverflow.ellipsis,
+                                    text: TextSpan(
+                                      style: TextStyle(
+                                          color: greyColor,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16),
+                                      text:
+                                          'पशुसंसार एप को अपने पशुपालक दोस्तों से शेयर करे और हर हफ्ते ₹10000 जीतने का मौका पाए',
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                    flex: 1,
+                                    child: FaIcon(
+                                      FontAwesomeIcons.shareAlt,
+                                      color: primaryColor,
+                                      size: 40,
+                                    ))
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  
 
                   // ListView.builder(
                   //   shrinkWrap: true,

@@ -258,89 +258,89 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                         )),
                     replacement: SizedBox.shrink(),
                   ),
-                  // SizedBox(height: 20),
-                  // RichText(
-                  //   textAlign: TextAlign.center,
-                  //   text: TextSpan(
-                  //       text: "have_referral_code".tr,
-                  //       style: TextStyle(color: Colors.black54, fontSize: 15),
-                  //       children: [
-                  //         TextSpan(
-                  //             text: "click_here".tr,
-                  //             recognizer: onTapRecognizer,
-                  //             style: TextStyle(
-                  //                 color: primaryColor,
-                  //                 fontWeight: FontWeight.bold,
-                  //                 fontSize: 16))
-                  //       ]),
-                  // ),
-                  // SizedBox(height: 20),
-                  // Visibility(
-                  //   visible: _showReferralData,
-                  //   child: Form(
-                  //       key: formKey,
-                  //       child: Padding(
-                  //           padding: const EdgeInsets.symmetric(
-                  //               vertical: 8.0, horizontal: 30),
-                  //           child: PinCodeTextField(
-                  //             appContext: context,
-                  //             pastedTextStyle: TextStyle(
-                  //               color: primaryColor,
-                  //               fontWeight: FontWeight.bold,
-                  //             ),
-                  //             length: 6,
-                  //             obscureText: false,
-                  //             obscuringCharacter: '*',
-                  //             blinkWhenObscuring: true,
-                  //             animationType: AnimationType.fade,
+                  SizedBox(height: 20),
+                  RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                        text: "have_referral_code".tr,
+                        style: TextStyle(color: Colors.black54, fontSize: 15),
+                        children: [
+                          TextSpan(
+                              text: "click_here".tr,
+                              recognizer: onTapRecognizer,
+                              style: TextStyle(
+                                  color: primaryColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16))
+                        ]),
+                  ),
+                  SizedBox(height: 20),
+                  Visibility(
+                    visible: _showReferralData,
+                    child: Form(
+                        key: formKey,
+                        child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 8.0, horizontal: 30),
+                            child: PinCodeTextField(
+                              appContext: context,
+                              pastedTextStyle: TextStyle(
+                                color: primaryColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              length: 6,
+                              obscureText: false,
+                              obscuringCharacter: '*',
+                              blinkWhenObscuring: true,
+                              animationType: AnimationType.fade,
 
-                  //             pinTheme: PinTheme(
-                  //               shape: PinCodeFieldShape.box,
-                  //               borderRadius: BorderRadius.circular(5),
-                  //               fieldHeight: 50,
-                  //               fieldWidth: 40,
-                  //               activeColor: primaryColor,
-                  //               activeFillColor: Colors.white,
-                  //               inactiveColor: primaryColor,
-                  //               inactiveFillColor: Colors.white,
-                  //               selectedColor: primaryColor,
-                  //               selectedFillColor: Colors.white,
-                  //             ),
-                  //             cursorColor: Colors.black,
-                  //             animationDuration: Duration(milliseconds: 300),
-                  //             backgroundColor: Colors.white,
-                  //             enableActiveFill: true,
-                  //             controller: referralCodeController,
-                  //             autoDisposeControllers: false,
-                  //             keyboardType: TextInputType.text,
-                  //             boxShadows: [
-                  //               BoxShadow(
-                  //                 offset: Offset(0, 1),
-                  //                 color: Colors.black12,
-                  //                 blurRadius: 10,
-                  //               )
-                  //             ],
-                  //             onCompleted: (v) {
-                  //               print("Completed");
-                  //             },
-                  //             // onTap: () {
-                  //             //   print("Pressed");
-                  //             // },
-                  //             onChanged: (value) {
-                  //               print(value);
-                  //               setState(() {
-                  //                 currentText = value.toUpperCase();
-                  //               });
-                  //             },
-                  //             beforeTextPaste: (text) {
-                  //               print("Allowing to paste $text");
-                  //               //if you return true then it will show the paste confirmation dialog. Otherwise if false, then nothing will happen.
-                  //               //but you ca show anything you want here, like your pop up saying wrong paste format or etc
-                  //               return true;
-                  //             },
-                  //           ))),
-                  //   replacement: SizedBox.shrink(),
-                  // ),
+                              pinTheme: PinTheme(
+                                shape: PinCodeFieldShape.box,
+                                borderRadius: BorderRadius.circular(5),
+                                fieldHeight: 50,
+                                fieldWidth: 40,
+                                activeColor: primaryColor,
+                                activeFillColor: Colors.white,
+                                inactiveColor: primaryColor,
+                                inactiveFillColor: Colors.white,
+                                selectedColor: primaryColor,
+                                selectedFillColor: Colors.white,
+                              ),
+                              cursorColor: Colors.black,
+                              animationDuration: Duration(milliseconds: 300),
+                              backgroundColor: Colors.white,
+                              enableActiveFill: true,
+                              controller: referralCodeController,
+                              autoDisposeControllers: false,
+                              keyboardType: TextInputType.text,
+                              boxShadows: [
+                                BoxShadow(
+                                  offset: Offset(0, 1),
+                                  color: Colors.black12,
+                                  blurRadius: 10,
+                                )
+                              ],
+                              onCompleted: (v) {
+                                print("Completed");
+                              },
+                              // onTap: () {
+                              //   print("Pressed");
+                              // },
+                              onChanged: (value) {
+                                print(value);
+                                setState(() {
+                                  currentText = value.toUpperCase();
+                                });
+                              },
+                              beforeTextPaste: (text) {
+                                print("Allowing to paste $text");
+                                //if you return true then it will show the paste confirmation dialog. Otherwise if false, then nothing will happen.
+                                //but you ca show anything you want here, like your pop up saying wrong paste format or etc
+                                return true;
+                              },
+                            ))),
+                    replacement: SizedBox.shrink(),
+                  ),
                   SizedBox(
                     height: 14,
                   ),
