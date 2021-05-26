@@ -12,7 +12,7 @@
 
         <!-- android:name=".Application" -->
    <application
-        android:name=".Application"
+        android:name="io.flutter.app.FlutterApplication"
         android:requestLegacyExternalStorage="true" 
         android:hardwareAccelerated="false"
         android:largeHeap="true" 
