@@ -32,6 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
   ProgressDialog pr;
   List _animalInfo = [], _sellingAnimalInfo = [];
   Map _profileData = {};
+  Map _referralWinnerData = {};
   final geo = Geoflutterfire();
   PageController _pageController;
   String _referralUniqueValue = '', _mobileNumber = '';
@@ -129,48 +130,48 @@ class _HomeScreenState extends State<HomeScreen> {
 
   //   print(first);
 
-    // await FirebaseFirestore.instance
-    //     .collection("buyingAnimalList1")
-    //     .orderBy('dateOfSaving')
-    //     .where('dateOfSaving', isLessThanOrEqualTo: '1621692916', isGreaterThanOrEqualTo: '1621555200')
-    //     .get()
-    //     .then((value) => value.docs.forEach((element) async {
-    //           var addresses = await geoCoder.Geocoder.local
-    //               .findAddressesFromCoordinates(geoCoder.Coordinates(
-    //                   element['userLatitude'], element['userLongitude']));
-    //           var first = addresses.first;
-    //           // print((first.subAdminArea ?? first.locality));
-    //           await FirebaseFirestore.instance
-    //               .collection("buyingAnimalList1")
-    //               .doc(element.reference.id)
-    //               .update({
-    //             'district': first.subAdminArea ?? first.locality,
-    //             'zipCode': first.postalCode
-    //           });
-    //         }));
+  // await FirebaseFirestore.instance
+  //     .collection("buyingAnimalList1")
+  //     .orderBy('dateOfSaving')
+  //     .where('dateOfSaving', isLessThanOrEqualTo: '1621692916', isGreaterThanOrEqualTo: '1621555200')
+  //     .get()
+  //     .then((value) => value.docs.forEach((element) async {
+  //           var addresses = await geoCoder.Geocoder.local
+  //               .findAddressesFromCoordinates(geoCoder.Coordinates(
+  //                   element['userLatitude'], element['userLongitude']));
+  //           var first = addresses.first;
+  //           // print((first.subAdminArea ?? first.locality));
+  //           await FirebaseFirestore.instance
+  //               .collection("buyingAnimalList1")
+  //               .doc(element.reference.id)
+  //               .update({
+  //             'district': first.subAdminArea ?? first.locality,
+  //             'zipCode': first.postalCode
+  //           });
+  //         }));
 
-    // .where('uniqueId',
-    //     isLessThanOrEqualTo: '10000000') // 00000000 - 10000000
-    // .where('uniqueId',
-    //     isGreaterThan: '10000000', isLessThanOrEqualTo: '20000000') // 30 - 31
-    // .where('uniqueId',
-    //     isGreaterThan: '20000000', isLessThanOrEqualTo: '30000000') // 30 - 31
-    // .where('uniqueId',
-    //     isGreaterThan: '30000000', isLessThanOrEqualTo: '40000000') // karna hai aaj
-    // .where('uniqueId',
-    //     isGreaterThan: '40000000', isLessThanOrEqualTo: '50000000') // karna hai aaj
-    // .where('uniqueId',
-    //     isGreaterThan: '50000000', isLessThanOrEqualTo: '60000000') // karna hai aaj
-    // .where('uniqueId',
-    //     isGreaterThan: '60000000', isLessThanOrEqualTo: '70000000') // karna hai aaj
-    // .where('uniqueId',
-    //     isGreaterThan: '70000000', isLessThanOrEqualTo: '80000000') // karna hai aaj
-    // .where('uniqueId',
-    //     isGreaterThan: '80000000', isLessThanOrEqualTo: '90000000') // karna hai aaj
-    // .where('uniqueId', isGreaterThan: '90000000') // k
+  // .where('uniqueId',
+  //     isLessThanOrEqualTo: '10000000') // 00000000 - 10000000
+  // .where('uniqueId',
+  //     isGreaterThan: '10000000', isLessThanOrEqualTo: '20000000') // 30 - 31
+  // .where('uniqueId',
+  //     isGreaterThan: '20000000', isLessThanOrEqualTo: '30000000') // 30 - 31
+  // .where('uniqueId',
+  //     isGreaterThan: '30000000', isLessThanOrEqualTo: '40000000') // karna hai aaj
+  // .where('uniqueId',
+  //     isGreaterThan: '40000000', isLessThanOrEqualTo: '50000000') // karna hai aaj
+  // .where('uniqueId',
+  //     isGreaterThan: '50000000', isLessThanOrEqualTo: '60000000') // karna hai aaj
+  // .where('uniqueId',
+  //     isGreaterThan: '60000000', isLessThanOrEqualTo: '70000000') // karna hai aaj
+  // .where('uniqueId',
+  //     isGreaterThan: '70000000', isLessThanOrEqualTo: '80000000') // karna hai aaj
+  // .where('uniqueId',
+  //     isGreaterThan: '80000000', isLessThanOrEqualTo: '90000000') // karna hai aaj
+  // .where('uniqueId', isGreaterThan: '90000000') // k
 
-    // .get()
-    // .then((value) => value.docs.forEach((element) async {}));
+  // .get()
+  // .then((value) => value.docs.forEach((element) async {}));
   // }
 
   getInitialInfo() async {
@@ -293,14 +294,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   getAnimalSellingInfo() async {
+    print('hello');
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     try {
       await FirebaseFirestore.instance
-          .collection("animalSellingInfo")
-          .doc(FirebaseAuth.instance.currentUser.uid)
-          .collection('sellingAnimalList')
-          .orderBy('dateOfSaving', descending: true)
+          .collection("buyingAnimalList1")
+          .where('userId', isEqualTo: FirebaseAuth.instance.currentUser.uid)
           .get(GetOptions(source: Source.serverAndCache))
           .then(
         (value) {
@@ -309,9 +309,9 @@ class _HomeScreenState extends State<HomeScreen> {
             _info.addIf(
                 element.data()['isValidUser'] == 'Approved', element.data());
           });
-
           setState(() {
             _sellingAnimalInfo = _info;
+            print('This is the buing Animal List1 $_animalInfo');
             prefs.setString('animalDetails', jsonEncode(_info));
           });
         },
@@ -362,6 +362,37 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
     if (!_checkReferral) initReferrerDetails(_profileData['mobile']);
+
+    getReferralWinnerInfo();
+  }
+
+  getReferralWinnerInfo() async {
+    try {
+      await FirebaseFirestore.instance
+          .collection("referralWinner")
+          .limit(1)
+          .get(GetOptions(source: Source.serverAndCache))
+          .then(
+        (value) {
+          setState(() {
+            _referralWinnerData = value.docs[0].data();
+          });
+        },
+      );
+    } catch (e) {
+      FirebaseFirestore.instance
+          .collection('logger')
+          .doc(_mobileNumber)
+          .collection('home-profile-main')
+          .doc()
+          .set({
+        'issue': e.toString(),
+        'userId': FirebaseAuth.instance.currentUser == null
+            ? ''
+            : FirebaseAuth.instance.currentUser.uid,
+        'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
+      });
+    }
   }
 
   void _onItemTapped(int index) {
@@ -390,6 +421,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 2:
         return ProfileMain(
             profileData: _profileData,
+            refData: _referralWinnerData,
             sellingAnimalInfo: _sellingAnimalInfo,
             userName: _profileData['name'],
             userMobileNumber: _profileData['mobile']);
@@ -449,6 +481,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     userMobileNumber: _profileData['mobile']),
                 ProfileMain(
                     profileData: _profileData,
+                    refData: _referralWinnerData,
                     sellingAnimalInfo: _sellingAnimalInfo,
                     userName: _profileData['name'],
                     userMobileNumber: _profileData['mobile']),

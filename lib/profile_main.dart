@@ -11,6 +11,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -25,6 +26,7 @@ import 'package:url_launcher/url_launcher.dart' as UrlLauncher;
 // ignore: must_be_immutable
 class ProfileMain extends StatefulWidget {
   Map profileData;
+  Map refData;
   final List sellingAnimalInfo;
   final String userName;
   final String userMobileNumber;
@@ -32,10 +34,12 @@ class ProfileMain extends StatefulWidget {
   ProfileMain({
     Key key,
     @required this.profileData,
+    @required this.refData,
     @required this.sellingAnimalInfo,
     @required this.userName,
     @required this.userMobileNumber,
   }) : super(key: key);
+
   @override
   ProfileMainState createState() => ProfileMainState();
 }
@@ -629,164 +633,44 @@ class ProfileMainState extends State<ProfileMain>
                         ),
                       ),
                     ),
-                  )
-
-                  // ListView.builder(
-                  //   shrinkWrap: true,
-                  //   physics: NeverScrollableScrollPhysics(),
-                  //   itemCount: 6,
-                  //   itemBuilder: (context, index) {
-                  //     return Padding(
-                  //       padding: const EdgeInsets.all(8.0),
-                  //       child: Card(
-                  //         // key: Key(widget.animalInfo[index]['uuid']),
-                  //         shape: RoundedRectangleBorder(
-                  //           borderRadius: BorderRadius.circular(10.0),
-                  //         ),
-                  //         elevation: 5,
-                  //         child: Column(
-                  //           crossAxisAlignment: CrossAxisAlignment.start,
-                  //           children: [
-                  //             Text("hello"),
-                  //             Text("hello"),
-                  //             Text("hello"),
-                  //             Text("hello"),
-                  //             Text("hello"),
-                  //             Text("hello"),
-                  //             // _buildBreedTypeWidget(index),
-                  //             // _buildDateWidget(index),
-                  //             // _buildImageDescriptionWidget(width, index),
-                  //           ],
-                  //         ),
-                  //       ),
-                  //     );
-                  //   },
-                  // ),
-
-                  // new Container(
-                  //   color: Color(0xffFFFFFF),
-                  //   child: Padding(
-                  //     padding: EdgeInsets.only(bottom: 25.0),
-                  //     child: new Column(
-                  //       crossAxisAlignment: CrossAxisAlignment.start,
-                  //       mainAxisAlignment: MainAxisAlignment.start,
-                  //       children: <Widget>[
-                  //         Padding(
-                  //             padding: EdgeInsets.only(
-                  //                 left: 25.0, right: 25.0, top: 5.0),
-                  //             child: new Row(
-                  //               mainAxisAlignment:
-                  //                   MainAxisAlignment.spaceBetween,
-                  //               mainAxisSize: MainAxisSize.max,
-                  //               children: <Widget>[
-                  //                 new Column(
-                  //                   mainAxisAlignment: MainAxisAlignment.start,
-                  //                   mainAxisSize: MainAxisSize.min,
-                  //                   children: <Widget>[
-                  //                     new Text(
-                  //                       'Personal Information',
-                  //                       style: TextStyle(
-                  //                           fontSize: 18.0,
-                  //                           fontWeight: FontWeight.bold),
-                  //                     ),
-                  //                   ],
-                  //                 ),
-                  //                 new Column(
-                  //                   mainAxisAlignment: MainAxisAlignment.end,
-                  //                   mainAxisSize: MainAxisSize.min,
-                  //                   children: <Widget>[
-                  //                     _status
-                  //                         ? _getEditIcon()
-                  //                         : new Container(),
-                  //                   ],
-                  //                 )
-                  //               ],
-                  //             )),
-                  //         Padding(
-                  //             padding: EdgeInsets.only(
-                  //                 left: 25.0, right: 25.0, top: 25.0),
-                  //             child: new Row(
-                  //               mainAxisSize: MainAxisSize.max,
-                  //               children: <Widget>[
-                  //                 new Column(
-                  //                   mainAxisAlignment: MainAxisAlignment.start,
-                  //                   mainAxisSize: MainAxisSize.min,
-                  //                   children: <Widget>[
-                  //                     new Text(
-                  //                       'name_label'.tr,
-                  //                       style: TextStyle(
-                  //                           fontSize: 16.0,
-                  //                           fontWeight: FontWeight.bold),
-                  //                     ),
-                  //                   ],
-                  //                 ),
-                  //               ],
-                  //             )),
-                  //         Padding(
-                  //             padding: EdgeInsets.only(
-                  //                 left: 25.0, right: 25.0, top: 2.0),
-                  //             child: new Row(
-                  //               mainAxisSize: MainAxisSize.max,
-                  //               children: <Widget>[
-                  //                 new Flexible(
-                  //                   child: new TextFormField(
-                  //                     initialValue: widget.profileData['name'],
-                  //                     decoration: InputDecoration(
-                  //                       hintText: 'name_hint'.tr,
-                  //                     ),
-                  //                     enabled: !_status,
-                  //                     autofocus: !_status,
-                  //                     onChanged: (String val) {
-                  //                       userInfo['name'] = val;
-                  //                     },
-                  //                   ),
-                  //                 ),
-                  //               ],
-                  //             )),
-                  //         Padding(
-                  //             padding: EdgeInsets.only(
-                  //                 left: 25.0, right: 25.0, top: 25.0),
-                  //             child: new Row(
-                  //               mainAxisSize: MainAxisSize.max,
-                  //               children: <Widget>[
-                  //                 new Column(
-                  //                   mainAxisAlignment: MainAxisAlignment.start,
-                  //                   mainAxisSize: MainAxisSize.min,
-                  //                   children: <Widget>[
-                  //                     new Text(
-                  //                       'mobile_label'.tr,
-                  //                       style: TextStyle(
-                  //                           fontSize: 16.0,
-                  //                           fontWeight: FontWeight.bold),
-                  //                     ),
-                  //                   ],
-                  //                 ),
-                  //               ],
-                  //             )),
-                  //         Padding(
-                  //             padding: EdgeInsets.only(
-                  //                 left: 25.0, right: 25.0, top: 2.0),
-                  //             child: new Row(
-                  //               mainAxisSize: MainAxisSize.max,
-                  //               children: <Widget>[
-                  //                 new Flexible(
-                  //                   child: new TextFormField(
-                  //                     initialValue:
-                  //                         widget.profileData['mobile'],
-                  //                     decoration: InputDecoration(
-                  //                         hintText: "mobile_hint".tr),
-                  //                     enabled: false,
-                  //                     // enabled: !_status,
-                  //                   ),
-                  //                 ),
-                  //               ],
-                  //             )),
-                  //         !_status ? _getActionButtons() : new Container(),
-                  //         saveButton()
-                  //       ],
-                  //     ),
-                  //   ),
-                  // )
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: DottedBorder(
+                      strokeWidth: 2,
+                      borderType: BorderType.RRect,
+                      radius: Radius.circular(12),
+                      padding: EdgeInsets.all(6),
+                      color: Colors.grey[500],
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(12),
+                        ),
+                        child: Container(
+                          height: 90,
+                          width: double.infinity,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                flex: 5,
+                                child: RichText(
+                                  // overflow: TextOverflow.ellipsis,
+                                  text: TextSpan(
+                                    style: TextStyle(
+                                        color: greyColor,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16),
+                                    text:
+                                        'इस सप्ताह लिंक रेफरल के विजेता का \nनाम :${widget.refData['name']} \nपता : ${widget.refData['address']} \nतारीख : ${widget.refData['dateOfSaving'].toString()}'  ,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ],
