@@ -42,22 +42,17 @@ class _InterestedBuyerState extends State<InterestedBuyer> {
                       color: greyColor,
                       fontWeight: FontWeight.bold,
                       fontSize: 16),
-                  text: (widget.animalInfo[index]['animalInfo']
-                                  ['animalBreed'] ==
+                  text: (widget.animalInfo[index]['userAnimalBreed'] ==
                               'not_known'.tr
                           ? ""
-                          : widget.animalInfo[index]['animalInfo']
-                              ['animalBreed']) +
+                          : widget.animalInfo[index]['userAnimalBreed']) +
                       ' ',
                   children: <InlineSpan>[
                     TextSpan(
-                      text: (widget.animalInfo[index]['animalInfo']
-                                      ['animalType'] ==
+                      text: (widget.animalInfo[index]['userAnimalInfo'] ==
                                   'other_animal'.tr
-                              ? widget.animalInfo[index]['animalInfo']
-                                  ['animalTypeOther']
-                              : widget.animalInfo[index]['animalInfo']
-                                  ['animalType']) +
+                              ? widget.animalInfo[index]['userAnimalTypeOther']
+                              : widget.animalInfo[index]['userAnimalType']) +
                           ', ',
                       style: TextStyle(
                           color: greyColor,
@@ -66,8 +61,8 @@ class _InterestedBuyerState extends State<InterestedBuyer> {
                     ),
                     TextSpan(
                       text: '₹ ' +
-                          formatter.format(int.parse(widget.animalInfo[index]
-                              ['animalInfo']['animalPrice'])),
+                          formatter.format(int.parse(
+                              widget.animalInfo[index]['userAnimalPrice'])),
                       style: TextStyle(
                           color: greyColor,
                           fontWeight: FontWeight.bold,
@@ -96,17 +91,14 @@ class _InterestedBuyerState extends State<InterestedBuyer> {
         data = widget.animalInfo[index]['animalVideoThumbnail'];
       }
     } else {
-      if (widget.animalInfo[index]['animalImages']['image1'].isNotEmpty) {
-        data = widget.animalInfo[index]['animalImages']['image1'];
-      } else if (widget
-          .animalInfo[index]['animalImages']['image2'].isNotEmpty) {
-        data = widget.animalInfo[index]['animalImages']['image2'];
-      } else if (widget
-          .animalInfo[index]['animalImages']['image3'].isNotEmpty) {
+      if (widget.animalInfo[index]['image1'].isNotEmpty) {
+        data = widget.animalInfo[index]['image1'];
+      } else if (widget.animalInfo[index]['image2'].isNotEmpty) {
+        data = widget.animalInfo[index]['image2'];
+      } else if (widget.animalInfo[index]['image3'].isNotEmpty) {
         data = widget.animalInfo[index]['animalImages']['image3'];
-      } else if (widget
-          .animalInfo[index]['animalImages']['image4'].isNotEmpty) {
-        data = widget.animalInfo[index]['animalImages']['image4'];
+      } else if (widget.animalInfo[index]['image4'].isNotEmpty) {
+        data = widget.animalInfo[index]['image4'];
       } else {
         data = widget.animalInfo[index]['animalVideoThumbnail'];
       }
@@ -117,14 +109,13 @@ class _InterestedBuyerState extends State<InterestedBuyer> {
 
   _descriptionText(int index) {
     String animalBreedCheck =
-        widget.animalInfo[index]['animalInfo']['animalBreed'] == 'not_known'.tr
+        widget.animalInfo[index]['userAnimalBreed'] == 'not_known'.tr
             ? ""
-            : widget.animalInfo[index]['animalInfo']['animalBreed'];
-    String animalTypeCheck = widget.animalInfo[index]['animalInfo']
-                ['animalType'] ==
-            'other_animal'.tr
-        ? widget.animalInfo[index]['animalInfo']['animalTypeOther']
-        : widget.animalInfo[index]['animalInfo']['animalType'];
+            : widget.animalInfo[index]['userAnimalBreed'];
+    String animalTypeCheck =
+        widget.animalInfo[index]['userAnimalType'] == 'other_animal'.tr
+            ? widget.animalInfo[index]['userAnimalTypeOther']
+            : widget.animalInfo[index]['userAnimalType'];
 
     String desc = '';
 
@@ -137,17 +128,16 @@ class _InterestedBuyerState extends State<InterestedBuyer> {
     String stmn42 =
         'इसके साथ में ${widget.animalInfo[index]['extraInfo']['animalHasBaby']}। ';
     String stmn5 =
-        'पिछले बार के हिसाब से दूध कैपेसिटी ${widget.animalInfo[index]['animalInfo']['animalMilk']} लीटर है। ';
+        'पिछले बार के हिसाब से दूध कैपेसिटी ${widget.animalInfo[index]['userAnimalMilk']} लीटर है। ';
 
-    if (widget.animalInfo[index]['animalInfo']['animalType'] ==
-            'buffalo_male'.tr ||
-        widget.animalInfo[index]['animalInfo']['animalType'] == 'ox'.tr ||
-        widget.animalInfo[index]['animalType'] == 'other_animal'.tr) {
+    if (widget.animalInfo[index]['userAnimalType'] == 'buffalo_male'.tr ||
+        widget.animalInfo[index]['userAnimalType'] == 'ox'.tr ||
+        widget.animalInfo[index]['userAnimalType'] == 'other_animal'.tr) {
       desc =
-          'ये $animalBreedCheck $animalTypeCheck ${widget.animalInfo[index]['animalInfo']['animalAge']} साल का है। ';
+          'ये $animalBreedCheck $animalTypeCheck ${widget.animalInfo[index]['userAnimalAge']} साल का है। ';
     } else {
       desc =
-          'ये $animalBreedCheck $animalTypeCheck ${widget.animalInfo[index]['animalInfo']['animalAge']} साल की है। ';
+          'ये $animalBreedCheck $animalTypeCheck ${widget.animalInfo[index]['userAnimalAge']} साल की है। ';
       if (widget.animalInfo[index]['extraInfo']['animalAlreadyGivenBirth'] !=
           null) desc = desc + stmn2;
       if (widget.animalInfo[index]['extraInfo']['animalIfPregnant'] != null)

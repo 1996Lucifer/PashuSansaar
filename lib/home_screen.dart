@@ -175,13 +175,13 @@ class _HomeScreenState extends State<HomeScreen> {
   // }
 
   getInitialInfo() async {
-    pr = new ProgressDialog(context,
-        type: ProgressDialogType.Normal, isDismissible: false);
-
-    pr.style(message: 'progress_dialog_message'.tr);
-    pr.show();
-
     try {
+      pr = new ProgressDialog(context,
+          type: ProgressDialogType.Normal, isDismissible: false);
+
+      pr.style(message: 'progress_dialog_message'.tr);
+      pr.show();
+
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final now = DateTime.now();
       List district = [];
@@ -203,8 +203,8 @@ class _HomeScreenState extends State<HomeScreen> {
       if (district.isEmpty) {
         Stream<List<DocumentSnapshot>> stream = geo
             .collection(
-                collectionRef:
-                    FirebaseFirestore.instance.collection("buyingAnimalList1"))
+                collectionRef: FirebaseFirestore.instance
+                    .collection("buyingAnimalList1"))
             .within(
                 center: geo.point(latitude: lat, longitude: long),
                 radius: 50,
@@ -212,6 +212,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 strictMode: true);
 
         stream.listen((List<DocumentSnapshot> documentList) {
+          pr.hide();
           List _temp = [];
           documentList.forEach((e) {
             // _temp.addIf(
@@ -224,13 +225,13 @@ class _HomeScreenState extends State<HomeScreen> {
             print('=-=-=-' + e.toString());
           });
           setState(() {
+            // _animalInfo = documentList;
             _animalInfo = _temp;
             _animalInfo
                 .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
           });
 
           print("=-=-=" + documentList.length.toString());
-          pr.hide();
         });
       } else {
         FirebaseFirestore.instance
@@ -239,43 +240,46 @@ class _HomeScreenState extends State<HomeScreen> {
             .where('dateOfSaving',
                 isLessThanOrEqualTo: ReusableWidgets.dateTimeToEpoch(now))
             .where('district', whereIn: district[0])
+            .where('isValidUser', isEqualTo: 'Approved')
             .limit(25)
-            .get()
+            .get(GetOptions(source: Source.serverAndCache))
             .then((value) {
-          List _temp = [];
-          value.docs.forEach((e) {
-            _temp.addIf(
-                e['isValidUser'] == 'Approved' &&
-                    double.parse((Geodesy().distanceBetweenTwoGeoPoints(
-                                    LatLng(lat, long),
-                                    LatLng(e['userLatitude'],
-                                        e['userLongitude'])) /
-                                1000)
-                            .toStringAsPrecision(2)) <=
-                        50.0,
-                e);
+          // List _temp = [];
+          // value.docs.forEach((e) {
+          // _temp.addIf(
+          //     // e['isValidUser'] == 'Approved' &&
+          //         double.parse((Geodesy().distanceBetweenTwoGeoPoints(
+          //                         LatLng(lat, long),
+          //                         LatLng(e['userLatitude'],
+          //                             e['userLongitude'])) /
+          //                     1000)
+          //                 .toStringAsPrecision(2)) <=
+          //             50.0,
+          //     e);
 
-            print('=-=-=-' + e.reference.id);
-            print('=-=-=->' + e.toString());
-          });
+          //   print('=-=-=-' + e.reference.id);
+          //   print('=-=-=->' + e.toString());
+          // });
 
-          print('=-=-=-<>' + value.docs.last['dateOfSaving'].toString());
+          // print('=-=-=-<>' + value.docs.last['dateOfSaving'].toString());
 
+          pr.hide();
           setState(() {
             lastDocument = value.docs.last['dateOfSaving'];
             districtList = district[0];
-            _animalInfo = _temp;
+            _animalInfo = value.docs;
+            // _animalInfo = _temp;
             _animalInfo
                 .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
           });
 
-          pr.hide();
           print("=-=-=" + value.docs.length.toString());
         });
       }
     } catch (e) {
       print('=-=Error-Home=->>>' + e.toString());
-      pr.hide();
+      // pr.hide();
+
       FirebaseFirestore.instance
           .collection('logger')
           .doc(_mobileNumber)

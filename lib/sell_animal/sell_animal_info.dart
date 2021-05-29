@@ -1,12 +1,17 @@
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:progress_dialog/progress_dialog.dart';
 
+import '../home_screen.dart';
 import '../interested_buyer.dart';
 import 'remove_animal.dart';
 import 'sell_animal_edit_form.dart';
@@ -32,6 +37,17 @@ class SellingAnimalInfo extends StatefulWidget {
 
 class _SellingAnimalInfoState extends State<SellingAnimalInfo>
     with AutomaticKeepAliveClientMixin {
+  bool _isError = false, _isErrorEmpty = false;
+  String _price = '';
+  TextEditingController _controller = TextEditingController();
+  ProgressDialog pr;
+
+  static const _locale = 'en_IN';
+  String _formatNumber(String s) =>
+      intl.NumberFormat.decimalPattern(_locale).format(int.parse(s));
+  String get _currency =>
+      intl.NumberFormat.compactSimpleCurrency(locale: _locale).currencySymbol;
+
   @override
   bool get wantKeepAlive => true;
 
@@ -49,7 +65,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                 child: Column(
                   children: [
                     Text(
-                      'आपका कोई पशु दर्ज़ नहीं है| कृपया पशु दर्ज़ करे',
+                      'आपका कोई पशु दर्ज़ नहीं है| कृपया पशु दर्ज़ करे ${widget.animalInfo}',
                       style:
                           TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
@@ -93,7 +109,14 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildBreedTypeWidget(index),
+                              Row(
+                                children: [
+                                  _buildBreedTypeWidget(index),
+                                  IconButton(
+                                      icon: Icon(Icons.view_agenda),
+                                      onPressed: () {})
+                                ],
+                              ),
                               _buildDateWidget(index),
                               _buildImageDescriptionWidget(width, index),
                               widget.showExtraData
@@ -229,14 +252,14 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
 
   _imageData(index) {
     var data = '';
-    if (widget.animalInfo[index]['animalImages']['image1'] != '') {
-      data = widget.animalInfo[index]['animalImages']['image1'];
-    } else if (widget.animalInfo[index]['animalImages']['image2'] != '') {
-      data = widget.animalInfo[index]['animalImages']['image2'];
-    } else if (widget.animalInfo[index]['animalImages']['image3'] != '') {
-      data = widget.animalInfo[index]['animalImages']['image3'];
-    } else if (widget.animalInfo[index]['animalImages']['image4'] != '') {
-      data = widget.animalInfo[index]['animalImages']['image4'];
+    if (widget.animalInfo[index]['image1'] != null) {
+      data = widget.animalInfo[index]['image1'];
+    } else if (widget.animalInfo[index]['image2'] != null) {
+      data = widget.animalInfo[index]['image2'];
+    } else if (widget.animalInfo[index]['image3'] != null) {
+      data = widget.animalInfo[index]['image3'];
+    } else if (widget.animalInfo[index]['image4'] != null) {
+      data = widget.animalInfo[index]['image4'];
     }
 
     return data;
@@ -269,7 +292,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                   padding:
                       const EdgeInsets.only(right: 12.0, left: 12, top: 15),
                   child: Text(
-                    widget.animalInfo[index]['animalDescription'],
+                    widget.animalInfo[index]['userAnimalDescription'],
                     overflow: TextOverflow.ellipsis,
                     maxLines: 4,
                     textAlign: TextAlign.justify,
@@ -319,21 +342,18 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                     color: greyColor,
                     fontWeight: FontWeight.bold,
                     fontSize: 16),
-                text: (widget.animalInfo[index]['animalInfo']['animalBreed'] ==
+                text: (widget.animalInfo[index]['userAnimalBreed'] ==
                             'not_known'.tr
                         ? ""
-                        : ReusableWidgets.removeEnglisgDataFromName(widget
-                            .animalInfo[index]['animalInfo']['animalBreed'])) +
+                        : ReusableWidgets.removeEnglisgDataFromName(
+                            widget.animalInfo[index]['userAnimalBreed'])) +
                     ' ',
                 children: <InlineSpan>[
                   TextSpan(
-                    text: (widget.animalInfo[index]['animalInfo']
-                                    ['animalType'] ==
+                    text: (widget.animalInfo[index]['userAnimalType'] ==
                                 'other_animal'.tr
-                            ? widget.animalInfo[index]['animalInfo']
-                                ['animalTypeOther']
-                            : widget.animalInfo[index]['animalInfo']
-                                ['animalType']) +
+                            ? widget.animalInfo[index]['userAnimalTypeOther']
+                            : widget.animalInfo[index]['userAnimalTypeOther']) +
                         ', ',
                     style: TextStyle(
                         color: greyColor,
@@ -342,8 +362,8 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                   ),
                   TextSpan(
                     text: '₹ ' +
-                        formatter.format(int.parse(widget.animalInfo[index]
-                            ['animalInfo']['animalPrice'])),
+                        formatter.format(int.parse(
+                            widget.animalInfo[index]['userAnimalPrice'])),
                     style: TextStyle(
                         color: greyColor,
                         fontWeight: FontWeight.bold,
@@ -352,6 +372,8 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                 ]),
           ),
           // RaisedButton.icon(
+          //     shape: RoundedRectangleBorder(
+          //         borderRadius: BorderRadius.circular(10)),
           //     onPressed: () => showRemoveAnimalDialog(index),
           //     icon: Icon(
           //       Icons.delete,
@@ -440,6 +462,193 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
         fullscreenDialog: true));
   }
 
+  _priceTextBox(index) => Column(
+        children: [
+          TextFormField(
+            inputFormatters: <TextInputFormatter>[
+              FilteringTextInputFormatter.digitsOnly,
+              FilteringTextInputFormatter.deny(RegExp(r'^0+'))
+            ],
+            controller: _controller,
+            keyboardType: TextInputType.number,
+            onChanged: (String price) {
+              String string = '${_formatNumber(price.replaceAll(',', ''))}';
+
+              _controller.value = TextEditingValue(
+                text: _currency + string,
+                selection: TextSelection.collapsed(offset: string.length),
+              );
+
+              _controller.selection = TextSelection.fromPosition(
+                  TextPosition(offset: _controller.text.length));
+              setState(() {
+                _price = price;
+              });
+            },
+            decoration: InputDecoration(
+                hintText: 'price_hint_text'.tr,
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 1, horizontal: 10),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(5),
+                )),
+          ),
+          _isErrorEmpty
+              ? Text(
+                  'empty_removal_price_error'.tr,
+                  style: TextStyle(color: primaryColor),
+                )
+              : _isError
+                  ? Text(
+                      'removal_price_error'.tr,
+                      style: TextStyle(color: primaryColor),
+                    )
+                  : SizedBox.shrink()
+
+          // Text(
+          //   'removal_price_error'.trParams(
+          //     {
+          //       'minPrice':
+          //           '${(int.parse(widget.animalInfo[index]['animalInfo']['animalPrice']) ~/ 2).toString()}',
+          //       'maxPrice':
+          //           '${widget.animalInfo[index]['animalInfo']['animalPrice']}'
+          //     },
+          //   ),
+          //   style: TextStyle(color: primaryColor),
+          // )
+        ],
+      );
+
+  _showPriceDialog(index) => showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => StatefulBuilder(
+          builder: (context, setState) => AlertDialog(
+            title: Text('info'.tr),
+            content: Padding(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('tell_price'.tr),
+                  SizedBox(height: 5),
+                  _priceTextBox(index)
+                ],
+              ),
+              padding: EdgeInsets.symmetric(vertical: 2, horizontal: 3),
+            ),
+            actions: <Widget>[
+              RaisedButton(
+                  child: Text(
+                    'cancel'.tr,
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _controller.clear();
+                      _isError = false;
+                      _isErrorEmpty = false;
+                      _price = '';
+                    });
+                    Navigator.of(context).pop();
+                  }),
+              RaisedButton(
+                child: Text(
+                  'Ok'.tr,
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16),
+                ),
+                onPressed: () {
+                  if (_price.isEmpty) {
+                    setState(() {
+                      _isError = false;
+                      _isErrorEmpty = true;
+                    });
+                  } else if ((int.parse(_price) <
+                          (int.parse(widget.animalInfo[index]['animalInfo']
+                                  ['animalPrice']) ~/
+                              2)) ||
+                      (int.parse(_price) >
+                          int.parse(widget.animalInfo[index]['animalInfo']
+                              ['animalPrice']))) {
+                    setState(() {
+                      _isErrorEmpty = false;
+                      _isError = true;
+                    });
+                  } else {
+                    setState(() {
+                      _isErrorEmpty = false;
+                      _isError = false;
+                    });
+
+                    pr = new ProgressDialog(context,
+                        type: ProgressDialogType.Normal, isDismissible: false);
+                    pr.style(message: 'progress_dialog_message'.tr);
+                    pr.show();
+
+                    FirebaseFirestore.instance
+                        .collection("animalSellingInfo")
+                        .doc(FirebaseAuth.instance.currentUser.uid)
+                        .collection('sellingAnimalList')
+                        .doc(widget.animalInfo[index]['uniqueId'])
+                        .update({
+                          'animalRemove': {
+                            'soldFromApp': false,
+                            'price': _price
+                          },
+                          'isValidUser': 'RemovedByUser'
+                        })
+                        .then((value) => FirebaseFirestore.instance
+                                .collection('buyingAnimalList1')
+                                .doc(widget.animalInfo[index]['uniqueId'] +
+                                    FirebaseAuth.instance.currentUser.uid)
+                                .update({
+                              'animalRemove': {
+                                'soldFromApp': false,
+                                'price': _price
+                              },
+                              'isValidUser': 'RemovedByUser'
+                            }).then((value) {
+                              pr.hide();
+                              return showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                        title: Text('info'.tr),
+                                        content: Text('pashu_removed'.tr),
+                                        actions: <Widget>[
+                                          FlatButton(
+                                              child: Text(
+                                                'Ok'.tr,
+                                                style: TextStyle(
+                                                    color: primaryColor),
+                                              ),
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                                Navigator.pop(context);
+                                                Get.off(() => HomeScreen(
+                                                      selectedIndex: 0,
+                                                    ));
+                                              }),
+                                        ]);
+                                  });
+                            }).catchError((err) => print(
+                                    'removeAnimalError==>${err.toString()}')))
+                        .catchError((err) => print(
+                            'removeAnimalOuterError==>${err.toString()}'));
+                  }
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+
   showRemoveAnimalDialog(index) {
     return showDialog(
         context: context,
@@ -467,7 +676,20 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                     ),
                     onPressed: () {
                       Navigator.of(context).pop();
-                      _openAddEntryDialog(index);
+                      FirebaseFirestore.instance
+                          .collection('callingInfo')
+                          .doc(widget.animalInfo[index]['uniqueId'])
+                          .collection('interestedBuyers')
+                          .orderBy('dateOfSaving')
+                          .limit(1)
+                          .get()
+                          .then((value) {
+                        if (value.docs.length == 0) {
+                          _showPriceDialog(index);
+                        } else {
+                          _openAddEntryDialog(index);
+                        }
+                      });
                     }),
               ]);
         });

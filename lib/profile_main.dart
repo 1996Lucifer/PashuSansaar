@@ -460,7 +460,7 @@ class ProfileMainState extends State<ProfileMain>
                         ),
                         Expanded(
                             child: Padding(
-                          padding: EdgeInsets.only(top: 50.0),
+                          padding: EdgeInsets.only(top: 30.0),
                           child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -476,9 +476,25 @@ class ProfileMainState extends State<ProfileMain>
                                                   fontSize: 14)),
                                         ],
                                       ),
+                                SizedBox(height: 5),
+                                userInfo['mobile'] == null
+                                    ? Text('progress_dialog_message'.tr)
+                                    : Row(
+                                        children: [
+                                          Icon(Icons.call),
+                                          SizedBox(width: 5),
+                                          Text(userInfo['mobile'],
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 14)),
+                                        ],
+                                      ),
+                                SizedBox(height: 5),
                                 userInfo['address'] == null
                                     ? Text('progress_dialog_message'.tr)
                                     : Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Icon(Icons.location_on_outlined),
                                           SizedBox(width: 5),
@@ -635,6 +651,39 @@ class ProfileMainState extends State<ProfileMain>
                     ),
                   ),
                   Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: DottedBorder(
+                          strokeWidth: 2,
+                          borderType: BorderType.RRect,
+                          radius: Radius.circular(12),
+                          padding: EdgeInsets.all(6),
+                          color: Colors.grey[500],
+                          child: ClipRRect(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(12),
+                              ),
+                              child: Container(
+                                  height: 90,
+                                  width: double.infinity,
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        flex: 5,
+                                        child: RichText(
+                                          // overflow: TextOverflow.ellipsis,
+                                          text: TextSpan(
+                                            style: TextStyle(
+                                                color: greyColor,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16),
+                                            text:
+                                                'इस सप्ताह लिंक रेफरल के विजेता का \nनाम :${widget.refData['name']} \nपता : ${widget.refData['address']} \nतारीख : ${widget.refData['dateOfSaving'].toString()}',
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ))))),
+                  Padding(
                     padding: const EdgeInsets.all(12.0),
                     child: DottedBorder(
                       strokeWidth: 2,
@@ -661,7 +710,7 @@ class ProfileMainState extends State<ProfileMain>
                                         fontWeight: FontWeight.bold,
                                         fontSize: 16),
                                     text:
-                                        'इस सप्ताह लिंक रेफरल के विजेता का \nनाम :${widget.refData['name']} \nपता : ${widget.refData['address']} \nतारीख : ${widget.refData['dateOfSaving'].toString()}'  ,
+                                        'इस सप्ताह लिंक रेफरल के विजेता का \nनाम :${widget.refData['name']} \nपता : ${widget.refData['address']} \nतारीख : ${widget.refData['dateOfSaving'].toString()}',
                                   ),
                                 ),
                               ),
