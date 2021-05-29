@@ -32,6 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List _animalInfo = [], _sellingAnimalInfo = [];
   Map _profileData = {};
+  Map _referralWinnerData = {};
   final geo = Geoflutterfire();
   PageController _pageController;
   String _referralUniqueValue = '', _mobileNumber = '';
@@ -290,7 +291,40 @@ class _HomeScreenState extends State<HomeScreen> {
         'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
       });
     }
+
     if (!_checkReferral) initReferrerDetails(_profileData['mobile']);
+
+    getReferralWinnerInfo();
+  }
+
+  getReferralWinnerInfo() async {
+    try {
+      await FirebaseFirestore.instance
+          .collection("referralWinner")
+          .limit(1)
+          .orderBy('dateOfSaving', descending: true)
+          .get(GetOptions(source: Source.serverAndCache))
+          .then(
+        (value) {
+          setState(() {
+            _referralWinnerData = value.docs[0].data();
+          });
+        },
+      );
+    } catch (e) {
+      FirebaseFirestore.instance
+          .collection('logger')
+          .doc(_mobileNumber)
+          .collection('home-profile-main')
+          .doc()
+          .set({
+        'issue': e.toString(),
+        'userId': FirebaseAuth.instance.currentUser == null
+            ? ''
+            : FirebaseAuth.instance.currentUser.uid,
+        'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
+      });
+    }
   }
 
   void _onItemTapped(int index) {
@@ -357,10 +391,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     userName: _profileData['name'],
                     userMobileNumber: _profileData['mobile']),
                 ProfileMain(
-                    profileData: _profileData,
-                    sellingAnimalInfo: _sellingAnimalInfo,
-                    userName: _profileData['name'],
-                    userMobileNumber: _profileData['mobile']),
+                  profileData: _profileData,
+                  sellingAnimalInfo: _sellingAnimalInfo,
+                  userName: _profileData['name'],
+                  userMobileNumber: _profileData['mobile'],
+                  refData: _referralWinnerData,
+                ),
               ]),
           bottomNavigationBar: BottomNavigationBar(
             items: <BottomNavigationBarItem>[
