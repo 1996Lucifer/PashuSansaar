@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:core';
+import 'package:another_flushbar/flushbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
@@ -640,6 +641,11 @@ class _BuyAnimalState extends State<BuyAnimal>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    pr = new ProgressDialog(context,
+        type: ProgressDialogType.Normal, isDismissible: false);
+
+    pr.style(message: 'progress_dialog_message'.tr);
+
     return SafeArea(
       child: RepaintBoundary(
         key: previewContainer,
@@ -2063,16 +2069,6 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                       .tr));
                                             else {
                                               _tempAnimalList = [];
-                                              pr = new ProgressDialog(context,
-                                                  type:
-                                                      ProgressDialogType.Normal,
-                                                  isDismissible: false);
-
-                                              pr.style(
-                                                  message:
-                                                      'progress_dialog_message'
-                                                          .tr);
-                                              pr.show();
 
                                               try {
                                                 var address = await Geocoder
@@ -2081,7 +2077,6 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                         _locationController
                                                             .text);
 
-                                                // .then((value) {
                                                 var first = address.first;
                                                 setState(() {
                                                   _userLocality =
@@ -2095,20 +2090,16 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                 });
                                                 _getLocationBasedList(
                                                     context, first);
-
-                                                // pr.hide();
-                                                // Navigator.pop(context);
                                               } catch (e) {
-                                                pr.hide();
-                                                Navigator.pop(context);
-
                                                 print('locationerro==> ' +
                                                     e.toString());
-                                                return ScaffoldMessenger.of(
-                                                        context)
-                                                    .showSnackBar(SnackBar(
-                                                        content: Text(
-                                                            'चुनाव में एक भी पशु उपलब्ध नहीं है, इसलिए सभी पशु दिखाए जा रहे है |')));
+                                                Navigator.of(context).pop();
+                                                Flushbar(
+                                                  message:
+                                                      "no_animal_present".tr,
+                                                  duration:
+                                                      Duration(seconds: 2),
+                                                )..show(context);
                                               }
                                             }
                                           }
@@ -2220,6 +2211,7 @@ class _BuyAnimalState extends State<BuyAnimal>
 
     try {
       List district = [];
+      _tempAnimalList = [];
       RemoteConfig remoteConfig = await RemoteConfig.instance;
       await remoteConfig.fetch(expiration: const Duration(seconds: 0));
       await remoteConfig.activateFetched();
@@ -2230,12 +2222,14 @@ class _BuyAnimalState extends State<BuyAnimal>
         district.addIf(element[first.subAdminArea ?? first.locality] != null,
             element[first.subAdminArea ?? first.locality]);
       });
+      pr.show();
       if (district.isEmpty ||
           !district[0].contains(first.subAdminArea ?? first.locality)) {
         Stream<List<DocumentSnapshot>> stream = geo
             .collection(
-                collectionRef:
-                    FirebaseFirestore.instance.collection("buyingAnimalList1"))
+                collectionRef: FirebaseFirestore.instance
+                    .collection("buyingAnimalList1")
+                    .where('isValidUser', isEqualTo: 'Approved'))
             .within(
                 center: geo.point(
                     latitude: first.coordinates.latitude,
@@ -2246,25 +2240,21 @@ class _BuyAnimalState extends State<BuyAnimal>
 
         stream.listen((List<DocumentSnapshot> documentList) {
           print("=-=-=12==" + documentList.length.toString());
-          List _temp = [];
-          documentList.forEach((e) {
-            _temp.addIf(e['isValidUser'] == 'Approved', e);
-            print('=-=-=-' + e.reference.id);
-            print('=-=-=-' + e.toString());
-          });
           if (_tempAnimalList.length == 0) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text(
-                    'चुनाव में एक भी पशु उपलब्ध नहीं है, इसलिए सभी पशु दिखाए जा रहे है |')));
+            Flushbar(
+              message: "no_animal_present".tr,
+              duration: Duration(seconds: 2),
+            )..show(context);
           }
 
           setState(() {
             lastDocument = '';
-            _resetFilterData = _tempAnimalList = _temp;
+            _resetFilterData = _tempAnimalList = documentList;
             _tempAnimalList
                 .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
           });
-          pr.hide();
+          if (pr.isShowing()) pr.hide();
+          // pr.hide();
           Navigator.pop(context);
         });
       } else {
@@ -2289,15 +2279,14 @@ class _BuyAnimalState extends State<BuyAnimal>
                 .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
           });
 
-          pr.hide();
+          // pr.hide();
+          if (pr.isShowing()) pr.hide();
           Navigator.pop(context);
           print("=-=-=" + value.docs.length.toString());
         });
       }
     } catch (e) {
-      pr.hide();
       Navigator.pop(context);
-
       print('=-=Error-=->>>' + e.toString());
     }
   }
@@ -2440,22 +2429,22 @@ class _BuyAnimalState extends State<BuyAnimal>
                               minimumVersion: 25,
                             ));
                     final Uri dynamicUrl = await parameters.buildUrl();
-                    await takeScreenShot(_list[index]['uniqueId']);
+                    // await takeScreenShot(_list[index]['uniqueId']);
 
-                    Share.shareFiles([fileUrl.path],
-                        mimeTypes: ['images/png'],
-                        text:
-                            "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar} \n\n ${dynamicUrl.toString()}",
-                        subject: 'पशु की जानकारी');
+                    // Share.shareFiles([fileUrl.path],
+                    //     mimeTypes: ['images/png'],
+                    //     text:
+                    //         "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar} \n\n ${dynamicUrl.toString()}",
+                    //     subject: 'पशु की जानकारी');
 
                     // Share.shareFiles([image],
                     //     mimeTypes: ['images/jpg'],
                     //     text:
                     //         "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar} \n\n ${dynamicUrl.toString()}",
                     //     subject: 'Share Animal Info');
-                    // Share.share(
-                    //     "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar} \n\n ${dynamicUrl.toString()}",
-                    //     subject: 'Share Animal Info');
+                    Share.share(
+                        "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar} \n\n ${dynamicUrl.toString()}",
+                        subject: 'Share Animal Info');
                   },
                   icon: Icon(Icons.share, color: Colors.white, size: 14),
                   label: Text('share'.tr,
@@ -2891,10 +2880,10 @@ class _BuyAnimalState extends State<BuyAnimal>
 
                                     Navigator.pop(context);
                                     if (_tempAnimalList.length == 0) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(SnackBar(
-                                              content: Text(
-                                                  'चुनाव में एक भी पशु उपलब्ध नहीं है, इसलिए सभी पशु दिखाए जा रहे है |')));
+                                      Flushbar(
+                                        message: "no_animal_present".tr,
+                                        duration: Duration(seconds: 2),
+                                      )..show(context);
 
                                       setState(() {
                                         _tempAnimalList = _resetFilterData;

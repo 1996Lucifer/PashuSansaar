@@ -101,6 +101,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   _getDistrictList() async {
+    pr.show();
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     List district = [];
@@ -148,17 +150,12 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       final now = DateTime.now();
 
-      pr = new ProgressDialog(context,
-          type: ProgressDialogType.Normal, isDismissible: false);
-
-      pr.style(message: 'progress_dialog_message'.tr);
-      pr.show();
-
       if (districtList.isEmpty) {
         Stream<List<DocumentSnapshot>> stream = geo
             .collection(
-                collectionRef:
-                    FirebaseFirestore.instance.collection("buyingAnimalList1"))
+                collectionRef: FirebaseFirestore.instance
+                    .collection("buyingAnimalList1")
+                    .where('isValidUser', isEqualTo: 'Approved'))
             .within(
                 center: geo.point(latitude: lat, longitude: long),
                 radius: 50,
@@ -166,19 +163,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 strictMode: true);
 
         stream.listen((List<DocumentSnapshot> documentList) {
-          List _temp = [];
-          documentList.forEach((e) {
-            _temp.addIf(e['isValidUser'] == 'Approved', e);
-            print('=-=-=-' + e.reference.id);
-            print('=-=-=-' + e.toString());
-          });
+          // List _temp = [];
+          // documentList.forEach((e) {
+          //   _temp.addIf(e['isValidUser'] == 'Approved', e);
+          // });
           setState(() {
-            _animalInfo = _temp;
+            _animalInfo = documentList;
             _animalInfo
                 .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
           });
           pr.hide();
-          print("=-=-=" + documentList.length.toString());
+          // if (pr.isShowing()) pr.hide();
         });
       } else {
         FirebaseFirestore.instance
@@ -198,11 +193,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
           });
           pr.hide();
-          print("=-=-=" + value.docs.length.toString());
+          // if (pr.isShowing()) pr.hide();
         });
       }
     } catch (e) {
       print('=-=Error-Home=->>>' + e.toString());
+      // if (pr.isShowing()) pr.hide();
 
       FirebaseFirestore.instance
           .collection('logger')
@@ -217,6 +213,10 @@ class _HomeScreenState extends State<HomeScreen> {
         'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
       });
     }
+
+    print('=-=-==-=' + pr.isShowing().toString());
+
+    // if (pr.isShowing()) pr.hide();
 
     getAnimalSellingInfo();
   }
@@ -301,32 +301,6 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  getScreenOnSelection() {
-    switch (widget.selectedIndex) {
-      case 0:
-        return BuyAnimal(
-            animalInfo: _animalInfo,
-            userName: _profileData['name'],
-            userMobileNumber: _profileData['mobile'],
-            userImage: _profileData['image']);
-        break;
-      case 1:
-        return SellAnimalMain(
-            sellingAnimalInfo: _sellingAnimalInfo,
-            userName: _profileData['name'],
-            userMobileNumber: _profileData['mobile']);
-        break;
-      case 2:
-        return ProfileMain(
-            profileData: _profileData,
-            sellingAnimalInfo: _sellingAnimalInfo,
-            userName: _profileData['name'],
-            userMobileNumber: _profileData['mobile']);
-        break;
-      default:
-    }
-  }
-
   Future<bool> _onWillPop() {
     if (widget.selectedIndex == 0) {
       return showDialog(
@@ -359,6 +333,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    pr = new ProgressDialog(context,
+        type: ProgressDialogType.Normal, isDismissible: false);
+
+    pr.style(message: 'progress_dialog_message'.tr);
+    // if (pr.isShowing()) pr.hide();
+
     return WillPopScope(
         onWillPop: _onWillPop,
         child: Scaffold(

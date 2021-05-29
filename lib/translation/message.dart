@@ -250,11 +250,14 @@ class Messages extends Translations {
           'sold_to': 'इसको बेचा',
           'tell_price': 'कितने में बेचीं ?',
           'empty_removal_price_error': 'कृपया दाम डाले',
-          'removal_price_error': 'आपके पशु बेचने का दाम गलत लग रहा हैं, कृपया सही दाम डाले',
+          'removal_price_error':
+              'आपके पशु बेचने का दाम गलत लग रहा हैं, कृपया सही दाम डाले',
           // 'removal_price_error': 'galti @minPrice and @maxPrice',
           'tell_price_with_name': '@name को कितने में बेचीं ?',
           'pashu_removed': 'आपका पशु हटा दिया गया हैं',
-          'cancel': 'कैंसिल करे'
+          'cancel': 'कैंसिल करे',
+          'no_animal_present':
+              'चुनाव में एक भी पशु उपलब्ध नहीं है, इसलिए सभी पशु दिखाए जा रहे है |'
         }
       };
 }

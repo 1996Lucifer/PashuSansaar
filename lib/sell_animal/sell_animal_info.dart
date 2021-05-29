@@ -597,7 +597,9 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                             'soldFromApp': false,
                             'price': _price
                           },
-                          'isValidUser': 'RemovedByUser'
+                          'isValidUser': 'RemovedByUser',
+                          'dateOfUpdation':
+                              ReusableWidgets.dateTimeToEpoch(DateTime.now())
                         })
                         .then((value) => FirebaseFirestore.instance
                                 .collection('buyingAnimalList1')
@@ -608,9 +610,13 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                                 'soldFromApp': false,
                                 'price': _price
                               },
-                              'isValidUser': 'RemovedByUser'
+                              'isValidUser': 'RemovedByUser',
+                              'dateOfUpdation': ReusableWidgets.dateTimeToEpoch(
+                                  DateTime.now())
                             }).then((value) {
                               pr.hide();
+                              Navigator.of(context).pop();
+
                               return showDialog(
                                   context: context,
                                   builder: (context) {
@@ -625,11 +631,17 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                                                     color: primaryColor),
                                               ),
                                               onPressed: () {
-                                                Navigator.pop(context);
-                                                Navigator.pop(context);
-                                                Get.off(() => HomeScreen(
+                                                Navigator.of(context).pop();
+                                                Get.offAll(() => HomeScreen(
                                                       selectedIndex: 0,
                                                     ));
+                                                // Navigator.pushReplacement(
+                                                //     context,
+                                                //     MaterialPageRoute(
+                                                //         builder: (context) =>
+                                                //             HomeScreen(
+                                                //               selectedIndex: 0,
+                                                //             )));
                                               }),
                                         ]);
                                   });
