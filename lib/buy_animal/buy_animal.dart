@@ -66,7 +66,8 @@ class _BuyAnimalState extends State<BuyAnimal>
   String _userLocality = '';
   TextEditingController _locationController = TextEditingController();
   String whatsappText = '';
-  ScrollController _scrollController = ScrollController();
+  ScrollController _scrollController =
+      ScrollController(keepScrollOffset: false);
   String directory = '';
   String url1 = '', url2 = '', url3 = '', url4 = '';
   bool _isLoading = false;
@@ -650,16 +651,6 @@ class _BuyAnimalState extends State<BuyAnimal>
       child: RepaintBoundary(
         key: previewContainer,
         child: Scaffold(
-          // floatingActionButton: _showBackToTopButton == false
-          //     ? null
-          //     : FloatingActionButton(
-          //         child: Icon(
-          //           Icons.arrow_upward,
-          //         ),
-          //         onPressed: () => _scrollController.jumpTo(0)
-          //         // .animateTo(0,
-          //         //     duration: Duration(seconds: 2), curve: Curves.linear),
-          //         ),
           backgroundColor: Colors.grey[100],
           body: Stack(
             children: [
@@ -681,6 +672,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                               alignment: Alignment.bottomCenter,
                               children: [
                                 ListView.builder(
+                                    key: ObjectKey(_tempAnimalList[0]),
                                     padding: EdgeInsets.only(bottom: 60),
                                     controller: _scrollController,
                                     physics: BouncingScrollPhysics(),
@@ -1316,6 +1308,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                               alignment: Alignment.bottomCenter,
                               children: [
                                 ListView.builder(
+                                    key: ObjectKey(widget.animalInfo[0]),
                                     padding: EdgeInsets.only(bottom: 60),
                                     controller: _scrollController,
                                     physics: BouncingScrollPhysics(),
@@ -2068,7 +2061,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                   Text('error_length_zipcode'
                                                       .tr));
                                             else {
-                                              _tempAnimalList = [];
+                                              _tempAnimalList.clear();
 
                                               try {
                                                 var address = await Geocoder
@@ -2211,7 +2204,6 @@ class _BuyAnimalState extends State<BuyAnimal>
 
     try {
       List district = [];
-      _tempAnimalList = [];
       RemoteConfig remoteConfig = await RemoteConfig.instance;
       await remoteConfig.fetch(expiration: const Duration(seconds: 0));
       await remoteConfig.activateFetched();
@@ -2255,7 +2247,7 @@ class _BuyAnimalState extends State<BuyAnimal>
           });
           if (pr.isShowing()) pr.hide();
           // pr.hide();
-          Navigator.pop(context);
+          Navigator.of(context).pop();
         });
       } else {
         FirebaseFirestore.instance
@@ -2281,7 +2273,7 @@ class _BuyAnimalState extends State<BuyAnimal>
 
           // pr.hide();
           if (pr.isShowing()) pr.hide();
-          Navigator.pop(context);
+          Navigator.of(context).pop();
           print("=-=-=" + value.docs.length.toString());
         });
       }
@@ -2429,22 +2421,23 @@ class _BuyAnimalState extends State<BuyAnimal>
                               minimumVersion: 25,
                             ));
                     final Uri dynamicUrl = await parameters.buildUrl();
-                    // await takeScreenShot(_list[index]['uniqueId']);
+                    await takeScreenShot(_list[index]['uniqueId']);
 
-                    // Share.shareFiles([fileUrl.path],
-                    //     mimeTypes: ['images/png'],
-                    //     text:
-                    //         "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar} \n\n ${dynamicUrl.toString()}",
-                    //     subject: 'पशु की जानकारी');
+                    Share.shareFiles([fileUrl.path],
+                        mimeTypes: ['images/png'],
+                        text:
+                            "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
+                        // "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar} \n\n ${dynamicUrl.toString()}",
+                        subject: 'पशु की जानकारी');
 
                     // Share.shareFiles([image],
                     //     mimeTypes: ['images/jpg'],
                     //     text:
                     //         "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar} \n\n ${dynamicUrl.toString()}",
                     //     subject: 'Share Animal Info');
-                    Share.share(
-                        "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar} \n\n ${dynamicUrl.toString()}",
-                        subject: 'Share Animal Info');
+                    // Share.share(
+                    //     "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar} \n\n ${dynamicUrl.toString()}",
+                    //     subject: 'Share Animal Info');
                   },
                   icon: Icon(Icons.share, color: Colors.white, size: 14),
                   label: Text('share'.tr,

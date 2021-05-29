@@ -60,7 +60,6 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
     super.initState();
   }
 
-
   getLocationLocate() async {
     Location location = new Location();
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -407,7 +406,8 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                                 'dateOfCreation': DateFormat()
                                     .add_yMMMd()
                                     .add_jm()
-                                    .format(DateTime.now())
+                                    .format(DateTime.now()),
+                                'zipcode': zipCodeController.text ?? ''
                               }).then((result) {
                                 pr.hide().then(
                                   (isHidden) {

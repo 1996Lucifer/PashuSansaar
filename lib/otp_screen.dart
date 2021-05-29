@@ -389,47 +389,42 @@ class _OTPScreenState extends State<OTPScreen>
                                 smsCode: currentText))
                             .then((value) async {
                           if (value.user != null) {
-                            FirebaseFirestore.instance
-                                .collection("userInfo")
-                                .doc(FirebaseAuth.instance.currentUser.uid)
-                                .get(GetOptions(source: Source.serverAndCache))
-                                .then((profile) {
-                              profile['alreadyUser']
-                                  ? Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              UserDetailsUpdate(
-                                                currentUser: value.user.uid,
-                                                mobile: widget.phoneNumber,
-                                                name: profile['name'],
-                                                referralCode: profile[
-                                                    'enteredReferralCode'],
-                                              )))
-                                  : Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              UserDetailsFetch(
+                            try {
+                              FirebaseFirestore.instance
+                                  .collection("userInfo")
+                                  .doc(FirebaseAuth.instance.currentUser.uid)
+                                  .get(
+                                      GetOptions(source: Source.serverAndCache))
+                                  .then((profile) {
+                                profile.exists && profile['alreadyUser']
+                                    ? Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                UserDetailsUpdate(
                                                   currentUser: value.user.uid,
-                                                  mobile: widget.phoneNumber)));
-                            });
-
-                            // ((FirebaseAuth.instance.currentUser.uid ==
-                            //             value.user.uid) &&
-                            //         _checkUserLoginState)
-                            //     ? Navigator.pushReplacement(
-                            //         context,
-                            //         MaterialPageRoute(
-                            //             builder: (context) => HomeScreen(
-                            //                   selectedIndex: 0,
-                            //                 )))
-                            //     : Navigator.pushReplacement(
-                            //         context,
-                            //         MaterialPageRoute(
-                            //             builder: (context) => UserDetailsFetch(
-                            //                 currentUser: value.user.uid,
-                            //                 mobile: widget.phoneNumber)));
+                                                  mobile: widget.phoneNumber,
+                                                  name: profile['name'],
+                                                  referralCode: profile[
+                                                      'enteredReferralCode'],
+                                                )))
+                                    : Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                UserDetailsFetch(
+                                                    currentUser: value.user.uid,
+                                                    mobile:
+                                                        widget.phoneNumber)));
+                              });
+                            } catch (e) {
+                              Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => UserDetailsFetch(
+                                          currentUser: value.user.uid,
+                                          mobile: widget.phoneNumber)));
+                            }
                           }
                         });
                       } catch (e) {

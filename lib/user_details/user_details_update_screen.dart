@@ -392,7 +392,7 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
                               FirebaseFirestore.instance
                                   .collection("userInfo")
                                   .doc(widget.currentUser)
-                                  .set({
+                                  .update({
                                 // "currentUser": widget.currentUser,
                                 "name": nameController.text,
                                 // "mobile": widget.mobile,
@@ -414,7 +414,8 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
                                 'dateOfUpdation': DateFormat()
                                     .add_yMMMd()
                                     .add_jm()
-                                    .format(DateTime.now())
+                                    .format(DateTime.now()),
+                                'zipcode': zipCodeController.text ?? ''
                               }).then((result) {
                                 pr.hide().then(
                                   (isHidden) {
