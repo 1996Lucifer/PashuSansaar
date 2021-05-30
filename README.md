@@ -1,6 +1,6 @@
 # pashusansaar
 
-A new Flutter project.
+Selling and buying of animal
 
 ## Getting Started
 
