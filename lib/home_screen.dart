@@ -145,7 +145,23 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     _getDistrictList();
+    // dataUpdation();
   }
+
+  // dataUpdation() async {
+  //   await FirebaseFirestore.instance.collection("userInfo").get().then(
+  //     (value) {
+  //       value.docs.forEach((element) {
+  //         FirebaseFirestore.instance
+  //             .collection("userInfo")
+  //             .doc(element.reference.id)
+  //             .update({
+  //               'dateOfCreation': FirebaseAuth.instance.
+  //             });
+  //       });
+  //     },
+  //   );
+  // }
 
   getInitialInfo() async {
     try {

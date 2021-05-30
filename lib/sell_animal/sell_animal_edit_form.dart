@@ -218,28 +218,27 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                 if (size <= 300.0) {
                   compressedFile = await FlutterNativeImage.compressImage(
                       file.path,
-                      quality: 90);
+                      quality: 100);
                 } else if (size > 300.0 && size <= 600.0) {
                   compressedFile = await FlutterNativeImage.compressImage(
                       file.path,
-                      quality: 80);
+                      quality: 85);
                 } else if (size > 600.0 && size <= 1000.0) {
                   compressedFile = await FlutterNativeImage.compressImage(
                       file.path,
-                      quality: 65);
+                      quality: 75);
                 } else {
                   compressedFile = await FlutterNativeImage.compressImage(
                       file.path,
-                      quality: 60);
+                      quality: 65);
                 }
                 break;
               case 1:
                 compressedFile = await FlutterNativeImage.compressImage(
                     file.path,
-                    quality: 55);
+                    quality: 60);
                 break;
             }
-
             // setState(() {
             //   imagesFileUpload['image$index'] = file.path;
             // });
@@ -283,28 +282,27 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                 if (size <= 300.0) {
                   compressedFile = await FlutterNativeImage.compressImage(
                       file.path,
-                      quality: 90);
+                      quality: 100);
                 } else if (size > 300.0 && size <= 600.0) {
                   compressedFile = await FlutterNativeImage.compressImage(
                       file.path,
-                      quality: 80);
+                      quality: 85);
                 } else if (size > 600.0 && size <= 1000.0) {
                   compressedFile = await FlutterNativeImage.compressImage(
                       file.path,
-                      quality: 65);
+                      quality: 75);
                 } else {
                   compressedFile = await FlutterNativeImage.compressImage(
                       file.path,
-                      quality: 60);
+                      quality: 65);
                 }
                 break;
               case 1:
                 compressedFile = await FlutterNativeImage.compressImage(
                     file.path,
-                    quality: 55);
+                    quality: 60);
                 break;
             }
-
             // setState(() {
             //   imagesFileUpload['image$index'] = file.path;
             // });

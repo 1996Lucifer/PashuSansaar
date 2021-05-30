@@ -411,10 +411,12 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
                                 // 'appVersion': prefs
                                 //     .getStringList('currentVersion')
                                 //     .join('.'),
-                                'dateOfUpdation': DateFormat()
-                                    .add_yMMMd()
-                                    .add_jm()
-                                    .format(DateTime.now()),
+                                'dateOfCreation': FirebaseAuth
+                                    .instance.currentUser.metadata.creationTime
+                                    .toString(),
+                                'dateOfUpdation': FirebaseAuth.instance
+                                    .currentUser.metadata.lastSignInTime
+                                    .toString(),
                                 'zipcode': zipCodeController.text ?? ''
                               }).then((result) {
                                 pr.hide().then(

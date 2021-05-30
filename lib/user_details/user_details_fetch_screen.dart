@@ -403,10 +403,9 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                                 'appVersion': prefs
                                     .getStringList('currentVersion')
                                     .join('.'),
-                                'dateOfCreation': DateFormat()
-                                    .add_yMMMd()
-                                    .add_jm()
-                                    .format(DateTime.now()),
+                                'dateOfCreation': FirebaseAuth
+                                    .instance.currentUser.metadata.creationTime
+                                    .toString(),
                                 'zipcode': zipCodeController.text ?? ''
                               }).then((result) {
                                 pr.hide().then(
