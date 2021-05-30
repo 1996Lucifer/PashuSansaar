@@ -2,12 +2,12 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
-import 'package:geodesy/geodesy.dart';
 import 'package:intl/intl.dart';
 import 'package:pashusansaar/buy_animal/buy_animal.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+// import 'package:pashusansaar/utils/custom_progress_dialog.dart';
 import 'package:pashusansaar/utils/global.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:progress_dialog/progress_dialog.dart';
@@ -17,7 +17,6 @@ import 'sell_animal/sell_animal_main.dart';
 import 'package:get/get.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:geocoder/geocoder.dart' as geoCoder;
-// import 'dart:math' show cos, sqrt, asin;
 
 // ignore: must_be_immutable
 class HomeScreen extends StatefulWidget {
@@ -30,12 +29,13 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   ProgressDialog pr;
+
   List _animalInfo = [], _sellingAnimalInfo = [];
   Map _profileData = {};
+  Map _referralWinnerData = {};
   final geo = Geoflutterfire();
   PageController _pageController;
   String _referralUniqueValue = '', _mobileNumber = '';
-  // QueryDocumentSnapshot _lastAnimal;
   bool _checkReferral = false;
   double lat = 0.0, long = 0.0;
 
@@ -101,6 +101,34 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  _getDistrictList() async {
+    pr.show();
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    List district = [];
+    RemoteConfig remoteConfig = await RemoteConfig.instance;
+    await remoteConfig.fetch(expiration: const Duration(seconds: 0));
+    await remoteConfig.activateFetched();
+    var address = await geoCoder.Geocoder.local.findAddressesFromCoordinates(
+        geoCoder.Coordinates(
+            prefs.getDouble('latitude'), prefs.getDouble('longitude')));
+    var first = address.first;
+
+    json
+        .decode(remoteConfig.getValue("district_map").asString())
+        .forEach((element) {
+      district.addIf(element[first.subAdminArea ?? first.locality] != null,
+          element[first.subAdminArea ?? first.locality]);
+    });
+
+    setState(() {
+      districtList = district.isEmpty ? [] : district[0];
+    });
+
+    getInitialInfo();
+  }
+
   loginSetup() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -116,94 +144,35 @@ class _HomeScreenState extends State<HomeScreen> {
       long = prefs.getDouble('longitude');
     });
 
-    getInitialInfo();
-    // updateData();
+    _getDistrictList();
+    // dataUpdation();
   }
 
-  // updateData() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-
-  //   var addresses = await geoCoder.Geocoder.local.findAddressesFromCoordinates(
-  //       geoCoder.Coordinates(25.5314475, 83.2280148));
-  //   var first = addresses.first;
-
-  //   print(first);
-
-  // await FirebaseFirestore.instance
-  //     .collection("buyingAnimalList1")
-  //     .orderBy('dateOfSaving')
-  //     .where('dateOfSaving', isLessThanOrEqualTo: '1621692916', isGreaterThanOrEqualTo: '1621555200')
-  //     .get()
-  //     .then((value) => value.docs.forEach((element) async {
-  //           var addresses = await geoCoder.Geocoder.local
-  //               .findAddressesFromCoordinates(geoCoder.Coordinates(
-  //                   element['userLatitude'], element['userLongitude']));
-  //           var first = addresses.first;
-  //           // print((first.subAdminArea ?? first.locality));
-  //           await FirebaseFirestore.instance
-  //               .collection("buyingAnimalList1")
-  //               .doc(element.reference.id)
-  //               .update({
-  //             'district': first.subAdminArea ?? first.locality,
-  //             'zipCode': first.postalCode
-  //           });
-  //         }));
-
-  // .where('uniqueId',
-  //     isLessThanOrEqualTo: '10000000') // 00000000 - 10000000
-  // .where('uniqueId',
-  //     isGreaterThan: '10000000', isLessThanOrEqualTo: '20000000') // 30 - 31
-  // .where('uniqueId',
-  //     isGreaterThan: '20000000', isLessThanOrEqualTo: '30000000') // 30 - 31
-  // .where('uniqueId',
-  //     isGreaterThan: '30000000', isLessThanOrEqualTo: '40000000') // karna hai aaj
-  // .where('uniqueId',
-  //     isGreaterThan: '40000000', isLessThanOrEqualTo: '50000000') // karna hai aaj
-  // .where('uniqueId',
-  //     isGreaterThan: '50000000', isLessThanOrEqualTo: '60000000') // karna hai aaj
-  // .where('uniqueId',
-  //     isGreaterThan: '60000000', isLessThanOrEqualTo: '70000000') // karna hai aaj
-  // .where('uniqueId',
-  //     isGreaterThan: '70000000', isLessThanOrEqualTo: '80000000') // karna hai aaj
-  // .where('uniqueId',
-  //     isGreaterThan: '80000000', isLessThanOrEqualTo: '90000000') // karna hai aaj
-  // .where('uniqueId', isGreaterThan: '90000000') // k
-
-  // .get()
-  // .then((value) => value.docs.forEach((element) async {}));
+  // dataUpdation() async {
+  //   await FirebaseFirestore.instance.collection("userInfo").get().then(
+  //     (value) {
+  //       value.docs.forEach((element) {
+  //         FirebaseFirestore.instance
+  //             .collection("userInfo")
+  //             .doc(element.reference.id)
+  //             .update({
+  //               'dateOfCreation': FirebaseAuth.instance.
+  //             });
+  //       });
+  //     },
+  //   );
   // }
 
   getInitialInfo() async {
     try {
-      pr = new ProgressDialog(context,
-          type: ProgressDialogType.Normal, isDismissible: false);
-
-      pr.style(message: 'progress_dialog_message'.tr);
-      pr.show();
-
-      SharedPreferences prefs = await SharedPreferences.getInstance();
       final now = DateTime.now();
-      List district = [];
-      RemoteConfig remoteConfig = await RemoteConfig.instance;
-      await remoteConfig.fetch(expiration: const Duration(seconds: 0));
-      await remoteConfig.activateFetched();
-      var address = await geoCoder.Geocoder.local.findAddressesFromCoordinates(
-          geoCoder.Coordinates(
-              prefs.getDouble('latitude'), prefs.getDouble('longitude')));
-      var first = address.first;
 
-      json
-          .decode(remoteConfig.getValue("district_map").asString())
-          .forEach((element) {
-        district.addIf(element[first.subAdminArea ?? first.locality] != null,
-            element[first.subAdminArea ?? first.locality]);
-      });
-
-      if (district.isEmpty) {
+      if (districtList.isEmpty) {
         Stream<List<DocumentSnapshot>> stream = geo
             .collection(
                 collectionRef: FirebaseFirestore.instance
-                    .collection("buyingAnimalList1"))
+                    .collection("buyingAnimalList1")
+                    .where('isValidUser', isEqualTo: 'Approved'))
             .within(
                 center: geo.point(latitude: lat, longitude: long),
                 radius: 50,
@@ -211,26 +180,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 strictMode: true);
 
         stream.listen((List<DocumentSnapshot> documentList) {
-          pr.hide();
-          List _temp = [];
-          documentList.forEach((e) {
-            // _temp.addIf(
-            //     (e.reference.id.substring(8) !=
-            //             FirebaseAuth.instance.currentUser.uid) &&
-            //         (e['isValidUser'] == 'Approved'),
-            //     e);
-            _temp.addIf(e['isValidUser'] == 'Approved', e);
-            print('=-=-=-' + e.reference.id);
-            print('=-=-=-' + e.toString());
-          });
+          // List _temp = [];
+          // documentList.forEach((e) {
+          //   _temp.addIf(e['isValidUser'] == 'Approved', e);
+          // });
           setState(() {
-            // _animalInfo = documentList;
-            _animalInfo = _temp;
+            _animalInfo = documentList;
             _animalInfo
                 .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
           });
-
-          print("=-=-=" + documentList.length.toString());
+          pr.hide();
+          // if (pr.isShowing()) pr.hide();
         });
       } else {
         FirebaseFirestore.instance
@@ -238,46 +198,24 @@ class _HomeScreenState extends State<HomeScreen> {
             .orderBy('dateOfSaving', descending: true)
             .where('dateOfSaving',
                 isLessThanOrEqualTo: ReusableWidgets.dateTimeToEpoch(now))
-            .where('district', whereIn: district[0])
+            .where('district', whereIn: districtList)
             .where('isValidUser', isEqualTo: 'Approved')
             .limit(25)
             .get(GetOptions(source: Source.serverAndCache))
             .then((value) {
-          // List _temp = [];
-          // value.docs.forEach((e) {
-          // _temp.addIf(
-          //     // e['isValidUser'] == 'Approved' &&
-          //         double.parse((Geodesy().distanceBetweenTwoGeoPoints(
-          //                         LatLng(lat, long),
-          //                         LatLng(e['userLatitude'],
-          //                             e['userLongitude'])) /
-          //                     1000)
-          //                 .toStringAsPrecision(2)) <=
-          //             50.0,
-          //     e);
-
-          //   print('=-=-=-' + e.reference.id);
-          //   print('=-=-=->' + e.toString());
-          // });
-
-          // print('=-=-=-<>' + value.docs.last['dateOfSaving'].toString());
-
-          pr.hide();
           setState(() {
             lastDocument = value.docs.last['dateOfSaving'];
-            districtList = district[0];
             _animalInfo = value.docs;
-            // _animalInfo = _temp;
             _animalInfo
                 .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
           });
-
-          print("=-=-=" + value.docs.length.toString());
+          pr.hide();
+          // if (pr.isShowing()) pr.hide();
         });
       }
     } catch (e) {
       print('=-=Error-Home=->>>' + e.toString());
-      // pr.hide();
+      // if (pr.isShowing()) pr.hide();
 
       FirebaseFirestore.instance
           .collection('logger')
@@ -292,6 +230,10 @@ class _HomeScreenState extends State<HomeScreen> {
         'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
       });
     }
+
+    print('=-=-==-=' + pr.isShowing().toString());
+
+    // if (pr.isShowing()) pr.hide();
 
     getAnimalSellingInfo();
   }
@@ -365,7 +307,40 @@ class _HomeScreenState extends State<HomeScreen> {
         'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
       });
     }
+
     if (!_checkReferral) initReferrerDetails(_profileData['mobile']);
+
+    getReferralWinnerInfo();
+  }
+
+  getReferralWinnerInfo() async {
+    try {
+      await FirebaseFirestore.instance
+          .collection("referralWinner")
+          .limit(1)
+          .orderBy('dateOfSaving', descending: true)
+          .get(GetOptions(source: Source.serverAndCache))
+          .then(
+        (value) {
+          setState(() {
+            _referralWinnerData = value.docs[0].data();
+          });
+        },
+      );
+    } catch (e) {
+      FirebaseFirestore.instance
+          .collection('logger')
+          .doc(_mobileNumber)
+          .collection('home-profile-main')
+          .doc()
+          .set({
+        'issue': e.toString(),
+        'userId': FirebaseAuth.instance.currentUser == null
+            ? ''
+            : FirebaseAuth.instance.currentUser.uid,
+        'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
+      });
+    }
   }
 
   void _onItemTapped(int index) {
@@ -374,32 +349,6 @@ class _HomeScreenState extends State<HomeScreen> {
       _pageController.animateToPage(index,
           duration: Duration(milliseconds: 500), curve: Curves.easeInOutCirc);
     });
-  }
-
-  getScreenOnSelection() {
-    switch (widget.selectedIndex) {
-      case 0:
-        return BuyAnimal(
-            animalInfo: _animalInfo,
-            userName: _profileData['name'],
-            userMobileNumber: _profileData['mobile'],
-            userImage: _profileData['image']);
-        break;
-      case 1:
-        return SellAnimalMain(
-            sellingAnimalInfo: _sellingAnimalInfo,
-            userName: _profileData['name'],
-            userMobileNumber: _profileData['mobile']);
-        break;
-      case 2:
-        return ProfileMain(
-            profileData: _profileData,
-            sellingAnimalInfo: _sellingAnimalInfo,
-            userName: _profileData['name'],
-            userMobileNumber: _profileData['mobile']);
-        break;
-      default:
-    }
   }
 
   Future<bool> _onWillPop() {
@@ -434,6 +383,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    pr = new ProgressDialog(context,
+        type: ProgressDialogType.Normal, isDismissible: false);
+
+    pr.style(message: 'progress_dialog_message'.tr);
+    // if (pr.isShowing()) pr.hide();
+
     return WillPopScope(
         onWillPop: _onWillPop,
         child: Scaffold(
@@ -452,10 +407,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     userName: _profileData['name'],
                     userMobileNumber: _profileData['mobile']),
                 ProfileMain(
-                    profileData: _profileData,
-                    sellingAnimalInfo: _sellingAnimalInfo,
-                    userName: _profileData['name'],
-                    userMobileNumber: _profileData['mobile']),
+                  profileData: _profileData,
+                  sellingAnimalInfo: _sellingAnimalInfo,
+                  userName: _profileData['name'],
+                  userMobileNumber: _profileData['mobile'],
+                  refData: _referralWinnerData,
+                ),
               ]),
           bottomNavigationBar: BottomNavigationBar(
             items: <BottomNavigationBarItem>[

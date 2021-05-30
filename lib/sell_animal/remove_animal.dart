@@ -164,7 +164,9 @@ class _RemoveAnimalState extends State<RemoveAnimal> {
                         .doc(widget.listId)
                         .update({
                           'animalRemove': userMap,
-                          'isValidUser': 'RemovedByUser'
+                          'isValidUser': 'RemovedByUser',
+                          'dateOfUpdation':
+                              ReusableWidgets.dateTimeToEpoch(DateTime.now())
                         })
                         .then((value) => FirebaseFirestore.instance
                                 .collection('buyingAnimalList1')
@@ -172,9 +174,12 @@ class _RemoveAnimalState extends State<RemoveAnimal> {
                                     FirebaseAuth.instance.currentUser.uid)
                                 .update({
                               'animalRemove': userMap,
-                              'isValidUser': 'RemovedByUser'
+                              'isValidUser': 'RemovedByUser',
+                              'dateOfUpdation': ReusableWidgets.dateTimeToEpoch(
+                                  DateTime.now())
                             }).then((value) {
                               pr.hide();
+                              Navigator.of(context).pop();
                               return showDialog(
                                   context: context,
                                   builder: (context) {
@@ -189,9 +194,8 @@ class _RemoveAnimalState extends State<RemoveAnimal> {
                                                     color: primaryColor),
                                               ),
                                               onPressed: () {
-                                                Navigator.pop(context);
-                                                Navigator.pop(context);
-                                                Get.off(() => HomeScreen(
+                                                Navigator.of(context).pop();
+                                                Get.offAll(() => HomeScreen(
                                                       selectedIndex: 0,
                                                     ));
                                               }),

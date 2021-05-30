@@ -101,7 +101,7 @@ class _MyAppState extends State<MyApp> {
           context, 'error'.tr, Text('vpn_issue'.tr),
           cta: true, barrierDismissible: false);
     } else {
-      getToken();
+      getReferralCheck();
     }
   }
 
@@ -250,15 +250,6 @@ class _MyAppState extends State<MyApp> {
             ));
       },
     );
-  }
-
-  getToken() async {
-    String _token = await FirebaseMessaging.instance.getToken();
-    setState(() {
-      token = _token;
-    });
-    print(token);
-    await getReferralCheck();
   }
 
   bool logInBasedOnVersion;

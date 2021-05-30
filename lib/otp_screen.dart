@@ -3,15 +3,14 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:pashusansaar/home_screen.dart';
+import 'package:pashusansaar/user_details/user_details_update_screen.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:pashusansaar/utils/global.dart';
-import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'user_details_fetch_screen.dart';
+import 'user_details/user_details_fetch_screen.dart';
 import 'package:get/get.dart';
 import 'package:flutter_countdown_timer/index.dart';
 
@@ -390,21 +389,42 @@ class _OTPScreenState extends State<OTPScreen>
                                 smsCode: currentText))
                             .then((value) async {
                           if (value.user != null) {
-                            ((FirebaseAuth.instance.currentUser.uid ==
-                                        value.user.uid) &&
-                                    _checkUserLoginState)
-                                ? Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => HomeScreen(
-                                              selectedIndex: 0,
-                                            )))
-                                : Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => UserDetailsFetch(
-                                            currentUser: value.user.uid,
-                                            mobile: widget.phoneNumber)));
+                            try {
+                              FirebaseFirestore.instance
+                                  .collection("userInfo")
+                                  .doc(FirebaseAuth.instance.currentUser.uid)
+                                  .get(
+                                      GetOptions(source: Source.serverAndCache))
+                                  .then((profile) {
+                                profile.exists && profile['alreadyUser']
+                                    ? Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                UserDetailsUpdate(
+                                                  currentUser: value.user.uid,
+                                                  mobile: widget.phoneNumber,
+                                                  name: profile['name'],
+                                                  referralCode: profile[
+                                                      'enteredReferralCode'],
+                                                )))
+                                    : Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                UserDetailsFetch(
+                                                    currentUser: value.user.uid,
+                                                    mobile:
+                                                        widget.phoneNumber)));
+                              });
+                            } catch (e) {
+                              Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => UserDetailsFetch(
+                                          currentUser: value.user.uid,
+                                          mobile: widget.phoneNumber)));
+                            }
                           }
                         });
                       } catch (e) {
@@ -414,20 +434,8 @@ class _OTPScreenState extends State<OTPScreen>
                       }
                     }
                   },
-                  // child: Center(
-                  //     child: Text(
-                  //   "verify_button".tr,
-                  //   style: TextStyle(
-                  //       color: Colors.white,
-                  //       fontSize: 18,
-                  //       fontWeight: FontWeight.bold),
-                  // )),
                 ),
               ),
-              // decoration: BoxDecoration(
-              //   color: primaryColor,
-              //   borderRadius: BorderRadius.circular(5),
-              // ),
             ),
           ],
         ),

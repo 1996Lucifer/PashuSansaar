@@ -1,16 +1,84 @@
-import 'dart:convert';
-import 'dart:io';
-import 'dart:math';
+import 'dart:convert' show base64Decode, jsonDecode;
+import 'dart:io' show File;
+import 'dart:math' show log, pi, pow;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:geocoder/geocoder.dart';
-import 'package:pashusansaar/utils/colors.dart';
-import 'package:pashusansaar/utils/reusable_widgets.dart';
-import 'package:dropdown_search/dropdown_search.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:geocoder/geocoder.dart' show Coordinates, Geocoder;
+import 'package:pashusansaar/utils/colors.dart' show primaryColor;
+import 'package:pashusansaar/utils/reusable_widgets.dart' show ReusableWidgets;
+import 'package:dropdown_search/dropdown_search.dart' show DropdownSearch, Mode;
+import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth;
+import 'package:flutter/material.dart'
+    show
+        AlertDialog,
+        Alignment,
+        AutomaticKeepAliveClientMixin,
+        BorderRadius,
+        BouncingScrollPhysics,
+        BuildContext,
+        Card,
+        Center,
+        CircularProgressIndicator,
+        ClipRRect,
+        Color,
+        Colors,
+        Column,
+        Container,
+        CrossAxisAlignment,
+        Divider,
+        EdgeInsets,
+        Expanded,
+        FlatButton,
+        FontStyle,
+        FontWeight,
+        GestureDetector,
+        Icon,
+        IconButton,
+        Icons,
+        Image,
+        InputDecoration,
+        Key,
+        MainAxisAlignment,
+        MainAxisSize,
+        Matrix4,
+        MediaQuery,
+        Navigator,
+        Opacity,
+        OutlineInputBorder,
+        Padding,
+        Positioned,
+        Radius,
+        RaisedButton,
+        RoundedRectangleBorder,
+        Row,
+        Scaffold,
+        SingleChildScrollView,
+        SizedBox,
+        Stack,
+        State,
+        StatefulWidget,
+        Text,
+        TextEditingController,
+        TextEditingValue,
+        TextFormField,
+        TextInputType,
+        TextPosition,
+        TextSelection,
+        TextStyle,
+        Transform,
+        Visibility,
+        Widget,
+        WidgetsBinding,
+        required,
+        showDialog;
+import 'package:flutter/services.dart'
+    show
+        FilteringTextInputFormatter,
+        TextEditingValue,
+        TextInputFormatter,
+        TextInputType,
+        TextPosition,
+        TextSelection;
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:progress_dialog/progress_dialog.dart';
@@ -46,7 +114,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
   ImagePicker _picker;
   ProgressDialog pr;
   Color backgroundColor = Colors.red[50];
-  bool _showData = false;
+  bool _showData = false, _isLoading = false;
   // final _storage = new FlutterSecureStorage();
   SharedPreferences prefs;
   String uniqueId = '', isValidUser = '', userId = '';
@@ -99,8 +167,6 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                 '${_formatNumber(animalInfo['animalPrice'].replaceAll(',', ''))}');
       });
     }
-    // print("data=====" + animalInfo.toString());
-    // print("jsonDatadata=====" + jsonData[0]['animalInfo'].toString());
   }
 
   String _formatNumber(String s) =>
@@ -111,6 +177,10 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
       intl.NumberFormat.compactSimpleCurrency(locale: _locale).currencySymbol;
 
   Future<void> uploadFile(File file, String index) async {
+    setState(() {
+      _isLoading = true;
+    });
+
     await firebase_storage.FirebaseStorage.instance
         .ref('${FirebaseAuth.instance.currentUser.uid}/${uniqueId}_$index.jpg')
         .putFile(file);
@@ -121,7 +191,8 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
 
     setState(() {
       imagesUpload['image$index'] = downloadURL;
-      fileUrl = downloadURL;
+      imagesFileUpload['image$index'] = downloadURL;
+      _isLoading = false;
     });
   }
 
@@ -137,13 +208,43 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
           return null;
           break;
         default:
-          File compressedFile =
-              await FlutterNativeImage.compressImage(file.path, quality: 80);
+          await getFileSize(file.path, 1).then((val) async {
+            double size = double.parse(val.split(' ')[0]);
+            String type = val.split(' ')[1];
+            File compressedFile;
 
-          setState(() {
-            imagesFileUpload['image$index'] = file.path;
+            switch (type.compareTo('KB')) {
+              case 0:
+                if (size <= 300.0) {
+                  compressedFile = await FlutterNativeImage.compressImage(
+                      file.path,
+                      quality: 100);
+                } else if (size > 300.0 && size <= 600.0) {
+                  compressedFile = await FlutterNativeImage.compressImage(
+                      file.path,
+                      quality: 85);
+                } else if (size > 600.0 && size <= 1000.0) {
+                  compressedFile = await FlutterNativeImage.compressImage(
+                      file.path,
+                      quality: 75);
+                } else {
+                  compressedFile = await FlutterNativeImage.compressImage(
+                      file.path,
+                      quality: 65);
+                }
+                break;
+              case 1:
+                compressedFile = await FlutterNativeImage.compressImage(
+                    file.path,
+                    quality: 60);
+                break;
+            }
+            // setState(() {
+            //   imagesFileUpload['image$index'] = file.path;
+            // });
+
+            await uploadFile(compressedFile, index);
           });
-          await uploadFile(compressedFile, index);
       }
     } catch (e) {}
   }
@@ -171,7 +272,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
           return null;
           break;
         default:
-          getFileSize(file.path, 1).then((val) async {
+          await getFileSize(file.path, 1).then((val) async {
             double size = double.parse(val.split(' ')[0]);
             String type = val.split(' ')[1];
             File compressedFile;
@@ -181,7 +282,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                 if (size <= 300.0) {
                   compressedFile = await FlutterNativeImage.compressImage(
                       file.path,
-                      quality: 98);
+                      quality: 100);
                 } else if (size > 300.0 && size <= 600.0) {
                   compressedFile = await FlutterNativeImage.compressImage(
                       file.path,
@@ -189,23 +290,22 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                 } else if (size > 600.0 && size <= 1000.0) {
                   compressedFile = await FlutterNativeImage.compressImage(
                       file.path,
-                      quality: 80);
+                      quality: 75);
                 } else {
                   compressedFile = await FlutterNativeImage.compressImage(
                       file.path,
-                      quality: 70);
+                      quality: 65);
                 }
                 break;
               case 1:
                 compressedFile = await FlutterNativeImage.compressImage(
                     file.path,
-                    quality: 70);
+                    quality: 60);
                 break;
             }
-
-            setState(() {
-              imagesFileUpload['image$index'] = file.path;
-            });
+            // setState(() {
+            //   imagesFileUpload['image$index'] = file.path;
+            // });
 
             await uploadFile(compressedFile, index);
           });
@@ -703,22 +803,29 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                           : Image.network(
                               imagesUpload['image1'],
                             ),
-                      replacement: Column(children: [
-                        Opacity(
-                          opacity: 0.5,
-                          child: Image.asset(
-                            'assets/images/photouploadfront.png',
-                            height: 100,
-                          ),
-                        ),
-                        RaisedButton(
-                          onPressed: () => chooseOption('1'),
-                          child: Text(
-                            'choose_photo'.tr,
-                            style: TextStyle(color: Colors.white, fontSize: 16),
-                          ),
-                        )
-                      ]),
+                      replacement: _isLoading
+                          ? Center(
+                              child: Container(
+                                  child: CircularProgressIndicator(),
+                                  height: 50,
+                                  width: 50))
+                          : Column(children: [
+                              Opacity(
+                                opacity: 0.5,
+                                child: Image.asset(
+                                  'assets/images/photouploadfront.png',
+                                  height: 100,
+                                ),
+                              ),
+                              RaisedButton(
+                                onPressed: () => chooseOption('1'),
+                                child: Text(
+                                  'choose_photo'.tr,
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 16),
+                                ),
+                              )
+                            ]),
                     ),
                   ),
                 ),
@@ -775,22 +882,29 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                           : Image.network(
                               imagesUpload['image2'],
                             ),
-                      replacement: Column(children: [
-                        Opacity(
-                          opacity: 0.5,
-                          child: Image.asset(
-                            'assets/images/photouploadback.png',
-                            height: 100,
-                          ),
-                        ),
-                        RaisedButton(
-                          onPressed: () => chooseOption('2'),
-                          child: Text(
-                            'choose_photo'.tr,
-                            style: TextStyle(color: Colors.white, fontSize: 16),
-                          ),
-                        )
-                      ]),
+                      replacement: _isLoading
+                          ? Center(
+                              child: Container(
+                                  child: CircularProgressIndicator(),
+                                  height: 50,
+                                  width: 50))
+                          : Column(children: [
+                              Opacity(
+                                opacity: 0.5,
+                                child: Image.asset(
+                                  'assets/images/photouploadback.png',
+                                  height: 100,
+                                ),
+                              ),
+                              RaisedButton(
+                                onPressed: () => chooseOption('2'),
+                                child: Text(
+                                  'choose_photo'.tr,
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 16),
+                                ),
+                              )
+                            ]),
                     ),
                   )),
             ),
@@ -845,22 +959,29 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                           : Image.network(
                               imagesUpload['image3'],
                             ),
-                      replacement: Column(children: [
-                        Opacity(
-                          opacity: 0.5,
-                          child: Image.asset(
-                            'assets/images/photouploadside.png',
-                            height: 100,
-                          ),
-                        ),
-                        RaisedButton(
-                          onPressed: () => chooseOption('3'),
-                          child: Text(
-                            'choose_photo'.tr,
-                            style: TextStyle(color: Colors.white, fontSize: 16),
-                          ),
-                        )
-                      ]),
+                      replacement: _isLoading
+                          ? Center(
+                              child: Container(
+                                  child: CircularProgressIndicator(),
+                                  height: 50,
+                                  width: 50))
+                          : Column(children: [
+                              Opacity(
+                                opacity: 0.5,
+                                child: Image.asset(
+                                  'assets/images/photouploadside.png',
+                                  height: 100,
+                                ),
+                              ),
+                              RaisedButton(
+                                onPressed: () => chooseOption('3'),
+                                child: Text(
+                                  'choose_photo'.tr,
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 16),
+                                ),
+                              )
+                            ]),
                     ),
                   )),
             ),
@@ -916,25 +1037,32 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                           : Image.network(
                               imagesUpload['image4'],
                             ),
-                      replacement: Column(children: [
-                        Opacity(
-                            opacity: 0.5,
-                            child: Transform(
-                              alignment: Alignment.center,
-                              transform: Matrix4.rotationY(math.pi),
-                              child: Image.asset(
-                                'assets/images/photouploadside.png',
-                                height: 100,
-                              ),
-                            )),
-                        RaisedButton(
-                          onPressed: () => chooseOption('4'),
-                          child: Text(
-                            'choose_photo'.tr,
-                            style: TextStyle(color: Colors.white, fontSize: 16),
-                          ),
-                        )
-                      ]),
+                      replacement: _isLoading
+                          ? Center(
+                              child: Container(
+                                  child: CircularProgressIndicator(),
+                                  height: 50,
+                                  width: 50))
+                          : Column(children: [
+                              Opacity(
+                                  opacity: 0.5,
+                                  child: Transform(
+                                    alignment: Alignment.center,
+                                    transform: Matrix4.rotationY(math.pi),
+                                    child: Image.asset(
+                                      'assets/images/photouploadside.png',
+                                      height: 100,
+                                    ),
+                                  )),
+                              RaisedButton(
+                                onPressed: () => chooseOption('4'),
+                                child: Text(
+                                  'choose_photo'.tr,
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 16),
+                                ),
+                              )
+                            ]),
                     ),
                   )),
             ),
@@ -977,7 +1105,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
     String stmn41 = 'इसके साथ में बच्चा नहीं है। ';
     String stmn42 = 'इसके साथ में ${extraInfoData['animalHasBaby']}। ';
     String stmn5 =
-        'पिछले बार के हिसाब से दूध कैपेसिटी ${animalInfo['animalMilk']} लीटर है। ';
+        'पिछले बार के हिसाब से दूध कैपेसिटी ${animalInfo['animalMilkCapacity']} लीटर है। ';
 
     if (animalInfo['animalType'] == 'buffalo_male'.tr ||
         animalInfo['animalType'] == 'ox'.tr ||
@@ -994,7 +1122,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                   extraInfoData['animalHasBaby'] == 'nothing'.tr
               ? stmn41
               : stmn42);
-      desc = desc + stmn5;
+      if (animalInfo['animalMilkCapacity'] != null) desc = desc + stmn5;
     }
 
     return desc + (extraInfoData['moreInfo'] ?? '');
@@ -1019,180 +1147,178 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                   fontStyle: FontStyle.normal,
                   fontWeight: FontWeight.w600),
             ),
-            onPressed: () async {
-              if (animalInfo['animalType'] == null)
-                ReusableWidgets.showDialogBox(
-                  context,
-                  'error'.tr,
-                  Text('animal_type_error'.tr),
-                );
-              else if (animalInfo['animalBreed'] == null)
-                ReusableWidgets.showDialogBox(
-                  context,
-                  'error'.tr,
-                  Text('animal_breed_error'.tr),
-                );
-              else if (animalInfo['animalAge'] == null)
-                ReusableWidgets.showDialogBox(
-                  context,
-                  'error'.tr,
-                  Text('animal_age_error'.tr),
-                );
-              else if ([0, 1].contains(
-                    constant.animalType.indexOf(animalInfo['animalType']),
-                  ) &&
-                  (animalInfo['animalIsPregnant'] == null))
-                ReusableWidgets.showDialogBox(
-                  context,
-                  'error'.tr,
-                  Text('animal_pregnancy_error'.tr),
-                );
-              else if ([0, 1].contains(
-                    constant.animalType.indexOf(animalInfo['animalType']),
-                  ) &&
-                  (animalInfo['animalMilk'] == null ||
-                      animalInfo['animalMilk'].isEmpty))
-                ReusableWidgets.showDialogBox(
-                  context,
-                  'error'.tr,
-                  Text('animal_milk_error'.tr),
-                );
-              else if ([0, 1].contains(
-                      constant.animalType.indexOf(animalInfo['animalType'])) &&
-                  (animalInfo['animalMilk'] != null ||
-                      animalInfo['animalMilk'].isNotEmpty) &&
-                  (int.parse(animalInfo['animalMilk']) > 70))
-                ReusableWidgets.showDialogBox(
-                  context,
-                  'error'.tr,
-                  Text('maximum_milk_length'.tr),
-                );
-              else if (animalInfo['animalPrice'] == null ||
-                  animalInfo['animalPrice'].isEmpty)
-                ReusableWidgets.showDialogBox(
-                  context,
-                  'error'.tr,
-                  Text('animal_price_error'.tr),
-                );
-              else if (imagesUpload['image1'].isEmpty &&
-                  imagesUpload['image2'].isEmpty &&
-                  imagesUpload['image3'].isEmpty &&
-                  imagesUpload['image4'].isEmpty)
-                ReusableWidgets.showDialogBox(
-                  context,
-                  'error'.tr,
-                  Text('animal_image_error'.tr),
-                );
-              else {
-                pr = new ProgressDialog(context,
-                    type: ProgressDialogType.Normal, isDismissible: false);
-                pr.style(message: 'progress_dialog_message'.tr);
-                pr.show();
+            onPressed: _isLoading
+                ? null
+                : () async {
+                    if (animalInfo['animalType'] == null)
+                      ReusableWidgets.showDialogBox(
+                        context,
+                        'error'.tr,
+                        Text('animal_type_error'.tr),
+                      );
+                    else if (animalInfo['animalBreed'] == null)
+                      ReusableWidgets.showDialogBox(
+                        context,
+                        'error'.tr,
+                        Text('animal_breed_error'.tr),
+                      );
+                    else if (animalInfo['animalAge'] == null)
+                      ReusableWidgets.showDialogBox(
+                        context,
+                        'error'.tr,
+                        Text('animal_age_error'.tr),
+                      );
+                    else if ([0, 1].contains(
+                          constant.animalType.indexOf(animalInfo['animalType']),
+                        ) &&
+                        (animalInfo['animalIsPregnant'] == null))
+                      ReusableWidgets.showDialogBox(
+                        context,
+                        'error'.tr,
+                        Text('animal_pregnancy_error'.tr),
+                      );
+                    else if ([0, 1].contains(
+                          constant.animalType.indexOf(animalInfo['animalType']),
+                        ) &&
+                        (animalInfo['animalMilk'] == null ||
+                            animalInfo['animalMilk'].isEmpty))
+                      ReusableWidgets.showDialogBox(
+                        context,
+                        'error'.tr,
+                        Text('animal_milk_error'.tr),
+                      );
+                    else if ([0, 1].contains(constant.animalType
+                            .indexOf(animalInfo['animalType'])) &&
+                        (animalInfo['animalMilk'] != null ||
+                            animalInfo['animalMilk'].isNotEmpty) &&
+                        (int.parse(animalInfo['animalMilk']) > 70))
+                      ReusableWidgets.showDialogBox(
+                        context,
+                        'error'.tr,
+                        Text('maximum_milk_length'.tr),
+                      );
+                    else if (animalInfo['animalPrice'] == null ||
+                        animalInfo['animalPrice'].isEmpty)
+                      ReusableWidgets.showDialogBox(
+                        context,
+                        'error'.tr,
+                        Text('animal_price_error'.tr),
+                      );
+                    else if (imagesUpload['image1'].isEmpty &&
+                        imagesUpload['image2'].isEmpty &&
+                        imagesUpload['image3'].isEmpty &&
+                        imagesUpload['image4'].isEmpty)
+                      ReusableWidgets.showDialogBox(
+                        context,
+                        'error'.tr,
+                        Text('animal_image_error'.tr),
+                      );
+                    else {
+                      pr = new ProgressDialog(context,
+                          type: ProgressDialogType.Normal,
+                          isDismissible: false);
+                      pr.style(message: 'progress_dialog_message'.tr);
+                      pr.show();
 
-                await FirebaseFirestore.instance
-                    .collection("animalSellingInfo")
-                    .doc(userId)
-                    .collection('sellingAnimalList')
-                    .doc(uniqueId)
-                    .update({
-                  'animalInfo': animalInfo,
-                  'animalImages': imagesUpload,
-                  'extraInfo': extraInfoData,
-                  'dateOfUpdation':
-                      ReusableWidgets.dateTimeToEpoch(DateTime.now()),
-                  'uniqueId': uniqueId,
-                  'isValidUser': isValidUser,
-                  'userId': userId,
-                  "animalDescription": _descriptionText(),
-                }).then((res) async {
-                  SharedPreferences prefs =
-                      await SharedPreferences.getInstance();
-                  var addresses = await Geocoder.local
-                      .findAddressesFromCoordinates(Coordinates(
-                          prefs.getDouble('latitude'),
-                          prefs.getDouble('longitude')));
-                  var first = addresses.first;
-                  await FirebaseFirestore.instance
-                      .collection("buyingAnimalList1")
-                      .doc(uniqueId + userId)
-                      .update({
-                    "userAnimalDescription": _descriptionText(),
-                    "userAnimalType": animalInfo['animalType'] ?? "",
-                    "userAnimalTypeOther": animalInfo['animalTypeOther'] ?? "",
-                    "userAnimalAge": animalInfo['animalAge'] ?? "",
-                    "userAddress": first.addressLine ??
-                        (first.adminArea + ', ' + first.countryName),
-                    "userName": widget.userName,
-                    "userAnimalPrice": animalInfo['animalPrice'] ?? "0",
-                    "userAnimalBreed": animalInfo['animalBreed'] ?? "",
-                    "userMobileNumber": widget.userMobileNumber,
-                    "userAnimalMilk": animalInfo['animalMilk'] ?? "",
-                    "userAnimalPregnancy": animalInfo['animalIsPregnant'] ?? "",
-                    "userLatitude": prefs.getDouble('latitude'),
-                    "userLongitude": prefs.getDouble('longitude'),
-                    'position': geo
-                        .point(
-                            latitude: prefs.getDouble('latitude'),
-                            longitude: prefs.getDouble('longitude'))
-                        .data,
-                    "image1": imagesUpload['image1'] == null ||
-                            imagesUpload['image1'] == ""
-                        ? ""
-                        : imagesUpload['image1'],
-                    "image2": imagesUpload['image2'] == null ||
-                            imagesUpload['image2'] == ""
-                        ? ""
-                        : imagesUpload['image2'],
-                    "image3": imagesUpload['image3'] == null ||
-                            imagesUpload['image3'] == ""
-                        ? ""
-                        : imagesUpload['image3'],
-                    "image4": imagesUpload['image4'] == null ||
-                            imagesUpload['image4'] == ""
-                        ? ""
-                        : imagesUpload['image4'],
-                    'dateOfUpdation':
-                        ReusableWidgets.dateTimeToEpoch(DateTime.now()),
-                    'uniqueId': uniqueId,
-                    'isValidUser': isValidUser,
-                    'userId': userId,
-                    'extraInfo': extraInfoData
-                  }).then((value) {
-                    pr.hide();
-                    return showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                              title: Text('pashu_re_registered'.tr),
-                              content: Text('updated_animal'.tr),
-                              actions: <Widget>[
-                                FlatButton(
-                                    child: Text(
-                                      'Ok'.tr,
-                                      style: TextStyle(color: primaryColor),
-                                    ),
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      Get.off(() => HomeScreen(
-                                            selectedIndex: 0,
-                                          ));
-
-                                      // Navigator.pushReplacement(
-                                      //     context,
-                                      //     MaterialPageRoute(
-                                      //       builder: (context) => HomeScreen(
-                                      //         selectedIndex: 0,
-                                      //       ),
-                                      //     ));
-                                    }),
-                              ]);
+                      await FirebaseFirestore.instance
+                          .collection("animalSellingInfo")
+                          .doc(userId)
+                          .collection('sellingAnimalList')
+                          .doc(uniqueId)
+                          .update({
+                        'animalInfo': animalInfo,
+                        'animalImages': imagesUpload,
+                        'extraInfo': extraInfoData,
+                        'dateOfUpdation':
+                            ReusableWidgets.dateTimeToEpoch(DateTime.now()),
+                        'uniqueId': uniqueId,
+                        'isValidUser': isValidUser,
+                        'userId': userId,
+                        "animalDescription": _descriptionText(),
+                      }).then((res) async {
+                        SharedPreferences prefs =
+                            await SharedPreferences.getInstance();
+                        var addresses = await Geocoder.local
+                            .findAddressesFromCoordinates(Coordinates(
+                                prefs.getDouble('latitude'),
+                                prefs.getDouble('longitude')));
+                        var first = addresses.first;
+                        await FirebaseFirestore.instance
+                            .collection("buyingAnimalList1")
+                            .doc(uniqueId + userId)
+                            .update({
+                          "userAnimalDescription": _descriptionText(),
+                          "userAnimalType": animalInfo['animalType'] ?? "",
+                          "userAnimalTypeOther":
+                              animalInfo['animalTypeOther'] ?? "",
+                          "userAnimalAge": animalInfo['animalAge'] ?? "",
+                          "userAddress": first.addressLine ??
+                              (first.adminArea + ', ' + first.countryName),
+                          "userName": widget.userName,
+                          "userAnimalPrice": animalInfo['animalPrice'] ?? "0",
+                          "userAnimalBreed": animalInfo['animalBreed'] ?? "",
+                          "userMobileNumber": widget.userMobileNumber,
+                          "userAnimalMilk": animalInfo['animalMilk'] ?? "",
+                          "userAnimalPregnancy":
+                              animalInfo['animalIsPregnant'] ?? "",
+                          "userLatitude": prefs.getDouble('latitude'),
+                          "userLongitude": prefs.getDouble('longitude'),
+                          'position': geo
+                              .point(
+                                  latitude: prefs.getDouble('latitude'),
+                                  longitude: prefs.getDouble('longitude'))
+                              .data,
+                          "image1": imagesUpload['image1'] == null ||
+                                  imagesUpload['image1'] == ""
+                              ? ""
+                              : imagesUpload['image1'],
+                          "image2": imagesUpload['image2'] == null ||
+                                  imagesUpload['image2'] == ""
+                              ? ""
+                              : imagesUpload['image2'],
+                          "image3": imagesUpload['image3'] == null ||
+                                  imagesUpload['image3'] == ""
+                              ? ""
+                              : imagesUpload['image3'],
+                          "image4": imagesUpload['image4'] == null ||
+                                  imagesUpload['image4'] == ""
+                              ? ""
+                              : imagesUpload['image4'],
+                          'dateOfUpdation':
+                              ReusableWidgets.dateTimeToEpoch(DateTime.now()),
+                          'uniqueId': uniqueId,
+                          'isValidUser': isValidUser,
+                          'userId': userId,
+                          'extraInfo': extraInfoData
+                        }).then((value) {
+                          pr.hide();
+                          return showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                    title: Text('pashu_re_registered'.tr),
+                                    content: Text('updated_animal'.tr),
+                                    actions: <Widget>[
+                                      FlatButton(
+                                          child: Text(
+                                            'Ok'.tr,
+                                            style:
+                                                TextStyle(color: primaryColor),
+                                          ),
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                            Get.offAll(() => HomeScreen(
+                                                  selectedIndex: 0,
+                                                ));
+                                          }),
+                                    ]);
+                              });
                         });
-                  });
-                }).catchError(
-                  (err) => print("err->" + err.toString()),
-                );
-              }
-            },
+                      }).catchError(
+                        (err) => print("err->" + err.toString()),
+                      );
+                    }
+                  },
           ),
         ),
       );
