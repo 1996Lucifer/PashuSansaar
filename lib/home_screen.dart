@@ -180,10 +180,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 strictMode: true);
 
         stream.listen((List<DocumentSnapshot> documentList) {
-          // List _temp = [];
-          // documentList.forEach((e) {
-          //   _temp.addIf(e['isValidUser'] == 'Approved', e);
-          // });
+          List _temp = [];
+          documentList.forEach((e) {
+            _temp.addIf(
+                e.reference.id.substring(8) ==
+                        FirebaseAuth.instance.currentUser.uid &&
+                    e['isValidUser'] == 'Approved',
+                e);
+          });
           setState(() {
             _animalInfo = documentList;
             _animalInfo
@@ -203,9 +207,16 @@ class _HomeScreenState extends State<HomeScreen> {
             .limit(25)
             .get(GetOptions(source: Source.serverAndCache))
             .then((value) {
+          List _temp = [];
+          value.docs.forEach((e) {
+            _temp.addIf(
+                e.reference.id.substring(8) ==
+                    FirebaseAuth.instance.currentUser.uid,
+                e);
+          });
           setState(() {
             lastDocument = value.docs.last['dateOfSaving'];
-            _animalInfo = value.docs;
+            _animalInfo = _temp;
             _animalInfo
                 .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
           });
@@ -404,6 +415,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 SellAnimalMain(
                     sellingAnimalInfo: _sellingAnimalInfo,
+                    info: _animalInfo,
                     userName: _profileData['name'],
                     userMobileNumber: _profileData['mobile']),
                 ProfileMain(

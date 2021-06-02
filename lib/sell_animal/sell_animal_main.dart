@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 
 class SellAnimalMain extends StatelessWidget {
   final List sellingAnimalInfo;
+   final List info;
   final String userName;
   final String userMobileNumber;
 
   SellAnimalMain(
       {Key key,
       @required this.sellingAnimalInfo,
+      @required this.info,
       @required this.userName,
       @required this.userMobileNumber})
       : super(key: key);
@@ -20,6 +22,7 @@ class SellAnimalMain extends StatelessWidget {
         ? SellAnimalForm(userName: userName, userMobileNumber: userMobileNumber)
         : SellingAnimalInfo(
             animalInfo: sellingAnimalInfo,
+            viewInfo: info,
             userName: userName,
             userMobileNumber: userMobileNumber,
             showExtraData: true);

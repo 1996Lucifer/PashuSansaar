@@ -151,7 +151,9 @@ class _SellAnimalFormState extends State<SellAnimalForm>
             await uploadFile(compressedFile, index);
           });
       }
-    } catch (e) {}
+    } catch (err) {
+      print('error-sell---' + err.toString());
+    }
   }
 
   getFileSize(String filepath, int decimals) async {

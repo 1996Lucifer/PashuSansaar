@@ -63,6 +63,10 @@ class _BuyAnimalState extends State<BuyAnimal>
   List _infoList = [];
   List _tempAnimalList = [], _resetFilterData = [];
   String desc = '';
+  int whatsappCount = 0;
+  int callCount = 0;
+  int shareCount = 0;
+  int cardCount = 0;
   String _userLocality = '';
   TextEditingController _locationController = TextEditingController();
   String whatsappText = '';
@@ -96,6 +100,40 @@ class _BuyAnimalState extends State<BuyAnimal>
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+  userAnimalView(index) async {
+    try {
+      FirebaseFirestore.instance
+          .collection("buyingAnimalList1")
+          .doc(widget.animalInfo[index]['uniqueId'] +
+              widget.animalInfo[index]['userId'])
+          .update({
+        'viewCount': {
+          'whatsAppCount': whatsappCount,
+          'shareCount': shareCount,
+          'callCount': callCount,
+        }
+      });
+      print('user view function Call $index');
+      setState((){
+        // prefs.setString('totalViewCount', )
+      });
+    } catch (e) {
+      print('=-=Error-Re-Buying-=->>>' + e.toString());
+      FirebaseFirestore.instance
+          .collection('logger')
+          .doc(widget.userMobileNumber)
+          .collection('home-re-buying')
+          .doc()
+          .set({
+        'issue': e.toString(),
+        'userId': FirebaseAuth.instance.currentUser == null
+            ? ''
+            : FirebaseAuth.instance.currentUser.uid,
+        'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
+      });
+    }
   }
 
   _getNextSetOfBuyingAnimal() async {
@@ -764,15 +802,30 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                                     secondaryColor,
                                                                 onPressed:
                                                                     () async {
+                                                                  setState(() {
+                                                                    callCount =
+                                                                        callCount +
+                                                                            1;
+                                                                    print(
+                                                                        'Call Button click by users $callCount');
+                                                                  });
+                                                                  userAnimalView(
+                                                                      index);
                                                                   SharedPreferences
                                                                       prefs =
                                                                       await SharedPreferences
                                                                           .getInstance();
-                                                                  var addresses = await Geocoder.local.findAddressesFromCoordinates(Coordinates(
+                                                                  var addresses =
+                                                                      await Geocoder
+                                                                          .local
+                                                                          .findAddressesFromCoordinates(
+                                                                    Coordinates(
                                                                       prefs.getDouble(
                                                                           'latitude'),
                                                                       prefs.getDouble(
-                                                                          'longitude')));
+                                                                          'longitude'),
+                                                                    ),
+                                                                  );
                                                                   var first =
                                                                       addresses
                                                                           .first;
@@ -1015,6 +1068,15 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                                     darkGreenColor,
                                                                 onPressed:
                                                                     () async {
+                                                                  setState(() {
+                                                                    whatsappCount =
+                                                                        whatsappCount +
+                                                                            1;
+                                                                    print(
+                                                                        'whatsApp Button click by users$whatsappCount');
+                                                                  });
+                                                                  userAnimalView(
+                                                                      index);
                                                                   SharedPreferences
                                                                       prefs =
                                                                       await SharedPreferences
@@ -1381,6 +1443,15 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                                       darkSecondaryColor)),
                                                           color: secondaryColor,
                                                           onPressed: () async {
+                                                            setState(() {
+                                                              callCount =
+                                                                  callCount + 1;
+                                                              print(
+                                                                  'Call Button click by users $callCount');
+                                                            });
+                                                            userAnimalView(
+                                                                index);
+
                                                             SharedPreferences
                                                                 prefs =
                                                                 await SharedPreferences
@@ -1659,6 +1730,15 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                                       darkGreenColor)),
                                                           color: darkGreenColor,
                                                           onPressed: () async {
+                                                            setState(() {
+                                                              whatsappCount =
+                                                                  whatsappCount +
+                                                                      1;
+                                                              print(
+                                                                  'whatsApp Button click by users$whatsappCount');
+                                                            });
+                                                            userAnimalView(
+                                                                index);
                                                             String whatsappUrl =
                                                                 '';
                                                             SharedPreferences
@@ -2409,6 +2489,11 @@ class _BuyAnimalState extends State<BuyAnimal>
                       side: BorderSide(color: violetColor)),
                   color: violetColor,
                   onPressed: () async {
+                    setState(() {
+                      shareCount = shareCount + 1;
+                      print('ShareButton Button click by users$shareCount');
+                    });
+                    userAnimalView(index);
                     String uriPrefix =
                         'https://console.firebase.google.com/u/0/project/pashusansaar-6e910/firestore/data';
                     final DynamicLinkParameters parameters =

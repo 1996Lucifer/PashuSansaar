@@ -177,15 +177,19 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
   }
 
   loadAsset() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    var addresses =
-        await Geocoder.local.findAddressesFromQuery(zipCodeController.text);
-    var first = addresses.first;
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      var addresses =
+          await Geocoder.local.findAddressesFromQuery(zipCodeController.text);
+      var first = addresses.first;
 
-    setState(() {
-      prefs.setDouble("latitude", first.coordinates.latitude);
-      prefs.setDouble("longitude", first.coordinates.longitude);
-    });
+      setState(() {
+        prefs.setDouble("latitude", first.coordinates.latitude);
+        prefs.setDouble("longitude", first.coordinates.longitude);
+      });
+    } catch (e) {
+      print('error--' + e.toString());
+    }
   }
 
   @override

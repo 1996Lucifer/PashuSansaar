@@ -10,7 +10,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:progress_dialog/progress_dialog.dart';
-
 import '../home_screen.dart';
 import '../interested_buyer.dart';
 import 'remove_animal.dart';
@@ -19,6 +18,7 @@ import 'sell_animal_form.dart';
 
 class SellingAnimalInfo extends StatefulWidget {
   final List animalInfo;
+  final List viewInfo;
   final String userName;
   final String userMobileNumber;
   final bool showExtraData;
@@ -26,6 +26,7 @@ class SellingAnimalInfo extends StatefulWidget {
   SellingAnimalInfo({
     Key key,
     @required this.animalInfo,
+    @required this.viewInfo,
     @required this.userName,
     @required this.userMobileNumber,
     @required this.showExtraData,
@@ -38,6 +39,8 @@ class SellingAnimalInfo extends StatefulWidget {
 class _SellingAnimalInfoState extends State<SellingAnimalInfo>
     with AutomaticKeepAliveClientMixin {
   bool _isError = false, _isErrorEmpty = false;
+  List _viewInfo = [];
+  List currentUserView = [];
   String _price = '';
   TextEditingController _controller = TextEditingController();
   ProgressDialog pr;
@@ -50,6 +53,19 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
 
   @override
   bool get wantKeepAlive => true;
+
+  comp() {
+    currentUserView = widget.viewInfo
+        .where(
+            (index) => index['userId'] == FirebaseAuth.instance.currentUser.uid)
+        .toList();
+  }
+
+  @override
+  void initState() {
+    comp();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +126,20 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               _buildBreedTypeWidget(index),
-                              _buildDateWidget(index),
+                              Row(
+                                children: [
+                                  _buildDateWidget(index),
+                                  SizedBox(
+                                    width: 26,
+                                  ),
+                                  Icon(Icons.remove_red_eye),
+                                  SizedBox(
+                                    width: 5,
+                                  ),
+                                  Text(
+                                      '${currentUserView[index]['viewCount']['shareCount'] + currentUserView[index]['viewCount']['callCount'] + currentUserView[index]['viewCount']['whatsAppCount']}',style: TextStyle(fontSize: 18),),
+                                ],
+                              ),
                               _buildImageDescriptionWidget(width, index),
                               widget.showExtraData
                                   ? Row(
@@ -178,7 +207,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                                                   FontAwesomeIcons.arrowRight,
                                                   color: primaryColor,
                                                   size: 16,
-                                                )
+                                                ),
                                               ],
                                             )),
                                       ],
@@ -224,12 +253,19 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                                                       fontSize: 16,
                                                       fontWeight:
                                                           FontWeight.bold)),
-                                              Icon(Icons.arrow_forward_ios)
+                                              Icon(Icons.arrow_forward_ios),
                                             ],
                                           ),
                                         ),
                                       ),
-                                    )
+                                    ),
+                              SizedBox(
+                                height: 5,
+                              ),
+                              Center(),
+                              SizedBox(
+                                height: 10,
+                              )
                             ],
                           ),
                         ),
