@@ -81,7 +81,8 @@ class Messages extends Translations {
           'price_hint_text': 'जैसे: 30,000',
           'choose_photo': 'फोटो चुनें',
           'save_button': 'दर्ज़ (Save) करे',
-          'upload_image_text': 'फोटो डालें (कम से कम एक)',
+          'upload_image_text': 'वीडियो डालें',
+          // 'upload_image_text': 'वीडियो डालें (कम से कम एक)',
           'cow': 'गाय',
           'buffalo_female': 'भैंस',
           'ox': 'बैल',
@@ -258,7 +259,17 @@ class Messages extends Translations {
           'cancel': 'कैंसिल करे',
           'no_animal_present':
               'चुनाव में एक भी पशु उपलब्ध नहीं है, इसलिए सभी पशु दिखाए जा रहे है |',
-          'referral_winner': 'पिछले हफ्ते के विजेता हैं @name जी @place से'
+          'referral_winner': 'पिछले हफ्ते के विजेता हैं @name जी @place से',
+          'animal_video_error': 'वीडियो चुने',
+          'video_progress_dialog_message':
+              'आपका पशु दर्ज हो रहा है | वीडियो को अपलोड होने मैं 1-2 मिनट का समय लगेगा कृपया इसी स्क्रीन पर बने रहे|',
+          'sample_video': 'सैंपल वीडियो देखे',
+          'video_loading_message':
+              'वीडियो लोड हो रही है, कृपया प्रतीक्षा करे..',
+          'prfile_photo_update': 'प्रोफाइल फोटो अपलोड कर दिया गया है |',
+          'time_duration': 'वीडियो 1 मिनट से ज्यादा का नहीं होना चाहिए',
+          'video_supportive_text': ' (अधिकतम 1 मिनट)',
+          'maximum_milk_capacity_length': 'दूध के क्षमता की सही मात्रा डाले |'
         }
       };
 }

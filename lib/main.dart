@@ -2,7 +2,6 @@ import 'package:android_play_install_referrer/android_play_install_referrer.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
 import 'package:pashusansaar/home_screen.dart';
@@ -172,12 +171,12 @@ class _MyAppState extends State<MyApp> {
         prefs.setStringList('currentVersion', currentVersion1);
         prefs.setString('referralUniqueValue', _unique);
       });
-      if ((newVersion1[0].compareTo(currentVersion1[0]) == 1) ||
-          (newVersion1[1].compareTo(currentVersion1[1]) == 1)) {
-        await _showVersionDialog(newVersion1, currentVersion1, true);
-      }
-      if (newVersion1[2].compareTo(currentVersion1[2]) == 1)
-        await _showVersionDialog(newVersion1, currentVersion1, false);
+      // if ((newVersion1[0].compareTo(currentVersion1[0]) == 1) ||
+      //     (newVersion1[1].compareTo(currentVersion1[1]) == 1)) {
+      //   await _showVersionDialog(newVersion1, currentVersion1, true);
+      // }
+      // if (newVersion1[2].compareTo(currentVersion1[2]) == 1)
+      //   await _showVersionDialog(newVersion1, currentVersion1, false);
     } catch (exception) {
       print(exception);
     }

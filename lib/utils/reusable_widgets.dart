@@ -2,9 +2,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:crypto/crypto.dart' as crypto;
 import 'package:intl/intl.dart';
-import 'dart:convert';
 import 'package:get/get.dart';
 
 import 'colors.dart';
@@ -14,6 +12,7 @@ class ReusableWidgets {
       BuildContext context, String heading, bool automaticallyImplyLeading,
       {List<Widget> actions}) {
     return AppBar(
+      backgroundColor: primaryColor,
       title: Row(
         children: [
           Image.asset(
@@ -114,5 +113,12 @@ class ReusableWidgets {
     String str1 = x.length > 2 ? x[0] + ' ' + x[1] : x.join(' ');
 
     return str1;
+  }
+
+  static String printDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, "0");
+    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
+    String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
+    return "$twoDigitMinutes:$twoDigitSeconds";
   }
 }

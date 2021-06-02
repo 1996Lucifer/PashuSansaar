@@ -38,9 +38,10 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return SplashScreenView(
-      home: isLoggedIn &&
-              ([0, 1].contains(newVersion[0].compareTo(currentVersion[0]))) &&
-              ([0, 1].contains(newVersion[1].compareTo(currentVersion[1])))
+      home: isLoggedIn 
+      // &&
+      //         ([0, 1].contains(newVersion[0].compareTo(currentVersion[0]))) &&
+      //         ([0, 1].contains(newVersion[1].compareTo(currentVersion[1])))
           ? HomeScreen(selectedIndex: 0)
           : Login(),
       duration: 2000,

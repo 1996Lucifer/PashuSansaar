@@ -396,7 +396,7 @@ class _OTPScreenState extends State<OTPScreen>
                                   .get(
                                       GetOptions(source: Source.serverAndCache))
                                   .then((profile) {
-                                profile.exists && profile['alreadyUser']
+                                profile.exists
                                     ? Navigator.pushReplacement(
                                         context,
                                         MaterialPageRoute(
@@ -418,6 +418,7 @@ class _OTPScreenState extends State<OTPScreen>
                                                         widget.phoneNumber)));
                               });
                             } catch (e) {
+                              print('otp-navigation-error==' + e.toString());
                               Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(

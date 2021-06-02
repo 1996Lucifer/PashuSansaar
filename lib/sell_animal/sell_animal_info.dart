@@ -245,14 +245,18 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
 
   _imageData(index) {
     var data = '';
-    if (widget.animalInfo[index]['animalImages']['image1'] != '') {
-      data = widget.animalInfo[index]['animalImages']['image1'];
-    } else if (widget.animalInfo[index]['animalImages']['image2'] != '') {
-      data = widget.animalInfo[index]['animalImages']['image2'];
-    } else if (widget.animalInfo[index]['animalImages']['image3'] != '') {
-      data = widget.animalInfo[index]['animalImages']['image3'];
-    } else if (widget.animalInfo[index]['animalImages']['image4'] != '') {
-      data = widget.animalInfo[index]['animalImages']['image4'];
+    if (widget.animalInfo[index]['animalVideoThumbnail'] == null) {
+      if (widget.animalInfo[index]['animalImages']['image1'] != '') {
+        data = widget.animalInfo[index]['animalImages']['image1'];
+      } else if (widget.animalInfo[index]['animalImages']['image2'] != '') {
+        data = widget.animalInfo[index]['animalImages']['image2'];
+      } else if (widget.animalInfo[index]['animalImages']['image3'] != '') {
+        data = widget.animalInfo[index]['animalImages']['image3'];
+      } else if (widget.animalInfo[index]['animalImages']['image4'] != '') {
+        data = widget.animalInfo[index]['animalImages']['image4'];
+      }
+    } else {
+      data = widget.animalInfo[index]['animalVideoThumbnail'];
     }
 
     return data;
@@ -265,19 +269,36 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
           children: [
             Expanded(
               flex: 1,
-              child: Container(
-                width: width * 0.3,
-                height: 130.0,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: _imageData(index).length > 1000
-                          ? MemoryImage(base64Decode(_imageData(index)))
-                          : NetworkImage(_imageData(index))),
-                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                  color: Colors.redAccent,
-                ),
-              ),
+              child: _imageData(index).length > 1000
+                  ? Container(
+                      width: width * 0.3,
+                      height: 130.0,
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                            fit: BoxFit.cover,
+                            image:
+                                MemoryImage(base64Decode(_imageData(index)))),
+                        borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                        color: Colors.redAccent,
+                      ),
+                    )
+                  : Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Container(
+                          width: width * 0.3,
+                          height: 130.0,
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                                fit: BoxFit.cover,
+                                image: NetworkImage(_imageData(index))),
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(8.0)),
+                            color: Colors.redAccent,
+                          ),
+                        ),
+                      ],
+                    ),
             ),
             Expanded(
                 flex: 2,
