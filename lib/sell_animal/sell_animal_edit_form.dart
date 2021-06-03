@@ -1997,24 +1997,28 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
               animalPrice(),
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                child: Row(
-                  children: [
-                    Text(
-                      'upload_image_text'.tr,
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(
-                      width: 5,
-                    ),
-                    Text(
-                      '*',
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.red),
-                    ),
-                  ],
+                child: RichText(
+                  text: TextSpan(
+                    text: 'upload_image_text'.tr,
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black),
+                    children: <TextSpan>[
+                      TextSpan(
+                          text: 'video_supportive_text'.tr,
+                          style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey[500])),
+                      TextSpan(
+                          text: ' *',
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.red)),
+                    ],
+                  ),
                 ),
               ),
               thumbnailURL == null || thumbnailURL.isEmpty

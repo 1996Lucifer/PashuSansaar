@@ -114,7 +114,10 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
           mobileInfo = {
             'deviceType': deviceType,
             'deviceId': deviceId,
-            'deviceName': deviceName
+            'deviceName': deviceName,
+            'androidVersion': build.version.release,
+            'sdkInt': build.version.sdkInt,
+            'manufacturer': build.manufacturer,
           };
         });
       } else if (Platform.isIOS) {

@@ -1359,6 +1359,160 @@ class _SellAnimalFormState extends State<SellAnimalForm>
     );
   }
 
+  _sampleVideo() => Padding(
+        padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            RichText(
+              text: TextSpan(
+                text: 'upload_image_text'.tr,
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black),
+                children: <TextSpan>[
+                  TextSpan(
+                      text: 'video_supportive_text'.tr,
+                      style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey[500])),
+                  TextSpan(
+                      text: ' *',
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red)),
+                ],
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
+                _videoController1 = VideoPlayerController.network(
+                    'https://firebasestorage.googleapis.com/v0/b/pashusansaar-6e910.appspot.com/o/sample_video%2Fsample_video.mp4?alt=media&token=77ec82d0-5ce7-4a4b-84d9-a0f65915401b');
+                _videoController1.setLooping(false);
+                _videoController1.initialize();
+                _videoController1.pause();
+
+                return Navigator.of(context).push(
+                  PageRouteBuilder(
+                    opaque: true,
+                    pageBuilder: (BuildContext context, _, __) => WillPopScope(
+                        onWillPop: () async {
+                          setState(() {
+                            _videoController1.pause();
+                          });
+                          return true;
+                        },
+                        child: StatefulBuilder(
+                            builder: (context, setState) => Stack(
+                                  alignment: AlignmentDirectional.bottomCenter,
+                                  children: [
+                                    Center(
+                                        child: StreamBuilder<Object>(
+                                            stream: null,
+                                            builder: (context, snapshot) {
+                                              return VideoPlayer(
+                                                  _videoController1);
+                                            })),
+                                    _videoController1 == null
+                                        ? SizedBox.shrink()
+                                        : ValueListenableBuilder(
+                                            valueListenable: _videoController1,
+                                            builder: (context,
+                                                    VideoPlayerValue value,
+                                                    child) =>
+                                                Row(
+                                              children: [
+                                                Card(
+                                                  color: Colors.transparent,
+                                                  child: IconButton(
+                                                      icon: Icon(
+                                                        _videoController1
+                                                                .value.isPlaying
+                                                            ? Icons.pause
+                                                            : Icons.play_arrow,
+                                                      ),
+                                                      color: Colors.white,
+                                                      onPressed:
+                                                          () => setState(() {
+                                                                if (!_videoController1
+                                                                        .value
+                                                                        .isPlaying &&
+                                                                    value.position
+                                                                            .compareTo(value.duration) ==
+                                                                        0) {
+                                                                  _videoController1
+                                                                      .initialize();
+                                                                }
+                                                                _videoController1
+                                                                        .value
+                                                                        .isPlaying
+                                                                    ? _videoController1
+                                                                        .pause()
+                                                                    : _videoController1
+                                                                        .play();
+                                                              })),
+                                                ),
+                                                Card(
+                                                  color: Colors.transparent,
+                                                  child: Container(
+                                                    width:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.6,
+                                                    child: VideoProgressIndicator(
+                                                        _videoController1,
+                                                        colors:
+                                                            VideoProgressColors(
+                                                                playedColor:
+                                                                    Colors
+                                                                        .white),
+                                                        allowScrubbing: true),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  width: 10,
+                                                ),
+                                                Card(
+                                                  color: Colors.transparent,
+                                                  child: Padding(
+                                                      padding: const EdgeInsets
+                                                              .symmetric(
+                                                          vertical: 11.0,
+                                                          horizontal: 5),
+                                                      child: Text(
+                                                        ReusableWidgets
+                                                                .printDuration(
+                                                                    value
+                                                                        .position)
+                                                            .toString(),
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 15),
+                                                      )),
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                  ],
+                                ))),
+                  ),
+                );
+              },
+              child: Text('sample_video'.tr,
+                  style: TextStyle(
+                      decoration: TextDecoration.underline,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black)),
+            )
+          ],
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -1403,28 +1557,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                   ? animalMilkPerDayCapacity()
                   : SizedBox.shrink(),
               animalPrice(),
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                child: Row(
-                  children: [
-                    Text(
-                      'upload_image_text'.tr,
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(
-                      width: 5,
-                    ),
-                    Text(
-                      '*',
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.red),
-                    ),
-                  ],
-                ),
-              ),
+              _sampleVideo(),
               _videoStructure(width),
               extraInfo(),
               Padding(
