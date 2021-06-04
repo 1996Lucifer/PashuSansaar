@@ -153,6 +153,7 @@ List<String> isPregnant = [
   '7_months_pregnant'.tr,
   '8_months_pregnant'.tr,
   '9_months_pregnant'.tr,
+  '10_months_pregnant'.tr,
 ];
 List<String> ifPregnant = [
   'this_week_only'.tr,

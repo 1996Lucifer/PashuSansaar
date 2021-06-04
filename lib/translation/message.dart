@@ -194,6 +194,7 @@ class Messages extends Translations {
           '7_months_pregnant': '7 महीने की गर्भवती',
           '8_months_pregnant': '8 महीने की गर्भवती',
           '9_months_pregnant': '9 महीने की गर्भवती',
+          '10_months_pregnant': '10 महीने की गर्भवती',
           'this_week_only': 'इसी हफ्ते में',
           '1_week_before': '1 हफ्ते पहले',
           '2_week_before': '2 हफ्ते पहले',

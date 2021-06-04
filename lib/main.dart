@@ -2,7 +2,6 @@ import 'package:android_play_install_referrer/android_play_install_referrer.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
 import 'package:pashusansaar/home_screen.dart';
@@ -33,21 +32,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
 
   print('Handling a background message ${message.messageId}');
-  // RemoteNotification notification = message.notification;
-  // AndroidNotification android = message.notification?.android;
-  // if (notification != null && android != null) {
-  //   flutterLocalNotificationsPlugin.show(
-  //       notification.hashCode,
-  //       notification.title,
-  //       notification.body,
-  //       NotificationDetails(
-  //         android: AndroidNotificationDetails(
-  //           channel.id,
-  //           channel.name,
-  //           channel.description,
-  //         ),
-  //       ));
-  // }
 }
 
 RemoteConfig remoteConfig;
