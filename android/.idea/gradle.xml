@@ -1,12 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="GradleMigrationSettings" migrationVersion="1" />
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
         <option name="testRunner" value="PLATFORM" />
         <option name="distributionType" value="DEFAULT_WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="gradleJvm" value="1.8" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/../../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/android_play_install_referrer-0.0.4/android" />
+            <option value="$PROJECT_DIR$/../../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/another_flushbar-1.10.11/android" />
+            <option value="$PROJECT_DIR$/../../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/cloud_firestore-0.16.0+1/android" />
+            <option value="$PROJECT_DIR$/../../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/device_info-1.0.0/android" />
+            <option value="$PROJECT_DIR$/../../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/firebase_auth-0.20.1/android" />
+            <option value="$PROJECT_DIR$/../../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/firebase_core-0.7.0/android" />
+            <option value="$PROJECT_DIR$/../../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/firebase_dynamic_links-0.7.0+1/android" />
+            <option value="$PROJECT_DIR$/../../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/firebase_in_app_messaging-0.3.0+1/android" />
+            <option value="$PROJECT_DIR$/../../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/firebase_messaging-8.0.0-dev.15/android" />
+            <option value="$PROJECT_DIR$/../../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/firebase_remote_config-0.6.0/android" />
+            <option value="$PROJECT_DIR$/../../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/firebase_storage-7.0.0/android" />
+            <option value="$PROJECT_DIR$/../../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_local_notifications-4.0.1+2/android" />
+            <option value="$PROJECT_DIR$/../../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_native_image-0.0.5+3/android" />
+            <option value="$PROJECT_DIR$/../../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_plugin_android_lifecycle-1.0.11/android" />
+            <option value="$PROJECT_DIR$/../../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/geocoder-0.2.1/android" />
+            <option value="$PROJECT_DIR$/../../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/image_picker-0.6.7+22/android" />
+            <option value="$PROJECT_DIR$/../../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/location-3.2.4/android" />
+            <option value="$PROJECT_DIR$/../../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/package_info-0.4.3+4/android" />
+            <option value="$PROJECT_DIR$/../../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/path_provider-1.6.27/android" />
+            <option value="$PROJECT_DIR$/../../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/share-0.6.5+4/android" />
+            <option value="$PROJECT_DIR$/../../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/shared_preferences-0.5.12+4/android" />
+            <option value="$PROJECT_DIR$/../../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/url_launcher-5.7.10/android" />
+          </set>
+        </option>
         <option name="resolveModulePerSourceSet" value="false" />
       </GradleProjectSettings>
     </option>

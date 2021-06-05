@@ -26,7 +26,7 @@ class SellingAnimalInfo extends StatefulWidget {
   SellingAnimalInfo({
     Key key,
     @required this.animalInfo,
-    @required this.viewInfo,
+     this.viewInfo,
     @required this.userName,
     @required this.userMobileNumber,
     @required this.showExtraData,

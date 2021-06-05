@@ -522,6 +522,7 @@ class ProfileMainState extends State<ProfileMain>
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => SellingAnimalInfo(
+                                    
                                       animalInfo: widget.sellingAnimalInfo,
                                       userName: widget.userName,
                                       userMobileNumber: widget.userMobileNumber,
