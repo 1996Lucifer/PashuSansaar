@@ -2416,25 +2416,33 @@ class _BuyAnimalState extends State<BuyAnimal>
                       side: BorderSide(color: violetColor)),
                   color: violetColor,
                   onPressed: () async {
-                    String uriPrefix =
-                        'https://console.firebase.google.com/u/0/project/pashusansaar-6e910/firestore/data';
+                    String uriPrefix = 'https://pashusansaar.page.link/pashu';
+                    //     'https://console.firebase.google.com/u/0/project/pashusansaar-6e910/firestore/data';
                     final DynamicLinkParameters parameters =
                         DynamicLinkParameters(
-                            uriPrefix: 'https://pashusansaar.page.link/pashu',
-                            link: Uri.parse(
-                                '$uriPrefix/buyingAnimalList1/${_list[index]['uniqueId'] + _list[index]['userId']}'),
-                            androidParameters: AndroidParameters(
-                              packageName: 'dj.pashusansaar',
-                              minimumVersion: 25,
-                            ));
+                      uriPrefix: uriPrefix,
+                      link: Uri.parse(
+                          'https://pashusansaar.com?data=${_list[index]['uniqueId']}+${_list[index]['userId']}'),
+                      androidParameters: AndroidParameters(
+                        packageName: 'dj.pashusansaar',
+                        minimumVersion: 21,
+                      ),
+                      dynamicLinkParametersOptions:
+                          DynamicLinkParametersOptions(
+                        shortDynamicLinkPathLength:
+                            ShortDynamicLinkPathLength.unguessable,
+                      ),
+                    );
+
                     final Uri dynamicUrl = await parameters.buildUrl();
-                    await takeScreenShot(_list[index]['uniqueId']);
+
+                    // await takeScreenShot(_list[index]['uniqueId']);
 
                     Share.shareFiles([fileUrl.path],
                         mimeTypes: ['images/png'],
                         text:
                             "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
-                        // "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar} \n\n ${dynamicUrl.toString()}",
+                            // "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar} \n\n ${dynamicUrl.toString()}",
                         subject: 'पशु की जानकारी');
 
                     // Share.shareFiles([image],
@@ -2442,6 +2450,8 @@ class _BuyAnimalState extends State<BuyAnimal>
                     //     text:
                     //         "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar} \n\n ${dynamicUrl.toString()}",
                     //     subject: 'Share Animal Info');
+                    Share.share("${dynamicUrl.toString()}",
+                        subject: 'Share Animal Info');
                     // Share.share(
                     //     "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar} \n\n ${dynamicUrl.toString()}",
                     //     subject: 'Share Animal Info');

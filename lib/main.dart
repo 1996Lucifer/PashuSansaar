@@ -1,6 +1,7 @@
 import 'package:android_play_install_referrer/android_play_install_referrer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
@@ -132,8 +133,31 @@ class _MyAppState extends State<MyApp> {
               builder: (context) => HomeScreen(selectedIndex: 0)));
     });
 
+    // initDynamicLink();
     isVpnActive();
   }
+
+  // initDynamicLink() async {
+  //   FirebaseDynamicLinks.instance.onLink(
+  //       onSuccess: (PendingDynamicLinkData dynamicLink) async {
+  //     final Uri deepLink = dynamicLink?.link;
+
+  //     if (deepLink != null) {
+  //       Navigator.pushNamed(context, deepLink.path);
+  //     }
+  //   }, onError: (OnLinkErrorException e) async {
+  //     print('onLinkError');
+  //     print(e.message);
+  //   });
+
+  //   final PendingDynamicLinkData data =
+  //       await FirebaseDynamicLinks.instance.getInitialLink();
+  //   final Uri deepLink = data?.link;
+
+  //   if (deepLink != null) {
+  //     Navigator.pushNamed(context, deepLink.path);
+  //   }
+  // }
 
   getReferralCheck() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
