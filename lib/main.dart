@@ -50,7 +50,12 @@ void main() async {
           AndroidFlutterLocalNotificationsPlugin>()
       ?.createNotificationChannel(channel);
 
-  runApp(MaterialApp(debugShowCheckedModeBanner: false, home: MyApp()));
+  runApp(
+    MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {

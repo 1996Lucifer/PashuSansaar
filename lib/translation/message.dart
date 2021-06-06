@@ -259,7 +259,11 @@ class Messages extends Translations {
           'cancel': 'कैंसिल करे',
           'no_animal_present':
               'चुनाव में एक भी पशु उपलब्ध नहीं है, इसलिए सभी पशु दिखाए जा रहे है |',
-          'referral_winner': 'पिछले हफ्ते के विजेता हैं @name जी @place से'
+          'referral_winner': 'पिछले हफ्ते के विजेता हैं @name जी @place से',
+          'location_error_supportive_exit':
+              'आपका लोकेशन प्राप्त करने में दिक्कत हो रही है|\nकुछ समय बाद कोशिश करे',
+          'location_error_supportive_again':
+              'आपका लोकेशन प्राप्त करने में दिक्कत हो रही है|\nकृपया दोबारा कोशिश करे',
         }
       };
 }

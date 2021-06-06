@@ -29,6 +29,7 @@ class _SplashScreenState extends State<SplashScreen> {
       isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
       newVersion = prefs.getStringList('newVersion') ?? [];
       currentVersion = prefs.getStringList('currentVersion') ?? [];
+      prefs.setInt('count', 0);
     });
     print('isLoggedIn===' + isLoggedIn.toString());
     print('newVersion===' + newVersion.toString());

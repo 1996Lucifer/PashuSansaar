@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:intl/intl.dart';
+import 'package:location/location.dart';
 import 'package:pashusansaar/buy_animal/buy_animal.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -38,13 +39,85 @@ class _HomeScreenState extends State<HomeScreen> {
   String _referralUniqueValue = '', _mobileNumber = '';
   bool _checkReferral = false;
   double lat = 0.0, long = 0.0;
+  LocationData _locate;
 
   @override
   void initState() {
     _pageController = PageController(initialPage: widget.selectedIndex);
-    // checkForUpdate();
-    loginSetup();
+    checkInitialData();
     super.initState();
+  }
+
+  checkInitialData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.getDouble('latitude') == null || prefs.getDouble('longitude') == null
+        ? getLocationLocate()
+        : loginSetup();
+  }
+
+  getLocationLocate() async {
+    Location location = new Location();
+
+    bool _serviceEnabled;
+    PermissionStatus _permissionGranted;
+    LocationData _locationData;
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    _serviceEnabled = await location.serviceEnabled();
+    if (!_serviceEnabled) {
+      _serviceEnabled = await location.requestService();
+      if (!_serviceEnabled) {
+        return;
+      }
+    }
+
+    _permissionGranted = await location.hasPermission();
+    if (_permissionGranted == PermissionStatus.denied) {
+      _permissionGranted = await location.requestPermission();
+      if (_permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+
+    pr.show();
+    _locationData = await location.getLocation();
+
+    setState(() {
+      _locate = _locationData;
+      prefs.setDouble("latitude", _locate.latitude);
+      prefs.setDouble("longitude", _locate.longitude);
+    });
+
+    try {
+      FirebaseFirestore.instance
+          .collection('userInfo')
+          .doc(FirebaseAuth.instance.currentUser.uid)
+          .update({
+        'latitude': _locate.latitude,
+        'longitude': _locate.longitude,
+      }).then((value) async {
+        pr.hide();
+        await loginSetup();
+      });
+    } catch (e) {
+      FirebaseFirestore.instance
+          .collection('logger')
+          .doc(_mobileNumber)
+          .collection('home-location')
+          .doc()
+          .set({
+        'issue': e.toString(),
+        'userId': FirebaseAuth.instance.currentUser == null
+            ? ''
+            : FirebaseAuth.instance.currentUser.uid,
+        'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
+      });
+      pr.hide();
+      await loginSetup();
+    }
+
+    // await loginSetup();
   }
 
   Future<void> initReferrerDetails(mobile) async {
@@ -359,11 +432,11 @@ class _HomeScreenState extends State<HomeScreen> {
           title: new Text('एप बंद करे ?'),
           content: new Text('क्या आप एप बंद करना चाहते हैं'),
           actions: <Widget>[
-            new FlatButton(
+            new TextButton(
               onPressed: () => Navigator.of(context).pop(false),
               child: new Text('no'.tr, style: TextStyle(color: primaryColor)),
             ),
-            new FlatButton(
+            new TextButton(
               onPressed: () => Navigator.of(context).pop(true),
               child: new Text('yes'.tr, style: TextStyle(color: primaryColor)),
             ),
@@ -397,11 +470,12 @@ class _HomeScreenState extends State<HomeScreen> {
               physics: NeverScrollableScrollPhysics(),
               children: [
                 BuyAnimal(
-                  animalInfo: _animalInfo,
-                  userName: _profileData['name'],
-                  userMobileNumber: _profileData['mobile'],
-                  userImage: _profileData['image'],
-                ),
+                    animalInfo: _animalInfo,
+                    userName: _profileData['name'],
+                    userMobileNumber: _profileData['mobile'],
+                    userImage: _profileData['image'],
+                    latitude: lat,
+                    longitude: long),
                 SellAnimalMain(
                     sellingAnimalInfo: _sellingAnimalInfo,
                     userName: _profileData['name'],

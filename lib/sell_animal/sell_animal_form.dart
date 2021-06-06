@@ -23,8 +23,8 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'dart:math' as math;
 
 class SellAnimalForm extends StatefulWidget {
-  final String userName;
-  final String userMobileNumber;
+  String userName;
+  String userMobileNumber;
   SellAnimalForm(
       {Key key, @required this.userName, @required this.userMobileNumber})
       : super(key: key);
@@ -1132,7 +1132,50 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                       pr.style(message: 'progress_dialog_message'.tr);
                       pr.show();
 
-                      FirebaseFirestore.instance
+                      if (widget.userName == null ||
+                          widget.userMobileNumber == null) {
+                        try {
+                          await FirebaseFirestore.instance
+                              .collection("userInfo")
+                              .doc(FirebaseAuth.instance.currentUser.uid)
+                              .get(GetOptions(source: Source.serverAndCache))
+                              .then(
+                            (value) async {
+                              SharedPreferences prefs =
+                                  await SharedPreferences.getInstance();
+
+                              setState(() {
+                                widget.userName = value.data()['name'];
+                                widget.userMobileNumber =
+                                    value.data()['mobile'];
+
+                                prefs.setString(
+                                    'userName', value.data()['name']);
+                                prefs.setString(
+                                    'userMobile', value.data()['mobile']);
+                              });
+                            },
+                          );
+                        } catch (e) {
+                          FirebaseFirestore.instance
+                              .collection('logger')
+                              .doc(widget.userMobileNumber)
+                              .collection('sell-profile')
+                              .doc()
+                              .set({
+                            'issue': e.toString(),
+                            'userId': FirebaseAuth.instance.currentUser == null
+                                ? ''
+                                : FirebaseAuth.instance.currentUser.uid,
+                            'date': DateFormat()
+                                .add_yMMMd()
+                                .add_jm()
+                                .format(DateTime.now()),
+                          });
+                        }
+                      }
+
+                      await FirebaseFirestore.instance
                           .collection("animalSellingInfo")
                           .doc(FirebaseAuth.instance.currentUser.uid)
                           .collection('sellingAnimalList')
@@ -1170,10 +1213,10 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                           "userAnimalAge": animalInfo['animalAge'] ?? "",
                           "userAddress": first.addressLine ??
                               (first.adminArea + ', ' + first.countryName),
-                          "userName": widget.userName,
+                          "userName": prefs.getString('userName'),
                           "userAnimalPrice": animalInfo['animalPrice'] ?? "0",
                           "userAnimalBreed": animalInfo['animalBreed'] ?? "",
-                          "userMobileNumber": widget.userMobileNumber,
+                          "userMobileNumber": prefs.getString('userMobile'),
                           "userAnimalMilk": animalInfo['animalMilk'] ?? "",
                           "userAnimalPregnancy":
                               animalInfo['animalIsPregnant'] ?? "",
@@ -1220,7 +1263,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                                     title: Text('pashu_registered'.tr),
                                     content: Text('new_animal'.tr),
                                     actions: <Widget>[
-                                      FlatButton(
+                                      TextButton(
                                           child: Text(
                                             'Ok'.tr,
                                             style:

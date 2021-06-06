@@ -36,12 +36,15 @@ class BuyAnimal extends StatefulWidget {
   final String userName;
   final String userMobileNumber;
   final String userImage;
+  final double latitude, longitude;
   BuyAnimal({
     Key key,
     @required this.animalInfo,
     @required this.userName,
     @required this.userMobileNumber,
     @required this.userImage,
+    @required this.latitude,
+    @required this.longitude,
   }) : super(key: key);
 
   @override
@@ -178,16 +181,20 @@ class _BuyAnimalState extends State<BuyAnimal>
   _getInitialData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _latitude = prefs.getDouble('latitude');
-      _longitude = prefs.getDouble('longitude');
+      if (widget.latitude == 0.0 || widget.longitude == 0.0) {
+        _latitude = prefs.getDouble('latitude');
+        _longitude = prefs.getDouble('longitude');
+      } else {
+        _latitude = widget.latitude;
+        _longitude = widget.longitude;
+      }
     });
     getLatLong();
   }
 
   getLatLong() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final coordinates = new Coordinates(
-        prefs.getDouble('latitude'), prefs.getDouble('longitude'));
+    final coordinates = new Coordinates(_latitude, _longitude);
     var addresses =
         await Geocoder.local.findAddressesFromCoordinates(coordinates);
     var first = addresses.first;
@@ -2541,7 +2548,11 @@ class _BuyAnimalState extends State<BuyAnimal>
                   //       fontSize: 13),
                   // ),
                   TextSpan(
-                    text: _distanceBetweenTwoCoordinates(index) + ' ' + 'km'.tr,
+                    text: _distanceBetweenTwoCoordinates(
+                            _list[index]['userLatitude'],
+                            _list[index]['userLongitude']) +
+                        ' ' +
+                        'km'.tr,
                     style: TextStyle(
                         color: Colors.grey[800],
                         fontWeight: FontWeight.bold,
@@ -2561,13 +2572,19 @@ class _BuyAnimalState extends State<BuyAnimal>
     });
   }
 
-  String _distanceBetweenTwoCoordinates(int index) {
-    List _list =
-        _tempAnimalList.length != 0 ? _tempAnimalList : widget.animalInfo;
+  String _distanceBetweenTwoCoordinates(double lat, double long) {
+    double _latx, _longx;
+    if (widget.latitude == 0.0 || widget.longitude == 0.0) {
+      _latx = _latitude;
+      _longx = _longitude;
+    } else {
+      _latx = widget.latitude;
+      _longx = widget.longitude;
+    }
+
     return (Geodesy().distanceBetweenTwoGeoPoints(
-              LatLng(_latitude, _longitude),
-              LatLng(
-                  _list[index]['userLatitude'], _list[index]['userLongitude']),
+              LatLng(_latx, _longx),
+              LatLng(lat, long),
             ) /
             1000)
         .toStringAsFixed(0);
