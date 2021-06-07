@@ -396,7 +396,7 @@ class _OTPScreenState extends State<OTPScreen>
                                   .get(
                                       GetOptions(source: Source.serverAndCache))
                                   .then((profile) {
-                                profile.exists && profile['alreadyUser']
+                                profile.exists
                                     ? Navigator.pushReplacement(
                                         context,
                                         MaterialPageRoute(

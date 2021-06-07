@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:device_info/device_info.dart';
@@ -382,76 +383,124 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
 
                             await storeFCMToken();
 
-                            try {
-                              pr = new ProgressDialog(context,
-                                  type: ProgressDialogType.Normal,
-                                  isDismissible: false);
+                            if (prefs.getDouble('latitude') == null ||
+                                prefs.getDouble('longitude') == null) {
+                              return showDialog(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                        title: Text('warning'.tr),
+                                        content: RichText(
+                                          text: TextSpan(
+                                              text: prefs.getInt('count') == 1
+                                                  ? 'location_error_supportive_exit'
+                                                      .tr
+                                                  : 'location_error_supportive_again'
+                                                      .tr,
+                                              style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 16)),
+                                        ),
+                                        actions: <Widget>[
+                                          ElevatedButton(
+                                              style: ButtonStyle(
+                                                  backgroundColor:
+                                                      MaterialStateProperty.all<
+                                                          Color>(primaryColor)),
+                                              child: Text(
+                                                'Ok'.tr,
+                                                style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 16),
+                                              ),
+                                              onPressed: () {
+                                                if (prefs.getInt('count') == 1)
+                                                  SystemNavigator.pop();
+                                                else {
+                                                  setState(() {
+                                                    _zipCodeTextField = true;
+                                                    prefs.setInt('count', 1);
+                                                  });
+                                                  Navigator.pop(context);
+                                                }
+                                              }),
+                                        ]);
+                                  });
+                            } else {
+                              try {
+                                pr = new ProgressDialog(context,
+                                    type: ProgressDialogType.Normal,
+                                    isDismissible: false);
 
-                              pr.style(message: 'progress_dialog_message'.tr);
-                              pr.show();
-                              FirebaseFirestore.instance
-                                  .collection("userInfo")
-                                  .doc(widget.currentUser)
-                                  .update({
-                                // "currentUser": widget.currentUser,
-                                "name": nameController.text,
-                                // "mobile": widget.mobile,
-                                "mobileInfo": mobileInfo,
-                                'latitude':
-                                    prefs.getDouble('latitude').toString(),
-                                'longitude':
-                                    prefs.getDouble('longitude').toString(),
-                                // 'referralCode':
-                                //     ReusableWidgets.randomCodeGenerator(),
-                                'enteredReferralCode': referralCodeController
-                                        .text.isNotEmpty
-                                    ? referralCodeController.text.toUpperCase()
-                                    : '',
-                                // 'alreadyUser': true,
-                                // 'appVersion': prefs
-                                //     .getStringList('currentVersion')
-                                //     .join('.'),
-                                'dateOfCreation': FirebaseAuth
-                                    .instance.currentUser.metadata.creationTime
-                                    .toString(),
-                                'dateOfUpdation': FirebaseAuth.instance
-                                    .currentUser.metadata.lastSignInTime
-                                    .toString(),
-                                'zipcode': zipCodeController.text ?? ''
-                              }).then((result) {
-                                pr.hide().then(
-                                  (isHidden) {
-                                    return Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            HomeScreen(selectedIndex: 0),
-                                      ),
-                                    );
-                                  },
+                                pr.style(message: 'progress_dialog_message'.tr);
+                                pr.show();
+                                FirebaseFirestore.instance
+                                    .collection("userInfo")
+                                    .doc(widget.currentUser)
+                                    .update({
+                                  // "currentUser": widget.currentUser,
+                                  "name": nameController.text,
+                                  // "mobile": widget.mobile,
+                                  "mobileInfo": mobileInfo,
+                                  'latitude':
+                                      prefs.getDouble('latitude').toString(),
+                                  'longitude':
+                                      prefs.getDouble('longitude').toString(),
+                                  // 'referralCode':
+                                  //     ReusableWidgets.randomCodeGenerator(),
+                                  'enteredReferralCode':
+                                      referralCodeController.text.isNotEmpty
+                                          ? referralCodeController.text
+                                              .toUpperCase()
+                                          : '',
+                                  // 'alreadyUser': true,
+                                  // 'appVersion': prefs
+                                  //     .getStringList('currentVersion')
+                                  //     .join('.'),
+                                  'dateOfCreation': FirebaseAuth.instance
+                                      .currentUser.metadata.creationTime
+                                      .toString(),
+                                  'dateOfUpdation': FirebaseAuth.instance
+                                      .currentUser.metadata.lastSignInTime
+                                      .toString(),
+                                  'zipcode': zipCodeController.text ?? ''
+                                }).then((result) {
+                                  pr.hide().then(
+                                    (isHidden) {
+                                      return Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              HomeScreen(selectedIndex: 0),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                });
+                              } catch (err) {
+                                // pr.hide();
+                                print(
+                                  "err->" + err.toString(),
                                 );
-                              });
-                            } catch (err) {
-                              // pr.hide();
-                              print(
-                                "err->" + err.toString(),
-                              );
-                              FirebaseFirestore.instance
-                                  .collection('logger')
-                                  .doc(widget.mobile)
-                                  .collection('userDetails')
-                                  .doc()
-                                  .set({
-                                'issue': err.toString(),
-                                'userId':
-                                    FirebaseAuth.instance.currentUser == null
-                                        ? ''
-                                        : FirebaseAuth.instance.currentUser.uid,
-                                'date': DateFormat()
-                                    .add_yMMMd()
-                                    .add_jm()
-                                    .format(DateTime.now()),
-                              });
+                                FirebaseFirestore.instance
+                                    .collection('logger')
+                                    .doc(widget.mobile)
+                                    .collection('userDetails')
+                                    .doc()
+                                    .set({
+                                  'issue': err.toString(),
+                                  'userId': FirebaseAuth.instance.currentUser ==
+                                          null
+                                      ? ''
+                                      : FirebaseAuth.instance.currentUser.uid,
+                                  'date': DateFormat()
+                                      .add_yMMMd()
+                                      .add_jm()
+                                      .format(DateTime.now()),
+                                });
+                              }
                             }
                           }
                         },
