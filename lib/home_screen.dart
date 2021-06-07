@@ -44,9 +44,41 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     _pageController = PageController(initialPage: widget.selectedIndex);
+    // updateData();
     checkInitialData();
     super.initState();
   }
+
+  // updateData() async {
+  //   FirebaseFirestore.instance
+  //       .collection('buyingAnimalList1')
+  //       .orderBy('dateOfSaving')
+  //       .where('dateOfSaving', isLessThanOrEqualTo: '1623048304')
+  //       .where('dateOfSaving', isGreaterThanOrEqualTo: '1623009600')
+  //       .get()
+  //       .then((value) {
+  //     value.docs.forEach((element) {
+  //       if (element['userName'] == null ||
+  //           element['userMobileNumber'] == null) {
+  //         FirebaseFirestore.instance
+  //             .collection("userInfo")
+  //             .doc(element['userId'])
+  //             .get()
+  //             .then(
+  //           (profile) {
+  //             FirebaseFirestore.instance
+  //                 .collection('buyingAnimalList1')
+  //                 .doc(element.reference.id)
+  //                 .update({
+  //               'userName': profile.data()['name'],
+  //               'userMobileNumber': profile.data()['mobile'],
+  //             });
+  //           },
+  //         );
+  //       }
+  //     });
+  //   });
+  // }
 
   checkInitialData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

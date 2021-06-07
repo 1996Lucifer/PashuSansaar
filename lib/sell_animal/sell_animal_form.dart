@@ -1148,11 +1148,6 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                                 widget.userName = value.data()['name'];
                                 widget.userMobileNumber =
                                     value.data()['mobile'];
-
-                                prefs.setString(
-                                    'userName', value.data()['name']);
-                                prefs.setString(
-                                    'userMobile', value.data()['mobile']);
                               });
                             },
                           );
@@ -1213,10 +1208,10 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                           "userAnimalAge": animalInfo['animalAge'] ?? "",
                           "userAddress": first.addressLine ??
                               (first.adminArea + ', ' + first.countryName),
-                          "userName": prefs.getString('userName'),
+                          "userName": widget.userName,
                           "userAnimalPrice": animalInfo['animalPrice'] ?? "0",
                           "userAnimalBreed": animalInfo['animalBreed'] ?? "",
-                          "userMobileNumber": prefs.getString('userMobile'),
+                          "userMobileNumber": widget.userMobileNumber,
                           "userAnimalMilk": animalInfo['animalMilk'] ?? "",
                           "userAnimalPregnancy":
                               animalInfo['animalIsPregnant'] ?? "",
