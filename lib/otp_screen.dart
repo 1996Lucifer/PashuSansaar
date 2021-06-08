@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:pashusansaar/domain/auth/login/login_util/login_util.dart';
 import 'package:pashusansaar/home_screen.dart';
 import 'package:pashusansaar/user_details/user_details_update_screen.dart';
 import 'package:pashusansaar/utils/colors.dart';
@@ -28,6 +29,7 @@ class _OTPScreenState extends State<OTPScreen>
   var onTapRecognizer;
 
   TextEditingController textEditingController = TextEditingController();
+  final OtpController otpController = Get.put(OtpController());
   String _verificationCode;
   int _resendToken;
 
@@ -35,9 +37,7 @@ class _OTPScreenState extends State<OTPScreen>
 
   bool hasError = false, _checkUserLoginState = false, _startTimer = false;
   String currentText = "";
-  final GlobalKey<ScaffoldState> scaffoldKey =
-      GlobalKey<ScaffoldState>(debugLabel: 'otpScaffoldKey');
-  final formKey = GlobalKey<FormState>(debugLabel: 'otpFormStateKey');
+
   int endTime = DateTime.now().millisecondsSinceEpoch + 1000 * 60;
   CountdownTimerController countdownTimerController;
 
@@ -113,6 +113,11 @@ class _OTPScreenState extends State<OTPScreen>
   }
 
   _verifyPhone() async {
+
+
+
+
+
     await FirebaseAuth.instance
         .verifyPhoneNumber(
             phoneNumber: '+91${widget.phoneNumber}',
@@ -211,7 +216,6 @@ class _OTPScreenState extends State<OTPScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      key: scaffoldKey,
       body: Container(
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
@@ -257,7 +261,7 @@ class _OTPScreenState extends State<OTPScreen>
               height: 20,
             ),
             Form(
-              key: formKey,
+
               child: Padding(
                   padding:
                       const EdgeInsets.symmetric(vertical: 8.0, horizontal: 30),
@@ -369,10 +373,20 @@ class _OTPScreenState extends State<OTPScreen>
                         fontWeight: FontWeight.bold),
                   ),
                   onPressed: () async {
-                    formKey.currentState.validate();
-                    // conditions for validating
-                    if (currentText.length != 6 &&
-                        currentText != _verificationCode) {
+                    if (textEditingController.text.length != 6) {
+
+
+                      bool status =otpController.fetchOtpVerify(number: widget.phoneNumber,otp: textEditingController.text);
+                      if(status==true){
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => UserDetailsUpdate()));
+                      }else{
+                        print('Enter Valid Otp');
+
+                      }
+
                       errorController.add(ErrorAnimationType.shake);
 
                       setState(() {
