@@ -31,6 +31,7 @@ dependencies:
   cupertino_icons: ^1.0.0
   date_format: ^1.0.9
   device_info: ^1.0.0
+  dio: any
   dotted_border: ^1.0.7
   dropdown_search: ^0.4.9
   firebase_auth: ^0.20.1
@@ -49,6 +50,7 @@ dependencies:
   geodesy: ^0.3.2
   geoflutterfire: ^2.2.2
   get: ^3.26.0
+  http: any
   image_picker: ^0.6.7+7
   intl: any
   location: ^3.2.4

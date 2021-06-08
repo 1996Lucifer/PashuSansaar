@@ -1,4 +1,4 @@
-import 'package:pashusansaar/login_screen.dart';
+import 'package:pashusansaar/domain/auth/login/login_screen.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
