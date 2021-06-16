@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "681833283611",
+    "firebase_url": "https://pashusansaar-6e910-default-rtdb.firebaseio.com",
     "project_id": "pashusansaar-6e910",
     "storage_bucket": "pashusansaar-6e910.appspot.com"
   },
@@ -13,6 +14,30 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "681833283611-bktj67nu3vsuf9rk1t1tb9gffcpf6dmj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "dj.pashusansaar",
+            "certificate_hash": "f0b774f17b6c3bfbffd11f2a0dd98c64e4b12f89"
+          }
+        },
+        {
+          "client_id": "681833283611-l0ujo41td1a6k0ub9bphs7621glrlf42.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "dj.pashusansaar",
+            "certificate_hash": "876a39d8d71329b60a9a465af20603e024443039"
+          }
+        },
+        {
+          "client_id": "681833283611-pkcgj1iomvfifb1cumat0gkudguihcfa.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "dj.pashusansaar",
+            "certificate_hash": "d6db5f04021086727bc294d4e0177c65eed8ba77"
+          }
+        },
         {
           "client_id": "681833283611-vvjcrngubq6ld9g3efubegvimev93abq.apps.googleusercontent.com",
           "client_type": 1,

@@ -1,6 +1,9 @@
+import 'package:pashusansaar/connectivity%20check/connectivity_provider.dart';
+import 'package:pashusansaar/connectivity%20check/no_internet.dart';
 import 'package:pashusansaar/domain/auth/login/login_screen.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:splash_screen_view/SplashScreenView.dart';
 import 'home_screen.dart';
@@ -20,6 +23,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     getLoginCheck();
+    Provider.of<ConnectivityProvider>(context, listen: false).startMonitoring();
   }
 
   getLoginCheck() async {
@@ -38,23 +42,36 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SplashScreenView(
-      home: isLoggedIn &&
-              ([0, 1].contains(newVersion[0].compareTo(currentVersion[0]))) &&
-              ([0, 1].contains(newVersion[1].compareTo(currentVersion[1])))
-          ? HomeScreen(selectedIndex: 0)
-          : Login(),
-      duration: 2000,
-      imageSize: 200,
-      imageSrc: "assets/images/cow.png",
-      text: "PashuSansar            पशुसंसार",
-      textType: TextType.ScaleAnimatedText,
-      textStyle: TextStyle(
-        color: Colors.white,
-        fontWeight: FontWeight.bold,
-        fontSize: 50.0,
-      ),
-      backgroundColor: primaryColor,
+    return Consumer<ConnectivityProvider>(
+      builder: (consumerContext,model,child){
+        if (model.isOnline!=null){
+          return model.isOnline ?
+          SplashScreenView(
+            home: isLoggedIn &&
+                ([0, 1].contains(newVersion[0].compareTo(currentVersion[0]))) &&
+                ([0, 1].contains(newVersion[1].compareTo(currentVersion[1])))
+                ? HomeScreen(selectedIndex: 0)
+                : Login(),
+            duration: 2000,
+            imageSize: 200,
+            imageSrc: "assets/images/cow.png",
+            text: "PashuSansar            पशुसंसार",
+            textType: TextType.ScaleAnimatedText,
+            textStyle: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 50.0,
+            ),
+            backgroundColor: primaryColor,
+          )
+              :NoInternet();
+        }
+        return Container(
+          child: Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      }
     );
   }
 }

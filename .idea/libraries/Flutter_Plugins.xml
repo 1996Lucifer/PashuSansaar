@@ -1,6 +1,7 @@
 <component name="libraryTable">
   <library name="Flutter Plugins" type="FlutterPluginsLibraryType">
     <CLASSES>
+      <root url="file://$PROJECT_DIR$/../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/connectivity_for_web-0.4.0" />
       <root url="file://$PROJECT_DIR$/../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/location_web-1.0.1" />
       <root url="file://$PROJECT_DIR$/../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/path_provider-1.6.28" />
       <root url="file://$PROJECT_DIR$/../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/firebase_storage-7.0.0" />
@@ -22,6 +23,7 @@
       <root url="file://$PROJECT_DIR$/../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/url_launcher_macos-2.0.0" />
       <root url="file://$PROJECT_DIR$/../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/firebase_in_app_messaging-0.3.0+1" />
       <root url="file://$PROJECT_DIR$/../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/shared_preferences_windows-0.0.2+3" />
+      <root url="file://$PROJECT_DIR$/../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/connectivity-3.0.6" />
       <root url="file://$PROJECT_DIR$/../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/firebase_messaging-8.0.0-dev.15" />
       <root url="file://$PROJECT_DIR$/../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/geocoder-0.2.1" />
       <root url="file://$PROJECT_DIR$/../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/path_provider_windows-0.0.5" />

@@ -6,6 +6,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:intl/intl.dart';
+import 'package:pashusansaar/domain/auth/otp_conf/otp_model.dart';
+import 'package:pashusansaar/domain/auth_token_controller.dart';
+import 'package:pashusansaar/global_data/global_data.dart';
 import 'package:pashusansaar/home_screen.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/global.dart';
@@ -23,7 +26,9 @@ import 'package:progress_dialog/progress_dialog.dart';
 
 class UserDetailsFetch extends StatefulWidget {
   final String currentUser, mobile;
-  UserDetailsFetch({Key key, @required this.currentUser, @required this.mobile})
+     OtpModel otpModel;
+
+  UserDetailsFetch({Key key, @required this.currentUser, @required this.mobile,})
       : super(key: key);
 
   @override
@@ -36,10 +41,12 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
   ProgressDialog pr;
   int count = 0;
   TextEditingController nameController = new TextEditingController();
+  final AuthToken authController = Get.put(AuthToken());
   TextEditingController referralCodeController = new TextEditingController();
   TextEditingController zipCodeController = new TextEditingController();
   Map<String, dynamic> mobileInfo = {};
   LocationData _locate;
+
   // Map _profileData = {};
 
   // final geo = geoFire.Geoflutterfire();
@@ -97,6 +104,7 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
       _locate = _locationData;
       prefs.setDouble("latitude", _locate.latitude);
       prefs.setDouble("longitude", _locate.longitude);
+
     });
     await assignDeviceID();
   }
@@ -428,49 +436,35 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                                 pr = new ProgressDialog(context,
                                     type: ProgressDialogType.Normal,
                                     isDismissible: false);
-
-                                pr.style(message: 'progress_dialog_message'.tr);
-                                pr.show();
-                                FirebaseFirestore.instance
-                                    .collection("userInfo")
-                                    .doc(widget.currentUser)
-                                    .set({
-                                  "currentUser": widget.currentUser,
-                                  "name": nameController.text,
-                                  "mobile": widget.mobile,
-                                  "mobileInfo": mobileInfo,
-                                  'latitude':
-                                      prefs.getDouble('latitude').toString(),
-                                  'longitude':
-                                      prefs.getDouble('longitude').toString(),
-                                  'referralCode':
-                                      ReusableWidgets.randomCodeGenerator(),
-                                  'enteredReferralCode':
-                                      referralCodeController.text.isNotEmpty
-                                          ? referralCodeController.text
-                                              .toUpperCase()
-                                          : '',
-                                  'alreadyUser': true,
-                                  'appVersion': prefs
-                                      .getStringList('currentVersion')
-                                      .join('.'),
-                                  'dateOfCreation': FirebaseAuth.instance
-                                      .currentUser.metadata.creationTime
-                                      .toString(),
-                                  'zipcode': zipCodeController.text ?? ''
-                                }).then((result) {
-                                  pr.hide().then(
-                                    (isHidden) {
-                                      return Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              HomeScreen(selectedIndex: 0),
-                                        ),
-                                      );
-                                    },
+                               bool status=await authController.fetchAuthToken(
+                                    mobileInfo: mobileInfo,
+                                    name: nameController.text,
+                                    apkVersion: prefs
+                                        .getStringList('currentVersion')
+                                        .join('.'),
+                                    longitude:
+                                    prefs.getDouble('longitude').toString(),
+                                    latitude: prefs.getDouble('latitude').toString(),
+                                    referredByCode:  referralCodeController.text.isNotEmpty
+                                        ? referralCodeController.text
+                                        .toUpperCase()
+                                        : '',
+                                    number: widget.mobile,
                                   );
-                                });
+                               if(status==true){
+                                 Navigator.pushReplacement(
+                                   context,
+                                   MaterialPageRoute(
+                                     builder: (context) =>
+                                         HomeScreen(selectedIndex: 0),
+                                   ),
+                                 );
+                               }
+
+
+
+
+
                               } catch (err) {
                                 // pr.hide();
                                 print(

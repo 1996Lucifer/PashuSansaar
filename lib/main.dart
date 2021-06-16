@@ -1,10 +1,12 @@
+import 'dart:async';
+
 import 'package:android_play_install_referrer/android_play_install_referrer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
+import 'package:pashusansaar/connectivity%20check/connectivity_provider.dart';
 import 'package:pashusansaar/home_screen.dart';
 import 'package:pashusansaar/splash_screen.dart';
 import 'package:pashusansaar/translation/message.dart';
@@ -14,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:pashusansaar/utils/global.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart' as URLauncher;
 import 'package:package_info/package_info.dart';
@@ -274,21 +277,30 @@ class _MyAppState extends State<MyApp> {
       DeviceOrientation.portraitDown,
     ]);
 
-    return GetMaterialApp(
-        title: 'PashuSansaar',
-        debugShowCheckedModeBanner: false,
-        translations: Messages(), // translations
-        locale: Locale('hn', 'IN'),
-        theme: ThemeData(
-            fontFamily: 'Mukta',
-            primaryColor: primaryColor,
-            buttonColor: primaryColor,
-            iconTheme: IconThemeData(color: primaryColor),
-            accentColor: primaryColor,
-            textSelectionTheme:
-                TextSelectionThemeData(cursorColor: primaryColor),
-            indicatorColor: primaryColor,
-            scaffoldBackgroundColor: Colors.white),
-        home: SplashScreen());
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => ConnectivityProvider(),
+          child: SplashScreen(),
+        )
+      ],
+      child: GetMaterialApp(
+          title: 'PashuSansaar',
+          debugShowCheckedModeBanner: false,
+          translations: Messages(),
+          // translations
+          locale: Locale('hn', 'IN'),
+          theme: ThemeData(
+              fontFamily: 'Mukta',
+              primaryColor: primaryColor,
+              buttonColor: primaryColor,
+              iconTheme: IconThemeData(color: primaryColor),
+              accentColor: primaryColor,
+              textSelectionTheme:
+                  TextSelectionThemeData(cursorColor: primaryColor),
+              indicatorColor: primaryColor,
+              scaffoldBackgroundColor: Colors.white),
+          home: SplashScreen()),
+    );
   }
 }
