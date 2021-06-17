@@ -1,4 +1,4 @@
-import 'package:pashusansaar/sell_animal/sell_animal_form.dart';
+import 'package:pashusansaar/sell_animal/sell_animal_form/sell_animal_form.dart';
 import 'package:pashusansaar/sell_animal/sell_animal_info.dart';
 import 'package:flutter/material.dart';
 

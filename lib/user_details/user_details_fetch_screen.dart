@@ -5,9 +5,11 @@ import 'package:device_info/device_info.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:pashusansaar/domain/auth/otp_conf/otp_model.dart';
-import 'package:pashusansaar/domain/auth_token_controller.dart';
+import 'package:pashusansaar/domain/auth/auth_token_conf/auth_token_controller.dart';
 import 'package:pashusansaar/global_data/global_data.dart';
 import 'package:pashusansaar/home_screen.dart';
 import 'package:pashusansaar/utils/colors.dart';
@@ -46,10 +48,7 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
   TextEditingController zipCodeController = new TextEditingController();
   Map<String, dynamic> mobileInfo = {};
   LocationData _locate;
-
-  // Map _profileData = {};
-
-  // final geo = geoFire.Geoflutterfire();
+  LocationData add;
 
   String currentText = "";
 
@@ -63,51 +62,133 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
           _showReferralData = !_showReferralData;
         });
       };
-    getLocationLocate();
+    // getLocationLocate();
+    _determinePosition();
+    loadAsset();
     super.initState();
   }
 
-  getLocationLocate() async {
-    Location location = new Location();
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+  // getLocationLocate() async {
+  //   Location location = new Location();
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //
+  //   bool _serviceEnabled;
+  //   PermissionStatus _permissionGranted;
+  //   LocationData _locationData;
+  //
+  //   _serviceEnabled = await location.serviceEnabled();
+  //   if (!_serviceEnabled) {
+  //     _serviceEnabled = await location.requestService();
+  //     if (!_serviceEnabled) {
+  //       setState(() {
+  //         _zipCodeTextField = true;
+  //       });
+  //       await assignDeviceID();
+  //       return;
+  //     }
+  //   }
+  //   _permissionGranted = await location.hasPermission();
+  //   if (_permissionGranted == PermissionStatus.denied) {
+  //     _permissionGranted = await location.requestPermission();
+  //     if (_permissionGranted != PermissionStatus.granted) {
+  //       setState(() {
+  //         _zipCodeTextField = true;
+  //       });
+  //       await assignDeviceID();
+  //       return;
+  //     }
+  //   }
+  //   _locationData = await location.getLocation();
+  //   final coordinates = new Coordinates(_locationData.longitude,_locationData.latitude);
+  //   print("+++++++++${coordinates}++++++++++++++++");
+  //   var addressesByGps =
+  //   await Geocoder.local.findAddressesFromCoordinates(coordinates);
+  //   var firstByGps = addressesByGps.first;
+  //
+  //
+  //
+  //   setState(() {
+  //
+  //     _locate = _locationData;
+  //     prefs.setDouble("latitude", _locate.latitude);
+  //     prefs.setDouble("longitude", _locate.longitude);
+  //     prefs.setString("userAddress",firstByGps.featureName );
+  //   });
+  //   await assignDeviceID();
+  // }
 
-    bool _serviceEnabled;
-    PermissionStatus _permissionGranted;
-    LocationData _locationData;
 
-    _serviceEnabled = await location.serviceEnabled();
-    if (!_serviceEnabled) {
-      _serviceEnabled = await location.requestService();
-      if (!_serviceEnabled) {
+
+
+
+
+   _determinePosition() async {
+     SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool serviceEnabled;
+    LocationPermission permission;
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error('Location services are disabled.');
+    }
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+
         setState(() {
-          _zipCodeTextField = true;
-        });
-        await assignDeviceID();
-        return;
+                  _zipCodeTextField = true;
+                });
+        return Future.error('Location permissions are denied');
       }
+
     }
 
-    _permissionGranted = await location.hasPermission();
-    if (_permissionGranted == PermissionStatus.denied) {
-      _permissionGranted = await location.requestPermission();
-      if (_permissionGranted != PermissionStatus.granted) {
-        setState(() {
-          _zipCodeTextField = true;
-        });
-        await assignDeviceID();
-        return;
-      }
+    if (permission == LocationPermission.deniedForever) {
+
+      setState(() {
+        _zipCodeTextField = true;
+      });
+      // Permissions are denied forever, handle appropriately.
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+
+
     }
 
-    _locationData = await location.getLocation();
+
+    Position position = await Geolocator.getCurrentPosition();
+    var address = await placemarkFromCoordinates(position.latitude,position.longitude);
+
+    // print("+++++++++${position.latitude}++++++++++++++++");
+    // print("+++++++++${position.longitude}++++++++++++++++");
+    // print("++++name+++++${address[0].name}++++++++++++++++");
+    // print("+++country++++++${address[0].country}++++++++++++++++");
+    //  print("++++locality++district+++${address[0].locality}++++++++++++++++");
+    // print("+++subLocality++++++name+++++++userAddress+++++++++++++++++${address[0].subLocality}++++++++++++++++");
+    // print("+++subAdministrativeArea++++++${address[0].subAdministrativeArea}++++++++++++++++");
+    // print("+++postalCode+++zipCode+++${address[0].postalCode}++++++++++++++++");
+    // print("++++administrativeArea+++++${address[0].administrativeArea}++++++++++++++++");
+    // print("+++++isoCountryCode++++${address[0].isoCountryCode}++++++++++++++++");
+    // print("+++street++++++${address[0].street}++++++++++++++++");
+
     setState(() {
-      _locate = _locationData;
-      prefs.setDouble("latitude", _locate.latitude);
-      prefs.setDouble("longitude", _locate.longitude);
+      prefs.setDouble("latitude", position.latitude);
+      prefs.setDouble("longitude", position.longitude);
+      prefs.setString("userAddress", address[0].name+' '+address[0].subLocality);
+      prefs.setString("zipCode", address[0].postalCode);
+      prefs.setString("district", address[0].locality);
 
     });
-    await assignDeviceID();
+
+     await assignDeviceID();
   }
+
+
+
+
+
+
+
 
   assignDeviceID() async {
     String deviceType, deviceId, deviceName;
@@ -183,8 +264,11 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
     var first = addresses.first;
 
     setState(() {
-      prefs.setDouble("latitude", first.coordinates.latitude);
-      prefs.setDouble("longitude", first.coordinates.longitude);
+      prefs.setDouble("latitudeByZipCodeController", first.coordinates.latitude);
+      prefs.setDouble("longitudeByZipCodeController", first.coordinates.longitude);
+      prefs.setString("userAddressByZipCodeController", first.featureName);
+      prefs.setString("userAddressByZipCodeController", first.postalCode);
+      prefs.setString("userAddressByZipCodeController", first.featureName);
     });
   }
 
@@ -419,6 +503,7 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                                                     fontSize: 16),
                                               ),
                                               onPressed: () {
+                                                print("=====================${prefs.getString("userAddress").toString()}===============");
                                                 if (prefs.getInt('count') == 1)
                                                   exit(0);
                                                 else {
@@ -449,9 +534,14 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                                         ? referralCodeController.text
                                         .toUpperCase()
                                         : '',
-                                    number: widget.mobile,
+                                    number: widget.mobile,zipCode: prefs.getString("zipCode").toString(),
+                                 userAddress: prefs.getString("userAddress").toString(),
+                                 cityName: prefs.getString("district").toString(),
+
+
+
                                   );
-                               if(status==true){
+                               if(status=="fh"){
                                  Navigator.pushReplacement(
                                    context,
                                    MaterialPageRoute(

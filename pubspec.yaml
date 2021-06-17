@@ -66,6 +66,8 @@ dependencies:
   url_launcher: any
   connectivity: any
   provider: 4.3.3
+  geocoding: ^1.0.5
+  geolocator: any
 
 dev_dependencies:
   flutter_test:

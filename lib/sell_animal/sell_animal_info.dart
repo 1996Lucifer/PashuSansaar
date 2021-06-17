@@ -15,7 +15,7 @@ import '../home_screen.dart';
 import '../interested_buyer.dart';
 import 'remove_animal.dart';
 import 'sell_animal_edit_form.dart';
-import 'sell_animal_form.dart';
+import 'sell_animal_form/sell_animal_form.dart';
 
 class SellingAnimalInfo extends StatefulWidget {
   final List animalInfo;

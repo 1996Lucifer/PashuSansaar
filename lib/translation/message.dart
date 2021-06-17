@@ -82,7 +82,7 @@ class Messages extends Translations {
           'choose_photo': 'फोटो चुनें',
           'save_button': 'दर्ज़ (Save) करे',
           'upload_image_text': 'फोटो डालें (कम से कम एक)',
-          'cow': 'गाय',
+          'cow': "1", // 'गाय',
           'buffalo_female': 'भैंस',
           'ox': 'बैल',
           'buffalo_male': 'भैंसा',
