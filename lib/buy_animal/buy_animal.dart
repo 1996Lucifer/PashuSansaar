@@ -1994,7 +1994,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                             color: Colors.grey[100],
                             border: Border.all(color: Colors.grey[400])),
                         child: Padding(
-                          padding: const EdgeInsets.only(top: 20.0),
+                          padding: const EdgeInsets.only(top: 7.0),
                           child: Center(
                               child: RichText(
                             text: TextSpan(
@@ -2032,7 +2032,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                             border: Border.all(color: Colors.grey[400])),
                         height: 50,
                         child: Padding(
-                          padding: const EdgeInsets.only(top: 20.0),
+                          padding: const EdgeInsets.only(top: 7.0),
                           child: Center(
                               child: RichText(
                             text: TextSpan(
@@ -2199,160 +2199,161 @@ class _BuyAnimalState extends State<BuyAnimal>
     ].forEach((element) =>
         _images.addIf(element != null && element.isNotEmpty, element));
     return Padding(
-        padding: EdgeInsets.only(left: 8.0, right: 8, bottom: 4),
-        child: Stack(
-          children: [
-            GestureDetector(
-              onTap: () {
-                return Navigator.of(context).push(PageRouteBuilder(
-                  opaque: true,
-                  pageBuilder: (BuildContext context, _, __) =>
-                      StatefulBuilder(builder: (context, setState) {
-                    return Column(
-                      children: [
-                        CarouselSlider(
-                          options: CarouselOptions(
-                              height: MediaQuery.of(context).size.height * 0.9,
-                              viewportFraction: 1.0,
-                              initialPage: 0,
-                              enableInfiniteScroll: true,
-                              reverse: false,
-                              autoPlay: true,
-                              autoPlayInterval: Duration(seconds: 4),
-                              autoPlayAnimationDuration:
-                                  Duration(milliseconds: 800),
-                              autoPlayCurve: Curves.fastOutSlowIn,
-                              enlargeCenterPage: true,
-                              scrollDirection: Axis.horizontal,
-                              onPageChanged: (index, reason) => setState(() {
-                                    _current = index;
-                                  })),
-                          items: _images.map((i) {
-                            return InteractiveViewer(
-                              boundaryMargin: const EdgeInsets.all(20.0),
-                              minScale: 0.1,
-                              maxScale: 1.6,
-                              child: i.length > 1000
-                                  ? Image.memory(base64Decode('$i'))
-                                  : Image.network(
-                                      '$i',
-                                      loadingBuilder: (BuildContext context,
-                                          Widget child,
-                                          ImageChunkEvent loadingProgress) {
-                                        if (loadingProgress == null)
-                                          return child;
-                                        return Center(
-                                          child: CircularProgressIndicator(
-                                            value: loadingProgress
-                                                        .expectedTotalBytes !=
-                                                    null
-                                                ? loadingProgress
-                                                        .cumulativeBytesLoaded /
-                                                    loadingProgress
-                                                        .expectedTotalBytes
-                                                : null,
-                                          ),
-                                        );
-                                      },
-                                    ),
-                            );
-                          }).toList(),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: _images.map((url) {
-                            int indexData = _images.indexOf(url);
-                            return Container(
-                              width: 8.0,
-                              height: 8.0,
-                              margin: EdgeInsets.symmetric(
-                                  vertical: 10.0, horizontal: 2.0),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: _current == indexData
-                                    ? Color.fromRGBO(255, 255, 255, 1)
-                                    : Color.fromRGBO(255, 255, 255, 0.4),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                    );
-                  }),
-                ));
-              },
-              child: Container(
-                height: 200.0,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    fit: BoxFit.cover,
-                    image: _images[0].length > 1000
-                        ? MemoryImage(
-                            base64.decode(_images[0]),
-                          )
-                        : NetworkImage(_images[0]),
-                  ),
-                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                  color: Colors.redAccent,
+      padding: EdgeInsets.only(left: 8.0, right: 8, bottom: 4),
+      child: Stack(
+        children: [
+          GestureDetector(
+            onTap: () {
+              return Navigator.of(context).push(PageRouteBuilder(
+                opaque: true,
+                pageBuilder: (BuildContext context, _, __) =>
+                    StatefulBuilder(builder: (context, setState) {
+                  return Column(
+                    children: [
+                      CarouselSlider(
+                        options: CarouselOptions(
+                            height: MediaQuery.of(context).size.height * 0.9,
+                            viewportFraction: 1.0,
+                            initialPage: 0,
+                            enableInfiniteScroll: true,
+                            reverse: false,
+                            autoPlay: true,
+                            autoPlayInterval: Duration(seconds: 4),
+                            autoPlayAnimationDuration:
+                                Duration(milliseconds: 800),
+                            autoPlayCurve: Curves.fastOutSlowIn,
+                            enlargeCenterPage: true,
+                            scrollDirection: Axis.horizontal,
+                            onPageChanged: (index, reason) => setState(() {
+                                  _current = index;
+                                })),
+                        items: _images.map((i) {
+                          return InteractiveViewer(
+                            boundaryMargin: const EdgeInsets.all(20.0),
+                            minScale: 0.1,
+                            maxScale: 1.6,
+                            child: i.length > 1000
+                                ? Image.memory(base64Decode('$i'))
+                                : Image.network(
+                                    '$i',
+                                    loadingBuilder: (BuildContext context,
+                                        Widget child,
+                                        ImageChunkEvent loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return Center(
+                                        child: CircularProgressIndicator(
+                                          value: loadingProgress
+                                                      .expectedTotalBytes !=
+                                                  null
+                                              ? loadingProgress
+                                                      .cumulativeBytesLoaded /
+                                                  loadingProgress
+                                                      .expectedTotalBytes
+                                              : null,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                          );
+                        }).toList(),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: _images.map((url) {
+                          int indexData = _images.indexOf(url);
+                          return Container(
+                            width: 8.0,
+                            height: 8.0,
+                            margin: EdgeInsets.symmetric(
+                                vertical: 10.0, horizontal: 2.0),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: _current == indexData
+                                  ? Color.fromRGBO(255, 255, 255, 1)
+                                  : Color.fromRGBO(255, 255, 255, 0.4),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  );
+                }),
+              ));
+            },
+            child: Container(
+              height: 200.0,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  fit: BoxFit.cover,
+                  image: _images[0].length > 1000
+                      ? MemoryImage(
+                          base64.decode(_images[0]),
+                        )
+                      : NetworkImage(_images[0]),
                 ),
+                borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                color: Colors.redAccent,
               ),
             ),
-            Positioned(
-              right: 0,
-              child: RaisedButton.icon(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18.0),
-                      side: BorderSide(color: violetColor)),
-                  color: violetColor,
-                  onPressed: () async {
-                    String uriPrefix = 'https://pashusansaar.page.link/pashu';
-                    Map<String, dynamic> qParams = {
-                      "uniqueId": _list[index]['uniqueId'],
-                      "userId": _list[index]['userId'],
-                      "screen": "DESCRIPTION_PAGE",
-                    };
+          ),
+          Positioned(
+            right: 0,
+            child: RaisedButton.icon(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18.0),
+                    side: BorderSide(color: violetColor)),
+                color: violetColor,
+                onPressed: () async {
+                  String qParams = json.encode({
+                    "uniqueId": _list[index]['uniqueId'],
+                    "userId": _list[index]['userId'],
+                    "screen": "DESCRIPTION_PAGE",
+                  });
 
-                    final Uri linkData =
-                        Uri.parse("https://www.pashu-sansaar.com")
-                            .replace(queryParameters: qParams);
+                  // final Uri linkData =
+                  //     Uri.parse("").replace(queryParameters: qParams);
 
-                    final DynamicLinkParameters parameters =
-                        DynamicLinkParameters(
-                      uriPrefix: uriPrefix,
-                      link: linkData,
-                      androidParameters: AndroidParameters(
-                        packageName: 'dj.pashusansaar',
-                        minimumVersion: 21,
-                      ),
-                      dynamicLinkParametersOptions:
-                          DynamicLinkParametersOptions(
-                        shortDynamicLinkPathLength:
-                            ShortDynamicLinkPathLength.unguessable,
-                      ),
-                    );
+                  final DynamicLinkParameters parameters =
+                      DynamicLinkParameters(
+                          uriPrefix: "https://pashusansaar.page.link",
+                          link: Uri.parse(
+                              "https://www.pashu-sansaar.com/?data=$qParams"),
+                          androidParameters: AndroidParameters(
+                            packageName: 'dj.pashusansaar',
+                            minimumVersion: 21,
+                          ),
+                          dynamicLinkParametersOptions:
+                              DynamicLinkParametersOptions(
+                            shortDynamicLinkPathLength:
+                                ShortDynamicLinkPathLength.unguessable,
+                          ),
+                          navigationInfoParameters: NavigationInfoParameters(
+                              forcedRedirectEnabled: true));
 
-                    final Uri dynamicUrl = await parameters.buildUrl();
+                  final shortDynamicLink = await parameters.buildShortLink();
+                  final Uri shortUrl = shortDynamicLink.shortUrl;
 
-                    await takeScreenShot(_list[index]['uniqueId']);
+                  await takeScreenShot(_list[index]['uniqueId']);
 
-                    Share.shareFiles([fileUrl.path],
-                        mimeTypes: ['images/png'],
-                        text:
-                            "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
-                        // "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar} \n\n ${dynamicUrl.toString()}",
-                        subject: 'पशु की जानकारी');
+                  Share.shareFiles([fileUrl.path],
+                      mimeTypes: ['images/png'],
+                      text:
+                          // "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
+                          "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar} \n\n ${shortUrl.toString()}",
+                      subject: 'पशु की जानकारी');
 
-                    // Share.share(dynamicUrl.toString(), subject: 'Data');
-                  },
-                  icon: Icon(Icons.share, color: Colors.white, size: 14),
-                  label: Text('share'.tr,
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14))),
-            )
-          ],
-        ));
+                  // Share.share(shortUrl.toString());
+                },
+                icon: Icon(Icons.share, color: Colors.white, size: 14),
+                label: Text('share'.tr,
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14))),
+          )
+        ],
+      ),
+    );
   }
 
   _distanceTimeMethod(int index) {

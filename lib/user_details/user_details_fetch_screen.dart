@@ -17,6 +17,8 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
 import 'package:progress_dialog/progress_dialog.dart';
+
+import '../utils/reusable_widgets.dart';
 // import 'package:geoflutterfire/geoflutterfire.dart' as geoFire;
 
 class UserDetailsFetch extends StatefulWidget {
@@ -175,18 +177,34 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
 
   loadAsset() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    var addresses =
-        await Geocoder.local.findAddressesFromQuery(zipCodeController.text);
-    var first = addresses.first;
 
-    if (first.countryCode == "IN") {
-      setState(() {
-        prefs.setDouble("latitude", first.coordinates.latitude);
-        prefs.setDouble("longitude", first.coordinates.longitude);
-      });
-    } else {
+    try {
+      var addresses =
+          await Geocoder.local.findAddressesFromQuery(zipCodeController.text);
+      var first = addresses.first;
+      if (first.countryCode == "IN") {
+        setState(() {
+          prefs.setDouble("latitude", first.coordinates.latitude);
+          prefs.setDouble("longitude", first.coordinates.longitude);
+        });
+      } else {
+        ReusableWidgets.showDialogBox(
+          context,
+          'warning'.tr,
+          Text(
+            'invalid_zipcode_error'.tr,
+          ),
+        );
+      }
+    } catch (e) {
+      print('zipcode-error===>' + e.toString());
       ReusableWidgets.showDialogBox(
-          context, 'warning'.tr, Text('invalid_zipcode_error'.tr));
+        context,
+        'warning'.tr,
+        Text(
+          'invalid_zipcode_error'.tr,
+        ),
+      );
     }
   }
 

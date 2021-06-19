@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:android_play_install_referrer/android_play_install_referrer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -33,13 +35,14 @@ const AndroidNotificationChannel channel = AndroidNotificationChannel(
 );
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
+  // await Firebase.initializeApp();
   print('payLoad==>>' + message.toString());
 
   print('payLoad-notification==>>' + message.notification.toString());
   print('payLoad-data==>>' + message.data.toString());
 
   print('Handling a background message ${message.messageId}');
+  // _goToDeeplyNestedView(message.data);
 }
 
 RemoteConfig remoteConfig;
@@ -154,7 +157,7 @@ class _MyAppState extends State<MyApp> {
     });
 
     FirebaseMessaging.onMessageOpenedApp
-        .listen((RemoteMessage message) => _goToDeeplyNestedView(dataPayload));
+        .listen((RemoteMessage message) => _goToDeeplyNestedView(message.data));
 
     initDynamicLink();
     isVpnActive();
@@ -164,7 +167,7 @@ class _MyAppState extends State<MyApp> {
     FirebaseDynamicLinks.instance.onLink(
         onSuccess: (PendingDynamicLinkData dynamicLink) async {
       final Uri deepLink = dynamicLink?.link;
-      final dynamicData = deepLink?.queryParameters;
+      final dynamicData = json.decode(deepLink?.queryParameters['data']);
       print("link1===>" + dynamicData.toString());
 
       if (deepLink != null && dynamicData != {} && dynamicData != null)
@@ -180,7 +183,7 @@ class _MyAppState extends State<MyApp> {
     final PendingDynamicLinkData data =
         await FirebaseDynamicLinks.instance.getInitialLink();
     final Uri deepLink = data?.link;
-    final dynamicData = deepLink?.queryParameters;
+    final dynamicData = json.decode(deepLink?.queryParameters['data']);
 
     print("link2===>" + dynamicData.toString());
 
