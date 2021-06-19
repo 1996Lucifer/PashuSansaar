@@ -71,7 +71,7 @@ class ProfileMainState extends State<ProfileMain>
                 title: Text('error'.tr),
                 content: Text('problem_loading_data'.tr),
                 actions: <Widget>[
-                  FlatButton(
+                  TextButton(
                       child: Text(
                         'Ok'.tr,
                         style: TextStyle(color: primaryColor),
@@ -102,7 +102,12 @@ class ProfileMainState extends State<ProfileMain>
         userInfo['mobile'] = widget.profileData['mobile'];
         userInfo['image'] = widget.profileData['image'];
         userInfo['address'] =
-            first.addressLine ?? (first.adminArea + ', ' + first.countryName);
+            first.addressLine ??
+            (first.adminArea +
+                ' ' +
+                first.postalCode +
+                ', ' +
+                first.countryName);
         _currentVersion = prefs.getStringList('currentVersion').join('.');
       });
       // getCallingInfo();
@@ -156,7 +161,7 @@ class ProfileMainState extends State<ProfileMain>
                       title: Text('Success'.tr),
                       content: Text('प्रोफाइल फोटो अपलोड कर दिया गया है |'),
                       actions: <Widget>[
-                        FlatButton(
+                        TextButton(
                             child: Text(
                               'Ok'.tr,
                               style: TextStyle(color: primaryColor),
@@ -215,7 +220,7 @@ class ProfileMainState extends State<ProfileMain>
                       title: Text('Success'.tr),
                       content: Text('प्रोफाइल फोटो अपलोड कर दिया गया है |'),
                       actions: <Widget>[
-                        FlatButton(
+                        TextButton(
                             child: Text(
                               'Ok'.tr,
                               style: TextStyle(color: primaryColor),
@@ -323,7 +328,7 @@ class ProfileMainState extends State<ProfileMain>
                               content:
                                   Text('प्रोफाइल फोटो अपलोड कर दिया गया है |'),
                               actions: <Widget>[
-                                FlatButton(
+                                TextButton(
                                     child: Text(
                                       'Ok'.tr,
                                       style: TextStyle(color: primaryColor),
@@ -727,10 +732,16 @@ class ProfileMainState extends State<ProfileMain>
                                                     '${widget.refData['name']}',
                                                 'place':
                                                     '${widget.refData['address']}'
-                                              })
-                                              ),
+                                              })),
                                         ),
                                       ),
+                                      Expanded(
+                                          flex: 1,
+                                          child: FaIcon(
+                                            FontAwesomeIcons.trophy,
+                                            color: goldenColor,
+                                            size: 40,
+                                          ))
                                     ],
                                   ))))),
                 ],

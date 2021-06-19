@@ -4,11 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:device_info/device_info.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:pashusansaar/home_screen.dart';
 import 'package:pashusansaar/utils/colors.dart';
-import 'package:pashusansaar/utils/global.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -139,6 +137,10 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String _token = await FirebaseMessaging.instance.getToken();
 
+    var addresses = await Geocoder.local.findAddressesFromCoordinates(
+        Coordinates(prefs.getDouble('latitude'), prefs.getDouble('longitude')));
+    var first = addresses.first;
+
     print(_token);
 
     FirebaseFirestore.instance
@@ -148,7 +150,10 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
       "id": widget.currentUser,
       'lat': prefs.getDouble('latitude').toString(),
       'long': prefs.getDouble('longitude').toString(),
-      'userToken': _token
+      'userToken': _token,
+      'district': ReusableWidgets.mappingDistrict(
+        first.subAdminArea ?? first.locality ?? first.featureName,
+      ),
     }).catchError((err) {
       print(
         "errToken->" + err.toString(),
@@ -174,10 +179,15 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
         await Geocoder.local.findAddressesFromQuery(zipCodeController.text);
     var first = addresses.first;
 
-    setState(() {
-      prefs.setDouble("latitude", first.coordinates.latitude);
-      prefs.setDouble("longitude", first.coordinates.longitude);
-    });
+    if (first.countryCode == "IN") {
+      setState(() {
+        prefs.setDouble("latitude", first.coordinates.latitude);
+        prefs.setDouble("longitude", first.coordinates.longitude);
+      });
+    } else {
+      ReusableWidgets.showDialogBox(
+          context, 'warning'.tr, Text('invalid_zipcode_error'.tr));
+    }
   }
 
   @override

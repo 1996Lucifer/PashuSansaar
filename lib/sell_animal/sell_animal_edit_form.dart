@@ -28,7 +28,7 @@ import 'package:flutter/material.dart'
         Divider,
         EdgeInsets,
         Expanded,
-        FlatButton,
+        TextButton,
         FontStyle,
         FontWeight,
         GestureDetector,
@@ -1253,7 +1253,11 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                               animalInfo['animalTypeOther'] ?? "",
                           "userAnimalAge": animalInfo['animalAge'] ?? "",
                           "userAddress": first.addressLine ??
-                              (first.adminArea + ', ' + first.countryName),
+                              (first.adminArea +
+                                  ' ' +
+                                  first.postalCode +
+                                  ', ' +
+                                  first.countryName),
                           "userName": widget.userName,
                           "userAnimalPrice": animalInfo['animalPrice'] ?? "0",
                           "userAnimalBreed": animalInfo['animalBreed'] ?? "",
@@ -1299,7 +1303,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                                     title: Text('pashu_re_registered'.tr),
                                     content: Text('updated_animal'.tr),
                                     actions: <Widget>[
-                                      FlatButton(
+                                      TextButton(
                                           child: Text(
                                             'Ok'.tr,
                                             style:

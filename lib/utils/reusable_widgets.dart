@@ -2,12 +2,11 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:crypto/crypto.dart' as crypto;
 import 'package:intl/intl.dart';
-import 'dart:convert';
 import 'package:get/get.dart';
+import 'package:pashusansaar/utils/colors.dart';
 
-import 'colors.dart';
+import 'constants.dart';
 
 class ReusableWidgets {
   static getAppBar(
@@ -27,6 +26,7 @@ class ReusableWidgets {
           Text(heading),
         ],
       ),
+      backgroundColor: primaryColor,
       automaticallyImplyLeading: automaticallyImplyLeading,
       actions: actions,
     );
@@ -114,5 +114,16 @@ class ReusableWidgets {
     String str1 = x.length > 2 ? x[0] + ' ' + x[1] : x.join(' ');
 
     return str1;
+  }
+
+  static mappingDistrict(String str) {
+    String _local = '';
+    if (hindiToEnglishDistrictMapping.containsKey(str)) {
+      _local = hindiToEnglishDistrictMapping[str] ?? (str);
+    } else {
+      _local = str;
+    }
+
+    return _local;
   }
 }

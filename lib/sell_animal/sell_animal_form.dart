@@ -1207,7 +1207,11 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                               animalInfo['animalTypeOther'] ?? "",
                           "userAnimalAge": animalInfo['animalAge'] ?? "",
                           "userAddress": first.addressLine ??
-                              (first.adminArea + ', ' + first.countryName),
+                              (first.adminArea +
+                                  ' ' +
+                                  first.postalCode +
+                                  ', ' +
+                                  first.countryName),
                           "userName": widget.userName,
                           "userAnimalPrice": animalInfo['animalPrice'] ?? "0",
                           "userAnimalBreed": animalInfo['animalBreed'] ?? "",
@@ -1246,7 +1250,11 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                           'isValidUser': 'Approved',
                           'uniqueId': uniqueId,
                           'userId': FirebaseAuth.instance.currentUser.uid,
-                          'district': (first.subAdminArea ?? first.locality),
+                          'district': ReusableWidgets.mappingDistrict(
+                            first.subAdminArea ??
+                                first.locality ??
+                                first.featureName,
+                          ),
                           'zipCode': first.postalCode,
                           // 'state': first.adminArea,
                         }).then((value) {
