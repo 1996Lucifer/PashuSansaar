@@ -2309,7 +2309,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                     "userId": _list[index]['userId'],
                     "screen": "DESCRIPTION_PAGE",
                   });
-                  
+
                   final DynamicLinkParameters parameters =
                       DynamicLinkParameters(
                           uriPrefix: "https://pashusansaar.page.link",
@@ -2336,7 +2336,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                       mimeTypes: ['images/png'],
                       text:
                           // "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
-                          "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar} \n\n ${shortUrl.toString()}",
+                          "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nपशु देखे: ${shortUrl.toString()}",
                       subject: 'पशु की जानकारी');
 
                   // Share.share(shortUrl.toString());

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/rendering.dart';
 import 'package:path_provider/path_provider.dart';
@@ -68,7 +69,7 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
 
     await FirebaseFirestore.instance
         .collection('userInfo')
-        .doc(widget.userId)
+        .doc(FirebaseAuth.instance.currentUser.uid)
         .get()
         .then((value) => setState(() {
               _profileData = value.data();
@@ -456,7 +457,7 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
           Share.shareFiles([fileUrl.path],
               mimeTypes: ['images/png'],
               text:
-                  "नस्ल: ${_animalInfo['userAnimalBreed']}\nजानकारी: ${_animalInfo['userAnimalDescription']}\nदूध(प्रति दिन): ${_animalInfo['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar} \n\n ${shortUrl.toString()}",
+                  "नस्ल: ${_animalInfo['userAnimalBreed']}\nजानकारी: ${_animalInfo['userAnimalDescription']}\nदूध(प्रति दिन): ${_animalInfo['userAnimalMilk']} Litre\n\nपशु देखे: ${shortUrl.toString()}",
               subject: 'पशु की जानकारी');
         },
         icon: Icon(Icons.share, color: Colors.white, size: 16),
@@ -468,19 +469,21 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
       );
 
   _getHomeScreenButton() => Center(
-    child: RaisedButton.icon(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        child: RaisedButton.icon(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           color: primaryColor,
-          onPressed: () => Navigator.popUntil(context, (route) => route.isFirst),
-          icon:
-              Icon(Icons.remove_red_eye_outlined, color: Colors.white, size: 16),
+          onPressed: () =>
+              Navigator.popUntil(context, (route) => route.isFirst),
+          icon: Icon(Icons.remove_red_eye_outlined,
+              color: Colors.white, size: 16),
           label: Text(
             'see_more_animal'.tr,
             style: TextStyle(
                 color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
           ),
         ),
-  );
+      );
 
   takeScreenShot(String uniqueId) async {
     pr.style(message: 'शेयर किया जा रहा है');
@@ -545,7 +548,26 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
                             maxScale: 1.6,
                             child: i.length > 1000
                                 ? Image.memory(base64Decode('$i'))
-                                : Image.network('$i'));
+                                : Image.network(
+                                    '$i',
+                                    loadingBuilder: (BuildContext context,
+                                        Widget child,
+                                        ImageChunkEvent loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return Center(
+                                        child: CircularProgressIndicator(
+                                          value: loadingProgress
+                                                      .expectedTotalBytes !=
+                                                  null
+                                              ? loadingProgress
+                                                      .cumulativeBytesLoaded /
+                                                  loadingProgress
+                                                      .expectedTotalBytes
+                                              : null,
+                                        ),
+                                      );
+                                    },
+                                  ));
                       }).toList(),
                     ),
                     Row(
