@@ -2309,10 +2309,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                     "userId": _list[index]['userId'],
                     "screen": "DESCRIPTION_PAGE",
                   });
-
-                  // final Uri linkData =
-                  //     Uri.parse("").replace(queryParameters: qParams);
-
+                  
                   final DynamicLinkParameters parameters =
                       DynamicLinkParameters(
                           uriPrefix: "https://pashusansaar.page.link",

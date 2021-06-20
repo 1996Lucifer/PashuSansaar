@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/rendering.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:progress_dialog/progress_dialog.dart';
@@ -85,25 +86,11 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
 
   @override
   Widget build(BuildContext context) {
+    pr = new ProgressDialog(context,
+        type: ProgressDialogType.Normal, isDismissible: false);
     return RepaintBoundary(
       key: previewContainer,
       child: Scaffold(
-        // floatingActionButton: _isLoading
-        //     ? SizedBox.shrink()
-        //     : Padding(
-        //         padding: const EdgeInsets.all(8.0),
-        //         child: Column(
-        //           mainAxisAlignment: MainAxisAlignment.end,
-        //           children: <Widget>[
-        //             _getWhatsAppButton(),
-        //             SizedBox(height: 4),
-        //             _getShareButton(),
-        //             SizedBox(height: 4),
-        //             _getCallButton(),
-        //             SizedBox(height: 4),
-        //           ],
-        //         ),
-        //       ),
         appBar: ReusableWidgets.getAppBar(context, "app_name".tr, true),
         body: _isLoading
             ? Center(child: CircularProgressIndicator())
@@ -178,7 +165,11 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
                         height: 10,
                       ),
                       // _getUserData()
-                      _getButton()
+                      _getButton(),
+                      SizedBox(
+                        height: 15,
+                      ),
+                      _getHomeScreenButton()
                     ],
                   ),
                 ),
@@ -438,11 +429,34 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         color: violetColor,
         onPressed: () async {
+          String qParams = json.encode({
+            "uniqueId": widget.uniqueId,
+            "userId": widget.userId,
+            "screen": "DESCRIPTION_PAGE",
+          });
+
+          final DynamicLinkParameters parameters = DynamicLinkParameters(
+              uriPrefix: "https://pashusansaar.page.link",
+              link: Uri.parse("https://www.pashu-sansaar.com/?data=$qParams"),
+              androidParameters: AndroidParameters(
+                packageName: 'dj.pashusansaar',
+                minimumVersion: 21,
+              ),
+              dynamicLinkParametersOptions: DynamicLinkParametersOptions(
+                shortDynamicLinkPathLength:
+                    ShortDynamicLinkPathLength.unguessable,
+              ),
+              navigationInfoParameters:
+                  NavigationInfoParameters(forcedRedirectEnabled: true));
+
+          final shortDynamicLink = await parameters.buildShortLink();
+          final Uri shortUrl = shortDynamicLink.shortUrl;
+
           await takeScreenShot(_animalInfo['uniqueId']);
           Share.shareFiles([fileUrl.path],
               mimeTypes: ['images/png'],
               text:
-                  "नस्ल: ${_animalInfo['userAnimalBreed']}\nजानकारी: ${_animalInfo['userAnimalDescription']}\nदूध(प्रति दिन): ${_animalInfo['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar} \n\n",
+                  "नस्ल: ${_animalInfo['userAnimalBreed']}\nजानकारी: ${_animalInfo['userAnimalDescription']}\nदूध(प्रति दिन): ${_animalInfo['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar} \n\n ${shortUrl.toString()}",
               subject: 'पशु की जानकारी');
         },
         icon: Icon(Icons.share, color: Colors.white, size: 16),
@@ -453,7 +467,25 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
         ),
       );
 
+  _getHomeScreenButton() => Center(
+    child: RaisedButton.icon(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          color: primaryColor,
+          onPressed: () => Navigator.popUntil(context, (route) => route.isFirst),
+          icon:
+              Icon(Icons.remove_red_eye_outlined, color: Colors.white, size: 16),
+          label: Text(
+            'see_more_animal'.tr,
+            style: TextStyle(
+                color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+          ),
+        ),
+  );
+
   takeScreenShot(String uniqueId) async {
+    pr.style(message: 'शेयर किया जा रहा है');
+    pr.show();
+
     RenderRepaintBoundary boundary =
         previewContainer.currentContext.findRenderObject();
     ui.Image image = await boundary.toImage();
@@ -467,6 +499,7 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
     setState(() {
       fileUrl = imgFile;
     });
+    pr.hide();
   }
 
   Widget _animalImage() {
