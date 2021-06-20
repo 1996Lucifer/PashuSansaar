@@ -148,6 +148,10 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String _token = await FirebaseMessaging.instance.getToken();
 
+    var addresses = await Geocoder.local.findAddressesFromCoordinates(
+        Coordinates(prefs.getDouble('latitude'), prefs.getDouble('longitude')));
+    var first = addresses.first;
+
     print(_token);
 
     FirebaseFirestore.instance
@@ -157,7 +161,10 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
       "id": widget.currentUser,
       'lat': prefs.getDouble('latitude').toString(),
       'long': prefs.getDouble('longitude').toString(),
-      'userToken': _token
+      'userToken': _token,
+      'district': ReusableWidgets.mappingDistrict(
+        first.subAdminArea ?? first.locality ?? first.featureName,
+      )
     }).catchError((err) {
       print(
         "errToken->" + err.toString(),
@@ -179,14 +186,29 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
 
   loadAsset() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    var addresses =
-        await Geocoder.local.findAddressesFromQuery(zipCodeController.text);
-    var first = addresses.first;
-
-    setState(() {
-      prefs.setDouble("latitude", first.coordinates.latitude);
-      prefs.setDouble("longitude", first.coordinates.longitude);
-    });
+    try {
+      var addresses =
+          await Geocoder.local.findAddressesFromQuery(zipCodeController.text);
+      var first = addresses.first;
+      if (first.countryCode == "IN") {
+        setState(() {
+          prefs.setDouble("latitude", first.coordinates.latitude);
+          prefs.setDouble("longitude", first.coordinates.longitude);
+        });
+      } else {
+        ReusableWidgets.showDialogBox(
+            context, 'warning'.tr, Text('invalid_zipcode_error'.tr));
+      }
+    } catch (e) {
+      print('zipcode-error===>' + e.toString());
+      ReusableWidgets.showDialogBox(
+        context,
+        'warning'.tr,
+        Text(
+          'invalid_zipcode_error'.tr,
+        ),
+      );
+    }
   }
 
   @override
@@ -440,25 +462,20 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
                                     .collection("userInfo")
                                     .doc(widget.currentUser)
                                     .update({
-                                  // "currentUser": widget.currentUser,
                                   "name": nameController.text,
-                                  // "mobile": widget.mobile,
                                   "mobileInfo": mobileInfo,
                                   'latitude':
                                       prefs.getDouble('latitude').toString(),
                                   'longitude':
                                       prefs.getDouble('longitude').toString(),
-                                  // 'referralCode':
-                                  //     ReusableWidgets.randomCodeGenerator(),
                                   'enteredReferralCode':
                                       referralCodeController.text.isNotEmpty
                                           ? referralCodeController.text
                                               .toUpperCase()
                                           : '',
-                                  // 'alreadyUser': true,
-                                  // 'appVersion': prefs
-                                  //     .getStringList('currentVersion')
-                                  //     .join('.'),
+                                  'appVersion': prefs
+                                      .getStringList('currentVersion')
+                                      .join('.'),
                                   'dateOfCreation': FirebaseAuth.instance
                                       .currentUser.metadata.creationTime
                                       .toString(),

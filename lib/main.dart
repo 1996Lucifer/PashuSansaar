@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:android_play_install_referrer/android_play_install_referrer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -5,7 +7,7 @@ import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
-import 'package:pashusansaar/home_screen.dart';
+import 'package:pashusansaar/buy_animal/animal_description_page.dart';
 import 'package:pashusansaar/splash_screen.dart';
 import 'package:pashusansaar/translation/message.dart';
 import 'package:pashusansaar/utils/colors.dart';
@@ -22,20 +24,36 @@ import 'package:check_vpn_connection/check_vpn_connection.dart';
 
 import 'utils/reusable_widgets.dart';
 
+final GlobalKey<NavigatorState> navigatorKey =
+    GlobalKey(debugLabel: "Main Navigator");
+
 const AndroidNotificationChannel channel = AndroidNotificationChannel(
   'high_importance_channel', // id
   'High Importance Notifications', // title
   'This channel is used for important notifications.', // description
-  importance: Importance.high,
+  importance: Importance.max,
 );
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
+  // await Firebase.initializeApp();
+  print('payLoad==>>' + message.toString());
+
+  print('payLoad-notification==>>' + message.notification.toString());
+  print('payLoad-data==>>' + message.data.toString());
 
   print('Handling a background message ${message.messageId}');
+  // _goToDeeplyNestedView(message.data);
 }
 
 RemoteConfig remoteConfig;
+
+Future _goToDeeplyNestedView(data) async {
+  if (data != null && data['screen'] == 'DESCRIPTION_PAGE') {
+    await navigatorKey.currentState.push(MaterialPageRoute(
+        builder: (_) => AnimalDescription(
+            userId: data['userId'], uniqueId: data['uniqueId'])));
+  }
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -54,6 +72,7 @@ void main() async {
   runApp(
     MaterialApp(
       debugShowCheckedModeBanner: false,
+      navigatorKey: navigatorKey,
       home: MyApp(),
     ),
   );
@@ -95,9 +114,16 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  getMessageOpen() async =>
+      await FirebaseMessaging.instance.getInitialMessage();
+
+  Map<String, dynamic> dataPayload = {};
+
   @override
   void initState() {
     super.initState();
+
+    getMessageOpen();
 
     var initialiseAndroidSettings =
         AndroidInitializationSettings('ic_notification');
@@ -105,10 +131,17 @@ class _MyAppState extends State<MyApp> {
     var initialisingSettings =
         InitializationSettings(android: initialiseAndroidSettings);
 
-    flutterLocalNotificationsPlugin.initialize(initialisingSettings);
+    flutterLocalNotificationsPlugin.initialize(initialisingSettings,
+        onSelectNotification: (value) => _goToDeeplyNestedView(dataPayload));
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('payLoad==12>>' + message.toString());
       RemoteNotification notification = message.notification;
+      print('payLoad-notification==12>>' + notification.toString());
+      print('payLoad-data==12>>' + message.data.toString());
+      setState(() {
+        dataPayload = message.data;
+      });
       AndroidNotification android = message.notification?.android;
       if (notification != null && android != null) {
         flutterLocalNotificationsPlugin.show(
@@ -117,47 +150,50 @@ class _MyAppState extends State<MyApp> {
             notification.body,
             NotificationDetails(
               android: AndroidNotificationDetails(
-                channel.id,
-                channel.name,
-                channel.description,
-              ),
+                  channel.id, channel.name, channel.description,
+                  priority: Priority.max, importance: Importance.max),
             ));
       }
     });
 
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print('A new onMessageOpenedApp event was published!');
-      Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (context) => HomeScreen(selectedIndex: 0)));
-    });
+    FirebaseMessaging.onMessageOpenedApp
+        .listen((RemoteMessage message) => _goToDeeplyNestedView(message.data));
 
-    // initDynamicLink();
+    initDynamicLink();
     isVpnActive();
   }
 
-  // initDynamicLink() async {
-  //   FirebaseDynamicLinks.instance.onLink(
-  //       onSuccess: (PendingDynamicLinkData dynamicLink) async {
-  //     final Uri deepLink = dynamicLink?.link;
+  initDynamicLink() async {
+    FirebaseDynamicLinks.instance.onLink(
+        onSuccess: (PendingDynamicLinkData dynamicLink) async {
+      final Uri deepLink = dynamicLink?.link;
+      final dynamicData = json.decode(deepLink?.queryParameters['data']);
+      print("link1===>" + dynamicData.toString());
 
-  //     if (deepLink != null) {
-  //       Navigator.pushNamed(context, deepLink.path);
-  //     }
-  //   }, onError: (OnLinkErrorException e) async {
-  //     print('onLinkError');
-  //     print(e.message);
-  //   });
+      if (deepLink != null && dynamicData != {} && dynamicData != null)
+        navigatorKey.currentState.push(MaterialPageRoute(
+            builder: (_) => AnimalDescription(
+                userId: dynamicData['userId'],
+                uniqueId: dynamicData['uniqueId'])));
+    }, onError: (OnLinkErrorException e) async {
+      print('onLinkError');
+      print(e.message);
+    });
 
-  //   final PendingDynamicLinkData data =
-  //       await FirebaseDynamicLinks.instance.getInitialLink();
-  //   final Uri deepLink = data?.link;
+    final PendingDynamicLinkData data =
+        await FirebaseDynamicLinks.instance.getInitialLink();
+    final Uri deepLink = data?.link;
+    final dynamicData = json.decode(deepLink?.queryParameters['data']);
 
-  //   if (deepLink != null) {
-  //     Navigator.pushNamed(context, deepLink.path);
-  //   }
-  // }
+    print("link2===>" + dynamicData.toString());
+
+    if (deepLink != null && dynamicData != {} && dynamicData != null) {
+      navigatorKey.currentState.push(MaterialPageRoute(
+          builder: (_) => AnimalDescription(
+              userId: dynamicData['userId'],
+              uniqueId: dynamicData['uniqueId'])));
+    }
+  }
 
   getReferralCheck() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

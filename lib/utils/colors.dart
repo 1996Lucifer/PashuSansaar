@@ -8,3 +8,4 @@ Color greyColor = Color(0xff696969);
 Color greenColor = Color(0xff3ec252);
 Color darkGreenColor = Color(0xFF109123);
 Color violetColor = Color(0xFF740674);
+Color goldenColor = Color(0xFFFFD700);

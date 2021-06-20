@@ -118,7 +118,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: [
-                                        FlatButton(
+                                        TextButton(
                                             onPressed: () => Navigator.push(
                                                   context,
                                                   MaterialPageRoute(
@@ -149,7 +149,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                                                 )
                                               ],
                                             )),
-                                        FlatButton(
+                                        TextButton(
                                             onPressed: () => Navigator.push(
                                                 context,
                                                 MaterialPageRoute(
@@ -595,7 +595,10 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                         .update({
                           'animalRemove': {
                             'soldFromApp': false,
-                            'price': _price
+                            'price': _price,
+                            'soldDate':
+                                ReusableWidgets.dateTimeToEpoch(DateTime.now())
+
                           },
                           'isValidUser': 'RemovedByUser',
                           'dateOfUpdation':
@@ -608,7 +611,9 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                                 .update({
                               'animalRemove': {
                                 'soldFromApp': false,
-                                'price': _price
+                                'price': _price,
+                                'soldDate': ReusableWidgets.dateTimeToEpoch(
+                                    DateTime.now())
                               },
                               'isValidUser': 'RemovedByUser',
                               'dateOfUpdation': ReusableWidgets.dateTimeToEpoch(
@@ -624,7 +629,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                                         title: Text('info'.tr),
                                         content: Text('pashu_removed'.tr),
                                         actions: <Widget>[
-                                          FlatButton(
+                                          TextButton(
                                               child: Text(
                                                 'Ok'.tr,
                                                 style: TextStyle(

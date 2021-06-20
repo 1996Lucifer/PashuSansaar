@@ -147,13 +147,20 @@ class _RemoveAnimalState extends State<RemoveAnimal> {
 
                     Map<String, dynamic> userMap = Map();
                     if (data.isEmpty) {
-                      userMap = {'soldFromApp': true, 'price': _price};
+                      userMap = {
+                        'soldFromApp': false,
+                        'price': _price,
+                        'soldDate':
+                            ReusableWidgets.dateTimeToEpoch(DateTime.now())
+                      };
                     } else {
                       userMap = {
                         'soldFromApp': true,
                         'id': data['userIdCurrent'],
                         'name': data['userName'],
-                        'price': _price
+                        'price': _price,
+                        'soldDate':
+                            ReusableWidgets.dateTimeToEpoch(DateTime.now())
                       };
                     }
 
@@ -187,7 +194,7 @@ class _RemoveAnimalState extends State<RemoveAnimal> {
                                         title: Text('info'.tr),
                                         content: Text('pashu_removed'.tr),
                                         actions: <Widget>[
-                                          FlatButton(
+                                          TextButton(
                                               child: Text(
                                                 'Ok'.tr,
                                                 style: TextStyle(

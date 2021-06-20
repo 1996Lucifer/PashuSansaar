@@ -8,7 +8,6 @@ import 'package:pashusansaar/buy_animal/buy_animal.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-// import 'package:pashusansaar/utils/custom_progress_dialog.dart';
 import 'package:pashusansaar/utils/global.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:progress_dialog/progress_dialog.dart';
@@ -49,35 +48,63 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
   }
 
+//https://docs.google.com/spreadsheets/d/10M_tCvCNEjvsBPO3wg2hou9oF5lZikaH5C31kHXn4XU/edit#gid=0
+//https://script.google.com/macros/s/AKfycbwzLm_QkArFGt2y-3Aa-RvSeZQY7hLVOpBXHrRjjU-QzQHRDpmUnCaUH5efwvrq1IXe/exec
+// AKfycbwzLm_QkArFGt2y-3Aa-RvSeZQY7hLVOpBXHrRjjU-QzQHRDpmUnCaUH5efwvrq1IXe
+
   // updateData() async {
-  //   FirebaseFirestore.instance
-  //       .collection('buyingAnimalList1')
-  //       .orderBy('dateOfSaving')
-  //       .where('dateOfSaving', isLessThanOrEqualTo: '1623048304')
-  //       .where('dateOfSaving', isGreaterThanOrEqualTo: '1623009600')
-  //       .get()
-  //       .then((value) {
-  //     value.docs.forEach((element) {
-  //       if (element['userName'] == null ||
-  //           element['userMobileNumber'] == null) {
-  //         FirebaseFirestore.instance
-  //             .collection("userInfo")
-  //             .doc(element['userId'])
-  //             .get()
-  //             .then(
-  //           (profile) {
-  //             FirebaseFirestore.instance
-  //                 .collection('buyingAnimalList1')
-  //                 .doc(element.reference.id)
-  //                 .update({
-  //               'userName': profile.data()['name'],
-  //               'userMobileNumber': profile.data()['mobile'],
-  //             });
-  //           },
-  //         );
-  //       }
-  //     });
+  //   var addresses =
+  //       await geoCoder.Geocoder.local.findAddressesFromQuery("621719");
+  //   var first = addresses.first;
+
+  //   Map<String, dynamic> data = {
+  //     "addressLine": first.addressLine,
+  //     "adminArea": first.adminArea,
+  //     "coordinates": first.coordinates.toString(),
+  //     "countryCode": first.countryCode,
+  //     "countryName": first.countryName,
+  //     "featureName": first.featureName,
+  //     "locality": first.locality,
+  //     "postalCode": first.postalCode,
+  //     "subAdminArea": first.subAdminArea,
+  //     "subLocality": first.subLocality
+  //   };
+
+  //   print(data);
+
+  // FirebaseFirestore.instance
+  //     .collection('userInfo')
+  //     .limit(500)
+  //     .get()
+  //     .then((value) {
+  //   value.docs.forEach((element) async {
+  //     if (element['latitude'] != "null" || element['longitude'] != "null") {
+  //       var addresses = await geoCoder.Geocoder.local
+  //           .findAddressesFromCoordinates(geoCoder.Coordinates(
+  //               double.parse(element['latitude']),
+  //               double.parse(element['longitude'])));
+  //       var first = addresses.first;
+
+  //       Map<String, dynamic> data = {
+  //         "addressLine": first.addressLine,
+  //         "adminArea": first.adminArea,
+  //         "coordinates": first.coordinates.toString(),
+  //         "countryCode": first.countryCode,
+  //         "countryName": first.countryName,
+  //         "featureName": first.featureName,
+  //         "locality": first.locality,
+  //         "postalCode": first.postalCode,
+  //         "subAdminArea": first.subAdminArea,
+  //         "subLocality": first.subLocality
+  //       };
+
+  //       await FirebaseFirestore.instance
+  //           .collection('addressCollection')
+  //           .doc(element.reference.id)
+  //           .set(data);
+  //     }
   //   });
+  // });
   // }
 
   checkInitialData() async {
@@ -160,8 +187,12 @@ class _HomeScreenState extends State<HomeScreen> {
     var first = address.first;
     try {
       Map<String, dynamic> referralInfo = {
-        'userAddress':
-            first.addressLine ?? (first.adminArea + ', ' + first.countryName),
+        'userAddress': first.addressLine ??
+            (first.adminArea +
+                ' ' +
+                first.postalCode +
+                ', ' +
+                first.countryName),
         'dateOfUpdation': ReusableWidgets.dateTimeToEpoch(DateTime.now()),
         'userId': FirebaseAuth.instance.currentUser.uid,
         'userMobile': mobile
@@ -307,7 +338,8 @@ class _HomeScreenState extends State<HomeScreen> {
             .where('isValidUser', isEqualTo: 'Approved')
             .limit(25)
             .get(GetOptions(source: Source.serverAndCache))
-            .then((value) {
+            .asStream()
+            .listen((value) {
           setState(() {
             lastDocument = value.docs.last['dateOfSaving'];
             _animalInfo = value.docs;

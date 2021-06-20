@@ -186,3 +186,34 @@ List<String> radius = [
   '75 ' + 'km'.tr,
   '100 ' + 'km'.tr
 ];
+
+Map<String, String> hindiToEnglishDistrictMapping = {
+  "हमीरपुर": "Hamirpur",
+  "सीतापुर": "Sitapur",
+  "सहारनपुर": "Saharanpur",
+  "शामली": "Shamli",
+  "शाजापुर": "Shajapur",
+  "वाराणसी": "Varanasi",
+  "मैनपुरी": "Mainpuri",
+  "मिर्ज़ापुर": "Mirzapur",
+  "मंदसौर": "Mandsaur",
+  "भोपाल": "Bhopal",
+  "बहराइच": "Bahraich",
+  "बदायूं": "Badaun",
+  "प्रतापगढ़": "Pratapgarh",
+  "पानीपत": "Panipat",
+  "नीमुच": "Neemuch",
+  "नागौर": "Nagaur",
+  "देवास": "Dewas",
+  "टीकमगढ़": "Tikamgarh",
+  "जौनपुर": "Jaunpur",
+  "जोधपुर": "Jodhpur",
+  "चित्तोडगढ": "Chittaurgarh",
+  "गोरखपुर": "Gorakhpur",
+  "ग़ाज़ियाबाद": "Ghaziabad",
+  "कन्नौज": "Kannauj",
+  "कटनी": "Katni",
+  "उन्नाव": "Unnao",
+  "उज्जैन": "Ujjain",
+  "अमरोहा": "Amroha"
+};

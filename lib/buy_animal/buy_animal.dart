@@ -155,6 +155,8 @@ class _BuyAnimalState extends State<BuyAnimal>
   }
 
   takeScreenShot(String uniqueId) async {
+    pr.style(message: 'शेयर किया जा रहा है');
+    pr.show();
     RenderRepaintBoundary boundary =
         previewContainer.currentContext.findRenderObject();
     ui.Image image = await boundary.toImage();
@@ -168,6 +170,8 @@ class _BuyAnimalState extends State<BuyAnimal>
     setState(() {
       fileUrl = imgFile;
     });
+
+    pr.hide();
   }
 
   // dataDeleteion() async {
@@ -200,163 +204,11 @@ class _BuyAnimalState extends State<BuyAnimal>
     var first = addresses.first;
 
     setState(() {
-      _userLocality = first.locality ?? first.featureName;
+      _userLocality = ReusableWidgets.mappingDistrict(
+          first.subAdminArea ?? first.locality ?? first.featureName);
       prefs.setString('place', _userLocality);
     });
   }
-
-  // _createFileFromString(encodedStr, userId, uniqueId, id) async {
-  //   Uint8List bytes = base64Decode(encodedStr);
-  //   String fullPath = '$directory/${uniqueId}_$id.jpg';
-  //   File file = File(fullPath);
-
-  //   await file.writeAsBytes(bytes);
-
-  //   // await firebase_storage.FirebaseStorage.instance
-  //   //     .ref('$userId/${uniqueId}_$id.jpg')
-  //   //     .putFile(file);
-
-  //   // await firebase_storage.FirebaseStorage.instance
-  //   //     .ref('$userId/${uniqueId}_$id.jpg')
-  //   //     .getDownloadURL();
-  //         StorageReference ref = FirebaseStorage.instance.ref().child("video").child(userId).child(uniqueId);
-  // StorageUploadTask uploadTask = ref.putFile(file, StorageMetadata(contentType: 'video/mp4'));
-
-  // Uri downloadUrl = (await uploadTask.future).downloadUrl;
-
-  //   final String url = downloadUrl.toString();
-
-  // }
-
-  // func1(element) async {
-  //   _createFileFromString(
-  //       element['image1'], element['userId'], element['uniqueId'], '1');
-  //   String downloadURL1 = await firebase_storage.FirebaseStorage.instance
-  //       .ref('${element['userId']}/${element['uniqueId']}_1.jpg')
-  //       .getDownloadURL();
-  //   setState(() {
-  //     url1 = downloadURL1;
-  //   });
-  // }
-
-  // func2(element) async {
-  //   _createFileFromString(
-  //       element['image2'], element['userId'], element['uniqueId'], '2');
-  //   String downloadURL2 = await firebase_storage.FirebaseStorage.instance
-  //       .ref('${element['userId']}/${element['uniqueId']}_2.jpg')
-  //       .getDownloadURL();
-  //   setState(() {
-  //     url2 = downloadURL2;
-  //   });
-  // }
-
-  // func3(element) async {
-  //   _createFileFromString(
-  //       element['image3'], element['userId'], element['uniqueId'], '3');
-  //   String downloadURL3 = await firebase_storage.FirebaseStorage.instance
-  //       .ref('${element['userId']}/${element['uniqueId']}_3.jpg')
-  //       .getDownloadURL();
-  //   setState(() {
-  //     url3 = downloadURL3;
-  //   });
-  // }
-
-  // func4(element) async {
-  //   _createFileFromString(
-  //       element['image4'], element['userId'], element['uniqueId'], '4');
-  //   String downloadURL4 = await firebase_storage.FirebaseStorage.instance
-  //       .ref('${element['userId']}/${element['uniqueId']}_4.jpg')
-  //       .getDownloadURL();
-  //   setState(() {
-  //     url4 = downloadURL4;
-  //   });
-  // }
-
-  // dataUpdateOnInit() async {
-  // if (element['image1'] != null && element['image1'].isNotEmpty) {
-  //   await func1(element);
-  // }
-  // if (element['image2'] != null && element['image2'].isNotEmpty) {
-  //   await func2(element);
-  // }
-  // if (element['image3'] != null && element['image3'].isNotEmpty) {
-  //   await func3(element);
-  // }
-  // if (element['image4'] != null && element['image4'].isNotEmpty) {
-  //   await func4(element);
-  // }
-  // await FirebaseFirestore.instance
-  //     .collection("buyingAnimalList1")
-  //     .doc(element.reference.id)
-  //     .update({
-  //   'image1': url1 ?? '',
-  //   'image2': url2 ?? '',
-  //   'image3': url3 ?? '',
-  //   'image4': url4 ?? '',
-  // });
-  // await FirebaseFirestore.instance
-  //     .collection("buyingAnimalList")
-  //     .orderBy('uniqueId')
-  //     // .where('uniqueId',
-  //     //     isLessThanOrEqualTo: '10000000') // 00000000 - 10000000
-  //     // .where('uniqueId',
-  //     //     isGreaterThan: '10000000', isLessThanOrEqualTo: '20000000') // 30 - 31
-  //     // .where('uniqueId',
-  //     //     isGreaterThan: '20000000', isLessThanOrEqualTo: '30000000') // 30 - 31
-  //     // .where('uniqueId',
-  //     //     isGreaterThan: '30000000', isLessThanOrEqualTo: '40000000') // karna hai aaj
-  //     // .where('uniqueId',
-  //     //     isGreaterThan: '40000000', isLessThanOrEqualTo: '50000000') // karna hai aaj
-  //     // .where('uniqueId',
-  //     //     isGreaterThan: '50000000', isLessThanOrEqualTo: '60000000') // karna hai aaj
-  //     // .where('uniqueId',
-  //     //     isGreaterThan: '60000000', isLessThanOrEqualTo: '70000000') // karna hai aaj
-  //     // .where('uniqueId',
-  //     //     isGreaterThan: '70000000', isLessThanOrEqualTo: '80000000') // karna hai aaj
-  //     // .where('uniqueId',
-  //     //     isGreaterThan: '80000000', isLessThanOrEqualTo: '90000000') // karna hai aaj
-  //     // .where('uniqueId', isGreaterThan: '90000000') // k
-  //     .where('uniqueId',
-  //         isGreaterThanOrEqualTo: '00170146',
-  //         isLessThanOrEqualTo: '01331449') // 31-1
-
-  //     .get()
-  //     .then((value) => value.docs.forEach((element) async {
-  //           print("value.docs=====>" + value.docs.length.toString());
-  //           if (element['image1'] != null && element['image1'].isNotEmpty) {
-  //             await func1(element);
-  //           }
-  //           if (element['image2'] != null && element['image2'].isNotEmpty) {
-  //             await func2(element);
-  //           }
-  //           if (element['image3'] != null && element['image3'].isNotEmpty) {
-  //             await func3(element);
-  //           }
-  //           if (element['image4'] != null && element['image4'].isNotEmpty) {
-  //             await func4(element);
-  //           }
-  //           await FirebaseFirestore.instance
-  //               .collection("buyingAnimalList1")
-  //               .doc(element.reference.id)
-  //               .update({
-  //             'image1': url1 ?? '',
-  //             'image2': url2 ?? '',
-  //             'image3': url3 ?? '',
-  //             'image4': url4 ?? '',
-  //           });
-  //         }));
-  //   await FirebaseFirestore.instance
-  //       .collection("buyingAnimalList1")
-  //       .get()
-  //       .then((value) => value.docs.forEach((element) async {
-  //             await FirebaseFirestore.instance
-  //                 .collection("buyingAnimalList1")
-  //                 .doc(element.reference.id)
-  //                 .update({
-  //               'userAnimalTypeOther': '',
-  //             });
-  //           }));
-  // }
 
   removingNumberFromBayaat(String bayaat) {
     return bayaat.split('').reversed.skip(4).toList().reversed.join('');
@@ -417,7 +269,7 @@ class _BuyAnimalState extends State<BuyAnimal>
         await Geocoder.local.findAddressesFromCoordinates(coordinates);
     var first = addresses.first;
 
-    return first.locality ?? first.featureName;
+    return first.subAdminArea ?? first.locality ?? first.featureName;
   }
 
   Row _buildInfowidget(int index) {
@@ -927,65 +779,75 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                                               'extraInfo'] ??
                                                                           {};
 
-                                                                  FirebaseFirestore
-                                                                      .instance
-                                                                      .collection(
-                                                                          "callingInfo")
-                                                                      .doc(callingInfo[
-                                                                          'otherListId'])
-                                                                      .collection(
-                                                                          'interestedBuyers')
-                                                                      .doc(FirebaseAuth
+                                                                  if (_tempAnimalList[
+                                                                              index]
+                                                                          [
+                                                                          'userId'] !=
+                                                                      FirebaseAuth
                                                                           .instance
                                                                           .currentUser
-                                                                          .uid)
-                                                                      .set({
-                                                                    'userName':
-                                                                        widget
-                                                                            .userName,
-                                                                    'userMobileNumber':
-                                                                        widget
-                                                                            .userMobileNumber,
-                                                                    "userAddress": first
-                                                                            .addressLine ??
-                                                                        (first.adminArea +
-                                                                            ', ' +
-                                                                            first.countryName),
-                                                                    'userIdCurrent': FirebaseAuth
+                                                                          .uid) {
+                                                                    FirebaseFirestore
                                                                         .instance
-                                                                        .currentUser
-                                                                        .uid,
-                                                                    'userIdOther':
-                                                                        _tempAnimalList[index]
-                                                                            [
-                                                                            'userId'],
-                                                                    'otherListId':
-                                                                        _tempAnimalList[index]
-                                                                            [
-                                                                            'uniqueId'],
-                                                                    'channel':
-                                                                        "call",
-                                                                    "dateOfSaving":
-                                                                        ReusableWidgets.dateTimeToEpoch(
-                                                                            DateTime.now())
-                                                                  }, SetOptions(merge: true));
-
-                                                                  FirebaseFirestore
-                                                                      .instance
-                                                                      .collection(
-                                                                          "myCallingInfo")
-                                                                      .doc(FirebaseAuth
+                                                                        .collection(
+                                                                            "callingInfo")
+                                                                        .doc(callingInfo[
+                                                                            'otherListId'])
+                                                                        .collection(
+                                                                            'interestedBuyers')
+                                                                        .doc(FirebaseAuth
+                                                                            .instance
+                                                                            .currentUser
+                                                                            .uid)
+                                                                        .set({
+                                                                      'userName':
+                                                                          widget
+                                                                              .userName,
+                                                                      'userMobileNumber':
+                                                                          widget
+                                                                              .userMobileNumber,
+                                                                      "userAddress": first
+                                                                              .addressLine ??
+                                                                          (first.adminArea +
+                                                                              ' ' +
+                                                                              first.postalCode +
+                                                                              ', ' +
+                                                                              first.countryName),
+                                                                      'userIdCurrent': FirebaseAuth
                                                                           .instance
                                                                           .currentUser
-                                                                          .uid)
-                                                                      .collection(
-                                                                          'myCalls')
-                                                                      .doc(callingInfo[
-                                                                          'otherListId'])
-                                                                      .set(
-                                                                          callingInfo,
-                                                                          SetOptions(
-                                                                              merge: true));
+                                                                          .uid,
+                                                                      'userIdOther':
+                                                                          _tempAnimalList[index]
+                                                                              [
+                                                                              'userId'],
+                                                                      'otherListId':
+                                                                          _tempAnimalList[index]
+                                                                              [
+                                                                              'uniqueId'],
+                                                                      'channel':
+                                                                          "call",
+                                                                      "dateOfSaving":
+                                                                          ReusableWidgets.dateTimeToEpoch(
+                                                                              DateTime.now())
+                                                                    }, SetOptions(merge: true));
+
+                                                                    FirebaseFirestore
+                                                                        .instance
+                                                                        .collection(
+                                                                            "myCallingInfo")
+                                                                        .doc(FirebaseAuth
+                                                                            .instance
+                                                                            .currentUser
+                                                                            .uid)
+                                                                        .collection(
+                                                                            'myCalls')
+                                                                        .doc(callingInfo[
+                                                                            'otherListId'])
+                                                                        .set(
+                                                                            callingInfo,
+                                                                            SetOptions(merge: true));
+                                                                  }
 
                                                                   return UrlLauncher
                                                                       .launch(
@@ -1179,66 +1041,75 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                                               [
                                                                               'extraInfo'] ??
                                                                           {};
-
-                                                                  FirebaseFirestore
-                                                                      .instance
-                                                                      .collection(
-                                                                          "callingInfo")
-                                                                      .doc(callingInfo[
-                                                                          'otherListId'])
-                                                                      .collection(
-                                                                          'interestedBuyers')
-                                                                      .doc(FirebaseAuth
+                                                                  if (_tempAnimalList[
+                                                                              index]
+                                                                          [
+                                                                          'userId'] !=
+                                                                      FirebaseAuth
                                                                           .instance
                                                                           .currentUser
-                                                                          .uid)
-                                                                      .set({
-                                                                    'userName':
-                                                                        widget
-                                                                            .userName,
-                                                                    'userMobileNumber':
-                                                                        widget
-                                                                            .userMobileNumber,
-                                                                    "userAddress": first
-                                                                            .addressLine ??
-                                                                        (first.adminArea +
-                                                                            ', ' +
-                                                                            first.countryName),
-                                                                    'userIdCurrent': FirebaseAuth
+                                                                          .uid) {
+                                                                    FirebaseFirestore
                                                                         .instance
-                                                                        .currentUser
-                                                                        .uid,
-                                                                    'userIdOther':
-                                                                        _tempAnimalList[index]
-                                                                            [
-                                                                            'userId'],
-                                                                    'otherListId':
-                                                                        _tempAnimalList[index]
-                                                                            [
-                                                                            'uniqueId'],
-                                                                    'channel':
-                                                                        "whatsapp",
-                                                                    "dateOfSaving":
-                                                                        ReusableWidgets.dateTimeToEpoch(
-                                                                            DateTime.now())
-                                                                  }, SetOptions(merge: true));
-
-                                                                  FirebaseFirestore
-                                                                      .instance
-                                                                      .collection(
-                                                                          "myCallingInfo")
-                                                                      .doc(FirebaseAuth
+                                                                        .collection(
+                                                                            "callingInfo")
+                                                                        .doc(callingInfo[
+                                                                            'otherListId'])
+                                                                        .collection(
+                                                                            'interestedBuyers')
+                                                                        .doc(FirebaseAuth
+                                                                            .instance
+                                                                            .currentUser
+                                                                            .uid)
+                                                                        .set({
+                                                                      'userName':
+                                                                          widget
+                                                                              .userName,
+                                                                      'userMobileNumber':
+                                                                          widget
+                                                                              .userMobileNumber,
+                                                                      "userAddress": first
+                                                                              .addressLine ??
+                                                                          (first.adminArea +
+                                                                              ' ' +
+                                                                              first.postalCode +
+                                                                              ', ' +
+                                                                              first.countryName),
+                                                                      'userIdCurrent': FirebaseAuth
                                                                           .instance
                                                                           .currentUser
-                                                                          .uid)
-                                                                      .collection(
-                                                                          'myCalls')
-                                                                      .doc(callingInfo[
-                                                                          'otherListId'])
-                                                                      .set(
-                                                                          callingInfo,
-                                                                          SetOptions(
-                                                                              merge: true));
+                                                                          .uid,
+                                                                      'userIdOther':
+                                                                          _tempAnimalList[index]
+                                                                              [
+                                                                              'userId'],
+                                                                      'otherListId':
+                                                                          _tempAnimalList[index]
+                                                                              [
+                                                                              'uniqueId'],
+                                                                      'channel':
+                                                                          "whatsapp",
+                                                                      "dateOfSaving":
+                                                                          ReusableWidgets.dateTimeToEpoch(
+                                                                              DateTime.now())
+                                                                    }, SetOptions(merge: true));
+
+                                                                    FirebaseFirestore
+                                                                        .instance
+                                                                        .collection(
+                                                                            "myCallingInfo")
+                                                                        .doc(FirebaseAuth
+                                                                            .instance
+                                                                            .currentUser
+                                                                            .uid)
+                                                                        .collection(
+                                                                            'myCalls')
+                                                                        .doc(callingInfo[
+                                                                            'otherListId'])
+                                                                        .set(
+                                                                            callingInfo,
+                                                                            SetOptions(merge: true));
+                                                                  }
 
                                                                   whatsappText =
                                                                       'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${widget.userName}, ${prefs.getString('place')} \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
@@ -1564,75 +1435,80 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                                         [
                                                                         'extraInfo'] ??
                                                                     {};
-
-                                                            FirebaseFirestore
-                                                                .instance
-                                                                .collection(
-                                                                    "callingInfo")
-                                                                .doc(callingInfo[
-                                                                    'otherListId'])
-                                                                .collection(
-                                                                    'interestedBuyers')
-                                                                .doc(FirebaseAuth
+                                                            if (widget.animalInfo[
+                                                                        index][
+                                                                    'userId'] !=
+                                                                FirebaseAuth
                                                                     .instance
                                                                     .currentUser
-                                                                    .uid)
-                                                                .set(
-                                                                    {
-                                                                  'userName': widget
-                                                                      .userName,
-                                                                  'userMobileNumber':
-                                                                      widget
-                                                                          .userMobileNumber,
-                                                                  "userAddress": first
-                                                                          .addressLine ??
-                                                                      (first.adminArea +
-                                                                          ', ' +
-                                                                          first
-                                                                              .countryName),
-                                                                  'userIdCurrent':
-                                                                      FirebaseAuth
-                                                                          .instance
-                                                                          .currentUser
-                                                                          .uid,
-                                                                  'userIdOther':
-                                                                      widget.animalInfo[
-                                                                              index]
-                                                                          [
-                                                                          'userId'],
-                                                                  'otherListId':
-                                                                      widget.animalInfo[
-                                                                              index]
-                                                                          [
-                                                                          'uniqueId'],
-                                                                  'channel':
-                                                                      "call",
-                                                                  "dateOfSaving":
-                                                                      ReusableWidgets
-                                                                          .dateTimeToEpoch(
-                                                                              DateTime.now())
-                                                                },
-                                                                    SetOptions(
-                                                                        merge:
-                                                                            true));
+                                                                    .uid) {
+                                                              FirebaseFirestore
+                                                                  .instance
+                                                                  .collection(
+                                                                      "callingInfo")
+                                                                  .doc(callingInfo[
+                                                                      'otherListId'])
+                                                                  .collection(
+                                                                      'interestedBuyers')
+                                                                  .doc(FirebaseAuth
+                                                                      .instance
+                                                                      .currentUser
+                                                                      .uid)
+                                                                  .set(
+                                                                      {
+                                                                    'userName':
+                                                                        widget
+                                                                            .userName,
+                                                                    'userMobileNumber':
+                                                                        widget
+                                                                            .userMobileNumber,
+                                                                    "userAddress": first
+                                                                            .addressLine ??
+                                                                        (first.adminArea +
+                                                                            ' ' +
+                                                                            first.postalCode +
+                                                                            ', ' +
+                                                                            first.countryName),
+                                                                    'userIdCurrent': FirebaseAuth
+                                                                        .instance
+                                                                        .currentUser
+                                                                        .uid,
+                                                                    'userIdOther':
+                                                                        widget.animalInfo[index]
+                                                                            [
+                                                                            'userId'],
+                                                                    'otherListId':
+                                                                        widget.animalInfo[index]
+                                                                            [
+                                                                            'uniqueId'],
+                                                                    'channel':
+                                                                        "call",
+                                                                    "dateOfSaving":
+                                                                        ReusableWidgets.dateTimeToEpoch(
+                                                                            DateTime.now())
+                                                                  },
+                                                                      SetOptions(
+                                                                          merge:
+                                                                              true));
 
-                                                            FirebaseFirestore
-                                                                .instance
-                                                                .collection(
-                                                                    "myCallingInfo")
-                                                                .doc(FirebaseAuth
-                                                                    .instance
-                                                                    .currentUser
-                                                                    .uid)
-                                                                .collection(
-                                                                    'myCalls')
-                                                                .doc(callingInfo[
-                                                                    'otherListId'])
-                                                                .set(
-                                                                    callingInfo,
-                                                                    SetOptions(
-                                                                        merge:
-                                                                            true));
+                                                              FirebaseFirestore
+                                                                  .instance
+                                                                  .collection(
+                                                                      "myCallingInfo")
+                                                                  .doc(FirebaseAuth
+                                                                      .instance
+                                                                      .currentUser
+                                                                      .uid)
+                                                                  .collection(
+                                                                      'myCalls')
+                                                                  .doc(callingInfo[
+                                                                      'otherListId'])
+                                                                  .set(
+                                                                      callingInfo,
+                                                                      SetOptions(
+                                                                          merge:
+                                                                              true));
+                                                            }
 
                                                             return UrlLauncher
                                                                 .launch(
@@ -1844,75 +1720,80 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                                         [
                                                                         'extraInfo'] ??
                                                                     {};
-
-                                                            FirebaseFirestore
-                                                                .instance
-                                                                .collection(
-                                                                    "callingInfo")
-                                                                .doc(callingInfo[
-                                                                    'otherListId'])
-                                                                .collection(
-                                                                    'interestedBuyers')
-                                                                .doc(FirebaseAuth
+                                                            if (widget.animalInfo[
+                                                                        index][
+                                                                    'userId'] !=
+                                                                FirebaseAuth
                                                                     .instance
                                                                     .currentUser
-                                                                    .uid)
-                                                                .set(
-                                                                    {
-                                                                  'userName': widget
-                                                                      .userName,
-                                                                  'userMobileNumber':
-                                                                      widget
-                                                                          .userMobileNumber,
-                                                                  "userAddress": first
-                                                                          .addressLine ??
-                                                                      (first.adminArea +
-                                                                          ', ' +
-                                                                          first
-                                                                              .countryName),
-                                                                  'userIdCurrent':
-                                                                      FirebaseAuth
-                                                                          .instance
-                                                                          .currentUser
-                                                                          .uid,
-                                                                  'userIdOther':
-                                                                      widget.animalInfo[
-                                                                              index]
-                                                                          [
-                                                                          'userId'],
-                                                                  'otherListId':
-                                                                      widget.animalInfo[
-                                                                              index]
-                                                                          [
-                                                                          'uniqueId'],
-                                                                  'channel':
-                                                                      "whatsapp",
-                                                                  "dateOfSaving":
-                                                                      ReusableWidgets
-                                                                          .dateTimeToEpoch(
-                                                                              DateTime.now())
-                                                                },
-                                                                    SetOptions(
-                                                                        merge:
-                                                                            true));
+                                                                    .uid) {
+                                                              FirebaseFirestore
+                                                                  .instance
+                                                                  .collection(
+                                                                      "callingInfo")
+                                                                  .doc(callingInfo[
+                                                                      'otherListId'])
+                                                                  .collection(
+                                                                      'interestedBuyers')
+                                                                  .doc(FirebaseAuth
+                                                                      .instance
+                                                                      .currentUser
+                                                                      .uid)
+                                                                  .set(
+                                                                      {
+                                                                    'userName':
+                                                                        widget
+                                                                            .userName,
+                                                                    'userMobileNumber':
+                                                                        widget
+                                                                            .userMobileNumber,
+                                                                    "userAddress": first
+                                                                            .addressLine ??
+                                                                        (first.adminArea +
+                                                                            ' ' +
+                                                                            first.postalCode +
+                                                                            ', ' +
+                                                                            first.countryName),
+                                                                    'userIdCurrent': FirebaseAuth
+                                                                        .instance
+                                                                        .currentUser
+                                                                        .uid,
+                                                                    'userIdOther':
+                                                                        widget.animalInfo[index]
+                                                                            [
+                                                                            'userId'],
+                                                                    'otherListId':
+                                                                        widget.animalInfo[index]
+                                                                            [
+                                                                            'uniqueId'],
+                                                                    'channel':
+                                                                        "whatsapp",
+                                                                    "dateOfSaving":
+                                                                        ReusableWidgets.dateTimeToEpoch(
+                                                                            DateTime.now())
+                                                                  },
+                                                                      SetOptions(
+                                                                          merge:
+                                                                              true));
 
-                                                            FirebaseFirestore
-                                                                .instance
-                                                                .collection(
-                                                                    "myCallingInfo")
-                                                                .doc(FirebaseAuth
-                                                                    .instance
-                                                                    .currentUser
-                                                                    .uid)
-                                                                .collection(
-                                                                    'myCalls')
-                                                                .doc(callingInfo[
-                                                                    'otherListId'])
-                                                                .set(
-                                                                    callingInfo,
-                                                                    SetOptions(
-                                                                        merge:
-                                                                            true));
+                                                              FirebaseFirestore
+                                                                  .instance
+                                                                  .collection(
+                                                                      "myCallingInfo")
+                                                                  .doc(FirebaseAuth
+                                                                      .instance
+                                                                      .currentUser
+                                                                      .uid)
+                                                                  .collection(
+                                                                      'myCalls')
+                                                                  .doc(callingInfo[
+                                                                      'otherListId'])
+                                                                  .set(
+                                                                      callingInfo,
+                                                                      SetOptions(
+                                                                          merge:
+                                                                              true));
+                                                            }
 
                                                             whatsappText =
                                                                 'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${widget.userName}, ${prefs.getString('place')} \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
@@ -2049,7 +1930,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                                     );
                                   }),
                                   actions: <Widget>[
-                                    FlatButton(
+                                    TextButton(
                                         child: Text(
                                           'Ok'.tr,
                                           style: TextStyle(color: primaryColor),
@@ -2080,8 +1961,8 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                 var first = address.first;
                                                 setState(() {
                                                   _userLocality =
-                                                      first.locality ??
-                                                          first.subAdminArea ??
+                                                      first.subAdminArea ??
+                                                          first.locality ??
                                                           first.featureName;
                                                   _latitude = first
                                                       .coordinates.latitude;
@@ -2113,7 +1994,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                             color: Colors.grey[100],
                             border: Border.all(color: Colors.grey[400])),
                         child: Padding(
-                          padding: const EdgeInsets.only(top: 20.0),
+                          padding: const EdgeInsets.only(top: 7.0),
                           child: Center(
                               child: RichText(
                             text: TextSpan(
@@ -2151,7 +2032,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                             border: Border.all(color: Colors.grey[400])),
                         height: 50,
                         child: Padding(
-                          padding: const EdgeInsets.only(top: 20.0),
+                          padding: const EdgeInsets.only(top: 7.0),
                           child: Center(
                               child: RichText(
                             text: TextSpan(
@@ -2318,153 +2199,158 @@ class _BuyAnimalState extends State<BuyAnimal>
     ].forEach((element) =>
         _images.addIf(element != null && element.isNotEmpty, element));
     return Padding(
-        padding: EdgeInsets.only(left: 8.0, right: 8, bottom: 4),
-        child: Stack(
-          children: [
-            GestureDetector(
-              onTap: () {
-                return Navigator.of(context).push(PageRouteBuilder(
-                  opaque: true,
-                  pageBuilder: (BuildContext context, _, __) =>
-                      StatefulBuilder(builder: (context, setState) {
-                    return Column(
-                      children: [
-                        CarouselSlider(
-                          options: CarouselOptions(
-                              height: MediaQuery.of(context).size.height * 0.9,
-                              viewportFraction: 1.0,
-                              initialPage: 0,
-                              enableInfiniteScroll: true,
-                              reverse: false,
-                              autoPlay: true,
-                              autoPlayInterval: Duration(seconds: 3),
-                              autoPlayAnimationDuration:
-                                  Duration(milliseconds: 800),
-                              autoPlayCurve: Curves.fastOutSlowIn,
-                              enlargeCenterPage: true,
-                              scrollDirection: Axis.horizontal,
-                              onPageChanged: (index, reason) => setState(() {
-                                    _current = index;
-                                  })),
-                          items: _images.map((i) {
-                            return InteractiveViewer(
-                                boundaryMargin: const EdgeInsets.all(20.0),
-                                minScale: 0.1,
-                                maxScale: 1.6,
-                                child: i.length > 1000
-                                    ? Image.memory(base64Decode('$i'))
-                                    : Image.network('$i'));
-                            // return AspectRatio(
-                            //   aspectRatio: 16 / 9,
-                            //   child: Container(
-                            //     margin: EdgeInsets.all(6.0),
-                            //     decoration: BoxDecoration(
-                            //       borderRadius: BorderRadius.circular(8.0),
-                            //       image: DecorationImage(
-                            //         image: i.length > 1000
-                            //             ? MemoryImage(base64Decode('$i'))
-                            //             // : Image.file(fileUrl);
-                            //             : NetworkImage('$i'),
-                            //         fit: BoxFit.cover,
-                            //       ),
-                            //     ),
-                            //   ),
-                            // );
-                          }).toList(),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: _images.map((url) {
-                            int indexData = _images.indexOf(url);
-                            return Container(
-                              width: 8.0,
-                              height: 8.0,
-                              margin: EdgeInsets.symmetric(
-                                  vertical: 10.0, horizontal: 2.0),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: _current == indexData
-                                    ? Color.fromRGBO(255, 255, 255, 1)
-                                    : Color.fromRGBO(255, 255, 255, 0.4),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                    );
-                  }),
-                ));
-              },
-              child: Container(
-                height: 200.0,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: _images[0].length > 1000
-                          ? MemoryImage(base64.decode(_images[0]))
-                          : NetworkImage(_images[0])),
-                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                  color: Colors.redAccent,
+      padding: EdgeInsets.only(left: 8.0, right: 8, bottom: 4),
+      child: Stack(
+        children: [
+          GestureDetector(
+            onTap: () {
+              return Navigator.of(context).push(PageRouteBuilder(
+                opaque: true,
+                pageBuilder: (BuildContext context, _, __) =>
+                    StatefulBuilder(builder: (context, setState) {
+                  return Column(
+                    children: [
+                      CarouselSlider(
+                        options: CarouselOptions(
+                            height: MediaQuery.of(context).size.height * 0.9,
+                            viewportFraction: 1.0,
+                            initialPage: 0,
+                            enableInfiniteScroll: true,
+                            reverse: false,
+                            autoPlay: true,
+                            autoPlayInterval: Duration(seconds: 4),
+                            autoPlayAnimationDuration:
+                                Duration(milliseconds: 800),
+                            autoPlayCurve: Curves.fastOutSlowIn,
+                            enlargeCenterPage: true,
+                            scrollDirection: Axis.horizontal,
+                            onPageChanged: (index, reason) => setState(() {
+                                  _current = index;
+                                })),
+                        items: _images.map((i) {
+                          return InteractiveViewer(
+                            boundaryMargin: const EdgeInsets.all(20.0),
+                            minScale: 0.1,
+                            maxScale: 1.6,
+                            child: i.length > 1000
+                                ? Image.memory(base64Decode('$i'))
+                                : Image.network(
+                                    '$i',
+                                    loadingBuilder: (BuildContext context,
+                                        Widget child,
+                                        ImageChunkEvent loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return Center(
+                                        child: CircularProgressIndicator(
+                                          value: loadingProgress
+                                                      .expectedTotalBytes !=
+                                                  null
+                                              ? loadingProgress
+                                                      .cumulativeBytesLoaded /
+                                                  loadingProgress
+                                                      .expectedTotalBytes
+                                              : null,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                          );
+                        }).toList(),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: _images.map((url) {
+                          int indexData = _images.indexOf(url);
+                          return Container(
+                            width: 8.0,
+                            height: 8.0,
+                            margin: EdgeInsets.symmetric(
+                                vertical: 10.0, horizontal: 2.0),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: _current == indexData
+                                  ? Color.fromRGBO(255, 255, 255, 1)
+                                  : Color.fromRGBO(255, 255, 255, 0.4),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  );
+                }),
+              ));
+            },
+            child: Container(
+              height: 200.0,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  fit: BoxFit.cover,
+                  image: _images[0].length > 1000
+                      ? MemoryImage(
+                          base64.decode(_images[0]),
+                        )
+                      : NetworkImage(_images[0]),
                 ),
+                borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                color: Colors.redAccent,
               ),
             ),
-            Positioned(
-              right: 0,
-              child: RaisedButton.icon(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18.0),
-                      side: BorderSide(color: violetColor)),
-                  color: violetColor,
-                  onPressed: () async {
-                    String uriPrefix = 'https://pashusansaar.page.link/pashu';
-                    //     'https://console.firebase.google.com/u/0/project/pashusansaar-6e910/firestore/data';
-                    final DynamicLinkParameters parameters =
-                        DynamicLinkParameters(
-                      uriPrefix: uriPrefix,
-                      link: Uri.parse(
-                          'https://pashusansaar.com?data=${_list[index]['uniqueId']}+${_list[index]['userId']}'),
-                      androidParameters: AndroidParameters(
-                        packageName: 'dj.pashusansaar',
-                        minimumVersion: 21,
-                      ),
-                      dynamicLinkParametersOptions:
-                          DynamicLinkParametersOptions(
-                        shortDynamicLinkPathLength:
-                            ShortDynamicLinkPathLength.unguessable,
-                      ),
-                    );
+          ),
+          Positioned(
+            right: 0,
+            child: RaisedButton.icon(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18.0),
+                    side: BorderSide(color: violetColor)),
+                color: violetColor,
+                onPressed: () async {
+                  String qParams = json.encode({
+                    "uniqueId": _list[index]['uniqueId'],
+                    "userId": _list[index]['userId'],
+                    "screen": "DESCRIPTION_PAGE",
+                  });
 
-                    final Uri dynamicUrl = await parameters.buildUrl();
+                  final DynamicLinkParameters parameters =
+                      DynamicLinkParameters(
+                          uriPrefix: "https://pashusansaar.page.link",
+                          link: Uri.parse(
+                              "https://www.pashu-sansaar.com/?data=$qParams"),
+                          androidParameters: AndroidParameters(
+                            packageName: 'dj.pashusansaar',
+                            minimumVersion: 21,
+                          ),
+                          dynamicLinkParametersOptions:
+                              DynamicLinkParametersOptions(
+                            shortDynamicLinkPathLength:
+                                ShortDynamicLinkPathLength.unguessable,
+                          ),
+                          navigationInfoParameters: NavigationInfoParameters(
+                              forcedRedirectEnabled: true));
 
-                    // await takeScreenShot(_list[index]['uniqueId']);
+                  final shortDynamicLink = await parameters.buildShortLink();
+                  final Uri shortUrl = shortDynamicLink.shortUrl;
 
-                    Share.shareFiles([fileUrl.path],
-                        mimeTypes: ['images/png'],
-                        text:
-                            "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
-                            // "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar} \n\n ${dynamicUrl.toString()}",
-                        subject: 'पशु की जानकारी');
+                  await takeScreenShot(_list[index]['uniqueId']);
 
-                    // Share.shareFiles([image],
-                    //     mimeTypes: ['images/jpg'],
-                    //     text:
-                    //         "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar} \n\n ${dynamicUrl.toString()}",
-                    //     subject: 'Share Animal Info');
-                    Share.share("${dynamicUrl.toString()}",
-                        subject: 'Share Animal Info');
-                    // Share.share(
-                    //     "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar} \n\n ${dynamicUrl.toString()}",
-                    //     subject: 'Share Animal Info');
-                  },
-                  icon: Icon(Icons.share, color: Colors.white, size: 14),
-                  label: Text('share'.tr,
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14))),
-            )
-          ],
-        ));
+                  Share.shareFiles([fileUrl.path],
+                      mimeTypes: ['images/png'],
+                      text:
+                          // "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
+                          "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nपशु देखे: ${shortUrl.toString()}",
+                      subject: 'पशु की जानकारी');
+
+                  // Share.share(shortUrl.toString());
+                },
+                icon: Icon(Icons.share, color: Colors.white, size: 14),
+                label: Text('share'.tr,
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14))),
+          )
+        ],
+      ),
+    );
   }
 
   _distanceTimeMethod(int index) {
