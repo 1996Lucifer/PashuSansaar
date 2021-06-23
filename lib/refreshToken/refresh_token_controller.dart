@@ -42,7 +42,7 @@ class RefreshTokenController extends GetxController {
         }
       }
     } catch (e) {
-      print("Exceptions user Login_______$e");
+      print("Exceptions refresh token_______$e");
       return false;
     }
   }

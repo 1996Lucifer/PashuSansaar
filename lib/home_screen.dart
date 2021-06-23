@@ -213,11 +213,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   getInitialInfo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-
+    bool status;
     pr.show();
 
     if (ReusableWidgets.isTokenExpired(prefs.getInt('expires') ?? 0)) {
-      bool status = await refreshTokenController.getRefreshToken(
+       status = await refreshTokenController.getRefreshToken(
           refresh: prefs.getString('refreshToken') ?? '');
       if (status) {
         setState(() {
@@ -232,6 +232,7 @@ class _HomeScreenState extends State<HomeScreen> {
             context, 'warning'.tr, Text('Error getting token'));
       }
     }
+
     List data = await buyAnimalController.getAnimal(
       latitude: 40.1,
       longitude: -97.1,

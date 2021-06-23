@@ -136,18 +136,21 @@ class Result {
 class Files {
   String fileName;
   String fileType;
+  String fileUrl;
 
-  Files({this.fileName, this.fileType});
+  Files({this.fileName, this.fileType, this.fileUrl});
 
   Files.fromJson(Map<String, dynamic> json) {
     fileName = json['fileName'];
     fileType = json['fileType'];
+    fileUrl = json['fileUrl'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['fileName'] = this.fileName;
     data['fileType'] = this.fileType;
+    data['fileUrl'] = this.fileUrl;
     return data;
   }
 }

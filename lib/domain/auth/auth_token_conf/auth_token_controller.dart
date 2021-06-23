@@ -68,7 +68,7 @@ class AuthToken extends GetxController {
         }
       } catch (e) {
         status.value = false;
-        print("Exceptions user Login_______$e");
+        print("Exceptions user register data_______$e");
       }
     }
     return status.value;

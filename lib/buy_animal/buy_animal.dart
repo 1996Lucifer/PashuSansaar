@@ -2175,15 +2175,57 @@ class _BuyAnimalState extends State<BuyAnimal>
     }
   }
 
+  _descriptionText(animalInfo) {
+    String animalBreedCheck = (animalInfo.animalBreed.tr == 'not_known'.tr)
+        ? ""
+        : animalInfo.animalBreed.tr;
+    String animalTypeCheck = (animalInfo.animalType == 5)
+        ? intToAnimalTypeMapping[5]
+        : intToAnimalTypeMapping[animalInfo.animalType];
+
+    String desc = '';
+
+    // String stmn2 = 'यह ${extraInfoData['animalAlreadyGivenBirth']} ब्यायी है ';
+    // String stmn3 = 'और अभी ${extraInfoData['animalIfPregnant']} है। ';
+    // String stmn41 = 'इसके साथ में बच्चा नहीं है। ';
+    // String stmn42 = 'इसके साथ में ${extraInfoData['animalHasBaby']}। ';
+    // String stmn2 = 'यह ${extraInfoData['animalAlreadyGivenBirth']} ब्यायी है ';
+    // String stmn3 = 'और अभी ${extraInfoData['animalIfPregnant']} है। ';
+    // String stmn41 = 'इसके साथ में बच्चा नहीं है। ';
+    // String stmn42 = 'इसके साथ में ${extraInfoData['animalHasBaby']}। ';
+    String stmn5 =
+        'पिछले बार के हिसाब से दूध कैपेसिटी ${animalInfo.animalMilkCapacity} लीटर है। ';
+
+    if (animalInfo.animalType == 3 ||
+        animalInfo.animalType == 4 ||
+        animalInfo.animalType == 5) {
+      desc =
+          'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल की है। ';
+    } else {
+      desc =
+          'ये ${animalInfo.animalBreed.tr} ${intToAnimalTypeMapping[animalInfo.animalType]} ${animalInfo.animalAge} साल का है। ';
+      // if (extraInfoData['animalAlreadyGivenBirth'] != null) desc = desc + stmn2;
+      // if (extraInfoData['animalIfPregnant'] != null) desc = desc + stmn3;
+      // desc = desc +
+      //     (extraInfoData['animalHasBaby'] == null ||
+      //             extraInfoData['animalHasBaby'] == 'nothing'.tr
+      //         ? stmn41
+      //         : stmn42);
+      if (animalInfo.animalMilkCapacity != null) desc = desc + stmn5;
+    }
+
+    // return desc + (extraInfoData['moreInfo'] ?? '');
+    return desc ;
+  }
+
   Padding _animalDescriptionMethod(int index) {
     List _list =
         _tempAnimalList.length != 0 ? _tempAnimalList : widget.animalInfo;
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Text(
-        // _list[index]['userAnimalDescription'] ?? "",
-        '_list[index]' ?? "",
+      child: Text("description to be added",
+        // _descriptionText(_list[index]),
         maxLines: 4,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(color: Colors.grey[600], fontSize: 14.5),
@@ -2195,15 +2237,15 @@ class _BuyAnimalState extends State<BuyAnimal>
     List _list =
         _tempAnimalList.length != 0 ? _tempAnimalList : widget.animalInfo;
 
+    List<String> _imageData = [];
+
+    _list[index].files.forEach((elem) => _imageData.add(elem.fileUrl));
+
     List<String> _images = [];
-    [
-      'assets/images/AppIcon.jpg'
-      // _list[index]['image1'],
-      // _list[index]['image2'],
-      // _list[index]['image3'],
-      // _list[index]['image4'],
-    ].forEach((element) =>
-        _images.addIf(element != null && element.isNotEmpty, element));
+    _list[index].files.forEach((elem) => _images.add(elem.fileUrl));
+
+    // _imageData.forEach((element) =>
+    //     _images.addIf(element != null && element.isNotEmpty, element));
     return Padding(
         padding: EdgeInsets.only(left: 8.0, right: 8, bottom: 4),
         child: Stack(
@@ -2238,26 +2280,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                                 boundaryMargin: const EdgeInsets.all(20.0),
                                 minScale: 0.1,
                                 maxScale: 1.6,
-                                child: i.length > 1000
-                                    ? Image.memory(base64Decode('$i'))
-                                    : Image.asset('$i'));
-                            // : Image.network('$i'));
-                            // return AspectRatio(
-                            //   aspectRatio: 16 / 9,
-                            //   child: Container(
-                            //     margin: EdgeInsets.all(6.0),
-                            //     decoration: BoxDecoration(
-                            //       borderRadius: BorderRadius.circular(8.0),
-                            //       image: DecorationImage(
-                            //         image: i.length > 1000
-                            //             ? MemoryImage(base64Decode('$i'))
-                            //             // : Image.file(fileUrl);
-                            //             : NetworkImage('$i'),
-                            //         fit: BoxFit.cover,
-                            //       ),
-                            //     ),
-                            //   ),
-                            // );
+                                child: Image.network('$i'));
                           }).toList(),
                         ),
                         Row(
@@ -2287,10 +2310,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                 height: 200.0,
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: _images[0].length > 1000
-                          ? MemoryImage(base64.decode(_images[0]))
-                          : AssetImage(_images[0])),
+                      fit: BoxFit.cover, image: NetworkImage(_images[0])),
                   // : NetworkImage(_images[0])),
                   borderRadius: BorderRadius.all(Radius.circular(8.0)),
                   color: Colors.redAccent,
@@ -2306,7 +2326,6 @@ class _BuyAnimalState extends State<BuyAnimal>
                   color: violetColor,
                   onPressed: () async {
                     String uriPrefix = 'https://pashusansaar.page.link/pashu';
-                    //     'https://console.firebase.google.com/u/0/project/pashusansaar-6e910/firestore/data';
                     final DynamicLinkParameters parameters =
                         DynamicLinkParameters(
                       uriPrefix: uriPrefix,
