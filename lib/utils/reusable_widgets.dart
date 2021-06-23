@@ -88,7 +88,7 @@ class ReusableWidgets {
     String suffix = '';
     String duration = '';
     var dateObj = DateTime.now()
-        .difference(DateFormat('dd MMM yyyy').add_jm().parse(date));
+        .difference(DateTime.parse(date));
 
     if (dateObj.inSeconds < 60) {
       duration = dateObj.inSeconds.toString();
@@ -114,5 +114,11 @@ class ReusableWidgets {
     String str1 = x.length > 2 ? x[0] + ' ' + x[1] : x.join(' ');
 
     return str1;
+  }
+
+  static isTokenExpired(int epoch) {
+    DateTime expiryDate = DateTime.fromMillisecondsSinceEpoch(epoch);
+    if (DateTime.now().compareTo(expiryDate) == 1) return true;
+    return false;
   }
 }

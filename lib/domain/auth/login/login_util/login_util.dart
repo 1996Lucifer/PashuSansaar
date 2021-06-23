@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:pashusansaar/domain/auth/otp_conf/otp_model.dart';
 import 'package:pashusansaar/global_data/global_data.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginController extends GetxController {
   var status = false.obs;
@@ -40,7 +41,7 @@ class LoginController extends GetxController {
 class OtpController extends GetxController {
   var status = false.obs;
   var isUser = false.obs;
-  // var authorizationToken=''.obs;
+  var authorization = ''.obs;
 
   fetchOtpVerify({
     String number,
@@ -58,23 +59,21 @@ class OtpController extends GetxController {
     if (response.data != null) {
       try {
         var data = response.data;
-        if (response.statusCode == 201) {
-
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          
           OtpModel otpData = OtpModel.fromJson(data);
-          // authorizationToken.value = otpData.authorizationToken;
-          GlobalData.authorizationToken= otpData.authorizationToken;
 
           isUser.value = false;
-          status.value = true;
-
-        }else if(response.statusCode == 211) {
+          status.value = otpData.success;
+          authorization.value = otpData.authorizationToken;
+        } else if (response.statusCode == 211) {
           OtpModel otpData = OtpModel.fromJson(data);
-          GlobalData.authorizationToken= otpData.authorizationToken;
-          isUser.value=true;
-          status.value = true;
 
-        }return isUser.value;
-        // return {'isUser':isUser.value,'token':authorizationToken.value};
+          authorization.value = otpData.authorizationToken;
+          isUser.value = true;
+          status.value = true;
+        }
+        return isUser.value;
       } catch (e) {
         status.value = false;
         print("Exceptions user Login otp _______$e");
@@ -82,6 +81,5 @@ class OtpController extends GetxController {
     }
     print("this is the ststus $status");
     return status.value;
-    // return {'token':authorizationToken.value, 'status':status.value};
   }
 }

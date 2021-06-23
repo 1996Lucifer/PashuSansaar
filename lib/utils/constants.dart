@@ -6,11 +6,6 @@ List<String> animalType = [
   'buffalo_male'.tr,
   'ox'.tr,
   'other_animal'.tr,
-  // {"id": 1, "name": 'cow'.tr},
-  // {"id": 2, "name": 'buffalo_male'.tr},
-  // {"id": 3, "name": 'ox'.tr},
-  // {"id": 4, "name": 'buffalo_female'.tr},
-  // {"id": 5, "name": 'other_animal'.tr}
 ];
 
 List<List<String>> animalType1 = [
@@ -186,3 +181,30 @@ List<String> radius = [
   '75 ' + 'km'.tr,
   '100 ' + 'km'.tr
 ];
+
+Map<String, int> animalTypeMapping = {
+  "cow".tr: 1,
+  'buffalo_female'.tr: 2,
+  'buffalo_male'.tr: 3,
+  'ox'.tr: 4,
+  'other_animal'.tr: 5,
+};
+
+Map<int, String> intToAnimalTypeMapping = {
+  1: "cow".tr,
+  2: 'buffalo_female'.tr,
+  3: 'buffalo_male'.tr,
+  4: 'ox'.tr,
+  5: 'other_animal'.tr,
+};
+
+Map<String, int> animalBayaatMapping = {
+  'zero'.tr: 0,
+  'first'.tr: 1,
+  'second'.tr: 2,
+  'third'.tr: 3,
+  'fourth'.tr: 4,
+  'fifth'.tr: 5,
+  'sixth'.tr: 6,
+  'seventh'.tr: 7,
+};

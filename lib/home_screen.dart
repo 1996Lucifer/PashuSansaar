@@ -5,6 +5,10 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:intl/intl.dart';
 import 'package:location/location.dart';
 import 'package:pashusansaar/buy_animal/buy_animal.dart';
+import 'package:pashusansaar/buy_animal/buy_animal_controller.dart';
+import 'package:pashusansaar/buy_animal/buying_animal_model.dart';
+import 'package:pashusansaar/refreshToken/refresh_token_controller.dart';
+import 'package:pashusansaar/refreshToken/refresh_token_model.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +17,7 @@ import 'package:pashusansaar/utils/global.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'domain/auth/login/login_util/login_util.dart';
 import 'profile_main.dart';
 import 'sell_animal/sell_animal_main.dart';
 import 'package:get/get.dart';
@@ -31,15 +36,28 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   ProgressDialog pr;
 
-  List _animalInfo = [], _sellingAnimalInfo = [];
+  List _animalInfo = [];
+
+  List _sellingAnimalInfo = [];
   Map _profileData = {};
   Map _referralWinnerData = {};
   final geo = Geoflutterfire();
   PageController _pageController;
-  String _referralUniqueValue = '', _mobileNumber = '';
+  String _referralUniqueValue = '',
+      _mobileNumber = '',
+      _token = '',
+      _accessToken = '',
+      _refreshToken = '',
+      _userId = '';
   bool _checkReferral = false;
   double lat = 0.0, long = 0.0;
   LocationData _locate;
+  int _expires = 0;
+
+  final BuyAnimalController buyAnimalController =
+      Get.put(BuyAnimalController());
+  final RefreshTokenController refreshTokenController =
+      Get.put(RefreshTokenController());
 
   @override
   void initState() {
@@ -48,37 +66,6 @@ class _HomeScreenState extends State<HomeScreen> {
     checkInitialData();
     super.initState();
   }
-
-  // updateData() async {
-  //   FirebaseFirestore.instance
-  //       .collection('buyingAnimalList1')
-  //       .orderBy('dateOfSaving')
-  //       .where('dateOfSaving', isLessThanOrEqualTo: '1623048304')
-  //       .where('dateOfSaving', isGreaterThanOrEqualTo: '1623009600')
-  //       .get()
-  //       .then((value) {
-  //     value.docs.forEach((element) {
-  //       if (element['userName'] == null ||
-  //           element['userMobileNumber'] == null) {
-  //         FirebaseFirestore.instance
-  //             .collection("userInfo")
-  //             .doc(element['userId'])
-  //             .get()
-  //             .then(
-  //           (profile) {
-  //             FirebaseFirestore.instance
-  //                 .collection('buyingAnimalList1')
-  //                 .doc(element.reference.id)
-  //                 .update({
-  //               'userName': profile.data()['name'],
-  //               'userMobileNumber': profile.data()['mobile'],
-  //             });
-  //           },
-  //         );
-  //       }
-  //     });
-  //   });
-  // }
 
   checkInitialData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -148,8 +135,6 @@ class _HomeScreenState extends State<HomeScreen> {
       pr.hide();
       await loginSetup();
     }
-
-    // await loginSetup();
   }
 
   Future<void> initReferrerDetails(mobile) async {
@@ -206,141 +191,69 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  _getDistrictList() async {
-    pr.show();
-
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    List district = [];
-    RemoteConfig remoteConfig = await RemoteConfig.instance;
-    await remoteConfig.fetch(expiration: const Duration(seconds: 0));
-    await remoteConfig.activateFetched();
-    var address = await geoCoder.Geocoder.local.findAddressesFromCoordinates(
-        geoCoder.Coordinates(
-            prefs.getDouble('latitude'), prefs.getDouble('longitude')));
-    var first = address.first;
-
-    json
-        .decode(remoteConfig.getValue("district_map").asString())
-        .forEach((element) {
-      district.addIf(element[first.subAdminArea ?? first.locality] != null,
-          element[first.subAdminArea ?? first.locality]);
-    });
-
-    setState(() {
-      districtList = district.isEmpty ? [] : district[0];
-    });
-
-    getInitialInfo();
-  }
-
   loginSetup() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      prefs.setBool(
-          'isLoggedIn', FirebaseAuth.instance.currentUser.uid.isNotEmpty);
-      prefs.setBool(
-          'alreadyUser', FirebaseAuth.instance.currentUser.uid.isNotEmpty);
+      prefs.setBool('isLoggedIn', true);
+      prefs.setBool('alreadyUser', true);
       _referralUniqueValue = prefs.getString('referralUniqueValue');
       _checkReferral = prefs.getBool('checkReferral') ?? false;
       _mobileNumber = prefs.getString('mobileNumber');
+      // _accessToken = prefs.getString('accessToken') ?? '';
+      // _refreshToken = prefs.getString('refreshToken') ?? '';
+      // _userId = prefs.getString('userId') ?? '';
+      // _expires = prefs.getInt('expires') ?? 0;
 
       lat = prefs.getDouble('latitude');
       long = prefs.getDouble('longitude');
     });
 
-    _getDistrictList();
-    // dataUpdation();
+    getInitialInfo();
   }
 
-  // dataUpdation() async {
-  //   await FirebaseFirestore.instance.collection("userInfo").get().then(
-  //     (value) {
-  //       value.docs.forEach((element) {
-  //         FirebaseFirestore.instance
-  //             .collection("userInfo")
-  //             .doc(element.reference.id)
-  //             .update({
-  //               'dateOfCreation': FirebaseAuth.instance.
-  //             });
-  //       });
-  //     },
-  //   );
-  // }
-
   getInitialInfo() async {
-    try {
-      final now = DateTime.now();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
 
-      if (districtList.isEmpty) {
-        Stream<List<DocumentSnapshot>> stream = geo
-            .collection(
-                collectionRef: FirebaseFirestore.instance
-                    .collection("buyingAnimalList1")
-                    .where('isValidUser', isEqualTo: 'Approved'))
-            .within(
-                center: geo.point(latitude: lat, longitude: long),
-                radius: 50,
-                field: 'position',
-                strictMode: true);
+    pr.show();
 
-        stream.listen((List<DocumentSnapshot> documentList) {
-          // List _temp = [];
-          // documentList.forEach((e) {
-          //   _temp.addIf(e['isValidUser'] == 'Approved', e);
-          // });
-          setState(() {
-            _animalInfo = documentList;
-            _animalInfo
-                .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
-          });
-          pr.hide();
-          // if (pr.isShowing()) pr.hide();
+    if (ReusableWidgets.isTokenExpired(prefs.getInt('expires') ?? 0)) {
+      bool status = await refreshTokenController.getRefreshToken(
+          refresh: prefs.getString('refreshToken') ?? '');
+      if (status) {
+        setState(() {
+          prefs.setString(
+              'accessToken', refreshTokenController.accessToken.value);
+          prefs.setString(
+              'refreshToken', refreshTokenController.refreshToken.value);
+          prefs.setInt('expires', refreshTokenController.expires.value);
         });
       } else {
-        FirebaseFirestore.instance
-            .collection('buyingAnimalList1')
-            .orderBy('dateOfSaving', descending: true)
-            .where('dateOfSaving',
-                isLessThanOrEqualTo: ReusableWidgets.dateTimeToEpoch(now))
-            .where('district', whereIn: districtList)
-            .where('isValidUser', isEqualTo: 'Approved')
-            .limit(25)
-            .get(GetOptions(source: Source.serverAndCache))
-            .then((value) {
-          setState(() {
-            lastDocument = value.docs.last['dateOfSaving'];
-            _animalInfo = value.docs;
-            _animalInfo
-                .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
-          });
-          pr.hide();
-          // if (pr.isShowing()) pr.hide();
-        });
+        ReusableWidgets.showDialogBox(
+            context, 'warning'.tr, Text('Error getting token'));
       }
-    } catch (e) {
-      print('=-=Error-Home=->>>' + e.toString());
-      // if (pr.isShowing()) pr.hide();
-
-      FirebaseFirestore.instance
-          .collection('logger')
-          .doc(_mobileNumber)
-          .collection('home-buying')
-          .doc()
-          .set({
-        'issue': e.toString(),
-        'userId': FirebaseAuth.instance.currentUser == null
-            ? ''
-            : FirebaseAuth.instance.currentUser.uid,
-        'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
-      });
     }
+    List data = await buyAnimalController.getAnimal(
+      latitude: 40.1,
+      longitude: -97.1,
+      // latitude: lat,
+      // longitude: long,
+      animalType: null,
+      minMilk: null,
+      maxMilk: null,
+      page: 1,
+      accessToken: prefs.getString('accessToken') ?? '',
+      refreshToken: prefs.getString('refreshToken') ?? '',
+    );
 
-    print('=-=-==-=' + pr.isShowing().toString());
+    setState(() {
+      _animalInfo = data;
+    });
 
-    // if (pr.isShowing()) pr.hide();
+    pr.hide();
 
-    getAnimalSellingInfo();
+    print('animalInfo===' + _animalInfo.length.toString());
+
+    // getAnimalSellingInfo();
   }
 
   getAnimalSellingInfo() async {

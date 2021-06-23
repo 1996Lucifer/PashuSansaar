@@ -180,7 +180,9 @@ class _BuyAnimalState extends State<BuyAnimal>
 
   _getInitialData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+
     setState(() {
+      _userLocality = prefs.getString('district');
       if (widget.latitude == 0.0 || widget.longitude == 0.0) {
         _latitude = prefs.getDouble('latitude');
         _longitude = prefs.getDouble('longitude');
@@ -189,173 +191,21 @@ class _BuyAnimalState extends State<BuyAnimal>
         _longitude = widget.longitude;
       }
     });
-    getLatLong();
+    // getLatLong();
   }
 
-  getLatLong() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final coordinates = new Coordinates(_latitude, _longitude);
-    var addresses =
-        await Geocoder.local.findAddressesFromCoordinates(coordinates);
-    var first = addresses.first;
+  // getLatLong() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   // final coordinates = new Coordinates(_latitude, _longitude);
+  //   // var addresses =
+  //   //     await Geocoder.local.findAddressesFromCoordinates(coordinates);
+  //   // var first = addresses.first;
 
-    setState(() {
-      _userLocality = first.locality ?? first.featureName;
-      prefs.setString('place', _userLocality);
-    });
-  }
-
-  // _createFileFromString(encodedStr, userId, uniqueId, id) async {
-  //   Uint8List bytes = base64Decode(encodedStr);
-  //   String fullPath = '$directory/${uniqueId}_$id.jpg';
-  //   File file = File(fullPath);
-
-  //   await file.writeAsBytes(bytes);
-
-  //   // await firebase_storage.FirebaseStorage.instance
-  //   //     .ref('$userId/${uniqueId}_$id.jpg')
-  //   //     .putFile(file);
-
-  //   // await firebase_storage.FirebaseStorage.instance
-  //   //     .ref('$userId/${uniqueId}_$id.jpg')
-  //   //     .getDownloadURL();
-  //         StorageReference ref = FirebaseStorage.instance.ref().child("video").child(userId).child(uniqueId);
-  // StorageUploadTask uploadTask = ref.putFile(file, StorageMetadata(contentType: 'video/mp4'));
-
-  // Uri downloadUrl = (await uploadTask.future).downloadUrl;
-
-  //   final String url = downloadUrl.toString();
-
-  // }
-
-  // func1(element) async {
-  //   _createFileFromString(
-  //       element['image1'], element['userId'], element['uniqueId'], '1');
-  //   String downloadURL1 = await firebase_storage.FirebaseStorage.instance
-  //       .ref('${element['userId']}/${element['uniqueId']}_1.jpg')
-  //       .getDownloadURL();
   //   setState(() {
-  //     url1 = downloadURL1;
+  //     _userLocality = prefs.getString('district');
+  //     // _userLocality = first.locality ?? first.featureName;
+  //     // prefs.setString('place', _userLocality);
   //   });
-  // }
-
-  // func2(element) async {
-  //   _createFileFromString(
-  //       element['image2'], element['userId'], element['uniqueId'], '2');
-  //   String downloadURL2 = await firebase_storage.FirebaseStorage.instance
-  //       .ref('${element['userId']}/${element['uniqueId']}_2.jpg')
-  //       .getDownloadURL();
-  //   setState(() {
-  //     url2 = downloadURL2;
-  //   });
-  // }
-
-  // func3(element) async {
-  //   _createFileFromString(
-  //       element['image3'], element['userId'], element['uniqueId'], '3');
-  //   String downloadURL3 = await firebase_storage.FirebaseStorage.instance
-  //       .ref('${element['userId']}/${element['uniqueId']}_3.jpg')
-  //       .getDownloadURL();
-  //   setState(() {
-  //     url3 = downloadURL3;
-  //   });
-  // }
-
-  // func4(element) async {
-  //   _createFileFromString(
-  //       element['image4'], element['userId'], element['uniqueId'], '4');
-  //   String downloadURL4 = await firebase_storage.FirebaseStorage.instance
-  //       .ref('${element['userId']}/${element['uniqueId']}_4.jpg')
-  //       .getDownloadURL();
-  //   setState(() {
-  //     url4 = downloadURL4;
-  //   });
-  // }
-
-  // dataUpdateOnInit() async {
-  // if (element['image1'] != null && element['image1'].isNotEmpty) {
-  //   await func1(element);
-  // }
-  // if (element['image2'] != null && element['image2'].isNotEmpty) {
-  //   await func2(element);
-  // }
-  // if (element['image3'] != null && element['image3'].isNotEmpty) {
-  //   await func3(element);
-  // }
-  // if (element['image4'] != null && element['image4'].isNotEmpty) {
-  //   await func4(element);
-  // }
-  // await FirebaseFirestore.instance
-  //     .collection("buyingAnimalList1")
-  //     .doc(element.reference.id)
-  //     .update({
-  //   'image1': url1 ?? '',
-  //   'image2': url2 ?? '',
-  //   'image3': url3 ?? '',
-  //   'image4': url4 ?? '',
-  // });
-  // await FirebaseFirestore.instance
-  //     .collection("buyingAnimalList")
-  //     .orderBy('uniqueId')
-  //     // .where('uniqueId',
-  //     //     isLessThanOrEqualTo: '10000000') // 00000000 - 10000000
-  //     // .where('uniqueId',
-  //     //     isGreaterThan: '10000000', isLessThanOrEqualTo: '20000000') // 30 - 31
-  //     // .where('uniqueId',
-  //     //     isGreaterThan: '20000000', isLessThanOrEqualTo: '30000000') // 30 - 31
-  //     // .where('uniqueId',
-  //     //     isGreaterThan: '30000000', isLessThanOrEqualTo: '40000000') // karna hai aaj
-  //     // .where('uniqueId',
-  //     //     isGreaterThan: '40000000', isLessThanOrEqualTo: '50000000') // karna hai aaj
-  //     // .where('uniqueId',
-  //     //     isGreaterThan: '50000000', isLessThanOrEqualTo: '60000000') // karna hai aaj
-  //     // .where('uniqueId',
-  //     //     isGreaterThan: '60000000', isLessThanOrEqualTo: '70000000') // karna hai aaj
-  //     // .where('uniqueId',
-  //     //     isGreaterThan: '70000000', isLessThanOrEqualTo: '80000000') // karna hai aaj
-  //     // .where('uniqueId',
-  //     //     isGreaterThan: '80000000', isLessThanOrEqualTo: '90000000') // karna hai aaj
-  //     // .where('uniqueId', isGreaterThan: '90000000') // k
-  //     .where('uniqueId',
-  //         isGreaterThanOrEqualTo: '00170146',
-  //         isLessThanOrEqualTo: '01331449') // 31-1
-
-  //     .get()
-  //     .then((value) => value.docs.forEach((element) async {
-  //           print("value.docs=====>" + value.docs.length.toString());
-  //           if (element['image1'] != null && element['image1'].isNotEmpty) {
-  //             await func1(element);
-  //           }
-  //           if (element['image2'] != null && element['image2'].isNotEmpty) {
-  //             await func2(element);
-  //           }
-  //           if (element['image3'] != null && element['image3'].isNotEmpty) {
-  //             await func3(element);
-  //           }
-  //           if (element['image4'] != null && element['image4'].isNotEmpty) {
-  //             await func4(element);
-  //           }
-  //           await FirebaseFirestore.instance
-  //               .collection("buyingAnimalList1")
-  //               .doc(element.reference.id)
-  //               .update({
-  //             'image1': url1 ?? '',
-  //             'image2': url2 ?? '',
-  //             'image3': url3 ?? '',
-  //             'image4': url4 ?? '',
-  //           });
-  //         }));
-  //   await FirebaseFirestore.instance
-  //       .collection("buyingAnimalList1")
-  //       .get()
-  //       .then((value) => value.docs.forEach((element) async {
-  //             await FirebaseFirestore.instance
-  //                 .collection("buyingAnimalList1")
-  //                 .doc(element.reference.id)
-  //                 .update({
-  //               'userAnimalTypeOther': '',
-  //             });
-  //           }));
   // }
 
   removingNumberFromBayaat(String bayaat) {
@@ -429,104 +279,98 @@ class _BuyAnimalState extends State<BuyAnimal>
           padding: const EdgeInsets.all(8),
           child: RichText(
             textAlign: TextAlign.center,
-            text:
-                (constant.animalType.indexOf(_list[index]['userAnimalType']) ==
-                            0 ||
-                        constant.animalType
-                                .indexOf(_list[index]['userAnimalType']) ==
-                            1)
-                    ? TextSpan(
-                        text: _list[index]['userAnimalMilk'],
-                        style: TextStyle(
-                            color: Colors.grey[700],
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16),
-                        children: [
-                            TextSpan(
-                              text: ' ',
-                              style: TextStyle(
-                                  color: Colors.grey[700],
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16),
-                            ),
-                            TextSpan(
-                              text: "litre_milk".tr,
-                              style: TextStyle(
-                                  color: Colors.grey[700],
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16),
-                            ),
-                            TextSpan(
-                              text: ', ',
-                              style: TextStyle(
-                                  color: Colors.grey[700],
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16),
-                            ),
-                            TextSpan(
-                              text: bayaatMapping(
-                                  _list[index]['userAnimalPregnancy']),
-                              style: TextStyle(
-                                  color: Colors.grey[700],
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16),
-                            ),
-                            TextSpan(
-                              text: ', ',
-                              style: TextStyle(
-                                  color: Colors.grey[700],
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16),
-                            ),
-                            TextSpan(
-                              text: '₹ ' +
-                                      formatter.format(int.parse(
-                                          _list[index]['userAnimalPrice'])) ??
-                                  0,
-                              style: TextStyle(
-                                  color: Colors.grey[700],
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16),
-                            ),
-                          ])
-                    : TextSpan(
-                        text: _list[index]['userAnimalBreed'] == 'not_known'.tr
-                            ? ""
-                            : ReusableWidgets.removeEnglisgDataFromName(
-                                _list[index]['userAnimalBreed']),
-                        style: TextStyle(
-                            color: Colors.grey[700],
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16),
-                        children: [
-                            TextSpan(
-                              text: ' ',
-                              style: TextStyle(
-                                  color: Colors.grey[700],
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16),
-                            ),
-                            TextSpan(
-                              text: _list[index]['userAnimalType'] ==
-                                      'other_animal'.tr
-                                  ? _list[index]['userAnimalTypeOther']
-                                  : _list[index]['userAnimalType'],
-                              style: TextStyle(
-                                  color: Colors.grey[700],
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16),
-                            ),
-                            TextSpan(
-                              text: ', ₹ ' +
-                                      formatter.format(int.parse(
-                                          _list[index]['userAnimalPrice'])) ??
-                                  0,
-                              style: TextStyle(
-                                  color: Colors.grey[700],
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16),
-                            ),
-                          ]),
+            text: (_list[index].animalType == 1 || _list[index].animalType == 2)
+                ? TextSpan(
+                    text: _list[index].animalMilk.toString(),
+                    style: TextStyle(
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16),
+                    children: [
+                        TextSpan(
+                          text: ' ',
+                          style: TextStyle(
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                        ),
+                        TextSpan(
+                          text: "litre_milk".tr,
+                          style: TextStyle(
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                        ),
+                        TextSpan(
+                          text: ', ',
+                          style: TextStyle(
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                        ),
+                        TextSpan(
+                          text: bayaatMapping(
+                              _list[index].pregnantTime.toString()),
+                          style: TextStyle(
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                        ),
+                        TextSpan(
+                          text: ', ',
+                          style: TextStyle(
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                        ),
+                        TextSpan(
+                          text: '₹ ' +
+                                  formatter.format(_list[index].animalPrice) ??
+                              0,
+                          style: TextStyle(
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                        ),
+                      ])
+                : TextSpan(
+                    text: _list[index].animalBreed == 'not_known'.tr
+                        ? ""
+                        : _list[index].animalBreed,
+                    // ReusableWidgets.removeEnglisgDataFromName(
+                    //     _list[index].animalBreed
+                    // ),
+                    style: TextStyle(
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16),
+                    children: [
+                        TextSpan(
+                          text: ' ',
+                          style: TextStyle(
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                        ),
+                        TextSpan(
+                          text: _list[index].animalType == 5
+                              ? intToAnimalTypeMapping[5]
+                              : intToAnimalTypeMapping[_list[index].animalType],
+                          style: TextStyle(
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                        ),
+                        TextSpan(
+                          text: ', ₹ ' +
+                                  formatter.format(_list[index].animalPrice) ??
+                              0,
+                          style: TextStyle(
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                        ),
+                      ]),
           ),
         ),
       ],
@@ -664,14 +508,16 @@ class _BuyAnimalState extends State<BuyAnimal>
               _tempAnimalList.length == 0 && widget.animalInfo.length == 0
                   ? Center(
                       child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Text(
                           'जानकारी उपलब्ध नहीं है| कोई और चुनाव करके कोशिश करे |',
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
-                          )),
-                    ))
+                          ),
+                        ),
+                      ),
+                    )
                   : Padding(
                       padding: const EdgeInsets.only(top: 50.0),
                       child: _tempAnimalList.length != 0
@@ -679,650 +525,17 @@ class _BuyAnimalState extends State<BuyAnimal>
                               alignment: Alignment.bottomCenter,
                               children: [
                                 ListView.builder(
-                                    key: ObjectKey(_tempAnimalList[0]),
-                                    padding: EdgeInsets.only(bottom: 60),
-                                    controller: _scrollController,
-                                    physics: BouncingScrollPhysics(),
-                                    itemBuilder: (context, index) => Padding(
-                                          padding: const EdgeInsets.only(
-                                              left: 8.0, right: 8, top: 8),
-                                          child: Column(
-                                            children: [
-                                              Card(
-                                                key: Key(index.toString()),
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          10.0),
-                                                ),
-                                                elevation: 5,
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    _buildInfowidget(index),
-                                                    _distanceTimeMethod(index),
-                                                    _animalImageWidget(index),
-                                                    _animalDescriptionMethod(
-                                                        index),
-                                                    Container(
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          color:
-                                                              Colors.grey[100],
-                                                          boxShadow: [
-                                                            BoxShadow(
-                                                              color:
-                                                                  Colors.grey,
-                                                              blurRadius: 1.0,
-                                                            ),
-                                                          ],
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(8),
-                                                        ),
-                                                        height: 80,
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .all(8.0),
-                                                          child: Row(children: [
-                                                            widget.userImage ==
-                                                                        null ||
-                                                                    widget.userImage ==
-                                                                        ""
-                                                                ? Image.asset(
-                                                                    'assets/images/profile.jpg',
-                                                                    width: 40,
-                                                                    height: 40)
-                                                                : Image.memory(
-                                                                    base64Decode(
-                                                                        widget
-                                                                            .userImage),
-                                                                    width: 40,
-                                                                    height: 40),
-                                                            SizedBox(
-                                                              width: 5,
-                                                            ),
-                                                            Expanded(
-                                                              child: Text(
-                                                                _tempAnimalList[
-                                                                        index][
-                                                                    'userName'],
-                                                                style: TextStyle(
-                                                                    fontSize:
-                                                                        15,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .bold,
-                                                                    color: Colors
-                                                                        .black),
-                                                              ),
-                                                            ),
-                                                            RaisedButton.icon(
-                                                                shape: RoundedRectangleBorder(
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            18.0),
-                                                                    side: BorderSide(
-                                                                        color:
-                                                                            darkSecondaryColor)),
-                                                                color:
-                                                                    secondaryColor,
-                                                                onPressed:
-                                                                    () async {
-                                                                  SharedPreferences
-                                                                      prefs =
-                                                                      await SharedPreferences
-                                                                          .getInstance();
-                                                                  var addresses = await Geocoder.local.findAddressesFromCoordinates(Coordinates(
-                                                                      prefs.getDouble(
-                                                                          'latitude'),
-                                                                      prefs.getDouble(
-                                                                          'longitude')));
-                                                                  var first =
-                                                                      addresses
-                                                                          .first;
-
-                                                                  callingInfo[
-                                                                          'userIdCurrent'] =
-                                                                      FirebaseAuth
-                                                                          .instance
-                                                                          .currentUser
-                                                                          .uid;
-                                                                  callingInfo[
-                                                                      'userIdOther'] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'userId'];
-                                                                  callingInfo[
-                                                                      'otherListId'] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'uniqueId'];
-                                                                  callingInfo[
-                                                                          'channel'] =
-                                                                      "call";
-                                                                  callingInfo[
-                                                                      'userAddress'] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'userAddress'];
-                                                                  callingInfo[
-                                                                      "userAnimalDescription"] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'userAnimalDescription'];
-                                                                  callingInfo[
-                                                                          "userAnimalType"] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'userAnimalType'] ??
-                                                                          "";
-                                                                  callingInfo[
-                                                                          "userAnimalTypeOther"] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'userAnimalTypeOther'] ??
-                                                                          "";
-                                                                  callingInfo[
-                                                                          "userAnimalAge"] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'userAnimalAge'] ??
-                                                                          "";
-                                                                  callingInfo[
-                                                                      "userAddress"] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'userAddress'];
-                                                                  callingInfo[
-                                                                      "userName"] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'userName'];
-                                                                  callingInfo[
-                                                                          "userAnimalPrice"] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'userAnimalPrice'] ??
-                                                                          "0";
-                                                                  callingInfo[
-                                                                          "userAnimalBreed"] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'userAnimalBreed'] ??
-                                                                          "";
-                                                                  callingInfo[
-                                                                      "userMobileNumber"] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'userMobileNumber'];
-                                                                  callingInfo[
-                                                                          "userAnimalMilk"] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'userAnimalMilk'] ??
-                                                                          "";
-                                                                  callingInfo[
-                                                                          "userAnimalPregnancy"] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'userAnimalPregnancy'] ??
-                                                                          "";
-                                                                  callingInfo[
-                                                                      "image1"] = _tempAnimalList[index] ==
-                                                                              null ||
-                                                                          _tempAnimalList[index]['image1'] ==
-                                                                              ""
-                                                                      ? ""
-                                                                      : _tempAnimalList[
-                                                                              index]
-                                                                          [
-                                                                          'image1'];
-                                                                  callingInfo[
-                                                                      "image2"] = _tempAnimalList[index]['image2'] ==
-                                                                              null ||
-                                                                          _tempAnimalList[index]['image2'] ==
-                                                                              ""
-                                                                      ? ""
-                                                                      : _tempAnimalList[
-                                                                              index]
-                                                                          [
-                                                                          'image2'];
-                                                                  callingInfo[
-                                                                      "image3"] = _tempAnimalList[index]['image3'] ==
-                                                                              null ||
-                                                                          _tempAnimalList[index]['image3'] ==
-                                                                              ""
-                                                                      ? ""
-                                                                      : _tempAnimalList[
-                                                                              index]
-                                                                          [
-                                                                          'image3'];
-                                                                  callingInfo[
-                                                                      "image4"] = _tempAnimalList[index]['image4'] ==
-                                                                              null ||
-                                                                          _tempAnimalList[index]['image4'] ==
-                                                                              ""
-                                                                      ? ""
-                                                                      : _tempAnimalList[
-                                                                              index]
-                                                                          [
-                                                                          'image4'];
-                                                                  callingInfo[
-                                                                          "dateOfSaving"] =
-                                                                      ReusableWidgets
-                                                                          .dateTimeToEpoch(
-                                                                              DateTime.now());
-                                                                  callingInfo[
-                                                                      'isValidUser'] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'isValidUser'];
-                                                                  callingInfo[
-                                                                          'extraInfo'] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'extraInfo'] ??
-                                                                          {};
-
-                                                                  FirebaseFirestore
-                                                                      .instance
-                                                                      .collection(
-                                                                          "callingInfo")
-                                                                      .doc(callingInfo[
-                                                                          'otherListId'])
-                                                                      .collection(
-                                                                          'interestedBuyers')
-                                                                      .doc(FirebaseAuth
-                                                                          .instance
-                                                                          .currentUser
-                                                                          .uid)
-                                                                      .set({
-                                                                    'userName':
-                                                                        widget
-                                                                            .userName,
-                                                                    'userMobileNumber':
-                                                                        widget
-                                                                            .userMobileNumber,
-                                                                    "userAddress": first
-                                                                            .addressLine ??
-                                                                        (first.adminArea +
-                                                                            ', ' +
-                                                                            first.countryName),
-                                                                    'userIdCurrent': FirebaseAuth
-                                                                        .instance
-                                                                        .currentUser
-                                                                        .uid,
-                                                                    'userIdOther':
-                                                                        _tempAnimalList[index]
-                                                                            [
-                                                                            'userId'],
-                                                                    'otherListId':
-                                                                        _tempAnimalList[index]
-                                                                            [
-                                                                            'uniqueId'],
-                                                                    'channel':
-                                                                        "call",
-                                                                    "dateOfSaving":
-                                                                        ReusableWidgets.dateTimeToEpoch(
-                                                                            DateTime.now())
-                                                                  }, SetOptions(merge: true));
-
-                                                                  FirebaseFirestore
-                                                                      .instance
-                                                                      .collection(
-                                                                          "myCallingInfo")
-                                                                      .doc(FirebaseAuth
-                                                                          .instance
-                                                                          .currentUser
-                                                                          .uid)
-                                                                      .collection(
-                                                                          'myCalls')
-                                                                      .doc(callingInfo[
-                                                                          'otherListId'])
-                                                                      .set(
-                                                                          callingInfo,
-                                                                          SetOptions(
-                                                                              merge: true));
-
-                                                                  return UrlLauncher
-                                                                      .launch(
-                                                                          'tel:+91 ${_tempAnimalList[index]['userMobileNumber']}');
-                                                                },
-                                                                icon: Icon(
-                                                                  Icons.call,
-                                                                  color: Colors
-                                                                      .white,
-                                                                  size: 14,
-                                                                ),
-                                                                label: Text(
-                                                                    'call'.tr,
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontWeight:
-                                                                            FontWeight
-                                                                                .bold,
-                                                                        fontSize:
-                                                                            14))),
-                                                            SizedBox(
-                                                              width: 5,
-                                                            ),
-                                                            RaisedButton.icon(
-                                                                shape: RoundedRectangleBorder(
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            18.0),
-                                                                    side: BorderSide(
-                                                                        color:
-                                                                            darkGreenColor)),
-                                                                color:
-                                                                    darkGreenColor,
-                                                                onPressed:
-                                                                    () async {
-                                                                  SharedPreferences
-                                                                      prefs =
-                                                                      await SharedPreferences
-                                                                          .getInstance();
-                                                                  var addresses = await Geocoder.local.findAddressesFromCoordinates(Coordinates(
-                                                                      prefs.getDouble(
-                                                                          'latitude'),
-                                                                      prefs.getDouble(
-                                                                          'longitude')));
-                                                                  var first =
-                                                                      addresses
-                                                                          .first;
-                                                                  String
-                                                                      whatsappUrl =
-                                                                      '';
-                                                                  callingInfo[
-                                                                          'userIdCurrent'] =
-                                                                      FirebaseAuth
-                                                                          .instance
-                                                                          .currentUser
-                                                                          .uid;
-                                                                  callingInfo[
-                                                                      'userIdOther'] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'userId'];
-                                                                  callingInfo[
-                                                                      'otherListId'] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'uniqueId'];
-                                                                  callingInfo[
-                                                                          'channel'] =
-                                                                      "whatsapp";
-                                                                  callingInfo[
-                                                                      'userAddress'] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'userAddress'];
-                                                                  callingInfo[
-                                                                      "userAnimalDescription"] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'userAnimalDescription'];
-                                                                  callingInfo[
-                                                                          "userAnimalType"] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'userAnimalType'] ??
-                                                                          "";
-                                                                  callingInfo[
-                                                                          "userAnimalTypeOther"] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'userAnimalTypeOther'] ??
-                                                                          "";
-                                                                  callingInfo[
-                                                                          "userAnimalAge"] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'userAnimalAge'] ??
-                                                                          "";
-                                                                  callingInfo[
-                                                                      "userAddress"] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'userAddress'];
-                                                                  callingInfo[
-                                                                      "userName"] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'userName'];
-                                                                  callingInfo[
-                                                                          "userAnimalPrice"] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'userAnimalPrice'] ??
-                                                                          "0";
-                                                                  callingInfo[
-                                                                          "userAnimalBreed"] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'userAnimalBreed'] ??
-                                                                          "";
-                                                                  callingInfo[
-                                                                      "userMobileNumber"] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'userMobileNumber'];
-                                                                  callingInfo[
-                                                                          "userAnimalMilk"] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'userAnimalMilk'] ??
-                                                                          "";
-                                                                  callingInfo[
-                                                                          "userAnimalPregnancy"] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'userAnimalPregnancy'] ??
-                                                                          "";
-                                                                  callingInfo[
-                                                                      "image1"] = _tempAnimalList[index] ==
-                                                                              null ||
-                                                                          _tempAnimalList[index]['image1'] ==
-                                                                              ""
-                                                                      ? ""
-                                                                      : _tempAnimalList[
-                                                                              index]
-                                                                          [
-                                                                          'image1'];
-                                                                  callingInfo[
-                                                                      "image2"] = _tempAnimalList[index]['image2'] ==
-                                                                              null ||
-                                                                          _tempAnimalList[index]['image2'] ==
-                                                                              ""
-                                                                      ? ""
-                                                                      : _tempAnimalList[
-                                                                              index]
-                                                                          [
-                                                                          'image2'];
-                                                                  callingInfo[
-                                                                      "image3"] = _tempAnimalList[index]['image3'] ==
-                                                                              null ||
-                                                                          _tempAnimalList[index]['image3'] ==
-                                                                              ""
-                                                                      ? ""
-                                                                      : _tempAnimalList[
-                                                                              index]
-                                                                          [
-                                                                          'image3'];
-                                                                  callingInfo[
-                                                                      "image4"] = _tempAnimalList[index]['image4'] ==
-                                                                              null ||
-                                                                          _tempAnimalList[index]['image4'] ==
-                                                                              ""
-                                                                      ? ""
-                                                                      : _tempAnimalList[
-                                                                              index]
-                                                                          [
-                                                                          'image4'];
-                                                                  callingInfo[
-                                                                          "dateOfSaving"] =
-                                                                      ReusableWidgets
-                                                                          .dateTimeToEpoch(
-                                                                              DateTime.now());
-                                                                  callingInfo[
-                                                                      'isValidUser'] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'isValidUser'];
-                                                                  callingInfo[
-                                                                          'extraInfo'] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'extraInfo'] ??
-                                                                          {};
-
-                                                                  FirebaseFirestore
-                                                                      .instance
-                                                                      .collection(
-                                                                          "callingInfo")
-                                                                      .doc(callingInfo[
-                                                                          'otherListId'])
-                                                                      .collection(
-                                                                          'interestedBuyers')
-                                                                      .doc(FirebaseAuth
-                                                                          .instance
-                                                                          .currentUser
-                                                                          .uid)
-                                                                      .set({
-                                                                    'userName':
-                                                                        widget
-                                                                            .userName,
-                                                                    'userMobileNumber':
-                                                                        widget
-                                                                            .userMobileNumber,
-                                                                    "userAddress": first
-                                                                            .addressLine ??
-                                                                        (first.adminArea +
-                                                                            ', ' +
-                                                                            first.countryName),
-                                                                    'userIdCurrent': FirebaseAuth
-                                                                        .instance
-                                                                        .currentUser
-                                                                        .uid,
-                                                                    'userIdOther':
-                                                                        _tempAnimalList[index]
-                                                                            [
-                                                                            'userId'],
-                                                                    'otherListId':
-                                                                        _tempAnimalList[index]
-                                                                            [
-                                                                            'uniqueId'],
-                                                                    'channel':
-                                                                        "whatsapp",
-                                                                    "dateOfSaving":
-                                                                        ReusableWidgets.dateTimeToEpoch(
-                                                                            DateTime.now())
-                                                                  }, SetOptions(merge: true));
-
-                                                                  FirebaseFirestore
-                                                                      .instance
-                                                                      .collection(
-                                                                          "myCallingInfo")
-                                                                      .doc(FirebaseAuth
-                                                                          .instance
-                                                                          .currentUser
-                                                                          .uid)
-                                                                      .collection(
-                                                                          'myCalls')
-                                                                      .doc(callingInfo[
-                                                                          'otherListId'])
-                                                                      .set(
-                                                                          callingInfo,
-                                                                          SetOptions(
-                                                                              merge: true));
-
-                                                                  whatsappText =
-                                                                      'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${widget.userName}, ${prefs.getString('place')} \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
-                                                                  whatsappUrl =
-                                                                      "https://api.whatsapp.com/send/?phone=+91 ${_tempAnimalList[index]['userMobileNumber']}&text=$whatsappText";
-                                                                  await UrlLauncher.canLaunch(
-                                                                              whatsappUrl) !=
-                                                                          null
-                                                                      ? UrlLauncher.launch(
-                                                                          Uri.encodeFull(
-                                                                              whatsappUrl))
-                                                                      : ScaffoldMessenger.of(
-                                                                              context)
-                                                                          .showSnackBar(
-                                                                              SnackBar(
-                                                                          content:
-                                                                              Text('${_tempAnimalList[index]['userMobileNumber']} is not present in Whatsapp'),
-                                                                          duration:
-                                                                              Duration(milliseconds: 300),
-                                                                          padding:
-                                                                              EdgeInsets.symmetric(horizontal: 8),
-                                                                          behavior:
-                                                                              SnackBarBehavior.floating,
-                                                                          shape:
-                                                                              RoundedRectangleBorder(
-                                                                            borderRadius:
-                                                                                BorderRadius.circular(10.0),
-                                                                          ),
-                                                                        ));
-                                                                },
-                                                                icon: FaIcon(
-                                                                    FontAwesomeIcons
-                                                                        .whatsapp,
-                                                                    color: Colors
-                                                                        .white,
-                                                                    size: 14),
-                                                                label: Text(
-                                                                    'message'
-                                                                        .tr,
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontWeight:
-                                                                            FontWeight
-                                                                                .bold,
-                                                                        fontSize:
-                                                                            14)))
-                                                          ]),
-                                                        )),
-                                                  ],
-                                                ),
-                                              ),
-                                              _isLoading
-                                                  ? Positioned(
-                                                      bottom: 0,
-                                                      child: Column(
-                                                        children: [
-                                                          SizedBox(height: 10),
-                                                          Center(
-                                                            child:
-                                                                CircularProgressIndicator(),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    )
-                                                  : SizedBox.shrink(),
-                                            ],
-                                          ),
-                                        ),
-                                    itemCount: _tempAnimalList.length),
-                              ],
-                            )
-                          : Stack(
-                              alignment: Alignment.bottomCenter,
-                              children: [
-                                ListView.builder(
-                                    key: ObjectKey(widget.animalInfo[0]),
-                                    padding: EdgeInsets.only(bottom: 60),
-                                    controller: _scrollController,
-                                    physics: BouncingScrollPhysics(),
-                                    itemBuilder: (context, index) => Padding(
-                                        padding: const EdgeInsets.only(
-                                            left: 8.0, right: 8, top: 8),
-                                        child: Card(
+                                  key: ObjectKey(_tempAnimalList[0]),
+                                  padding: EdgeInsets.only(bottom: 60),
+                                  controller: _scrollController,
+                                  physics: BouncingScrollPhysics(),
+                                  itemCount: _tempAnimalList.length,
+                                  itemBuilder: (context, index) => Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 8.0, right: 8, top: 8),
+                                    child: Column(
+                                      children: [
+                                        Card(
                                           key: Key(index.toString()),
                                           shape: RoundedRectangleBorder(
                                             borderRadius:
@@ -1356,17 +569,25 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                         const EdgeInsets.all(
                                                             8.0),
                                                     child: Row(children: [
-                                                      Image.asset(
-                                                          'assets/images/profile.jpg',
-                                                          width: 40,
-                                                          height: 40),
+                                                      widget.userImage ==
+                                                                  null ||
+                                                              widget.userImage ==
+                                                                  ""
+                                                          ? Image.asset(
+                                                              'assets/images/profile.jpg',
+                                                              width: 40,
+                                                              height: 40)
+                                                          : Image.memory(
+                                                              base64Decode(widget
+                                                                  .userImage),
+                                                              width: 40,
+                                                              height: 40),
                                                       SizedBox(
                                                         width: 5,
                                                       ),
                                                       Expanded(
                                                         child: Text(
-                                                          widget.animalInfo[
-                                                                  index]
+                                                          _tempAnimalList[index]
                                                               ['userName'],
                                                           style: TextStyle(
                                                               fontSize: 15,
@@ -1410,12 +631,12 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                                     .uid;
                                                             callingInfo[
                                                                     'userIdOther'] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                         index]
                                                                     ['userId'];
                                                             callingInfo[
                                                                     'otherListId'] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                         index][
                                                                     'uniqueId'];
                                                             callingInfo[
@@ -1423,127 +644,127 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                                 "call";
                                                             callingInfo[
                                                                     'userAddress'] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                         index][
                                                                     'userAddress'];
                                                             callingInfo[
                                                                     "userAnimalDescription"] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                         index][
                                                                     'userAnimalDescription'];
                                                             callingInfo[
                                                                     "userAnimalType"] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                             index]
                                                                         [
                                                                         'userAnimalType'] ??
                                                                     "";
                                                             callingInfo[
                                                                     "userAnimalTypeOther"] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                             index]
                                                                         [
                                                                         'userAnimalTypeOther'] ??
                                                                     "";
                                                             callingInfo[
                                                                     "userAnimalAge"] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                             index]
                                                                         [
                                                                         'userAnimalAge'] ??
                                                                     "";
                                                             callingInfo[
                                                                     "userAddress"] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                         index][
                                                                     'userAddress'];
                                                             callingInfo[
                                                                     "userName"] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                         index][
                                                                     'userName'];
                                                             callingInfo[
                                                                     "userAnimalPrice"] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                             index]
                                                                         [
                                                                         'userAnimalPrice'] ??
                                                                     "0";
                                                             callingInfo[
                                                                     "userAnimalBreed"] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                             index]
                                                                         [
                                                                         'userAnimalBreed'] ??
                                                                     "";
                                                             callingInfo[
                                                                     "userMobileNumber"] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                         index][
                                                                     'userMobileNumber'];
                                                             callingInfo[
                                                                     "userAnimalMilk"] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                             index]
                                                                         [
                                                                         'userAnimalMilk'] ??
                                                                     "";
                                                             callingInfo[
                                                                     "userAnimalPregnancy"] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                             index]
                                                                         [
                                                                         'userAnimalPregnancy'] ??
                                                                     "";
                                                             callingInfo[
-                                                                "image1"] = widget.animalInfo[
+                                                                "image1"] = _tempAnimalList[
                                                                             index] ==
                                                                         null ||
-                                                                    widget.animalInfo[index]
+                                                                    _tempAnimalList[index]
                                                                             [
                                                                             'image1'] ==
                                                                         ""
                                                                 ? ""
-                                                                : widget.animalInfo[
+                                                                : _tempAnimalList[
                                                                         index]
                                                                     ['image1'];
                                                             callingInfo[
-                                                                "image2"] = widget.animalInfo[index]
+                                                                "image2"] = _tempAnimalList[index]
                                                                             [
                                                                             'image2'] ==
                                                                         null ||
-                                                                    widget.animalInfo[index]
+                                                                    _tempAnimalList[index]
                                                                             [
                                                                             'image2'] ==
                                                                         ""
                                                                 ? ""
-                                                                : widget.animalInfo[
+                                                                : _tempAnimalList[
                                                                         index]
                                                                     ['image2'];
                                                             callingInfo[
-                                                                "image3"] = widget.animalInfo[index]
+                                                                "image3"] = _tempAnimalList[index]
                                                                             [
                                                                             'image3'] ==
                                                                         null ||
-                                                                    widget.animalInfo[index]
+                                                                    _tempAnimalList[index]
                                                                             [
                                                                             'image3'] ==
                                                                         ""
                                                                 ? ""
-                                                                : widget.animalInfo[
+                                                                : _tempAnimalList[
                                                                         index]
                                                                     ['image3'];
                                                             callingInfo[
-                                                                "image4"] = widget.animalInfo[index]
+                                                                "image4"] = _tempAnimalList[index]
                                                                             [
                                                                             'image4'] ==
                                                                         null ||
-                                                                    widget.animalInfo[index]
+                                                                    _tempAnimalList[index]
                                                                             [
                                                                             'image4'] ==
                                                                         ""
                                                                 ? ""
-                                                                : widget.animalInfo[
+                                                                : _tempAnimalList[
                                                                         index]
                                                                     ['image4'];
                                                             callingInfo[
@@ -1554,12 +775,12 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                                             .now());
                                                             callingInfo[
                                                                     'isValidUser'] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                         index][
                                                                     'isValidUser'];
                                                             callingInfo[
                                                                     'extraInfo'] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                             index]
                                                                         [
                                                                         'extraInfo'] ??
@@ -1596,12 +817,12 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                                           .currentUser
                                                                           .uid,
                                                                   'userIdOther':
-                                                                      widget.animalInfo[
+                                                                      _tempAnimalList[
                                                                               index]
                                                                           [
                                                                           'userId'],
                                                                   'otherListId':
-                                                                      widget.animalInfo[
+                                                                      _tempAnimalList[
                                                                               index]
                                                                           [
                                                                           'uniqueId'],
@@ -1636,7 +857,7 @@ class _BuyAnimalState extends State<BuyAnimal>
 
                                                             return UrlLauncher
                                                                 .launch(
-                                                                    'tel:+91 ${widget.animalInfo[index]['userMobileNumber']}');
+                                                                    'tel:+91 ${_tempAnimalList[index]['']}');
                                                           },
                                                           icon: Icon(
                                                             Icons.call,
@@ -1666,8 +887,6 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                                       darkGreenColor)),
                                                           color: darkGreenColor,
                                                           onPressed: () async {
-                                                            String whatsappUrl =
-                                                                '';
                                                             SharedPreferences
                                                                 prefs =
                                                                 await SharedPreferences
@@ -1681,7 +900,8 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                                         'longitude')));
                                                             var first =
                                                                 addresses.first;
-
+                                                            String whatsappUrl =
+                                                                '';
                                                             callingInfo[
                                                                     'userIdCurrent'] =
                                                                 FirebaseAuth
@@ -1690,12 +910,12 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                                     .uid;
                                                             callingInfo[
                                                                     'userIdOther'] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                         index]
                                                                     ['userId'];
                                                             callingInfo[
                                                                     'otherListId'] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                         index][
                                                                     'uniqueId'];
                                                             callingInfo[
@@ -1703,127 +923,127 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                                 "whatsapp";
                                                             callingInfo[
                                                                     'userAddress'] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                         index][
                                                                     'userAddress'];
                                                             callingInfo[
                                                                     "userAnimalDescription"] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                         index][
                                                                     'userAnimalDescription'];
                                                             callingInfo[
                                                                     "userAnimalType"] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                             index]
                                                                         [
                                                                         'userAnimalType'] ??
                                                                     "";
                                                             callingInfo[
                                                                     "userAnimalTypeOther"] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                             index]
                                                                         [
                                                                         'userAnimalTypeOther'] ??
                                                                     "";
                                                             callingInfo[
                                                                     "userAnimalAge"] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                             index]
                                                                         [
                                                                         'userAnimalAge'] ??
                                                                     "";
                                                             callingInfo[
                                                                     "userAddress"] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                         index][
                                                                     'userAddress'];
                                                             callingInfo[
                                                                     "userName"] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                         index][
                                                                     'userName'];
                                                             callingInfo[
                                                                     "userAnimalPrice"] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                             index]
                                                                         [
                                                                         'userAnimalPrice'] ??
                                                                     "0";
                                                             callingInfo[
                                                                     "userAnimalBreed"] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                             index]
                                                                         [
                                                                         'userAnimalBreed'] ??
                                                                     "";
                                                             callingInfo[
                                                                     "userMobileNumber"] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                         index][
                                                                     'userMobileNumber'];
                                                             callingInfo[
                                                                     "userAnimalMilk"] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                             index]
                                                                         [
                                                                         'userAnimalMilk'] ??
                                                                     "";
                                                             callingInfo[
                                                                     "userAnimalPregnancy"] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                             index]
                                                                         [
                                                                         'userAnimalPregnancy'] ??
                                                                     "";
                                                             callingInfo[
-                                                                "image1"] = widget.animalInfo[
+                                                                "image1"] = _tempAnimalList[
                                                                             index] ==
                                                                         null ||
-                                                                    widget.animalInfo[index]
+                                                                    _tempAnimalList[index]
                                                                             [
                                                                             'image1'] ==
                                                                         ""
                                                                 ? ""
-                                                                : widget.animalInfo[
+                                                                : _tempAnimalList[
                                                                         index]
                                                                     ['image1'];
                                                             callingInfo[
-                                                                "image2"] = widget.animalInfo[index]
+                                                                "image2"] = _tempAnimalList[index]
                                                                             [
                                                                             'image2'] ==
                                                                         null ||
-                                                                    widget.animalInfo[index]
+                                                                    _tempAnimalList[index]
                                                                             [
                                                                             'image2'] ==
                                                                         ""
                                                                 ? ""
-                                                                : widget.animalInfo[
+                                                                : _tempAnimalList[
                                                                         index]
                                                                     ['image2'];
                                                             callingInfo[
-                                                                "image3"] = widget.animalInfo[index]
+                                                                "image3"] = _tempAnimalList[index]
                                                                             [
                                                                             'image3'] ==
                                                                         null ||
-                                                                    widget.animalInfo[index]
+                                                                    _tempAnimalList[index]
                                                                             [
                                                                             'image3'] ==
                                                                         ""
                                                                 ? ""
-                                                                : widget.animalInfo[
+                                                                : _tempAnimalList[
                                                                         index]
                                                                     ['image3'];
                                                             callingInfo[
-                                                                "image4"] = widget.animalInfo[index]
+                                                                "image4"] = _tempAnimalList[index]
                                                                             [
                                                                             'image4'] ==
                                                                         null ||
-                                                                    widget.animalInfo[index]
+                                                                    _tempAnimalList[index]
                                                                             [
                                                                             'image4'] ==
                                                                         ""
                                                                 ? ""
-                                                                : widget.animalInfo[
+                                                                : _tempAnimalList[
                                                                         index]
                                                                     ['image4'];
                                                             callingInfo[
@@ -1834,12 +1054,12 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                                             .now());
                                                             callingInfo[
                                                                     'isValidUser'] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                         index][
                                                                     'isValidUser'];
                                                             callingInfo[
                                                                     'extraInfo'] =
-                                                                widget.animalInfo[
+                                                                _tempAnimalList[
                                                                             index]
                                                                         [
                                                                         'extraInfo'] ??
@@ -1876,12 +1096,12 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                                           .currentUser
                                                                           .uid,
                                                                   'userIdOther':
-                                                                      widget.animalInfo[
+                                                                      _tempAnimalList[
                                                                               index]
                                                                           [
                                                                           'userId'],
                                                                   'otherListId':
-                                                                      widget.animalInfo[
+                                                                      _tempAnimalList[
                                                                               index]
                                                                           [
                                                                           'uniqueId'],
@@ -1917,7 +1137,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                             whatsappText =
                                                                 'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${widget.userName}, ${prefs.getString('place')} \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
                                                             whatsappUrl =
-                                                                "https://api.whatsapp.com/send/?phone=+91 ${widget.animalInfo[index]['userMobileNumber']}&text=$whatsappText";
+                                                                "https://api.whatsapp.com/send/?phone=+91 ${_tempAnimalList[index].mobile}&text=$whatsappText";
                                                             await UrlLauncher
                                                                         .canLaunch(
                                                                             whatsappUrl) !=
@@ -1930,7 +1150,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                                     .showSnackBar(
                                                                         SnackBar(
                                                                     content: Text(
-                                                                        '${widget.animalInfo[index]['userMobileNumber']} is not present in Whatsapp'),
+                                                                        '${_tempAnimalList[index].mobile} is not present in Whatsapp'),
                                                                     duration: Duration(
                                                                         milliseconds:
                                                                             300),
@@ -1969,10 +1189,675 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                   )),
                                             ],
                                           ),
-                                        )
-                                        // ),
                                         ),
-                                    itemCount: widget.animalInfo.length),
+                                        _isLoading
+                                            ? Positioned(
+                                                bottom: 0,
+                                                child: Column(
+                                                  children: [
+                                                    SizedBox(height: 10),
+                                                    Center(
+                                                      child:
+                                                          CircularProgressIndicator(),
+                                                    ),
+                                                  ],
+                                                ),
+                                              )
+                                            : SizedBox.shrink(),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Stack(
+                              alignment: Alignment.bottomCenter,
+                              children: [
+                                ListView.builder(
+                                  key: ObjectKey(widget.animalInfo[0]),
+                                  padding: EdgeInsets.only(bottom: 60),
+                                  controller: _scrollController,
+                                  physics: BouncingScrollPhysics(),
+                                  itemCount: widget.animalInfo.length,
+                                  itemBuilder: (context, index) => Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 8.0, right: 8, top: 8),
+                                    child: Card(
+                                      key: Key(index.toString()),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10.0),
+                                      ),
+                                      elevation: 5,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          _buildInfowidget(index),
+                                          _distanceTimeMethod(index),
+                                          _animalImageWidget(index),
+                                          _animalDescriptionMethod(index),
+                                          Container(
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey[100],
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.grey,
+                                                    blurRadius: 1.0,
+                                                  ),
+                                                ],
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
+                                              height: 80,
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: Row(children: [
+                                                  Image.asset(
+                                                      'assets/images/profile.jpg',
+                                                      width: 40,
+                                                      height: 40),
+                                                  SizedBox(
+                                                    width: 5,
+                                                  ),
+                                                  Expanded(
+                                                    child: Text(
+                                                      widget.animalInfo[index]
+                                                          .userName,
+                                                      style: TextStyle(
+                                                          fontSize: 15,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: Colors.black),
+                                                    ),
+                                                  ),
+                                                  RaisedButton.icon(
+                                                      shape: RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      18.0),
+                                                          side: BorderSide(
+                                                              color:
+                                                                  darkSecondaryColor)),
+                                                      color: secondaryColor,
+                                                      onPressed: () async {
+                                                        // SharedPreferences
+                                                        //     prefs =
+                                                        //     await SharedPreferences
+                                                        //         .getInstance();
+                                                        // var addresses = await Geocoder
+                                                        //     .local
+                                                        //     .findAddressesFromCoordinates(Coordinates(
+                                                        //         prefs.getDouble(
+                                                        //             'latitude'),
+                                                        //         prefs.getDouble(
+                                                        //             'longitude')));
+                                                        // var first =
+                                                        //     addresses.first;
+
+                                                        // callingInfo[
+                                                        //         'userIdCurrent'] =
+                                                        //     FirebaseAuth
+                                                        //         .instance
+                                                        //         .currentUser
+                                                        //         .uid;
+                                                        // callingInfo[
+                                                        //         'userIdOther'] =
+                                                        //     widget.animalInfo[
+                                                        //             index]
+                                                        //         ['userId'];
+                                                        // callingInfo[
+                                                        //         'otherListId'] =
+                                                        //     widget.animalInfo[
+                                                        //             index]
+                                                        //         ['uniqueId'];
+                                                        // callingInfo['channel'] =
+                                                        //     "call";
+                                                        // callingInfo[
+                                                        //         'userAddress'] =
+                                                        //     widget.animalInfo[
+                                                        //             index]
+                                                        //         ['userAddress'];
+                                                        // callingInfo[
+                                                        //     "userAnimalDescription"] = widget
+                                                        //             .animalInfo[
+                                                        //         index][
+                                                        //     'userAnimalDescription'];
+                                                        // callingInfo[
+                                                        //         "userAnimalType"] =
+                                                        //     widget.animalInfo[
+                                                        //                 index][
+                                                        //             'userAnimalType'] ??
+                                                        //         "";
+                                                        // callingInfo[
+                                                        //         "userAnimalTypeOther"] =
+                                                        //     widget.animalInfo[
+                                                        //                 index][
+                                                        //             'userAnimalTypeOther'] ??
+                                                        //         "";
+                                                        // callingInfo[
+                                                        //         "userAnimalAge"] =
+                                                        //     widget.animalInfo[
+                                                        //                 index][
+                                                        //             'userAnimalAge'] ??
+                                                        //         "";
+                                                        // callingInfo[
+                                                        //         "userAddress"] =
+                                                        //     widget.animalInfo[
+                                                        //             index]
+                                                        //         ['userAddress'];
+                                                        // callingInfo[
+                                                        //     "userName"] = widget
+                                                        //         .animalInfo[
+                                                        //     index]['userName'];
+                                                        // callingInfo[
+                                                        //         "userAnimalPrice"] =
+                                                        //     widget.animalInfo[
+                                                        //                 index][
+                                                        //             'userAnimalPrice'] ??
+                                                        //         "0";
+                                                        // callingInfo[
+                                                        //         "userAnimalBreed"] =
+                                                        //     widget.animalInfo[
+                                                        //                 index][
+                                                        //             'userAnimalBreed'] ??
+                                                        //         "";
+                                                        // callingInfo[
+                                                        //     "userMobileNumber"] = widget
+                                                        //             .animalInfo[
+                                                        //         index][
+                                                        //     'userMobileNumber'];
+                                                        // callingInfo[
+                                                        //         "userAnimalMilk"] =
+                                                        //     widget.animalInfo[
+                                                        //                 index][
+                                                        //             'userAnimalMilk'] ??
+                                                        //         "";
+                                                        // callingInfo[
+                                                        //         "userAnimalPregnancy"] =
+                                                        //     widget.animalInfo[
+                                                        //                 index][
+                                                        //             'userAnimalPregnancy'] ??
+                                                        //         "";
+                                                        // callingInfo[
+                                                        //     "image1"] = widget
+                                                        //                     .animalInfo[
+                                                        //                 index] ==
+                                                        //             null ||
+                                                        //         widget.animalInfo[
+                                                        //                     index]
+                                                        //                 [
+                                                        //                 'image1'] ==
+                                                        //             ""
+                                                        //     ? ""
+                                                        //     : widget.animalInfo[
+                                                        //             index]
+                                                        //         ['image1'];
+                                                        // callingInfo[
+                                                        //     "image2"] = widget.animalInfo[
+                                                        //                     index]
+                                                        //                 [
+                                                        //                 'image2'] ==
+                                                        //             null ||
+                                                        //         widget.animalInfo[
+                                                        //                     index]
+                                                        //                 [
+                                                        //                 'image2'] ==
+                                                        //             ""
+                                                        //     ? ""
+                                                        //     : widget.animalInfo[
+                                                        //             index]
+                                                        //         ['image2'];
+                                                        // callingInfo[
+                                                        //     "image3"] = widget.animalInfo[
+                                                        //                     index]
+                                                        //                 [
+                                                        //                 'image3'] ==
+                                                        //             null ||
+                                                        //         widget.animalInfo[
+                                                        //                     index]
+                                                        //                 [
+                                                        //                 'image3'] ==
+                                                        //             ""
+                                                        //     ? ""
+                                                        //     : widget.animalInfo[
+                                                        //             index]
+                                                        //         ['image3'];
+                                                        // callingInfo[
+                                                        //     "image4"] = widget.animalInfo[
+                                                        //                     index]
+                                                        //                 [
+                                                        //                 'image4'] ==
+                                                        //             null ||
+                                                        //         widget.animalInfo[
+                                                        //                     index]
+                                                        //                 [
+                                                        //                 'image4'] ==
+                                                        //             ""
+                                                        //     ? ""
+                                                        //     : widget.animalInfo[
+                                                        //             index]
+                                                        //         ['image4'];
+                                                        // callingInfo[
+                                                        //         "dateOfSaving"] =
+                                                        //     ReusableWidgets
+                                                        //         .dateTimeToEpoch(
+                                                        //             DateTime
+                                                        //                 .now());
+                                                        // callingInfo[
+                                                        //         'isValidUser'] =
+                                                        //     widget.animalInfo[
+                                                        //             index]
+                                                        //         ['isValidUser'];
+                                                        // callingInfo[
+                                                        //         'extraInfo'] =
+                                                        //     widget.animalInfo[
+                                                        //                 index][
+                                                        //             'extraInfo'] ??
+                                                        //         {};
+
+                                                        // FirebaseFirestore
+                                                        //     .instance
+                                                        //     .collection(
+                                                        //         "callingInfo")
+                                                        //     .doc(callingInfo[
+                                                        //         'otherListId'])
+                                                        //     .collection(
+                                                        //         'interestedBuyers')
+                                                        //     .doc(FirebaseAuth
+                                                        //         .instance
+                                                        //         .currentUser
+                                                        //         .uid)
+                                                        //     .set(
+                                                        //         {
+                                                        //       'userName': widget
+                                                        //           .userName,
+                                                        //       'userMobileNumber':
+                                                        //           widget
+                                                        //               .userMobileNumber,
+                                                        //       "userAddress": first
+                                                        //               .addressLine ??
+                                                        //           (first.adminArea +
+                                                        //               ', ' +
+                                                        //               first
+                                                        //                   .countryName),
+                                                        //       'userIdCurrent':
+                                                        //           FirebaseAuth
+                                                        //               .instance
+                                                        //               .currentUser
+                                                        //               .uid,
+                                                        //       'userIdOther':
+                                                        //           widget.animalInfo[
+                                                        //                   index]
+                                                        //               [
+                                                        //               'userId'],
+                                                        //       'otherListId':
+                                                        //           widget.animalInfo[
+                                                        //                   index]
+                                                        //               [
+                                                        //               'uniqueId'],
+                                                        //       'channel': "call",
+                                                        //       "dateOfSaving":
+                                                        //           ReusableWidgets
+                                                        //               .dateTimeToEpoch(
+                                                        //                   DateTime
+                                                        //                       .now())
+                                                        //     },
+                                                        //         SetOptions(
+                                                        //             merge:
+                                                        //                 true));
+
+                                                        // FirebaseFirestore
+                                                        //     .instance
+                                                        //     .collection(
+                                                        //         "myCallingInfo")
+                                                        //     .doc(FirebaseAuth
+                                                        //         .instance
+                                                        //         .currentUser
+                                                        //         .uid)
+                                                        //     .collection(
+                                                        //         'myCalls')
+                                                        //     .doc(callingInfo[
+                                                        //         'otherListId'])
+                                                        //     .set(
+                                                        //         callingInfo,
+                                                        //         SetOptions(
+                                                        //             merge:
+                                                        //                 true));
+
+                                                        return UrlLauncher.launch(
+                                                            'tel:+91 ${widget.animalInfo[index].mobile}');
+                                                      },
+                                                      icon: Icon(
+                                                        Icons.call,
+                                                        color: Colors.white,
+                                                        size: 14,
+                                                      ),
+                                                      label: Text('call'.tr,
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.white,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              fontSize: 14))),
+                                                  SizedBox(
+                                                    width: 5,
+                                                  ),
+                                                  RaisedButton.icon(
+                                                      shape: RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      18.0),
+                                                          side: BorderSide(
+                                                              color:
+                                                                  darkGreenColor)),
+                                                      color: darkGreenColor,
+                                                      onPressed: () async {
+                                                        String whatsappUrl = '';
+                                                        SharedPreferences
+                                                            prefs =
+                                                            await SharedPreferences
+                                                                .getInstance();
+                                                        // var addresses = await Geocoder
+                                                        //     .local
+                                                        //     .findAddressesFromCoordinates(Coordinates(
+                                                        //         prefs.getDouble(
+                                                        //             'latitude'),
+                                                        //         prefs.getDouble(
+                                                        //             'longitude')));
+                                                        // var first =
+                                                        //     addresses.first;
+
+                                                        // callingInfo[
+                                                        //         'userIdCurrent'] =
+                                                        //     FirebaseAuth
+                                                        //         .instance
+                                                        //         .currentUser
+                                                        //         .uid;
+                                                        // callingInfo[
+                                                        //         'userIdOther'] =
+                                                        //     widget.animalInfo[
+                                                        //             index]
+                                                        //         ['userId'];
+                                                        // callingInfo[
+                                                        //         'otherListId'] =
+                                                        //     widget.animalInfo[
+                                                        //             index]
+                                                        //         ['uniqueId'];
+                                                        // callingInfo['channel'] =
+                                                        //     "whatsapp";
+                                                        // callingInfo[
+                                                        //         'userAddress'] =
+                                                        //     widget.animalInfo[
+                                                        //             index]
+                                                        //         ['userAddress'];
+                                                        // callingInfo[
+                                                        //     "userAnimalDescription"] = widget
+                                                        //             .animalInfo[
+                                                        //         index][
+                                                        //     'userAnimalDescription'];
+                                                        // callingInfo[
+                                                        //         "userAnimalType"] =
+                                                        //     widget.animalInfo[
+                                                        //                 index][
+                                                        //             'userAnimalType'] ??
+                                                        //         "";
+                                                        // callingInfo[
+                                                        //         "userAnimalTypeOther"] =
+                                                        //     widget.animalInfo[
+                                                        //                 index][
+                                                        //             'userAnimalTypeOther'] ??
+                                                        //         "";
+                                                        // callingInfo[
+                                                        //         "userAnimalAge"] =
+                                                        //     widget.animalInfo[
+                                                        //                 index][
+                                                        //             'userAnimalAge'] ??
+                                                        //         "";
+                                                        // callingInfo[
+                                                        //         "userAddress"] =
+                                                        //     widget.animalInfo[
+                                                        //             index]
+                                                        //         ['userAddress'];
+                                                        // callingInfo[
+                                                        //     "userName"] = widget
+                                                        //         .animalInfo[
+                                                        //     index]['userName'];
+                                                        // callingInfo[
+                                                        //         "userAnimalPrice"] =
+                                                        //     widget.animalInfo[
+                                                        //                 index][
+                                                        //             'userAnimalPrice'] ??
+                                                        //         "0";
+                                                        // callingInfo[
+                                                        //         "userAnimalBreed"] =
+                                                        //     widget.animalInfo[
+                                                        //                 index][
+                                                        //             'userAnimalBreed'] ??
+                                                        //         "";
+                                                        // callingInfo[
+                                                        //     "userMobileNumber"] = widget
+                                                        //             .animalInfo[
+                                                        //         index][
+                                                        //     'userMobileNumber'];
+                                                        // callingInfo[
+                                                        //         "userAnimalMilk"] =
+                                                        //     widget.animalInfo[
+                                                        //                 index][
+                                                        //             'userAnimalMilk'] ??
+                                                        //         "";
+                                                        // callingInfo[
+                                                        //         "userAnimalPregnancy"] =
+                                                        //     widget.animalInfo[
+                                                        //                 index][
+                                                        //             'userAnimalPregnancy'] ??
+                                                        //         "";
+                                                        // callingInfo[
+                                                        //     "image1"] = widget
+                                                        //                     .animalInfo[
+                                                        //                 index] ==
+                                                        //             null ||
+                                                        //         widget.animalInfo[
+                                                        //                     index]
+                                                        //                 [
+                                                        //                 'image1'] ==
+                                                        //             ""
+                                                        //     ? ""
+                                                        //     : widget.animalInfo[
+                                                        //             index]
+                                                        //         ['image1'];
+                                                        // callingInfo[
+                                                        //     "image2"] = widget.animalInfo[
+                                                        //                     index]
+                                                        //                 [
+                                                        //                 'image2'] ==
+                                                        //             null ||
+                                                        //         widget.animalInfo[
+                                                        //                     index]
+                                                        //                 [
+                                                        //                 'image2'] ==
+                                                        //             ""
+                                                        //     ? ""
+                                                        //     : widget.animalInfo[
+                                                        //             index]
+                                                        //         ['image2'];
+                                                        // callingInfo[
+                                                        //     "image3"] = widget.animalInfo[
+                                                        //                     index]
+                                                        //                 [
+                                                        //                 'image3'] ==
+                                                        //             null ||
+                                                        //         widget.animalInfo[
+                                                        //                     index]
+                                                        //                 [
+                                                        //                 'image3'] ==
+                                                        //             ""
+                                                        //     ? ""
+                                                        //     : widget.animalInfo[
+                                                        //             index]
+                                                        //         ['image3'];
+                                                        // callingInfo[
+                                                        //     "image4"] = widget.animalInfo[
+                                                        //                     index]
+                                                        //                 [
+                                                        //                 'image4'] ==
+                                                        //             null ||
+                                                        //         widget.animalInfo[
+                                                        //                     index]
+                                                        //                 [
+                                                        //                 'image4'] ==
+                                                        //             ""
+                                                        //     ? ""
+                                                        //     : widget.animalInfo[
+                                                        //             index]
+                                                        //         ['image4'];
+                                                        // callingInfo[
+                                                        //         "dateOfSaving"] =
+                                                        //     ReusableWidgets
+                                                        //         .dateTimeToEpoch(
+                                                        //             DateTime
+                                                        //                 .now());
+                                                        // callingInfo[
+                                                        //         'isValidUser'] =
+                                                        //     widget.animalInfo[
+                                                        //             index]
+                                                        //         ['isValidUser'];
+                                                        // callingInfo[
+                                                        //         'extraInfo'] =
+                                                        //     widget.animalInfo[
+                                                        //                 index][
+                                                        //             'extraInfo'] ??
+                                                        //         {};
+
+                                                        // FirebaseFirestore
+                                                        //     .instance
+                                                        //     .collection(
+                                                        //         "callingInfo")
+                                                        //     .doc(callingInfo[
+                                                        //         'otherListId'])
+                                                        //     .collection(
+                                                        //         'interestedBuyers')
+                                                        //     .doc(FirebaseAuth
+                                                        //         .instance
+                                                        //         .currentUser
+                                                        //         .uid)
+                                                        //     .set(
+                                                        //         {
+                                                        //       'userName': widget
+                                                        //           .userName,
+                                                        //       'userMobileNumber':
+                                                        //           widget
+                                                        //               .userMobileNumber,
+                                                        //       "userAddress": first
+                                                        //               .addressLine ??
+                                                        //           (first.adminArea +
+                                                        //               ', ' +
+                                                        //               first
+                                                        //                   .countryName),
+                                                        //       'userIdCurrent':
+                                                        //           FirebaseAuth
+                                                        //               .instance
+                                                        //               .currentUser
+                                                        //               .uid,
+                                                        //       'userIdOther':
+                                                        //           widget.animalInfo[
+                                                        //                   index]
+                                                        //               [
+                                                        //               'userId'],
+                                                        //       'otherListId':
+                                                        //           widget.animalInfo[
+                                                        //                   index]
+                                                        //               [
+                                                        //               'uniqueId'],
+                                                        //       'channel':
+                                                        //           "whatsapp",
+                                                        //       "dateOfSaving":
+                                                        //           ReusableWidgets
+                                                        //               .dateTimeToEpoch(
+                                                        //                   DateTime
+                                                        //                       .now())
+                                                        //     },
+                                                        //         SetOptions(
+                                                        //             merge:
+                                                        //                 true));
+
+                                                        // FirebaseFirestore
+                                                        //     .instance
+                                                        //     .collection(
+                                                        //         "myCallingInfo")
+                                                        //     .doc(FirebaseAuth
+                                                        //         .instance
+                                                        //         .currentUser
+                                                        //         .uid)
+                                                        //     .collection(
+                                                        //         'myCalls')
+                                                        //     .doc(callingInfo[
+                                                        //         'otherListId'])
+                                                        //     .set(
+                                                        //         callingInfo,
+                                                        //         SetOptions(
+                                                        //             merge:
+                                                        //                 true));
+
+                                                        whatsappText =
+                                                            'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${widget.userName}, ${prefs.getString('district')} \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
+                                                        whatsappUrl =
+                                                            "https://api.whatsapp.com/send/?phone=+91 ${widget.animalInfo[index].mobile}&text=$whatsappText";
+                                                        await UrlLauncher.canLaunch(
+                                                                    whatsappUrl) !=
+                                                                null
+                                                            ? UrlLauncher.launch(
+                                                                Uri.encodeFull(
+                                                                    whatsappUrl))
+                                                            : ScaffoldMessenger
+                                                                    .of(context)
+                                                                .showSnackBar(
+                                                                    SnackBar(
+                                                                content: Text(
+                                                                    '${widget.animalInfo[index].mobile} is not present in Whatsapp'),
+                                                                duration: Duration(
+                                                                    milliseconds:
+                                                                        300),
+                                                                padding: EdgeInsets
+                                                                    .symmetric(
+                                                                        horizontal:
+                                                                            8),
+                                                                behavior:
+                                                                    SnackBarBehavior
+                                                                        .floating,
+                                                                shape:
+                                                                    RoundedRectangleBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              10.0),
+                                                                ),
+                                                              ));
+                                                      },
+                                                      icon: FaIcon(
+                                                          FontAwesomeIcons
+                                                              .whatsapp,
+                                                          color: Colors.white,
+                                                          size: 14),
+                                                      label: Text('message'.tr,
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.white,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              fontSize: 14)))
+                                                ]),
+                                              )),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
                                 _isLoading
                                     ? Positioned(
                                         bottom: 0,
@@ -2297,7 +2182,8 @@ class _BuyAnimalState extends State<BuyAnimal>
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Text(
-        _list[index]['userAnimalDescription'] ?? "",
+        // _list[index]['userAnimalDescription'] ?? "",
+        '_list[index]' ?? "",
         maxLines: 4,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(color: Colors.grey[600], fontSize: 14.5),
@@ -2311,10 +2197,11 @@ class _BuyAnimalState extends State<BuyAnimal>
 
     List<String> _images = [];
     [
-      _list[index]['image1'],
-      _list[index]['image2'],
-      _list[index]['image3'],
-      _list[index]['image4'],
+      'assets/images/AppIcon.jpg'
+      // _list[index]['image1'],
+      // _list[index]['image2'],
+      // _list[index]['image3'],
+      // _list[index]['image4'],
     ].forEach((element) =>
         _images.addIf(element != null && element.isNotEmpty, element));
     return Padding(
@@ -2353,7 +2240,8 @@ class _BuyAnimalState extends State<BuyAnimal>
                                 maxScale: 1.6,
                                 child: i.length > 1000
                                     ? Image.memory(base64Decode('$i'))
-                                    : Image.network('$i'));
+                                    : Image.asset('$i'));
+                            // : Image.network('$i'));
                             // return AspectRatio(
                             //   aspectRatio: 16 / 9,
                             //   child: Container(
@@ -2402,7 +2290,8 @@ class _BuyAnimalState extends State<BuyAnimal>
                       fit: BoxFit.cover,
                       image: _images[0].length > 1000
                           ? MemoryImage(base64.decode(_images[0]))
-                          : NetworkImage(_images[0])),
+                          : AssetImage(_images[0])),
+                  // : NetworkImage(_images[0])),
                   borderRadius: BorderRadius.all(Radius.circular(8.0)),
                   color: Colors.redAccent,
                 ),
@@ -2422,7 +2311,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                         DynamicLinkParameters(
                       uriPrefix: uriPrefix,
                       link: Uri.parse(
-                          'https://pashusansaar.com?data=${_list[index]['uniqueId']}+${_list[index]['userId']}'),
+                          'https://pashusansaar.com?data=${_list[index].sId}+${_list[index].userId}'),
                       androidParameters: AndroidParameters(
                         packageName: 'dj.pashusansaar',
                         minimumVersion: 21,
@@ -2438,11 +2327,15 @@ class _BuyAnimalState extends State<BuyAnimal>
 
                     // await takeScreenShot(_list[index]['uniqueId']);
 
-                    Share.shareFiles([fileUrl.path],
-                        mimeTypes: ['images/png'],
-                        text:
-                            "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
-                            // "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar} \n\n ${dynamicUrl.toString()}",
+                    // Share.shareFiles([fileUrl.path],
+                    //     mimeTypes: ['images/png'],
+                    //     text:
+                    //         "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
+                    //     // "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar} \n\n ${dynamicUrl.toString()}",
+                    //     subject: 'पशु की जानकारी');
+                    Share.share(
+                        "नस्ल: ${_list[index].animalBreed}\nजानकारी: description\nदूध(प्रति दिन): ${_list[index].animalMilk} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
+                        // "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar} \n\n ${dynamicUrl.toString()}",
                         subject: 'पशु की जानकारी');
 
                     // Share.shareFiles([image],
@@ -2450,8 +2343,8 @@ class _BuyAnimalState extends State<BuyAnimal>
                     //     text:
                     //         "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar} \n\n ${dynamicUrl.toString()}",
                     //     subject: 'Share Animal Info');
-                    Share.share("${dynamicUrl.toString()}",
-                        subject: 'Share Animal Info');
+                    // Share.share("${dynamicUrl.toString()}",
+                    //     subject: 'Share Animal Info');
                     // Share.share(
                     //     "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar} \n\n ${dynamicUrl.toString()}",
                     //     subject: 'Share Animal Info');
@@ -2473,8 +2366,7 @@ class _BuyAnimalState extends State<BuyAnimal>
         _tempAnimalList.length != 0 ? _tempAnimalList : widget.animalInfo;
 
     return StatefulBuilder(builder: (context, setState1) {
-      getPositionBasedOnLatLong(
-              _list[index]['userLatitude'], _list[index]['userLongitude'])
+      getPositionBasedOnLatLong(_list[index].latitude, _list[index].longitude)
           .then((result) {
         setState1(() {
           val = result;
@@ -2494,9 +2386,7 @@ class _BuyAnimalState extends State<BuyAnimal>
               textAlign: TextAlign.center,
               text: TextSpan(
                   text: ' ' +
-                      ReusableWidgets.dateDifference(
-                          ReusableWidgets.epochToDateTime(
-                              _list[index]['dateOfSaving'])),
+                      ReusableWidgets.dateDifference(_list[index].createdAt),
                   style: TextStyle(
                       color: Colors.grey[500],
                       fontWeight: FontWeight.bold,
@@ -2559,8 +2449,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                   // ),
                   TextSpan(
                     text: _distanceBetweenTwoCoordinates(
-                            _list[index]['userLatitude'],
-                            _list[index]['userLongitude']) +
+                            _list[index].latitude, _list[index].longitude) +
                         ' ' +
                         'km'.tr,
                     style: TextStyle(
