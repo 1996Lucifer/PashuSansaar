@@ -32,6 +32,7 @@ dependencies:
   date_format: ^1.0.9
   device_info: ^1.0.0
   dio: any
+  flutter_typeahead: ^2.0.0
   dotted_border: ^1.0.7
   dropdown_search: ^0.4.9
   firebase_auth: ^0.20.1

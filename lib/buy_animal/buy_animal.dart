@@ -7,6 +7,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:intl/intl.dart';
+import 'package:pashusansaar/address_auto_complete/model/auto_address_model.dart';
+import 'package:pashusansaar/address_auto_complete/util/data_auto_search.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/constants.dart';
 import 'package:pashusansaar/utils/global.dart';
@@ -30,6 +32,7 @@ import 'package:pashusansaar/utils/constants.dart' as constant;
 import 'package:geoflutterfire/geoflutterfire.dart' as geoFire;
 import 'package:path_provider/path_provider.dart';
 import 'dart:ui' as ui;
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 
 class BuyAnimal extends StatefulWidget {
   List animalInfo;
@@ -57,6 +60,8 @@ class _BuyAnimalState extends State<BuyAnimal>
   int _index = 0, _value, _valueRadius;
   int perPage = 10;
   final geo = geoFire.Geoflutterfire();
+  final locationController = TextEditingController();
+  double _lat = 0.0, _long = 0.0;
 
   int _current = 0;
   Map<String, dynamic> _filterDropDownMap = {};
@@ -1896,37 +1901,106 @@ class _BuyAnimalState extends State<BuyAnimal>
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
                                           children: <Widget>[
-                                            TextField(
-                                              maxLength: 6,
-                                              controller: _locationController,
-                                              inputFormatters: <
-                                                  TextInputFormatter>[
-                                                FilteringTextInputFormatter
-                                                    .digitsOnly
-                                              ],
-                                              keyboardType:
-                                                  TextInputType.number,
-                                              decoration: InputDecoration(
-                                                counterText: '',
-                                                border: OutlineInputBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(5),
-                                                ),
-                                                icon: Container(
-                                                  margin:
-                                                      EdgeInsets.only(left: 20),
-                                                  width: 10,
-                                                  height: 10,
-                                                  child: Icon(
-                                                    Icons.location_on,
-                                                    color: Colors.black,
+                                            // TextField(
+                                            //   maxLength: 6,
+                                            //   controller: _locationController,
+                                            //   inputFormatters: <
+                                            //       TextInputFormatter>[
+                                            //     FilteringTextInputFormatter
+                                            //         .digitsOnly
+                                            //   ],
+                                            //   keyboardType:
+                                            //       TextInputType.number,
+                                            //   decoration: InputDecoration(
+                                            //     counterText: '',
+                                            //     border: OutlineInputBorder(
+                                            //       borderRadius:
+                                            //           BorderRadius.circular(5),
+                                            //     ),
+                                            //     icon: Container(
+                                            //       margin:
+                                            //           EdgeInsets.only(left: 20),
+                                            //       width: 10,
+                                            //       height: 10,
+                                            //       child: Icon(
+                                            //         Icons.location_on,
+                                            //         color: Colors.black,
+                                            //       ),
+                                            //     ),
+                                            //     hintText: "ज़िपकोड डाले",
+                                            //     contentPadding: EdgeInsets.only(
+                                            //         left: 8.0, top: 16.0),
+                                            //   ),
+                                            // ),
+
+                                            // Auto Comp text field
+
+
+
+                                            TypeAheadField<AutoComplete>(
+                                              textFieldConfiguration:
+                                              TextFieldConfiguration(
+                                                  controller:
+                                                  locationController,
+                                                  autofocus: true,
+
+                                                  decoration:
+                                                  InputDecoration(
+                                                      hintText:
+                                                      "अपना पता दर्ज करें",
+                                                      contentPadding:
+                                                      EdgeInsets.only(
+                                                          left: 8.0,
+                                                          top:
+                                                          16.0),
+                                                      border:
+                                                      OutlineInputBorder(
+                                                        borderRadius:
+                                                        BorderRadius
+                                                            .circular(
+                                                            5),
+                                                      ))),
+                                              suggestionsCallback:
+                                                  (pattern) async {
+                                                if (pattern.length > 1) {
+                                                  return await AutoSaeachUtil
+                                                      .fetchAddressData(
+                                                      location: pattern);
+                                                }
+                                                return null;
+                                              },
+                                              itemBuilder:
+                                                  (context, suggestion) {
+                                                return ListTile(
+                                                  trailing:
+                                                  Icon(Icons.location_city),
+                                                  title: Text(
+                                                    '${suggestion.name}',
+                                                    style:
+                                                    TextStyle(fontSize: 18),
                                                   ),
-                                                ),
-                                                hintText: "ज़िपकोड डाले",
-                                                contentPadding: EdgeInsets.only(
-                                                    left: 8.0, top: 16.0),
-                                              ),
+                                                );
+                                              },
+                                              onSuggestionSelected:
+                                                  (suggestion) {
+                                                locationController.text =
+                                                    suggestion.name;
+
+                                                _lat = suggestion.place.geometry
+                                                    .coordinates[1];
+                                                _long = suggestion.place
+                                                    .geometry.coordinates[0];
+
+                                                setState(() {
+                                                  print(
+                                                      "This is the Cordinates $_longitude");
+                                                  print(
+                                                      "This is the Cordinates $_latitude");
+                                                });
+                                              },
                                             ),
+
+
                                             _radiusLocation()
                                           ],
                                         ),
@@ -1958,9 +2032,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                                               try {
                                                 var address = await Geocoder
                                                     .local
-                                                    .findAddressesFromQuery(
-                                                        _locationController
-                                                            .text);
+                                                    .findAddressesFromCoordinates(Coordinates(_lat, _long));
 
                                                 var first = address.first;
                                                 setState(() {
@@ -1968,10 +2040,8 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                       first.locality ??
                                                           first.subAdminArea ??
                                                           first.featureName;
-                                                  _latitude = first
-                                                      .coordinates.latitude;
-                                                  _longitude = first
-                                                      .coordinates.longitude;
+                                                  _latitude = _lat;
+                                                  _longitude = _long;
                                                 });
                                                 _getLocationBasedList(
                                                     context, first);
