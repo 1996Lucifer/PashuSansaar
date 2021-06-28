@@ -4,8 +4,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:device_info/device_info.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
+import 'package:pashusansaar/address_auto_complete/model/auto_address_model.dart';
+import 'package:pashusansaar/address_auto_complete/util/data_auto_search.dart';
 import 'package:pashusansaar/domain/auth/login/login_util/login_util.dart';
 import 'package:pashusansaar/domain/auth/otp_conf/otp_model.dart';
 import 'package:pashusansaar/domain/auth/auth_token_conf/auth_token_controller.dart';
@@ -46,6 +49,7 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
   final AuthToken authController = Get.put(AuthToken());
   TextEditingController referralCodeController = new TextEditingController();
   TextEditingController zipCodeController = new TextEditingController();
+  double _lat = 0.0, _long = 0.0;
   Map<String, dynamic> mobileInfo = {};
   LocationData _locate;
   LocationData add;
@@ -322,21 +326,60 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                 visible: _zipCodeTextField,
                 child: Padding(
                     padding: EdgeInsets.all(15),
-                    child: TextFormField(
-                      maxLength: 6,
-                      decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.location_on),
-                          border: OutlineInputBorder(),
-                          labelText: 'zipcode_label'.tr,
-                          hintText: 'zipcode_hint'.tr,
-                          counterText: ""),
-                      autofocus: false,
-                      controller: zipCodeController,
-                      inputFormatters: <TextInputFormatter>[
-                        FilteringTextInputFormatter.digitsOnly
-                      ],
-                      keyboardType: TextInputType.number,
-                    )),
+                    child:
+                    // TextFormField(
+                    //   maxLength: 6,
+                    //   decoration: InputDecoration(
+                    //       prefixIcon: Icon(Icons.location_on),
+                    //       border: OutlineInputBorder(),
+                    //       labelText: 'zipcode_label'.tr,
+                    //       hintText: 'zipcode_hint'.tr,
+                    //       counterText: ""),
+                    //   autofocus: false,
+                    //   controller: zipCodeController,
+                    //   inputFormatters: <TextInputFormatter>[
+                    //     FilteringTextInputFormatter.digitsOnly
+                    //   ],
+                    //   keyboardType: TextInputType.number,
+                    // ),
+                    TypeAheadField<AutoComplete>(
+                      textFieldConfiguration: TextFieldConfiguration(
+                          controller: zipCodeController,
+                          autofocus: true,
+                          decoration: InputDecoration(
+                              hintText: "अपना पता दर्ज करें",
+                              hintStyle: TextStyle(fontSize: 18),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(5),
+                              ))),
+                      suggestionsCallback: (pattern) async {
+                        if (pattern.length > 1) {
+                          return await AutoSaeachUtil.fetchAddressData(
+                              location: pattern);
+                        }
+                        return null;
+                      },
+                      itemBuilder: (context, suggestion) {
+                        return ListTile(
+                          trailing: Icon(Icons.location_city),
+                          title: Text(
+                            '${suggestion.name}',
+                            style: TextStyle(fontSize: 18),
+                          ),
+                        );
+                      },
+                      onSuggestionSelected: (suggestion) {
+                        zipCodeController.text = suggestion.name;
+
+                        setState(() {
+                          _lat = suggestion.place.geometry.coordinates[1];
+                          _long = suggestion.place.geometry.coordinates[0];
+                          print("This is the Cordinates $_lat");
+                          print("This is the Cordinates $_long");
+                        });
+                      },
+                    ),
+                ),
                 replacement: SizedBox.shrink(),
               ),
               SizedBox(height: 20),
