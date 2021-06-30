@@ -9,6 +9,7 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:intl/intl.dart';
 import 'package:pashusansaar/address_auto_complete/model/auto_address_model.dart';
 import 'package:pashusansaar/address_auto_complete/util/data_auto_search.dart';
+import 'package:pashusansaar/refreshToken/refresh_token_controller.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/constants.dart';
 import 'package:pashusansaar/utils/global.dart';
@@ -33,6 +34,8 @@ import 'package:geoflutterfire/geoflutterfire.dart' as geoFire;
 import 'package:path_provider/path_provider.dart';
 import 'dart:ui' as ui;
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+
+import 'buy_animal_controller.dart';
 
 class BuyAnimal extends StatefulWidget {
   List animalInfo;
@@ -84,6 +87,10 @@ class _BuyAnimalState extends State<BuyAnimal>
 
   static GlobalKey previewContainer =
       new GlobalKey(debugLabel: 'previewController');
+  final BuyAnimalController buyAnimalController =
+      Get.put(BuyAnimalController());
+  final RefreshTokenController refreshTokenController =
+      Get.put(RefreshTokenController());
 
   @override
   bool get wantKeepAlive => true;
@@ -315,7 +322,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                         ),
                         TextSpan(
                           text: bayaatMapping(
-                              _list[index].pregnantTime.toString()),
+                              intToPregnantTime[_list[index].pregnantTime]),
                           style: TextStyle(
                               color: Colors.grey[700],
                               fontWeight: FontWeight.bold,
@@ -1880,6 +1887,185 @@ class _BuyAnimalState extends State<BuyAnimal>
                               ],
                             ),
                     ),
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.start,
+              //   crossAxisAlignment: CrossAxisAlignment.start,
+              //   children: [
+              //     Expanded(
+              //       flex: 2,
+              //       child: GestureDetector(
+              //         onTap: () {
+              //           return showDialog(
+              //               context: context,
+              //               builder: (context) {
+              //                 return AlertDialog(
+              //                     title: Text("जगह बदले"),
+              //                     content: StatefulBuilder(
+              //                         builder: (context, setState) {
+              //                       return Container(
+              //                         height: 200,
+              //                         child: SingleChildScrollView(
+              //                           child: Column(
+              //                             mainAxisSize: MainAxisSize.min,
+              //                             children: <Widget>[
+              //                               // TextField(
+              //                               //   maxLength: 6,
+              //                               //   controller: _locationController,
+              //                               //   inputFormatters: <
+              //                               //       TextInputFormatter>[
+              //                               //     FilteringTextInputFormatter
+              //                               //         .digitsOnly
+              //                               //   ],
+              //                               //   keyboardType:
+              //                               //       TextInputType.number,
+              //                               //   decoration: InputDecoration(
+              //                               //     counterText: '',
+              //                               //     border: OutlineInputBorder(
+              //                               //       borderRadius:
+              //                               //           BorderRadius.circular(5),
+              //                               //     ),
+              //                               //     icon: Container(
+              //                               //       margin:
+              //                               //           EdgeInsets.only(left: 20),
+              //                               //       width: 10,
+              //                               //       height: 10,
+              //                               //       child: Icon(
+              //                               //         Icons.location_on,
+              //                               //         color: Colors.black,
+              //                               //       ),
+              //                               //     ),
+              //                               //     hintText: "ज़िपकोड डाले",
+              //                               //     contentPadding: EdgeInsets.only(
+              //                               //         left: 8.0, top: 16.0),
+              //                               //   ),
+              //                               // ),
+
+              //                               // Auto Comp text field
+
+              //                               TypeAheadField<AutoComplete>(
+              //                                 textFieldConfiguration:
+              //                                     TextFieldConfiguration(
+              //                                   controller: locationController,
+              //                                   autofocus: true,
+              //                                   decoration: InputDecoration(
+              //                                     hintText:
+              //                                         "अपना पता दर्ज करें",
+              //                                     contentPadding:
+              //                                         EdgeInsets.only(
+              //                                             left: 8.0, top: 16.0),
+              //                                     border: OutlineInputBorder(
+              //                                       borderRadius:
+              //                                           BorderRadius.circular(
+              //                                               5),
+              //                                     ),
+              //                                   ),
+              //                                 ),
+              //                                 suggestionsCallback:
+              //                                     (pattern) async {
+              //                                   if (pattern.length > 1) {
+              //                                     return await AutoSaeachUtil
+              //                                         .fetchAddressData(
+              //                                             location: pattern);
+              //                                   }
+              //                                   return null;
+              //                                 },
+              //                                 itemBuilder:
+              //                                     (context, suggestion) {
+              //                                   return ListTile(
+              //                                     trailing:
+              //                                         Icon(Icons.location_city),
+              //                                     title: Text(
+              //                                       '${suggestion.name}',
+              //                                       style:
+              //                                           TextStyle(fontSize: 18),
+              //                                     ),
+              //                                   );
+              //                                 },
+              //                                 onSuggestionSelected:
+              //                                     (suggestion) {
+              //                                   locationController.text =
+              //                                       suggestion.name;
+
+              //                                   setState(
+              //                                     () {
+              //                                       _lat = suggestion
+              //                                           .place
+              //                                           .geometry
+              //                                           .coordinates[1];
+              //                                       _long = suggestion
+              //                                           .place
+              //                                           .geometry
+              //                                           .coordinates[0];
+              //                                     },
+              //                                   );
+              //                                   print(
+              //                                       "This is the Cordinates $_longitude");
+              //                                   print(
+              //                                       "This is the Cordinates $_latitude");
+              //                                 },
+              //                               ),
+
+              //                               _radiusLocation()
+              //                             ],
+              //                           ),
+              //                         ),
+              //                       );
+              //                     }),
+              //                     actions: <Widget>[
+              //                       FlatButton(
+              //                           child: Text(
+              //                             'Ok'.tr,
+              //                             style: TextStyle(color: primaryColor),
+              //                           ),
+              //                           onPressed: () async {
+              //                             if (_locationController.text.length ==
+              //                                 0)
+              //                               Navigator.pop(context);
+              //                             else {
+              //                               if (_locationController
+              //                                       .text.length <
+              //                                   6)
+              //                                 ReusableWidgets.showDialogBox(
+              //                                     context,
+              //                                     'error'.tr,
+              //                                     Text('error_length_zipcode'
+              //                                         .tr));
+              //                               else {
+              //                                 _tempAnimalList.clear();
+
+              //                                 try {
+              //                                   var address = await Geocoder
+              //                                       .local
+              //                                       .findAddressesFromCoordinates(
+              //                                           Coordinates(
+              //                                               _lat, _long));
+
+              //                                   var first = address.first;
+              //                                   setState(() {
+              //                                     _userLocality =
+              //                                         first.subAdminArea ??
+              //                                             first.locality ??
+              //                                             first.featureName;
+              //                                   });
+              //                                   _getLocationBasedList(
+              //                                       context, first);
+              //                                 } catch (e) {
+              //                                   print('locationerro==> ' +
+              //                                       e.toString());
+              //                                   Navigator.of(context).pop();
+              //                                   Flushbar(
+              //                                     message:
+              //                                         "no_animal_present".tr,
+              //                                     duration:
+              //                                         Duration(seconds: 2),
+              //                                   )..show(context);
+              //                                 }
+              //                               }
+              //                             }
+              //                           }),
+              //                     ]);
+              //               });
+              //         },
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1901,106 +2087,37 @@ class _BuyAnimalState extends State<BuyAnimal>
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
                                           children: <Widget>[
-                                            // TextField(
-                                            //   maxLength: 6,
-                                            //   controller: _locationController,
-                                            //   inputFormatters: <
-                                            //       TextInputFormatter>[
-                                            //     FilteringTextInputFormatter
-                                            //         .digitsOnly
-                                            //   ],
-                                            //   keyboardType:
-                                            //       TextInputType.number,
-                                            //   decoration: InputDecoration(
-                                            //     counterText: '',
-                                            //     border: OutlineInputBorder(
-                                            //       borderRadius:
-                                            //           BorderRadius.circular(5),
-                                            //     ),
-                                            //     icon: Container(
-                                            //       margin:
-                                            //           EdgeInsets.only(left: 20),
-                                            //       width: 10,
-                                            //       height: 10,
-                                            //       child: Icon(
-                                            //         Icons.location_on,
-                                            //         color: Colors.black,
-                                            //       ),
-                                            //     ),
-                                            //     hintText: "ज़िपकोड डाले",
-                                            //     contentPadding: EdgeInsets.only(
-                                            //         left: 8.0, top: 16.0),
-                                            //   ),
-                                            // ),
-
-                                            // Auto Comp text field
-
-
-
-                                            TypeAheadField<AutoComplete>(
-                                              textFieldConfiguration:
-                                              TextFieldConfiguration(
-                                                  controller:
-                                                  locationController,
-                                                  autofocus: true,
-
-                                                  decoration:
-                                                  InputDecoration(
-                                                      hintText:
-                                                      "अपना पता दर्ज करें",
-                                                      contentPadding:
-                                                      EdgeInsets.only(
-                                                          left: 8.0,
-                                                          top:
-                                                          16.0),
-                                                      border:
-                                                      OutlineInputBorder(
-                                                        borderRadius:
-                                                        BorderRadius
-                                                            .circular(
-                                                            5),
-                                                      ))),
-                                              suggestionsCallback:
-                                                  (pattern) async {
-                                                if (pattern.length > 1) {
-                                                  return await AutoSaeachUtil
-                                                      .fetchAddressData(
-                                                      location: pattern);
-                                                }
-                                                return null;
-                                              },
-                                              itemBuilder:
-                                                  (context, suggestion) {
-                                                return ListTile(
-                                                  trailing:
-                                                  Icon(Icons.location_city),
-                                                  title: Text(
-                                                    '${suggestion.name}',
-                                                    style:
-                                                    TextStyle(fontSize: 18),
+                                            TextField(
+                                              maxLength: 6,
+                                              controller: _locationController,
+                                              inputFormatters: <
+                                                  TextInputFormatter>[
+                                                FilteringTextInputFormatter
+                                                    .digitsOnly
+                                              ],
+                                              keyboardType:
+                                                  TextInputType.number,
+                                              decoration: InputDecoration(
+                                                counterText: '',
+                                                border: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(5),
+                                                ),
+                                                icon: Container(
+                                                  margin:
+                                                      EdgeInsets.only(left: 20),
+                                                  width: 10,
+                                                  height: 10,
+                                                  child: Icon(
+                                                    Icons.location_on,
+                                                    color: Colors.black,
                                                   ),
-                                                );
-                                              },
-                                              onSuggestionSelected:
-                                                  (suggestion) {
-                                                locationController.text =
-                                                    suggestion.name;
-
-                                                _lat = suggestion.place.geometry
-                                                    .coordinates[1];
-                                                _long = suggestion.place
-                                                    .geometry.coordinates[0];
-
-                                                setState(() {
-                                                  print(
-                                                      "This is the Cordinates $_longitude");
-                                                  print(
-                                                      "This is the Cordinates $_latitude");
-                                                });
-                                              },
+                                                ),
+                                                hintText: "ज़िपकोड डाले",
+                                                contentPadding: EdgeInsets.only(
+                                                    left: 8.0, top: 16.0),
+                                              ),
                                             ),
-
-
                                             _radiusLocation()
                                           ],
                                         ),
@@ -2008,7 +2125,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                                     );
                                   }),
                                   actions: <Widget>[
-                                    FlatButton(
+                                    TextButton(
                                         child: Text(
                                           'Ok'.tr,
                                           style: TextStyle(color: primaryColor),
@@ -2032,16 +2149,20 @@ class _BuyAnimalState extends State<BuyAnimal>
                                               try {
                                                 var address = await Geocoder
                                                     .local
-                                                    .findAddressesFromCoordinates(Coordinates(_lat, _long));
+                                                    .findAddressesFromQuery(
+                                                        _locationController
+                                                            .text);
 
                                                 var first = address.first;
                                                 setState(() {
                                                   _userLocality =
-                                                      first.locality ??
-                                                          first.subAdminArea ??
+                                                      first.subAdminArea ??
+                                                          first.locality ??
                                                           first.featureName;
-                                                  _latitude = _lat;
-                                                  _longitude = _long;
+                                                  _latitude = first
+                                                      .coordinates.latitude;
+                                                  _longitude = first
+                                                      .coordinates.longitude;
                                                 });
                                                 _getLocationBasedList(
                                                     context, first);
@@ -2154,7 +2275,7 @@ class _BuyAnimalState extends State<BuyAnimal>
   }
 
   _getLocationBasedList(BuildContext context, Address first) async {
-    double _radiusData = _valueRadius == 0
+    int _radiusData = _valueRadius == 0
         ? 25
         : _valueRadius == 1
             ? 50
@@ -2165,80 +2286,122 @@ class _BuyAnimalState extends State<BuyAnimal>
                     : 50;
 
     try {
-      List district = [];
-      RemoteConfig remoteConfig = await RemoteConfig.instance;
-      await remoteConfig.fetch(expiration: const Duration(seconds: 0));
-      await remoteConfig.activateFetched();
-
-      json
-          .decode(remoteConfig.getValue("district_map").asString())
-          .forEach((element) {
-        district.addIf(element[first.subAdminArea ?? first.locality] != null,
-            element[first.subAdminArea ?? first.locality]);
-      });
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      bool status;
       pr.show();
-      if (district.isEmpty ||
-          !district[0].contains(first.subAdminArea ?? first.locality)) {
-        Stream<List<DocumentSnapshot>> stream = geo
-            .collection(
-                collectionRef: FirebaseFirestore.instance
-                    .collection("buyingAnimalList1")
-                    .where('isValidUser', isEqualTo: 'Approved'))
-            .within(
-                center: geo.point(
-                    latitude: first.coordinates.latitude,
-                    longitude: first.coordinates.longitude),
-                radius: _radiusData,
-                field: 'position',
-                strictMode: true);
 
-        stream.listen((List<DocumentSnapshot> documentList) {
-          print("=-=-=12==" + documentList.length.toString());
-          if (_tempAnimalList.length == 0) {
-            Flushbar(
-              message: "no_animal_present".tr,
-              duration: Duration(seconds: 2),
-            )..show(context);
-          }
-
+      if (ReusableWidgets.isTokenExpired(prefs.getInt('expires') ?? 0)) {
+        status = await refreshTokenController.getRefreshToken(
+            refresh: prefs.getString('refreshToken') ?? '');
+        if (status) {
           setState(() {
-            lastDocument = '';
-            _resetFilterData = _tempAnimalList = documentList;
-            _tempAnimalList
-                .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
+            prefs.setString(
+                'accessToken', refreshTokenController.accessToken.value);
+            prefs.setString(
+                'refreshToken', refreshTokenController.refreshToken.value);
+            prefs.setInt('expires', refreshTokenController.expires.value);
           });
-          if (pr.isShowing()) pr.hide();
-          // pr.hide();
-          Navigator.of(context).pop();
-        });
-      } else {
-        FirebaseFirestore.instance
-            .collection('buyingAnimalList1')
-            .orderBy('dateOfSaving', descending: true)
-            .where('dateOfSaving',
-                isLessThanOrEqualTo:
-                    ReusableWidgets.dateTimeToEpoch(DateTime.now()))
-            .where('district', whereIn: district[0])
-            .where('isValidUser', isEqualTo: 'Approved')
-            .limit(25)
-            .get()
-            .then((value) {
-          print('=-=-=-<>' + value.docs.last['dateOfSaving'].toString());
-
-          setState(() {
-            lastDocument = value.docs.last['dateOfSaving'];
-            districtList = district[0];
-            _resetFilterData = _tempAnimalList = value.docs;
-            _tempAnimalList
-                .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
-          });
-
-          // pr.hide();
-          if (pr.isShowing()) pr.hide();
-          Navigator.of(context).pop();
-          print("=-=-=" + value.docs.length.toString());
-        });
+        } else {
+          ReusableWidgets.showDialogBox(
+              context, 'warning'.tr, Text('Error getting token'));
+        }
       }
+
+      List data = await buyAnimalController.getAnimal(
+        latitude: 40.1,
+        longitude: -97.1,
+        // latitude: first.coordinates.latitude,
+        // longitude: first.coordinates.longitude,
+        distance: _radiusData * 1000,
+        animalType: null,
+        minMilk: null,
+        maxMilk: null,
+        page: 1,
+        accessToken: prefs.getString('accessToken') ?? '',
+        refreshToken: prefs.getString('refreshToken') ?? '',
+      );
+
+      setState(() {
+        widget.animalInfo = data;
+      });
+
+      pr.hide();
+      Navigator.of(context).pop();
+
+      // List district = [];
+      // RemoteConfig remoteConfig = await RemoteConfig.instance;
+      // await remoteConfig.fetch(expiration: const Duration(seconds: 0));
+      // await remoteConfig.activateFetched();
+
+      // json
+      //     .decode(remoteConfig.getValue("district_map").asString())
+      //     .forEach((element) {
+      //   district.addIf(element[first.subAdminArea ?? first.locality] != null,
+      //       element[first.subAdminArea ?? first.locality]);
+      // });
+      // pr.show();
+      // if (district.isEmpty ||
+      //     !district[0].contains(first.subAdminArea ?? first.locality)) {
+      //   Stream<List<DocumentSnapshot>> stream = geo
+      //       .collection(
+      //           collectionRef: FirebaseFirestore.instance
+      //               .collection("buyingAnimalList1")
+      //               .where('isValidUser', isEqualTo: 'Approved'))
+      //       .within(
+      //           center: geo.point(
+      //               latitude: first.coordinates.latitude,
+      //               longitude: first.coordinates.longitude),
+      //           radius: _radiusData,
+      //           field: 'position',
+      //           strictMode: true);
+
+      //   stream.listen((List<DocumentSnapshot> documentList) {
+      //     print("=-=-=12==" + documentList.length.toString());
+      //     if (_tempAnimalList.length == 0) {
+      //       Flushbar(
+      //         message: "no_animal_present".tr,
+      //         duration: Duration(seconds: 2),
+      //       )..show(context);
+      //     }
+
+      //     setState(() {
+      //       lastDocument = '';
+      //       _resetFilterData = _tempAnimalList = documentList;
+      //       _tempAnimalList
+      //           .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
+      //     });
+      //     if (pr.isShowing()) pr.hide();
+      //     // pr.hide();
+      //     Navigator.of(context).pop();
+      //   });
+      // } else {
+      //   FirebaseFirestore.instance
+      //       .collection('buyingAnimalList1')
+      //       .orderBy('dateOfSaving', descending: true)
+      //       .where('dateOfSaving',
+      //           isLessThanOrEqualTo:
+      //               ReusableWidgets.dateTimeToEpoch(DateTime.now()))
+      //       .where('district', whereIn: district[0])
+      //       .where('isValidUser', isEqualTo: 'Approved')
+      //       .limit(25)
+      //       .get()
+      //       .then((value) {
+      //     print('=-=-=-<>' + value.docs.last['dateOfSaving'].toString());
+
+      //     setState(() {
+      //       lastDocument = value.docs.last['dateOfSaving'];
+      //       districtList = district[0];
+      //       _resetFilterData = _tempAnimalList = value.docs;
+      //       _tempAnimalList
+      //           .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
+      //     });
+
+      //     // pr.hide();
+      //     if (pr.isShowing()) pr.hide();
+      //     Navigator.of(context).pop();
+      //     print("=-=-=" + value.docs.length.toString());
+      //   });
+      // }
     } catch (e) {
       Navigator.pop(context);
       print('=-=Error-=->>>' + e.toString());
@@ -2246,25 +2409,14 @@ class _BuyAnimalState extends State<BuyAnimal>
   }
 
   _descriptionText(animalInfo) {
-    String animalBreedCheck = (animalInfo.animalBreed.tr == 'not_known'.tr)
+    String animalBreedCheck = (animalInfo.animalBreed == 'not_known'.tr)
         ? ""
-        : animalInfo.animalBreed.tr;
+        : animalInfo.animalBreed;
     String animalTypeCheck = (animalInfo.animalType == 5)
         ? intToAnimalTypeMapping[5]
         : intToAnimalTypeMapping[animalInfo.animalType];
 
     String desc = '';
-
-    // String stmn2 = 'यह ${extraInfoData['animalAlreadyGivenBirth']} ब्यायी है ';
-    // String stmn3 = 'और अभी ${extraInfoData['animalIfPregnant']} है। ';
-    // String stmn41 = 'इसके साथ में बच्चा नहीं है। ';
-    // String stmn42 = 'इसके साथ में ${extraInfoData['animalHasBaby']}। ';
-    // String stmn2 = 'यह ${extraInfoData['animalAlreadyGivenBirth']} ब्यायी है ';
-    // String stmn3 = 'और अभी ${extraInfoData['animalIfPregnant']} है। ';
-    // String stmn41 = 'इसके साथ में बच्चा नहीं है। ';
-    // String stmn42 = 'इसके साथ में ${extraInfoData['animalHasBaby']}। ';
-    String stmn5 =
-        'पिछले बार के हिसाब से दूध कैपेसिटी ${animalInfo.animalMilkCapacity} लीटर है। ';
 
     if (animalInfo.animalType == 3 ||
         animalInfo.animalType == 4 ||
@@ -2273,19 +2425,26 @@ class _BuyAnimalState extends State<BuyAnimal>
           'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल की है। ';
     } else {
       desc =
-          'ये ${animalInfo.animalBreed.tr} ${intToAnimalTypeMapping[animalInfo.animalType]} ${animalInfo.animalAge} साल का है। ';
-      // if (extraInfoData['animalAlreadyGivenBirth'] != null) desc = desc + stmn2;
-      // if (extraInfoData['animalIfPregnant'] != null) desc = desc + stmn3;
+          'ये ${animalInfo.animalBreed} ${intToAnimalTypeMapping[animalInfo.animalType]} ${animalInfo.animalAge} साल का है। ';
+      if (animalInfo.recentBayatTime != null) {
+        desc = desc +
+            'यह ${intToRecentBayaatTime[animalInfo.recentBayatTime]} ब्यायी है। ';
+      }
+      if (animalInfo.pregnantTime != null) {
+        desc =
+            desc + 'यह अभी ${intToPregnantTime[animalInfo.pregnantTime]} है। ';
+      }
       // desc = desc +
-      //     (extraInfoData['animalHasBaby'] == null ||
-      //             extraInfoData['animalHasBaby'] == 'nothing'.tr
-      //         ? stmn41
-      //         : stmn42);
-      if (animalInfo.animalMilkCapacity != null) desc = desc + stmn5;
+      //     (animalInfo.animalHasBaby == null || animalInfo.animalHasBaby == 0
+      //         ? 'इसके साथ में बच्चा नहीं है। '
+      //         : 'इसके साथ में ${intToAnimalHasBaby[animalInfo.animalHasBaby]}। ',);
+      if (animalInfo.animalMilkCapacity != null) {
+        desc = desc +
+            'पिछले बार के हिसाब से दूध कैपेसिटी ${animalInfo.animalMilkCapacity} लीटर है। ';
+      }
     }
 
-    // return desc + (extraInfoData['moreInfo'] ?? '');
-    return desc ;
+    return desc;
   }
 
   Padding _animalDescriptionMethod(int index) {
@@ -2294,8 +2453,9 @@ class _BuyAnimalState extends State<BuyAnimal>
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Text("description to be added",
-        // _descriptionText(_list[index]),
+      child: Text(
+        // "description to be added",
+        _descriptionText(_list[index]),
         maxLines: 4,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(color: Colors.grey[600], fontSize: 14.5),
@@ -2314,8 +2474,6 @@ class _BuyAnimalState extends State<BuyAnimal>
     List<String> _images = [];
     _list[index].files.forEach((elem) => _images.add(elem.fileUrl));
 
-    // _imageData.forEach((element) =>
-    //     _images.addIf(element != null && element.isNotEmpty, element));
     return Padding(
         padding: EdgeInsets.only(left: 8.0, right: 8, bottom: 4),
         child: Stack(

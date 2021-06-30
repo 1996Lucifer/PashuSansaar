@@ -128,65 +128,6 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
     await assignDeviceID();
   }
 
-  //  _determinePosition() async {
-  //    SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   bool serviceEnabled;
-  //   LocationPermission permission;
-  //   serviceEnabled = await Geolocator.isLocationServiceEnabled();
-  //   if (!serviceEnabled) {
-  //     return Future.error('Location services are disabled.');
-  //   }
-  //   permission = await Geolocator.checkPermission();
-  //   if (permission == LocationPermission.denied) {
-  //     permission = await Geolocator.requestPermission();
-  //     if (permission == LocationPermission.denied) {
-
-  //       setState(() {
-  //                 _zipCodeTextField = true;
-  //               });
-  //       return Future.error('Location permissions are denied');
-  //     }
-
-  //   }
-
-  //   if (permission == LocationPermission.deniedForever) {
-
-  //     setState(() {
-  //       _zipCodeTextField = true;
-  //     });
-  //     // Permissions are denied forever, handle appropriately.
-  //     return Future.error(
-  //         'Location permissions are permanently denied, we cannot request permissions.');
-
-  //   }
-
-  //   Position position = await Geolocator.getCurrentPosition();
-  //   var address = await placemarkFromCoordinates(position.latitude,position.longitude);
-
-  //   // print("+++++++++${position.latitude}++++++++++++++++");
-  //   // print("+++++++++${position.longitude}++++++++++++++++");
-  //   // print("++++name+++++${address[0].name}++++++++++++++++");
-  //   // print("+++country++++++${address[0].country}++++++++++++++++");
-  //   //  print("++++locality++district+++${address[0].locality}++++++++++++++++");
-  //   // print("+++subLocality++++++name+++++++userAddress+++++++++++++++++${address[0].subLocality}++++++++++++++++");
-  //   // print("+++subAdministrativeArea++++++${address[0].subAdministrativeArea}++++++++++++++++");
-  //   // print("+++postalCode+++zipCode+++${address[0].postalCode}++++++++++++++++");
-  //   // print("++++administrativeArea+++++${address[0].administrativeArea}++++++++++++++++");
-  //   // print("+++++isoCountryCode++++${address[0].isoCountryCode}++++++++++++++++");
-  //   // print("+++street++++++${address[0].street}++++++++++++++++");
-
-  //   setState(() {
-  //     prefs.setDouble("latitude", position.latitude);
-  //     prefs.setDouble("longitude", position.longitude);
-  //     prefs.setString("userAddress", address[0].name+' '+address[0].subLocality);
-  //     prefs.setString("zipCode", address[0].postalCode);
-  //     prefs.setString("district", address[0].locality);
-
-  //   });
-
-  //    await assignDeviceID();
-  // }
-
   assignDeviceID() async {
     String deviceType, deviceId, deviceName;
     final DeviceInfoPlugin deviceInfoPlugin = new DeviceInfoPlugin();
@@ -325,60 +266,60 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
               Visibility(
                 visible: _zipCodeTextField,
                 child: Padding(
-                    padding: EdgeInsets.all(15),
-                    child:
-                    // TextFormField(
-                    //   maxLength: 6,
-                    //   decoration: InputDecoration(
-                    //       prefixIcon: Icon(Icons.location_on),
-                    //       border: OutlineInputBorder(),
-                    //       labelText: 'zipcode_label'.tr,
-                    //       hintText: 'zipcode_hint'.tr,
-                    //       counterText: ""),
-                    //   autofocus: false,
-                    //   controller: zipCodeController,
-                    //   inputFormatters: <TextInputFormatter>[
-                    //     FilteringTextInputFormatter.digitsOnly
-                    //   ],
-                    //   keyboardType: TextInputType.number,
-                    // ),
-                    TypeAheadField<AutoComplete>(
-                      textFieldConfiguration: TextFieldConfiguration(
-                          controller: zipCodeController,
-                          autofocus: true,
-                          decoration: InputDecoration(
-                              hintText: "अपना पता दर्ज करें",
-                              hintStyle: TextStyle(fontSize: 18),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(5),
-                              ))),
-                      suggestionsCallback: (pattern) async {
-                        if (pattern.length > 1) {
-                          return await AutoSaeachUtil.fetchAddressData(
-                              location: pattern);
-                        }
-                        return null;
-                      },
-                      itemBuilder: (context, suggestion) {
-                        return ListTile(
-                          trailing: Icon(Icons.location_city),
-                          title: Text(
-                            '${suggestion.name}',
-                            style: TextStyle(fontSize: 18),
-                          ),
-                        );
-                      },
-                      onSuggestionSelected: (suggestion) {
-                        zipCodeController.text = suggestion.name;
+                  padding: EdgeInsets.all(15),
+                  child:
+                      // TextFormField(
+                      //   maxLength: 6,
+                      //   decoration: InputDecoration(
+                      //       prefixIcon: Icon(Icons.location_on),
+                      //       border: OutlineInputBorder(),
+                      //       labelText: 'zipcode_label'.tr,
+                      //       hintText: 'zipcode_hint'.tr,
+                      //       counterText: ""),
+                      //   autofocus: false,
+                      //   controller: zipCodeController,
+                      //   inputFormatters: <TextInputFormatter>[
+                      //     FilteringTextInputFormatter.digitsOnly
+                      //   ],
+                      //   keyboardType: TextInputType.number,
+                      // ),
+                      TypeAheadField<AutoComplete>(
+                    textFieldConfiguration: TextFieldConfiguration(
+                        controller: zipCodeController,
+                        autofocus: true,
+                        decoration: InputDecoration(
+                            hintText: "अपना पता दर्ज करें",
+                            hintStyle: TextStyle(fontSize: 18),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5),
+                            ))),
+                    suggestionsCallback: (pattern) async {
+                      if (pattern.length > 1) {
+                        return await AutoSaeachUtil.fetchAddressData(
+                            location: pattern);
+                      }
+                      return null;
+                    },
+                    itemBuilder: (context, suggestion) {
+                      return ListTile(
+                        trailing: Icon(Icons.location_city),
+                        title: Text(
+                          '${suggestion.name}',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                      );
+                    },
+                    onSuggestionSelected: (suggestion) {
+                      zipCodeController.text = suggestion.name;
 
-                        setState(() {
-                          _lat = suggestion.place.geometry.coordinates[1];
-                          _long = suggestion.place.geometry.coordinates[0];
-                          print("This is the Cordinates $_lat");
-                          print("This is the Cordinates $_long");
-                        });
-                      },
-                    ),
+                      setState(() {
+                        _lat = suggestion.place.geometry.coordinates[1];
+                        _long = suggestion.place.geometry.coordinates[0];
+                        print("This is the Cordinates $_lat");
+                        print("This is the Cordinates $_long");
+                      });
+                    },
+                  ),
                 ),
                 replacement: SizedBox.shrink(),
               ),
