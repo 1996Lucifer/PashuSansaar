@@ -33,7 +33,6 @@ class SellAnimalForm extends StatefulWidget {
 
   @override
   _SellAnimalFormState createState() => _SellAnimalFormState();
-
 }
 
 class _SellAnimalFormState extends State<SellAnimalForm>
@@ -1063,253 +1062,226 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                   fontStyle: FontStyle.normal,
                   fontWeight: FontWeight.w600),
             ),
-            onPressed: (){
+            onPressed: _isLoading
+                ? null
+                : () async {
+                    if (animalInfo['animalType'] == null)
+                      ReusableWidgets.showDialogBox(
+                        context,
+                        'error'.tr,
+                        Text('animal_type_error'.tr),
+                      );
+                    else if (animalInfo['animalBreed'] == null)
+                      ReusableWidgets.showDialogBox(
+                        context,
+                        'error'.tr,
+                        Text('animal_breed_error'.tr),
+                      );
+                    else if (animalInfo['animalAge'] == null)
+                      ReusableWidgets.showDialogBox(
+                        context,
+                        'error'.tr,
+                        Text('animal_age_error'.tr),
+                      );
+                    else if ([0, 1].contains(
+                          constant.animalType.indexOf(animalInfo['animalType']),
+                        ) &&
+                        (animalInfo['animalIsPregnant'] == null))
+                      ReusableWidgets.showDialogBox(
+                        context,
+                        'error'.tr,
+                        Text('animal_pregnancy_error'.tr),
+                      );
+                    else if ([0, 1].contains(
+                          constant.animalType.indexOf(animalInfo['animalType']),
+                        ) &&
+                        (animalInfo['animalMilk'] == null ||
+                            animalInfo['animalMilk'].isEmpty))
+                      ReusableWidgets.showDialogBox(
+                        context,
+                        'error'.tr,
+                        Text('animal_milk_error'.tr),
+                      );
+                    else if ([0, 1].contains(constant.animalType
+                            .indexOf(animalInfo['animalType'])) &&
+                        (animalInfo['animalMilk'] != null ||
+                            animalInfo['animalMilk'].isNotEmpty) &&
+                        (int.parse(animalInfo['animalMilk']) > 70))
+                      ReusableWidgets.showDialogBox(
+                        context,
+                        'error'.tr,
+                        Text('maximum_milk_length'.tr),
+                      );
+                    else if (animalInfo['animalPrice'] == null ||
+                        animalInfo['animalPrice'].isEmpty)
+                      ReusableWidgets.showDialogBox(
+                        context,
+                        'error'.tr,
+                        Text('animal_price_error'.tr),
+                      );
+                    else if (imagesFileUpload['image1'].isEmpty &&
+                        imagesFileUpload['image2'].isEmpty &&
+                        imagesFileUpload['image3'].isEmpty &&
+                        imagesFileUpload['image4'].isEmpty)
+                      ReusableWidgets.showDialogBox(
+                        context,
+                        'error'.tr,
+                        Text('animal_image_error'.tr),
+                      );
+                    else {
 
-              print("____________${animalInfo['animalType']}_____________");
-            }
-            // _isLoading
-              //   ? null
-              //   : () async {
-              // //api testing
-              //
-              //
-              //
-              // print("_______________bug__________");
-              //       if (animalInfo['animalType'] == null)
-              //         ReusableWidgets.showDialogBox(
-              //           context,
-              //           'error'.tr,
-              //           Text('animal_type_error'.tr),
-              //         );
-              //       else if (animalInfo['animalBreed'] == null)
-              //         ReusableWidgets.showDialogBox(
-              //           context,
-              //           'error'.tr,
-              //           Text('animal_breed_error'.tr),
-              //         );
-              //       else if (animalInfo['animalAge'] == null)
-              //         ReusableWidgets.showDialogBox(
-              //           context,
-              //           'error'.tr,
-              //           Text('animal_age_error'.tr),
-              //         );
-              //       else if ([0, 1].contains(
-              //             constant.animalType.indexOf(animalInfo['animalType']),
-              //           ) &&
-              //           (animalInfo['animalIsPregnant'] == null))
-              //         ReusableWidgets.showDialogBox(
-              //           context,
-              //           'error'.tr,
-              //           Text('animal_pregnancy_error'.tr),
-              //         );
-              //       else if ([0, 1].contains(
-              //             constant.animalType.indexOf(animalInfo['animalType']),
-              //           ) &&
-              //           (animalInfo['animalMilk'] == null ||
-              //               animalInfo['animalMilk'].isEmpty))
-              //         ReusableWidgets.showDialogBox(
-              //           context,
-              //           'error'.tr,
-              //           Text('animal_milk_error'.tr),
-              //         );
-              //       else if ([0, 1].contains(constant.animalType
-              //               .indexOf(animalInfo['animalType'])) &&
-              //           (animalInfo['animalMilk'] != null ||
-              //               animalInfo['animalMilk'].isNotEmpty) &&
-              //           (int.parse(animalInfo['animalMilk']) > 70))
-              //         ReusableWidgets.showDialogBox(
-              //           context,
-              //           'error'.tr,
-              //           Text('maximum_milk_length'.tr),
-              //         );
-              //       else if (animalInfo['animalPrice'] == null ||
-              //           animalInfo['animalPrice'].isEmpty)
-              //         ReusableWidgets.showDialogBox(
-              //           context,
-              //           'error'.tr,
-              //           Text('animal_price_error'.tr),
-              //         );
-              //       else if (imagesFileUpload['image1'].isEmpty &&
-              //           imagesFileUpload['image2'].isEmpty &&
-              //           imagesFileUpload['image3'].isEmpty &&
-              //           imagesFileUpload['image4'].isEmpty)
-              //         ReusableWidgets.showDialogBox(
-              //           context,
-              //           'error'.tr,
-              //           Text('animal_image_error'.tr),
-              //         );
-              //       else {
-              //
-              //
-              //
-              //         bool Status = await animalSellingFormController.fetchAnimalSellingFormData(
-              //           animalAge: ,
-              //           userId: GlobalData.userId,
-              //
-              //         );
-              //
-              //
-              //
-              //
-              //
-              //
-              //
-              //
-              //
-              //
-              //         pr = new ProgressDialog(context,
-              //             type: ProgressDialogType.Normal,
-              //             isDismissible: false);
-              //         pr.style(message: 'progress_dialog_message'.tr);
-              //         pr.show();
-              //         print("_______________bug__________");
-              //
-              //         if (widget.userName == null ||
-              //             widget.userMobileNumber == null) {
-              //           try {
-              //             await FirebaseFirestore.instance
-              //                 .collection("userInfo")
-              //                 .doc(FirebaseAuth.instance.currentUser.uid)
-              //                 .get(GetOptions(source: Source.serverAndCache))
-              //                 .then(
-              //               (value) async {
-              //                 SharedPreferences prefs =
-              //                     await SharedPreferences.getInstance();
-              //
-              //                 setState(() {
-              //                   widget.userName = value.data()['name'];
-              //                   widget.userMobileNumber =
-              //                       value.data()['mobile'];
-              //                 });
-              //               },
-              //             );
-              //           } catch (e) {
-              //             FirebaseFirestore.instance
-              //                 .collection('logger')
-              //                 .doc(widget.userMobileNumber)
-              //                 .collection('sell-profile')
-              //                 .doc()
-              //                 .set({
-              //               'issue': e.toString(),
-              //               'userId': FirebaseAuth.instance.currentUser == null
-              //                   ? ''
-              //                   : FirebaseAuth.instance.currentUser.uid,
-              //               'date': DateFormat()
-              //                   .add_yMMMd()
-              //                   .add_jm()
-              //                   .format(DateTime.now()),
-              //             });
-              //           }
-              //         }
-              //
-              //         await FirebaseFirestore.instance
-              //             .collection("animalSellingInfo")
-              //             .doc(FirebaseAuth.instance.currentUser.uid)
-              //             .collection('sellingAnimalList')
-              //             .doc(uniqueId)
-              //             .set({
-              //           'animalInfo': animalInfo,
-              //           'animalImages': imagesUpload,
-              //           'extraInfo': extraInfoData,
-              //           'dateOfSaving':
-              //               ReusableWidgets.dateTimeToEpoch(DateTime.now()),
-              //           'dateOfUpdation':
-              //               ReusableWidgets.dateTimeToEpoch(DateTime.now()),
-              //           'uniqueId': uniqueId,
-              //           'isValidUser': 'Approved',
-              //           'userId': FirebaseAuth.instance.currentUser.uid,
-              //           "animalDescription": _descriptionText(),
-              //         }).then((res) async {
-              //           SharedPreferences prefs =
-              //               await SharedPreferences.getInstance();
-              //           var addresses = await Geocoder.local
-              //               .findAddressesFromCoordinates(Coordinates(
-              //                   prefs.getDouble('latitude'),
-              //                   prefs.getDouble('longitude')));
-              //           var first = addresses.first;
-              //
-              //           FirebaseFirestore.instance
-              //               .collection("buyingAnimalList1")
-              //               .doc(uniqueId +
-              //                   FirebaseAuth.instance.currentUser.uid)
-              //               .set({
-              //             "userAnimalDescription": _descriptionText(),
-              //             "userAnimalType": animalInfo['animalType'] ?? "",
-              //             "userAnimalTypeOther":
-              //                 animalInfo['animalTypeOther'] ?? "",
-              //             "userAnimalAge": animalInfo['animalAge'] ?? "",
-              //             "userAddress": first.addressLine ??
-              //                 (first.adminArea + ', ' + first.countryName),
-              //             "userName": widget.userName,
-              //             "userAnimalPrice": animalInfo['animalPrice'] ?? "0",
-              //             "userAnimalBreed": animalInfo['animalBreed'] ?? "",
-              //             "userMobileNumber": widget.userMobileNumber,
-              //             "userAnimalMilk": animalInfo['animalMilk'] ?? "",
-              //             "userAnimalPregnancy":
-              //                 animalInfo['animalIsPregnant'] ?? "",
-              //             "userLatitude": prefs.getDouble('latitude'),
-              //             "userLongitude": prefs.getDouble('longitude'),
-              //             'extraInfo': extraInfoData,
-              //             'position': geo
-              //                 .point(
-              //                     latitude: prefs.getDouble('latitude'),
-              //                     longitude: prefs.getDouble('longitude'))
-              //                 .data,
-              //             "image1": imagesFileUpload['image1'] == null ||
-              //                     imagesFileUpload['image1'] == ""
-              //                 ? ""
-              //                 : imagesUpload['image1'],
-              //             "image2": imagesFileUpload['image2'] == null ||
-              //                     imagesFileUpload['image2'] == ""
-              //                 ? ""
-              //                 : imagesUpload['image2'],
-              //             "image3": imagesFileUpload['image3'] == null ||
-              //                     imagesFileUpload['image3'] == ""
-              //                 ? ""
-              //                 : imagesUpload['image3'],
-              //             "image4": imagesFileUpload['image4'] == null ||
-              //                     imagesFileUpload['image4'] == ""
-              //                 ? ""
-              //                 : imagesUpload['image4'],
-              //             "dateOfSaving":
-              //                 ReusableWidgets.dateTimeToEpoch(DateTime.now()),
-              //             'dateOfUpdation':
-              //                 ReusableWidgets.dateTimeToEpoch(DateTime.now()),
-              //             'isValidUser': 'Approved',
-              //             'uniqueId': uniqueId,
-              //             'userId': FirebaseAuth.instance.currentUser.uid,
-              //             'district': (first.subAdminArea ?? first.locality),
-              //             'zipCode': first.postalCode,
-              //             // 'state': first.adminArea,
-              //           }).then((value) {
-              //             pr.hide();
-              //             return showDialog(
-              //                 context: context,
-              //                 builder: (context) {
-              //                   return AlertDialog(
-              //                       title: Text('pashu_registered'.tr),
-              //                       content: Text('new_animal'.tr),
-              //                       actions: <Widget>[
-              //                         TextButton(
-              //                             child: Text(
-              //                               'Ok'.tr,
-              //                               style:
-              //                                   TextStyle(color: primaryColor),
-              //                             ),
-              //                             onPressed: () {
-              //                               Navigator.of(context).pop();
-              //                               Get.offAll(() => HomeScreen(
-              //                                     selectedIndex: 0,
-              //                                   ));
-              //                             }),
-              //                       ]);
-              //                 });
-              //           });
-              //         }).catchError(
-              //           (err) => print("err->" + err.toString()),
-              //         );
-              //       }
-              //     },
+                      pr = new ProgressDialog(context,
+                          type: ProgressDialogType.Normal,
+                          isDismissible: false);
+                      pr.style(message: 'progress_dialog_message'.tr);
+                      // pr.show();
+
+                      if (widget.userName == null ||
+                          widget.userMobileNumber == null) {
+                        try {
+                          await FirebaseFirestore.instance
+                              .collection("userInfo")
+                              .doc(FirebaseAuth.instance.currentUser.uid)
+                              .get(GetOptions(source: Source.serverAndCache))
+                              .then(
+                            (value) async {
+                              SharedPreferences prefs =
+                                  await SharedPreferences.getInstance();
+
+                              setState(() {
+                                widget.userName = value.data()['name'];
+                                widget.userMobileNumber =
+                                    value.data()['mobile'];
+                              });
+                            },
+                          );
+                        } catch (e) {
+                          FirebaseFirestore.instance
+                              .collection('logger')
+                              .doc(widget.userMobileNumber)
+                              .collection('sell-profile')
+                              .doc()
+                              .set({
+                            'issue': e.toString(),
+                            'userId': FirebaseAuth.instance.currentUser == null
+                                ? ''
+                                : FirebaseAuth.instance.currentUser.uid,
+                            'date': DateFormat()
+                                .add_yMMMd()
+                                .add_jm()
+                                .format(DateTime.now()),
+                          });
+                        }
+                      }
+
+                      // await FirebaseFirestore.instance
+                      //     .collection("animalSellingInfo")
+                      //     .doc(FirebaseAuth.instance.currentUser.uid)
+                      //     .collection('sellingAnimalList')
+                      //     .doc(uniqueId)
+                      //     .set({
+                      //   'animalInfo': animalInfo,
+                      //   'animalImages': imagesUpload,
+                      //   'extraInfo': extraInfoData,
+                      //   'dateOfSaving':
+                      //       ReusableWidgets.dateTimeToEpoch(DateTime.now()),
+                      //   'dateOfUpdation':
+                      //       ReusableWidgets.dateTimeToEpoch(DateTime.now()),
+                      //   'uniqueId': uniqueId,
+                      //   'isValidUser': 'Approved',
+                      //   'userId': FirebaseAuth.instance.currentUser.uid,
+                      //   "animalDescription": _descriptionText(),
+                      // }).then((res) async {
+                      //   SharedPreferences prefs =
+                      //       await SharedPreferences.getInstance();
+                      //   var addresses = await Geocoder.local
+                      //       .findAddressesFromCoordinates(Coordinates(
+                      //           prefs.getDouble('latitude'),
+                      //           prefs.getDouble('longitude')));
+                      //   var first = addresses.first;
+
+                      //   FirebaseFirestore.instance
+                      //       .collection("buyingAnimalList1")
+                      //       .doc(uniqueId +
+                      //           FirebaseAuth.instance.currentUser.uid)
+                      //       .set({
+                      //     "userAnimalDescription": _descriptionText(),
+                      //     "userAnimalType": animalInfo['animalType'] ?? "",
+                      //     "userAnimalTypeOther":
+                      //         animalInfo['animalTypeOther'] ?? "",
+                      //     "userAnimalAge": animalInfo['animalAge'] ?? "",
+                      //     "userAddress": first.addressLine ??
+                      //         (first.adminArea + ', ' + first.countryName),
+                      //     "userName": widget.userName,
+                      //     "userAnimalPrice": animalInfo['animalPrice'] ?? "0",
+                      //     "userAnimalBreed": animalInfo['animalBreed'] ?? "",
+                      //     "userMobileNumber": widget.userMobileNumber,
+                      //     "userAnimalMilk": animalInfo['animalMilk'] ?? "",
+                      //     "userAnimalPregnancy":
+                      //         animalInfo['animalIsPregnant'] ?? "",
+                      //     "userLatitude": prefs.getDouble('latitude'),
+                      //     "userLongitude": prefs.getDouble('longitude'),
+                      //     'extraInfo': extraInfoData,
+                      //     'position': geo
+                      //         .point(
+                      //             latitude: prefs.getDouble('latitude'),
+                      //             longitude: prefs.getDouble('longitude'))
+                      //         .data,
+                      //     "image1": imagesFileUpload['image1'] == null ||
+                      //             imagesFileUpload['image1'] == ""
+                      //         ? ""
+                      //         : imagesUpload['image1'],
+                      //     "image2": imagesFileUpload['image2'] == null ||
+                      //             imagesFileUpload['image2'] == ""
+                      //         ? ""
+                      //         : imagesUpload['image2'],
+                      //     "image3": imagesFileUpload['image3'] == null ||
+                      //             imagesFileUpload['image3'] == ""
+                      //         ? ""
+                      //         : imagesUpload['image3'],
+                      //     "image4": imagesFileUpload['image4'] == null ||
+                      //             imagesFileUpload['image4'] == ""
+                      //         ? ""
+                      //         : imagesUpload['image4'],
+                      //     "dateOfSaving":
+                      //         ReusableWidgets.dateTimeToEpoch(DateTime.now()),
+                      //     'dateOfUpdation':
+                      //         ReusableWidgets.dateTimeToEpoch(DateTime.now()),
+                      //     'isValidUser': 'Approved',
+                      //     'uniqueId': uniqueId,
+                      //     'userId': FirebaseAuth.instance.currentUser.uid,
+                      //     'district': (first.subAdminArea ?? first.locality),
+                      //     'zipCode': first.postalCode,
+                      //     // 'state': first.adminArea,
+                      //   }).then((value) {
+                      //     pr.hide();
+                      //     return showDialog(
+                      //         context: context,
+                      //         builder: (context) {
+                      //           return AlertDialog(
+                      //               title: Text('pashu_registered'.tr),
+                      //               content: Text('new_animal'.tr),
+                      //               actions: <Widget>[
+                      //                 TextButton(
+                      //                     child: Text(
+                      //                       'Ok'.tr,
+                      //                       style:
+                      //                           TextStyle(color: primaryColor),
+                      //                     ),
+                      //                     onPressed: () {
+                      //                       Navigator.of(context).pop();
+                      //                       Get.offAll(() => HomeScreen(
+                      //                             selectedIndex: 0,
+                      //                           ));
+                      //                     }),
+                      //               ]);
+                      //         });
+                      //   });
+                      // }).catchError(
+                      //   (err) => print("err->" + err.toString()),
+                      // );
+                    }
+                  },
           ),
         ),
       );

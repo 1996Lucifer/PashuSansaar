@@ -13,4 +13,5 @@ class GlobalData {
   static String refreshToken = "/refresh-token";
   static String registerUser = "/register-user";
   static String getAnimals = "/get-animals";
+  static String saveAnimals = "/save-animal";
 }

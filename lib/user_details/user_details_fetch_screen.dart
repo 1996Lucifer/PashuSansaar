@@ -52,7 +52,6 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
   double _lat = 0.0, _long = 0.0;
   Map<String, dynamic> mobileInfo = {};
   LocationData _locate;
-  LocationData add;
 
   final OtpController _otpController = Get.put(OtpController());
 
@@ -91,6 +90,7 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
         return;
       }
     }
+
     _permissionGranted = await location.hasPermission();
     if (_permissionGranted == PermissionStatus.denied) {
       _permissionGranted = await location.requestPermission();
@@ -102,28 +102,31 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
         return;
       }
     }
+
     _locationData = await location.getLocation();
-    final coordinates =
-        new Coordinates(_locationData.longitude, _locationData.latitude);
-    var addressesByGps =
-        await Geocoder.local.findAddressesFromCoordinates(coordinates);
-    var first = addressesByGps.first;
+
+    var address = await Geocoder.local.findAddressesFromCoordinates(
+      Coordinates(_locationData.latitude, _locationData.longitude),
+    );
+    var first = address.first;
 
     setState(() {
       _locate = _locationData;
       prefs.setDouble("latitude", _locate.latitude);
       prefs.setDouble("longitude", _locate.longitude);
+
       prefs.setString("district",
           first.subAdminArea ?? first.locality ?? first.featureName);
       prefs.setString("zipCode", first.postalCode);
       prefs.setString(
-          "userAddress",
-          first.addressLine ??
-              (first.adminArea +
-                  ' ' +
-                  first.postalCode +
-                  ', ' +
-                  first.countryName));
+        "userAddress",
+        first.addressLine ??
+            (first.adminArea +
+                ' ' +
+                first.postalCode +
+                ', ' +
+                first.countryName),
+      );
     });
     await assignDeviceID();
   }
@@ -460,18 +463,11 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                                   title: Text('warning'.tr),
                                   content: RichText(
                                     text: TextSpan(
-                                      text: 'location_error'.tr,
+                                      text: prefs.getInt('count') == 1
+                                          ? 'location_error_supportive_exit'.tr
+                                          : 'location_error_supportive_again'
+                                              .tr,
                                       style: DefaultTextStyle.of(context).style,
-                                      children: <TextSpan>[
-                                        TextSpan(
-                                            text: prefs.getInt('count') == 1
-                                                ? 'location_error_supportive_exit'
-                                                    .tr
-                                                : 'location_error_supportive_again'
-                                                    .tr,
-                                            style: DefaultTextStyle.of(context)
-                                                .style),
-                                      ],
                                     ),
                                   ),
                                   actions: <Widget>[
