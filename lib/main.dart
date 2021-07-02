@@ -316,15 +316,18 @@ class _MyAppState extends State<MyApp> {
         translations: Messages(), // translations
         locale: Locale('hn', 'IN'),
         theme: ThemeData(
-            fontFamily: 'Mukta',
-            primaryColor: primaryColor,
-            buttonColor: primaryColor,
-            iconTheme: IconThemeData(color: primaryColor),
-            accentColor: primaryColor,
-            textSelectionTheme:
-                TextSelectionThemeData(cursorColor: primaryColor),
-            indicatorColor: primaryColor,
-            scaffoldBackgroundColor: Colors.white),
+          fontFamily: 'Mukta',
+          primaryColor: primaryColor,
+          buttonColor: primaryColor,
+          iconTheme: IconThemeData(color: primaryColor),
+          accentColor: primaryColor,
+          textSelectionTheme: TextSelectionThemeData(
+            cursorColor: primaryColor,
+            selectionHandleColor: primaryColor,
+          ),
+          indicatorColor: primaryColor,
+          scaffoldBackgroundColor: Colors.white,
+        ),
         home: SplashScreen());
   }
 }

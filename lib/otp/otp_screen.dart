@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:pashusansaar/home_screen.dart';
+import 'package:pashusansaar/login/login_controller.dart';
+import 'package:pashusansaar/otp/otp_controller.dart';
 import 'package:pashusansaar/user_details/user_details_update_screen.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,7 +12,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'user_details/user_details_fetch_screen.dart';
+import '../user_details/user_details_fetch_screen.dart';
 import 'package:get/get.dart';
 import 'package:flutter_countdown_timer/index.dart';
 
@@ -33,18 +35,21 @@ class _OTPScreenState extends State<OTPScreen>
 
   StreamController<ErrorAnimationType> errorController;
 
-  bool hasError = false, _checkUserLoginState = false, _startTimer = false;
+  bool hasError = false, _startTimer = false;
   String currentText = "";
   final GlobalKey<ScaffoldState> scaffoldKey =
       GlobalKey<ScaffoldState>(debugLabel: 'otpScaffoldKey');
   final formKey = GlobalKey<FormState>(debugLabel: 'otpFormStateKey');
   int endTime = DateTime.now().millisecondsSinceEpoch + 1000 * 60;
   CountdownTimerController countdownTimerController;
+  final OtpController otpController = Get.put(OtpController());
+  final LoginController loginController = Get.put(LoginController());
 
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _verifyPhone();
+      loginController.requestOTP(number: widget.phoneNumber);
+
       countdownTimerController =
           CountdownTimerController(endTime: endTime, onEnd: onEnd);
       setState(() {
@@ -56,7 +61,7 @@ class _OTPScreenState extends State<OTPScreen>
 
     onTapRecognizer = TapGestureRecognizer()
       ..onTap = () {
-        _verifyPhone();
+        loginController.requestOTP(number: widget.phoneNumber);
         countdownTimerController = CountdownTimerController(
             endTime: DateTime.now().millisecondsSinceEpoch + 1000 * 60,
             onEnd: onEnd);
@@ -82,7 +87,6 @@ class _OTPScreenState extends State<OTPScreen>
   checkUserLoginState() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _checkUserLoginState = prefs.getBool('alreadyUser') ?? false;
       prefs.setString('mobileNumber', widget.phoneNumber);
     });
   }
@@ -110,101 +114,6 @@ class _OTPScreenState extends State<OTPScreen>
   void dispose() {
     errorController.close();
     super.dispose();
-  }
-
-  _verifyPhone() async {
-    await FirebaseAuth.instance
-        .verifyPhoneNumber(
-            phoneNumber: '+91${widget.phoneNumber}',
-            verificationCompleted: (PhoneAuthCredential credential) async {
-              await FirebaseAuth.instance
-                  .signInWithCredential(credential)
-                  .then((value) async {
-                if (value.user != null) {
-                  Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => UserDetailsFetch(
-                              currentUser: value.user.uid,
-                              mobile: widget.phoneNumber)));
-                }
-              });
-            },
-            verificationFailed: (FirebaseAuthException e) async {
-              print('verificationFailed==>' + e.toString());
-              FirebaseFirestore.instance
-                  .collection('logger')
-                  .doc(widget.phoneNumber)
-                  .collection('OTP-VerificationFailed')
-                  .doc()
-                  .set({
-                'issue': e.toString(),
-                'mobile': widget.phoneNumber,
-                'userId': FirebaseAuth.instance.currentUser == null
-                    ? ''
-                    : FirebaseAuth.instance.currentUser.uid,
-                'date':
-                    DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
-              });
-            },
-            codeSent: (String verficationID, int resendToken) async {
-              FirebaseFirestore.instance
-                  .collection('logger')
-                  .doc(widget.phoneNumber)
-                  .collection('OTP-Sent')
-                  .doc()
-                  .set({
-                'otp': verficationID,
-                'resendToken': resendToken,
-                'mobile': widget.phoneNumber,
-                'userId': FirebaseAuth.instance.currentUser == null
-                    ? ''
-                    : FirebaseAuth.instance.currentUser.uid,
-                'date':
-                    DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
-              }).then((value) => setState(() {
-                        _verificationCode = verficationID;
-                        _resendToken = resendToken;
-                        _startTimer = true;
-                      }));
-            },
-            codeAutoRetrievalTimeout: (String verificationID) {
-              // FirebaseFirestore.instance
-              //     .collection('logger')
-              //     .doc(widget.phoneNumber)
-              //     .collection('OTP-CodeAutoRetrieval')
-              //     .doc()
-              //     .set({
-              //   'otp': verificationID,
-              //   'mobile': widget.phoneNumber,
-              //   'userId': FirebaseAuth.instance.currentUser == null
-              //       ? ''
-              //       : FirebaseAuth.instance.currentUser.uid,
-              //   'date':
-              //       DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
-              // }).then((value) => setState(() {
-              //           _verificationCode = verificationID;
-              //           _startTimer = false;
-              //         }));
-            },
-            timeout: Duration(seconds: 60),
-            forceResendingToken: _resendToken)
-        .catchError((error) async {
-      print('otp-error===>' + error.toString());
-      FirebaseFirestore.instance
-          .collection('logger')
-          .doc(widget.phoneNumber)
-          .collection('OTP-Error')
-          .doc()
-          .set({
-        'issue': error.toString(),
-        'mobile': widget.phoneNumber,
-        'userId': FirebaseAuth.instance.currentUser == null
-            ? ''
-            : FirebaseAuth.instance.currentUser.uid,
-        'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
-      });
-    });
   }
 
   @override
@@ -383,50 +292,25 @@ class _OTPScreenState extends State<OTPScreen>
                         hasError = false;
                       });
                       try {
-                        await FirebaseAuth.instance
-                            .signInWithCredential(PhoneAuthProvider.credential(
-                                verificationId: _verificationCode,
-                                smsCode: currentText))
-                            .then((value) async {
-                          if (value.user != null) {
-                            try {
-                              FirebaseFirestore.instance
-                                  .collection("userInfo")
-                                  .doc(FirebaseAuth.instance.currentUser.uid)
-                                  .get(
-                                      GetOptions(source: Source.serverAndCache))
-                                  .then((profile) {
-                                profile.exists
-                                    ? Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                UserDetailsUpdate(
-                                                  currentUser: value.user.uid,
-                                                  mobile: widget.phoneNumber,
-                                                  name: profile['name'],
-                                                  referralCode: profile[
-                                                      'enteredReferralCode'],
-                                                )))
-                                    : Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                UserDetailsFetch(
-                                                    currentUser: value.user.uid,
-                                                    mobile:
-                                                        widget.phoneNumber)));
-                              });
-                            } catch (e) {
-                              Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => UserDetailsFetch(
-                                          currentUser: value.user.uid,
-                                          mobile: widget.phoneNumber)));
-                            }
-                          }
-                        });
+                        bool isUserPresent = await otpController.verifyOTP(
+                          number: widget.phoneNumber,
+                          otp: textEditingController.text,
+                        );
+                        if (isUserPresent) {
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => UserDetailsFetch(
+                                        mobile: widget.phoneNumber,
+                                      )));
+                        } else {
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => UserDetailsFetch(
+                                        mobile: widget.phoneNumber,
+                                      )));
+                        }
                       } catch (e) {
                         FocusScope.of(context).unfocus();
                         ScaffoldMessenger.of(context).showSnackBar(

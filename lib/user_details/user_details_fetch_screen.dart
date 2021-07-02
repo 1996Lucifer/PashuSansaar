@@ -5,7 +5,10 @@ import 'package:device_info/device_info.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:intl/intl.dart';
+import 'package:pashusansaar/auth_token/auth_token_controller.dart';
 import 'package:pashusansaar/home_screen.dart';
+import 'package:pashusansaar/otp/otp_controller.dart';
+import 'package:pashusansaar/otp/otp_model.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:flutter/gestures.dart';
@@ -22,9 +25,8 @@ import '../utils/reusable_widgets.dart';
 // import 'package:geoflutterfire/geoflutterfire.dart' as geoFire;
 
 class UserDetailsFetch extends StatefulWidget {
-  final String currentUser, mobile;
-  UserDetailsFetch({Key key, @required this.currentUser, @required this.mobile})
-      : super(key: key);
+  final String mobile;
+  UserDetailsFetch({Key key, @required this.mobile}) : super(key: key);
 
   @override
   _UserDetailsFetchState createState() => _UserDetailsFetchState();
@@ -32,6 +34,7 @@ class UserDetailsFetch extends StatefulWidget {
 
 class _UserDetailsFetchState extends State<UserDetailsFetch> {
   var onTapRecognizer;
+  OtpModel otpModel;
   bool _showReferralData = false, hasError = false, _zipCodeTextField = false;
   ProgressDialog pr;
   int count = 0;
@@ -40,9 +43,8 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
   TextEditingController zipCodeController = new TextEditingController();
   Map<String, dynamic> mobileInfo = {};
   LocationData _locate;
-  // Map _profileData = {};
-
-  // final geo = geoFire.Geoflutterfire();
+  final AuthToken _authController = Get.put(AuthToken());
+  final OtpController _otpController = Get.put(OtpController());
 
   String currentText = "";
 
@@ -92,11 +94,38 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
       }
     }
 
+    var first;
     _locationData = await location.getLocation();
+
+    print('_locationData===' + _locationData.toString());
+    var address = await Geocoder.local.findAddressesFromCoordinates(
+      Coordinates(
+        _locationData.latitude,
+        _locationData.longitude,
+      ),
+    );
+    first = address.first;
+
+    print('first===' + first.toString());
+
     setState(() {
-      _locate = _locationData;
-      prefs.setDouble("latitude", _locate.latitude);
-      prefs.setDouble("longitude", _locate.longitude);
+      prefs.setDouble("latitude", first.coordinates.latitude);
+      prefs.setDouble("longitude", first.coordinates.longitude);
+
+      prefs.setString(
+          "district",
+          ReusableWidgets.mappingDistrict(
+              first.subAdminArea ?? first.locality ?? first.featureName));
+      prefs.setString("zipCode", first.postalCode);
+      prefs.setString(
+        "userAddress",
+        first.addressLine ??
+            (first.adminArea +
+                ' ' +
+                first.postalCode +
+                ', ' +
+                first.countryName),
+      );
     });
     await assignDeviceID();
   }
@@ -135,45 +164,45 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
     }
   }
 
-  storeFCMToken() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String _token = await FirebaseMessaging.instance.getToken();
+  // storeFCMToken() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   String _token = await FirebaseMessaging.instance.getToken();
 
-    var addresses = await Geocoder.local.findAddressesFromCoordinates(
-        Coordinates(prefs.getDouble('latitude'), prefs.getDouble('longitude')));
-    var first = addresses.first;
+  //   var addresses = await Geocoder.local.findAddressesFromCoordinates(
+  //       Coordinates(prefs.getDouble('latitude'), prefs.getDouble('longitude')));
+  //   var first = addresses.first;
 
-    print(_token);
+  //   print(_token);
 
-    FirebaseFirestore.instance
-        .collection("fcmToken")
-        .doc(widget.currentUser)
-        .set({
-      "id": widget.currentUser,
-      'lat': prefs.getDouble('latitude').toString(),
-      'long': prefs.getDouble('longitude').toString(),
-      'userToken': _token,
-      'district': ReusableWidgets.mappingDistrict(
-        first.subAdminArea ?? first.locality ?? first.featureName,
-      ),
-    }).catchError((err) {
-      print(
-        "errToken->" + err.toString(),
-      );
-      FirebaseFirestore.instance
-          .collection('logger')
-          .doc(widget.mobile)
-          .collection('token')
-          .doc()
-          .set({
-        'issue': err.toString(),
-        'userId': FirebaseAuth.instance.currentUser == null
-            ? ''
-            : FirebaseAuth.instance.currentUser.uid,
-        'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
-      });
-    });
-  }
+  //   FirebaseFirestore.instance
+  //       .collection("fcmToken")
+  //       .doc(widget.currentUser)
+  //       .set({
+  //     "id": widget.currentUser,
+  //     'lat': prefs.getDouble('latitude').toString(),
+  //     'long': prefs.getDouble('longitude').toString(),
+  //     'userToken': _token,
+  //     'district': ReusableWidgets.mappingDistrict(
+  //       first.subAdminArea ?? first.locality ?? first.featureName,
+  //     ),
+  //   }).catchError((err) {
+  //     print(
+  //       "errToken->" + err.toString(),
+  //     );
+  //     FirebaseFirestore.instance
+  //         .collection('logger')
+  //         .doc(widget.mobile)
+  //         .collection('token')
+  //         .doc()
+  //         .set({
+  //       'issue': err.toString(),
+  //       'userId': FirebaseAuth.instance.currentUser == null
+  //           ? ''
+  //           : FirebaseAuth.instance.currentUser.uid,
+  //       'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
+  //     });
+  //   });
+  // }
 
   loadAsset() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -186,6 +215,18 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
         setState(() {
           prefs.setDouble("latitude", first.coordinates.latitude);
           prefs.setDouble("longitude", first.coordinates.longitude);
+          prefs.setString("district",
+              first.subAdminArea ?? first.locality ?? first.featureName);
+          prefs.setString("zipCode", first.postalCode);
+          prefs.setString(
+            "userAddress",
+            first.addressLine ??
+                (first.adminArea +
+                    ' ' +
+                    first.postalCode +
+                    ', ' +
+                    first.countryName),
+          );
         });
       } else {
         ReusableWidgets.showDialogBox(
@@ -400,7 +441,7 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                                 zipCodeController.text.isNotEmpty)
                               await loadAsset();
 
-                            await storeFCMToken();
+                            // await storeFCMToken();
 
                             if (prefs.getDouble('latitude') == null ||
                                 prefs.getDouble('longitude') == null) {
@@ -412,21 +453,13 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                                         title: Text('warning'.tr),
                                         content: RichText(
                                           text: TextSpan(
-                                            text: 'location_error'.tr,
+                                            text: prefs.getInt('count') == 1
+                                                ? 'location_error_supportive_exit'
+                                                    .tr
+                                                : 'location_error_supportive_again'
+                                                    .tr,
                                             style: DefaultTextStyle.of(context)
                                                 .style,
-                                            children: <TextSpan>[
-                                              TextSpan(
-                                                  text: prefs.getInt('count') ==
-                                                          1
-                                                      ? 'location_error_supportive_exit'
-                                                          .tr
-                                                      : 'location_error_supportive_again'
-                                                          .tr,
-                                                  style: DefaultTextStyle.of(
-                                                          context)
-                                                      .style),
-                                            ],
                                           ),
                                         ),
                                         actions: <Widget>[
@@ -459,67 +492,57 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
 
                                 pr.style(message: 'progress_dialog_message'.tr);
                                 pr.show();
-                                FirebaseFirestore.instance
-                                    .collection("userInfo")
-                                    .doc(widget.currentUser)
-                                    .set({
-                                  "currentUser": widget.currentUser,
-                                  "name": nameController.text,
-                                  "mobile": widget.mobile,
-                                  "mobileInfo": mobileInfo,
-                                  'latitude':
-                                      prefs.getDouble('latitude').toString(),
-                                  'longitude':
+
+                                bool status =
+                                    await _authController.fetchAuthToken(
+                                  token:
+                                      '${_otpController.authorization.value}',
+                                  mobileInfo: mobileInfo,
+                                  name: nameController.text,
+                                  apkVersion: prefs
+                                      .getStringList('currentVersion')
+                                      .join('.'),
+                                  longitude:
                                       prefs.getDouble('longitude').toString(),
-                                  'referralCode':
-                                      ReusableWidgets.randomCodeGenerator(),
-                                  'enteredReferralCode':
+                                  latitude:
+                                      prefs.getDouble('latitude').toString(),
+                                  referredByCode:
                                       referralCodeController.text.isNotEmpty
                                           ? referralCodeController.text
                                               .toUpperCase()
                                           : '',
-                                  'alreadyUser': true,
-                                  'appVersion': prefs
-                                      .getStringList('currentVersion')
-                                      .join('.'),
-                                  'dateOfCreation': FirebaseAuth.instance
-                                      .currentUser.metadata.creationTime
-                                      .toString(),
-                                  'zipcode': zipCodeController.text ?? ''
-                                }).then((result) {
-                                  pr.hide().then(
-                                    (isHidden) {
-                                      return Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              HomeScreen(selectedIndex: 0),
-                                        ),
-                                      );
-                                    },
-                                  );
+                                  number: widget.mobile,
+                                  zipCode:
+                                      prefs.getString("zipCode").toString(),
+                                  userAddress:
+                                      prefs.getString("userAddress").toString(),
+                                  cityName:
+                                      prefs.getString("district").toString(),
+                                );
+
+                                setState(() {
+                                  prefs.setString('token',
+                                      _otpController.authorization.value);
+                                  prefs.setString('accessToken',
+                                      _authController.accessToken.value);
+                                  prefs.setString('refreshToken',
+                                      _authController.refreshToken.value);
+                                  prefs.setString(
+                                      'userId', _authController.userId.value);
+                                  prefs.setInt(
+                                      'expires', _authController.expires.value);
                                 });
+
+                                pr.hide();
+                                if (status) {
+                                  Get.off(() => HomeScreen(
+                                        selectedIndex: 0,
+                                      ));
+                                }
                               } catch (err) {
-                                // pr.hide();
                                 print(
                                   "err->" + err.toString(),
                                 );
-                                FirebaseFirestore.instance
-                                    .collection('logger')
-                                    .doc(widget.mobile)
-                                    .collection('userDetails')
-                                    .doc()
-                                    .set({
-                                  'issue': err.toString(),
-                                  'userId': FirebaseAuth.instance.currentUser ==
-                                          null
-                                      ? ''
-                                      : FirebaseAuth.instance.currentUser.uid,
-                                  'date': DateFormat()
-                                      .add_yMMMd()
-                                      .add_jm()
-                                      .format(DateTime.now()),
-                                });
                               }
                             }
                           }

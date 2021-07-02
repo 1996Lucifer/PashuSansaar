@@ -6,11 +6,6 @@ List<String> animalType = [
   'buffalo_male'.tr,
   'ox'.tr,
   'other_animal'.tr,
-  // {"id": 1, "name": 'cow'.tr},
-  // {"id": 2, "name": 'buffalo_male'.tr},
-  // {"id": 3, "name": 'ox'.tr},
-  // {"id": 4, "name": 'buffalo_female'.tr},
-  // {"id": 5, "name": 'other_animal'.tr}
 ];
 
 List<List<String>> animalType1 = [
@@ -155,6 +150,7 @@ List<String> isPregnant = [
   '9_months_pregnant'.tr,
   '10_months_pregnant'.tr,
 ];
+
 List<String> ifPregnant = [
   'this_week_only'.tr,
   '1_week_before'.tr,
@@ -167,8 +163,9 @@ List<String> ifPregnant = [
   '5_month_before'.tr,
   '6_month_before'.tr,
   '1_year_ago'.tr,
+  '2_year_ago'.tr,
   '5_year_ago'.tr,
-  'more_than_2_year_ago'.tr,
+  'more_than_5_year_ago'.tr,
 ];
 
 List<String> yesNo = ['yes'.tr, 'no'.tr];
@@ -217,3 +214,80 @@ Map<String, String> hindiToEnglishDistrictMapping = {
   "उज्जैन": "Ujjain",
   "अमरोहा": "Amroha"
 };
+
+Map<String, int> animalTypeMapping = {
+  "cow".tr: 1,
+  'buffalo_female'.tr: 2,
+  'buffalo_male'.tr: 3,
+  'ox'.tr: 4,
+  'other_animal'.tr: 5,
+};
+
+Map<int, String> intToAnimalTypeMapping = {
+  1: 'cow'.tr,
+  2: 'buffalo_female'.tr,
+  3: 'buffalo_male'.tr,
+  4: 'ox'.tr,
+  5: 'other_animal'.tr,
+};
+
+Map<String, int> animalBayaatMapping = {
+  'zero'.tr: 0,
+  'first'.tr: 1,
+  'second'.tr: 2,
+  'third'.tr: 3,
+  'fourth'.tr: 4,
+  'fifth'.tr: 5,
+  'sixth'.tr: 6,
+  'seventh'.tr: 7,
+};
+
+Map<int, String> intToAnimalBayaatMapping = {
+  0: 'zero'.tr,
+  1: 'first'.tr,
+  2: 'second'.tr,
+  3: 'third'.tr,
+  4: 'fourth'.tr,
+  5: 'fifth'.tr,
+  6: 'sixth'.tr,
+  7: 'seventh'.tr,
+};
+
+Map<int, String> intToRecentBayaatTime = {
+  0: 'this_week_only'.tr,
+  1: '1_week_before'.tr,
+  2: '2_week_before'.tr,
+  3: '3_week_before'.tr,
+  10: '1_month_before'.tr,
+  20: '2_month_before'.tr,
+  30: '3_month_before'.tr,
+  40: '4_month_before'.tr,
+  50: '5_month_before'.tr,
+  60: '6_month_before'.tr,
+  100: '1_year_ago'.tr,
+  200: '2_year_ago'.tr,
+  500: '5_year_ago'.tr,
+  1000: 'more_than_5_year_ago'.tr,
+};
+
+Map<int, String> intToPregnantTime = {
+  1: '1_months_pregnant'.tr,
+  2: '2_months_pregnant'.tr,
+  3: '3_months_pregnant'.tr,
+  4: '4_months_pregnant'.tr,
+  5: '5_months_pregnant'.tr,
+  6: '6_months_pregnant'.tr,
+  7: '7_months_pregnant'.tr,
+  8: '8_months_pregnant'.tr,
+  9: '9_months_pregnant'.tr,
+  10: '10_months_pregnant'.tr,
+};
+
+Map<int, String> intToAnimalHasBaby = {
+  0: 'nothing'.tr,
+  1: 'bacchri'.tr,
+  2: 'bachhra'.tr,
+};
+
+Map<String, bool> stringToYesNo = {'yes'.tr: true, 'no'.tr: false};
+Map<bool, String> intToYesNo = {true: 'yes'.tr, false: 'no'.tr};
