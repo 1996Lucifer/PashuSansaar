@@ -87,8 +87,7 @@ class ReusableWidgets {
   static String dateDifference(String date) {
     String suffix = '';
     String duration = '';
-    var dateObj = DateTime.now()
-        .difference(DateFormat('dd MMM yyyy').add_jm().parse(date));
+    var dateObj = DateTime.now().difference(DateTime.parse(date));
 
     if (dateObj.inSeconds < 60) {
       duration = dateObj.inSeconds.toString();
@@ -109,14 +108,14 @@ class ReusableWidgets {
     return '${duration + ' ' + suffix}';
   }
 
-  static removeEnglisgDataFromName(String str) {
+  static String removeEnglisgDataFromName(String str) {
     List<String> x = str.split(' (')[0].split(' ');
     String str1 = x.length > 2 ? x[0] + ' ' + x[1] : x.join(' ');
 
     return str1;
   }
 
-  static mappingDistrict(String str) {
+  static String mappingDistrict(String str) {
     String _local = '';
     if (hindiToEnglishDistrictMapping.containsKey(str)) {
       _local = hindiToEnglishDistrictMapping[str] ?? (str);
@@ -125,5 +124,15 @@ class ReusableWidgets {
     }
 
     return _local;
+  }
+
+  static bool isTokenExpired(int epoch) {
+    DateTime expiryDate = DateTime.fromMillisecondsSinceEpoch(epoch);
+    if (DateTime.now().compareTo(expiryDate) == 1) return true;
+    return false;
+  }
+
+  static int convertStringToInt(String value) {
+    return int.parse(value);
   }
 }

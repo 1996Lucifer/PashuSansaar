@@ -12,7 +12,9 @@ import 'package:pashusansaar/utils/global.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'buy_animal/buy_animal_controller.dart';
 import 'profile_main.dart';
+import 'refresh_token/refresh_token_controller.dart';
 import 'sell_animal/sell_animal_main.dart';
 import 'package:get/get.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
@@ -40,6 +42,11 @@ class _HomeScreenState extends State<HomeScreen> {
   double lat = 0.0, long = 0.0;
   LocationData _locate;
 
+  final BuyAnimalController buyAnimalController =
+      Get.put(BuyAnimalController());
+  final RefreshTokenController refreshTokenController =
+      Get.put(RefreshTokenController());
+
   @override
   void initState() {
     _pageController = PageController(initialPage: widget.selectedIndex);
@@ -47,65 +54,6 @@ class _HomeScreenState extends State<HomeScreen> {
     checkInitialData();
     super.initState();
   }
-
-//https://docs.google.com/spreadsheets/d/10M_tCvCNEjvsBPO3wg2hou9oF5lZikaH5C31kHXn4XU/edit#gid=0
-//https://script.google.com/macros/s/AKfycbwzLm_QkArFGt2y-3Aa-RvSeZQY7hLVOpBXHrRjjU-QzQHRDpmUnCaUH5efwvrq1IXe/exec
-// AKfycbwzLm_QkArFGt2y-3Aa-RvSeZQY7hLVOpBXHrRjjU-QzQHRDpmUnCaUH5efwvrq1IXe
-
-  // updateData() async {
-  //   var addresses =
-  //       await geoCoder.Geocoder.local.findAddressesFromQuery("621719");
-  //   var first = addresses.first;
-
-  //   Map<String, dynamic> data = {
-  //     "addressLine": first.addressLine,
-  //     "adminArea": first.adminArea,
-  //     "coordinates": first.coordinates.toString(),
-  //     "countryCode": first.countryCode,
-  //     "countryName": first.countryName,
-  //     "featureName": first.featureName,
-  //     "locality": first.locality,
-  //     "postalCode": first.postalCode,
-  //     "subAdminArea": first.subAdminArea,
-  //     "subLocality": first.subLocality
-  //   };
-
-  //   print(data);
-
-  // FirebaseFirestore.instance
-  //     .collection('userInfo')
-  //     .limit(500)
-  //     .get()
-  //     .then((value) {
-  //   value.docs.forEach((element) async {
-  //     if (element['latitude'] != "null" || element['longitude'] != "null") {
-  //       var addresses = await geoCoder.Geocoder.local
-  //           .findAddressesFromCoordinates(geoCoder.Coordinates(
-  //               double.parse(element['latitude']),
-  //               double.parse(element['longitude'])));
-  //       var first = addresses.first;
-
-  //       Map<String, dynamic> data = {
-  //         "addressLine": first.addressLine,
-  //         "adminArea": first.adminArea,
-  //         "coordinates": first.coordinates.toString(),
-  //         "countryCode": first.countryCode,
-  //         "countryName": first.countryName,
-  //         "featureName": first.featureName,
-  //         "locality": first.locality,
-  //         "postalCode": first.postalCode,
-  //         "subAdminArea": first.subAdminArea,
-  //         "subLocality": first.subLocality
-  //       };
-
-  //       await FirebaseFirestore.instance
-  //           .collection('addressCollection')
-  //           .doc(element.reference.id)
-  //           .set(data);
-  //     }
-  //   });
-  // });
-  // }
 
   checkInitialData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -237,41 +185,11 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  _getDistrictList() async {
-    pr.show();
-
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    List district = [];
-    RemoteConfig remoteConfig = await RemoteConfig.instance;
-    await remoteConfig.fetch(expiration: const Duration(seconds: 0));
-    await remoteConfig.activateFetched();
-    var address = await geoCoder.Geocoder.local.findAddressesFromCoordinates(
-        geoCoder.Coordinates(
-            prefs.getDouble('latitude'), prefs.getDouble('longitude')));
-    var first = address.first;
-
-    json
-        .decode(remoteConfig.getValue("district_map").asString())
-        .forEach((element) {
-      district.addIf(element[first.subAdminArea ?? first.locality] != null,
-          element[first.subAdminArea ?? first.locality]);
-    });
-
-    setState(() {
-      districtList = district.isEmpty ? [] : district[0];
-    });
-
-    getInitialInfo();
-  }
-
   loginSetup() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      prefs.setBool(
-          'isLoggedIn', FirebaseAuth.instance.currentUser.uid.isNotEmpty);
-      prefs.setBool(
-          'alreadyUser', FirebaseAuth.instance.currentUser.uid.isNotEmpty);
+      prefs.setBool('isLoggedIn', true);
+      prefs.setBool('alreadyUser', true);
       _referralUniqueValue = prefs.getString('referralUniqueValue');
       _checkReferral = prefs.getBool('checkReferral') ?? false;
       _mobileNumber = prefs.getString('mobileNumber');
@@ -280,99 +198,52 @@ class _HomeScreenState extends State<HomeScreen> {
       long = prefs.getDouble('longitude');
     });
 
-    _getDistrictList();
-    // dataUpdation();
+    getInitialInfo();
   }
 
-  // dataUpdation() async {
-  //   await FirebaseFirestore.instance.collection("userInfo").get().then(
-  //     (value) {
-  //       value.docs.forEach((element) {
-  //         FirebaseFirestore.instance
-  //             .collection("userInfo")
-  //             .doc(element.reference.id)
-  //             .update({
-  //               'dateOfCreation': FirebaseAuth.instance.
-  //             });
-  //       });
-  //     },
-  //   );
-  // }
-
   getInitialInfo() async {
-    try {
-      final now = DateTime.now();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool status;
+    pr.show();
 
-      if (districtList.isEmpty) {
-        Stream<List<DocumentSnapshot>> stream = geo
-            .collection(
-                collectionRef: FirebaseFirestore.instance
-                    .collection("buyingAnimalList1")
-                    .where('isValidUser', isEqualTo: 'Approved'))
-            .within(
-                center: geo.point(latitude: lat, longitude: long),
-                radius: 50,
-                field: 'position',
-                strictMode: true);
-
-        stream.listen((List<DocumentSnapshot> documentList) {
-          // List _temp = [];
-          // documentList.forEach((e) {
-          //   _temp.addIf(e['isValidUser'] == 'Approved', e);
-          // });
-          setState(() {
-            _animalInfo = documentList;
-            _animalInfo
-                .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
-          });
-          pr.hide();
-          // if (pr.isShowing()) pr.hide();
+    if (ReusableWidgets.isTokenExpired(prefs.getInt('expires') ?? 0)) {
+      status = await refreshTokenController.getRefreshToken(
+          refresh: prefs.getString('refreshToken') ?? '');
+      if (status) {
+        setState(() {
+          prefs.setString(
+              'accessToken', refreshTokenController.accessToken.value);
+          prefs.setString(
+              'refreshToken', refreshTokenController.refreshToken.value);
+          prefs.setInt('expires', refreshTokenController.expires.value);
         });
       } else {
-        FirebaseFirestore.instance
-            .collection('buyingAnimalList1')
-            .orderBy('dateOfSaving', descending: true)
-            .where('dateOfSaving',
-                isLessThanOrEqualTo: ReusableWidgets.dateTimeToEpoch(now))
-            .where('district', whereIn: districtList)
-            .where('isValidUser', isEqualTo: 'Approved')
-            .limit(25)
-            .get(GetOptions(source: Source.serverAndCache))
-            .asStream()
-            .listen((value) {
-          setState(() {
-            lastDocument = value.docs.last['dateOfSaving'];
-            _animalInfo = value.docs;
-            _animalInfo
-                .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
-          });
-          pr.hide();
-          // if (pr.isShowing()) pr.hide();
-        });
+        print('Error getting token==' + status.toString());
       }
-    } catch (e) {
-      print('=-=Error-Home=->>>' + e.toString());
-      // if (pr.isShowing()) pr.hide();
-
-      FirebaseFirestore.instance
-          .collection('logger')
-          .doc(_mobileNumber)
-          .collection('home-buying')
-          .doc()
-          .set({
-        'issue': e.toString(),
-        'userId': FirebaseAuth.instance.currentUser == null
-            ? ''
-            : FirebaseAuth.instance.currentUser.uid,
-        'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
-      });
     }
 
-    print('=-=-==-=' + pr.isShowing().toString());
+    List data = await buyAnimalController.getAnimal(
+      latitude: 40.1,
+      longitude: -97.1,
+      // latitude: lat,
+      // longitude: long,
+      animalType: null,
+      minMilk: null,
+      maxMilk: null,
+      page: 1,
+      accessToken: prefs.getString('accessToken') ?? '',
+      refreshToken: prefs.getString('refreshToken') ?? '',
+    );
 
-    // if (pr.isShowing()) pr.hide();
+    setState(() {
+      _animalInfo = data;
+    });
 
-    getAnimalSellingInfo();
+    pr.hide();
+
+    print('animalInfo===' + _animalInfo.length.toString());
+
+    // getAnimalSellingInfo();
   }
 
   getAnimalSellingInfo() async {
