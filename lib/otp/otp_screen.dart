@@ -102,7 +102,7 @@ class _OTPScreenState extends State<OTPScreen>
                   // recognizer: TapGestureRecognizer()..onTap(),
                   recognizer: onTapRecognizer,
                   style: TextStyle(
-                      color: primaryColor,
+                      color: appPrimaryColor,
                       fontWeight: FontWeight.bold,
                       fontSize: 16)),
               // WidgetSpan(
@@ -173,7 +173,7 @@ class _OTPScreenState extends State<OTPScreen>
                   child: PinCodeTextField(
                     appContext: context,
                     pastedTextStyle: TextStyle(
-                      color: primaryColor,
+                      color: appPrimaryColor,
                       fontWeight: FontWeight.bold,
                     ),
                     length: 6,
@@ -186,11 +186,11 @@ class _OTPScreenState extends State<OTPScreen>
                       borderRadius: BorderRadius.circular(5),
                       fieldHeight: 50,
                       fieldWidth: 40,
-                      activeColor: primaryColor,
+                      activeColor: appPrimaryColor,
                       activeFillColor: Colors.white,
-                      inactiveColor: primaryColor,
+                      inactiveColor: appPrimaryColor,
                       inactiveFillColor: Colors.white,
-                      selectedColor: primaryColor,
+                      selectedColor: appPrimaryColor,
                       selectedFillColor: Colors.white,
                     ),
 
@@ -249,7 +249,7 @@ class _OTPScreenState extends State<OTPScreen>
                       onEnd: onEnd,
                       endTime: endTime,
                       textStyle: TextStyle(
-                          color: primaryColor,
+                          color: appPrimaryColor,
                           fontSize: 18,
                           fontWeight: FontWeight.bold),
                       endWidget: textWidget(),
@@ -269,7 +269,7 @@ class _OTPScreenState extends State<OTPScreen>
                     borderRadius: BorderRadius.circular(24),
                   ),
                   elevation: 5,
-                  color: primaryColor,
+                  color: appPrimaryColor,
                   child: Text(
                     "verify_button".tr,
                     style: TextStyle(

@@ -136,7 +136,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                                                 Text(
                                                   'change_info'.tr,
                                                   style: TextStyle(
-                                                      color: primaryColor,
+                                                      color: appPrimaryColor,
                                                       fontSize: 15),
                                                 ),
                                                 SizedBox(
@@ -144,7 +144,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                                                 ),
                                                 FaIcon(
                                                   FontAwesomeIcons.edit,
-                                                  color: primaryColor,
+                                                  color: appPrimaryColor,
                                                   size: 16,
                                                 )
                                               ],
@@ -168,7 +168,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                                                 Text(
                                                   'इच्छुक खरीदार की सूचि',
                                                   style: TextStyle(
-                                                      color: primaryColor,
+                                                      color: appPrimaryColor,
                                                       fontSize: 15),
                                                 ),
                                                 SizedBox(
@@ -176,7 +176,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                                                 ),
                                                 FaIcon(
                                                   FontAwesomeIcons.arrowRight,
-                                                  color: primaryColor,
+                                                  color: appPrimaryColor,
                                                   size: 16,
                                                 )
                                               ],
@@ -492,12 +492,12 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
           _isErrorEmpty
               ? Text(
                   'empty_removal_price_error'.tr,
-                  style: TextStyle(color: primaryColor),
+                  style: TextStyle(color: appPrimaryColor),
                 )
               : _isError
                   ? Text(
                       'removal_price_error'.tr,
-                      style: TextStyle(color: primaryColor),
+                      style: TextStyle(color: appPrimaryColor),
                     )
                   : SizedBox.shrink()
 
@@ -510,7 +510,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
           //           '${widget.animalInfo[index]['animalInfo']['animalPrice']}'
           //     },
           //   ),
-          //   style: TextStyle(color: primaryColor),
+          //   style: TextStyle(color: appPrimaryColor),
           // )
         ],
       );
@@ -598,7 +598,6 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                             'price': _price,
                             'soldDate':
                                 ReusableWidgets.dateTimeToEpoch(DateTime.now())
-
                           },
                           'isValidUser': 'RemovedByUser',
                           'dateOfUpdation':
@@ -633,7 +632,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                                               child: Text(
                                                 'Ok'.tr,
                                                 style: TextStyle(
-                                                    color: primaryColor),
+                                                    color: appPrimaryColor),
                                               ),
                                               onPressed: () {
                                                 Navigator.of(context).pop();

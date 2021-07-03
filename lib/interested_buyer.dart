@@ -250,12 +250,12 @@ class _InterestedBuyerState extends State<InterestedBuyer> {
                           itemsPerPage: 10,
                           initialLoader: Center(
                             child: CircularProgressIndicator(
-                              backgroundColor: primaryColor,
+                              backgroundColor: appPrimaryColor,
                             ),
                           ),
                           bottomLoader: Center(
                             child: CircularProgressIndicator(
-                              backgroundColor: primaryColor,
+                              backgroundColor: appPrimaryColor,
                             ),
                           ),
                           emptyDisplay: Center(

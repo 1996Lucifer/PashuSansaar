@@ -67,12 +67,12 @@ class _RemoveAnimalState extends State<RemoveAnimal> {
           _isErrorEmpty
               ? Text(
                   'empty_removal_price_error'.tr,
-                  style: TextStyle(color: primaryColor),
+                  style: TextStyle(color: appPrimaryColor),
                 )
               : _isError
                   ? Text(
                       'removal_price_error'.tr,
-                      style: TextStyle(color: primaryColor),
+                      style: TextStyle(color: appPrimaryColor),
                     )
                   : SizedBox.shrink()
         ],
@@ -198,7 +198,7 @@ class _RemoveAnimalState extends State<RemoveAnimal> {
                                               child: Text(
                                                 'Ok'.tr,
                                                 style: TextStyle(
-                                                    color: primaryColor),
+                                                    color: appPrimaryColor),
                                               ),
                                               onPressed: () {
                                                 Navigator.of(context).pop();
@@ -259,12 +259,12 @@ class _RemoveAnimalState extends State<RemoveAnimal> {
                   itemsPerPage: 10,
                   initialLoader: Center(
                     child: CircularProgressIndicator(
-                      backgroundColor: primaryColor,
+                      backgroundColor: appPrimaryColor,
                     ),
                   ),
                   bottomLoader: Center(
                     child: CircularProgressIndicator(
-                      backgroundColor: primaryColor,
+                      backgroundColor: appPrimaryColor,
                     ),
                   ),
                   emptyDisplay: Center(

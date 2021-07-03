@@ -4,7 +4,7 @@ import 'dart:math' show log, pi, pow;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geocoder/geocoder.dart' show Coordinates, Geocoder;
-import 'package:pashusansaar/utils/colors.dart' show primaryColor;
+import 'package:pashusansaar/utils/colors.dart' show appPrimaryColor;
 import 'package:pashusansaar/utils/reusable_widgets.dart' show ReusableWidgets;
 import 'package:dropdown_search/dropdown_search.dart' show DropdownSearch, Mode;
 import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth;
@@ -1306,8 +1306,8 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                                       TextButton(
                                           child: Text(
                                             'Ok'.tr,
-                                            style:
-                                                TextStyle(color: primaryColor),
+                                            style: TextStyle(
+                                                color: appPrimaryColor),
                                           ),
                                           onPressed: () {
                                             Navigator.of(context).pop();

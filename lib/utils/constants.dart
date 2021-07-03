@@ -269,6 +269,22 @@ Map<int, String> intToRecentBayaatTime = {
   500: '5_year_ago'.tr,
   1000: 'more_than_5_year_ago'.tr,
 };
+Map<String, int> stringToRecentBayaatTime = {
+  'this_week_only'.tr: 0,
+  '1_week_before'.tr: 1,
+  '2_week_before'.tr: 2,
+  '3_week_before'.tr: 3,
+  '1_month_before'.tr: 10,
+  '2_month_before'.tr: 20,
+  '3_month_before'.tr: 30,
+  '4_month_before'.tr: 40,
+  '5_month_before'.tr: 50,
+  '6_month_before'.tr: 60,
+  '1_year_ago'.tr: 100,
+  '2_year_ago'.tr: 200,
+  '5_year_ago'.tr: 500,
+  'more_than_5_year_ago'.tr: 1000,
+};
 
 Map<int, String> intToPregnantTime = {
   1: '1_months_pregnant'.tr,
@@ -282,6 +298,18 @@ Map<int, String> intToPregnantTime = {
   9: '9_months_pregnant'.tr,
   10: '10_months_pregnant'.tr,
 };
+Map<String, int> stringToPregnantTime = {
+  '1_months_pregnant'.tr:1,
+  '2_months_pregnant'.tr:2,
+  '3_months_pregnant'.tr:3,
+  '4_months_pregnant'.tr:4,
+  '5_months_pregnant'.tr:5,
+  '6_months_pregnant'.tr:6,
+  '7_months_pregnant'.tr:7,
+  '8_months_pregnant'.tr:8,
+  '9_months_pregnant'.tr:9,
+  '10_months_pregnant'.tr:10,
+};
 
 Map<int, String> intToAnimalHasBaby = {
   0: 'nothing'.tr,
@@ -289,5 +317,5 @@ Map<int, String> intToAnimalHasBaby = {
   2: 'bachhra'.tr,
 };
 
-Map<String, bool> stringToYesNo = {'yes'.tr: true, 'no'.tr: false};
-Map<bool, String> intToYesNo = {true: 'yes'.tr, false: 'no'.tr};
+Map<String, int> stringToYesNo = {'yes'.tr: 0, 'no'.tr: 1};
+Map<int, String> intToYesNo = {0: 'yes'.tr, 1: 'no'.tr};

@@ -221,7 +221,7 @@ class _MyCalledListState extends State<MyCalledList> {
             },
             child: Container(
               decoration: BoxDecoration(
-                border: Border.all(color: primaryColor),
+                border: Border.all(color: appPrimaryColor),
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
@@ -250,7 +250,7 @@ class _MyCalledListState extends State<MyCalledList> {
                 UrlLauncher.launch('tel:+91 ${_list['userMobileNumber']}'),
             child: Container(
               decoration: BoxDecoration(
-                border: Border.all(color: primaryColor),
+                border: Border.all(color: appPrimaryColor),
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
@@ -498,12 +498,12 @@ class _MyCalledListState extends State<MyCalledList> {
                   itemsPerPage: 10,
                   initialLoader: Center(
                     child: CircularProgressIndicator(
-                      backgroundColor: primaryColor,
+                      backgroundColor: appPrimaryColor,
                     ),
                   ),
                   bottomLoader: Center(
                     child: CircularProgressIndicator(
-                      backgroundColor: primaryColor,
+                      backgroundColor: appPrimaryColor,
                     ),
                   ),
                   emptyDisplay: Center(

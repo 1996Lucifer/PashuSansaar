@@ -7,16 +7,16 @@ import 'package:pashusansaar/utils/urls.dart';
 import 'buy_animal_model.dart';
 
 class BuyAnimalController extends GetxController {
-  getAnimal(
-      {double latitude,
-      double longitude,
-      int distance,
-      int animalType,
-      int page,
-      int minMilk,
-      int maxMilk,
-      String accessToken,
-      String refreshToken}) async {
+  getAnimal({
+    double latitude,
+    double longitude,
+    int distance,
+    int animalType,
+    int page,
+    int minMilk,
+    int maxMilk,
+    String accessToken,
+  }) async {
     Map<String, dynamic> payload = {
       "latitude": latitude,
       "longitude": longitude,

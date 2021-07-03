@@ -472,7 +472,7 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
         child: RaisedButton.icon(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          color: primaryColor,
+          color: appPrimaryColor,
           onPressed: () =>
               Navigator.popUntil(context, (route) => route.isFirst),
           icon: Icon(Icons.remove_red_eye_outlined,

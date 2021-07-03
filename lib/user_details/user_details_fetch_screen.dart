@@ -327,7 +327,7 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                               text: "click_here".tr,
                               recognizer: onTapRecognizer,
                               style: TextStyle(
-                                  color: primaryColor,
+                                  color: appPrimaryColor,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16))
                         ]),
@@ -343,7 +343,7 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                             child: PinCodeTextField(
                               appContext: context,
                               pastedTextStyle: TextStyle(
-                                color: primaryColor,
+                                color: appPrimaryColor,
                                 fontWeight: FontWeight.bold,
                               ),
                               length: 6,
@@ -357,11 +357,11 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                                 borderRadius: BorderRadius.circular(5),
                                 fieldHeight: 50,
                                 fieldWidth: 40,
-                                activeColor: primaryColor,
+                                activeColor: appPrimaryColor,
                                 activeFillColor: Colors.white,
-                                inactiveColor: primaryColor,
+                                inactiveColor: appPrimaryColor,
                                 inactiveFillColor: Colors.white,
-                                selectedColor: primaryColor,
+                                selectedColor: appPrimaryColor,
                                 selectedFillColor: Colors.white,
                               ),
                               cursorColor: Colors.black,
@@ -412,7 +412,7 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                           borderRadius: BorderRadius.circular(24),
                         ),
                         elevation: 5,
-                        color: primaryColor,
+                        color: appPrimaryColor,
                         child: Text('proceed_button'.tr,
                             style: TextStyle(
                                 color: Colors.white,
