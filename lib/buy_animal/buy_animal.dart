@@ -1188,7 +1188,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                                 ListView.builder(
                                   key: ObjectKey(widget.animalInfo[0]),
                                   padding: EdgeInsets.only(bottom: 60),
-                                  controller: _scrollController,
+                                  // controller: _scrollController,
                                   physics: BouncingScrollPhysics(),
                                   itemCount: widget.animalInfo.length,
                                   itemBuilder: (context, index) {

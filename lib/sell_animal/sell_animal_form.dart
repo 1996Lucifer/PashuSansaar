@@ -48,7 +48,12 @@ class _SellAnimalFormState extends State<SellAnimalForm>
   File filePath;
   String uniqueId;
 
-  List<Map<String, dynamic>> imagesUpload = [];
+  Map<String, dynamic> imagesUpload = {
+    'Image1': {},
+    'Image2': {},
+    'Image3': {},
+    'Image4': {}
+  };
 
   Map<String, dynamic> imagesFileUpload = {
     'Image1': '',
@@ -57,6 +62,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
     'Image4': ''
   };
 
+  List _imageToBeUploaded = [];
   TextEditingController _controller;
   static const _locale = 'en_IN';
   final UploadImageController _uploadImageController =
@@ -81,26 +87,6 @@ class _SellAnimalFormState extends State<SellAnimalForm>
       NumberFormat.decimalPattern(_locale).format(int.parse(s));
   String get _currency =>
       NumberFormat.compactSimpleCurrency(locale: _locale).currencySymbol;
-
-  // Future<void> uploadFile(File file, String index) async {
-  //   // try {
-  //   setState(() {
-  //     _isLoading = true;
-  //   });
-  //   await firebase_storage.FirebaseStorage.instance
-  //       .ref('${FirebaseAuth.instance.currentUser.uid}/${uniqueId}_$index.jpg')
-  //       .putFile(file);
-
-  //   String downloadURL = await firebase_storage.FirebaseStorage.instance
-  //       .ref('${FirebaseAuth.instance.currentUser.uid}/${uniqueId}_$index.jpg')
-  //       .getDownloadURL();
-
-  //   setState(() {
-  //     imagesUpload['image$index'] = downloadURL;
-  //     imagesFileUpload['Image$index'] = downloadURL;
-  //     _isLoading = false;
-  //   });
-  // }
 
   Future<void> _choose(String index) async {
     try {
@@ -149,8 +135,10 @@ class _SellAnimalFormState extends State<SellAnimalForm>
 
             setState(() {
               imagesFileUpload['Image$index'] = compressedFile.path;
-              imagesUpload
-                  .add({"fileName": "Image$index", "fileType": mimeType});
+              imagesUpload['Image$index'] = {
+                "fileName": "Image$index",
+                "fileType": mimeType
+              };
             });
 
             // await uploadFile(compressedFile, index);
@@ -218,8 +206,10 @@ class _SellAnimalFormState extends State<SellAnimalForm>
 
             setState(() {
               imagesFileUpload['Image$index'] = compressedFile.path;
-              imagesUpload
-                  .add({"fileName": "Image$index", "fileType": mimeType});
+              imagesUpload['Image$index'] = {
+                "fileName": "Image$index",
+                "fileType": mimeType
+              };
             });
 
             // await uploadFile(compressedFile, index);
@@ -988,6 +978,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
     String xAmzDate,
     String policy,
     String xAmzSignature,
+    fileType,
   }) async {
     try {
       dio.FormData data = dio.FormData.fromMap({
@@ -1008,7 +999,11 @@ class _SellAnimalFormState extends State<SellAnimalForm>
         data: data,
       );
 
-      print('=-=-==' + resp.data.toString());
+      print('-=-=-=>>' + resp.toString());
+
+      setState(() {
+        _imageToBeUploaded.add({'fileName': key, 'fileType': fileType});
+      });
       return true;
     } catch (e) {
       print('=-=-==>>' + e.toString());
@@ -1104,20 +1099,25 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                           Text('animal_image_error'.tr),
                         );
                       else {
+                        setState(() {
+                          _imageToBeUploaded.clear();
+                        });
                         pr = new ProgressDialog(context,
                             type: ProgressDialogType.Normal,
                             isDismissible: false);
                         pr.style(message: 'progress_dialog_message'.tr);
                         pr.show();
 
-                        bool status;
                         SharedPreferences prefs =
                             await SharedPreferences.getInstance();
+                        List result = [];
 
                         if (ReusableWidgets.isTokenExpired(
                             prefs.getInt('expires') ?? 0)) {
-                          status = await refreshTokenController.getRefreshToken(
-                              refresh: prefs.getString('refreshToken') ?? '');
+                          bool status =
+                              await refreshTokenController.getRefreshToken(
+                                  refresh:
+                                      prefs.getString('refreshToken') ?? '');
                           if (status) {
                             setState(() {
                               prefs.setString('accessToken',
@@ -1132,15 +1132,18 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                           }
                         }
 
-                        final jsonList = imagesUpload
-                            .map((item) => jsonEncode(item))
-                            .toList();
-
-                        final uniqueJsonList = jsonList.toSet().toList();
-
-                        final result = uniqueJsonList
-                            .map((item) => jsonDecode(item))
-                            .toList();
+                        if (imagesUpload["Image1"].length != 0) {
+                          result.add(imagesUpload["Image1"]);
+                        }
+                        if (imagesUpload["Image2"].length != 0) {
+                          result.add(imagesUpload["Image2"]);
+                        }
+                        if (imagesUpload["Image3"].length != 0) {
+                          result.add(imagesUpload["Image3"]);
+                        }
+                        if (imagesUpload["Image4"].length != 0) {
+                          result.add(imagesUpload["Image4"]);
+                        }
 
                         List imageUploadingStatus =
                             await _uploadImageController.uploadImage(
@@ -1149,64 +1152,102 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                           token: prefs.getString('accessToken'),
                         );
 
-                        bool uploadStatus = false;
+                        List<bool> _isImageUploaded = [];
 
                         if (imageUploadingStatus.isBlank) {
                           ReusableWidgets.showDialogBox(context, 'error'.tr,
                               Text('issue uploading image'));
                         } else {
-                          imageUploadingStatus.forEach(
-                            (element) async {
-                              uploadStatus = await _upload(
-                                path: imagesFileUpload[
-                                    element.fields.key.split('_')[1]],
-                                fileName: element.fields.key,
-                                url: element.url,
-                                key: element.fields.key,
-                                bucket: element.fields.bucket,
-                                xAmzAlgorithm: element.fields.xAmzAlgorithm,
-                                xAmzCredential: element.fields.xAmzCredential,
-                                xAmzDate: element.fields.xAmzDate,
-                                policy: element.fields.policy,
-                                xAmzSignature: element.fields.xAmzSignature,
-                              );
-                            },
+                          for (int i = 0;
+                              i < imageUploadingStatus.length;
+                              i++) {
+                            bool uploadStatus = await _upload(
+                              path: imagesFileUpload[imageUploadingStatus[i]
+                                  .fields
+                                  .key
+                                  .split('_')[1]],
+                              fileName: imageUploadingStatus[i].fields.key,
+                              url: imageUploadingStatus[i].url,
+                              key: imageUploadingStatus[i].fields.key,
+                              bucket: imageUploadingStatus[i].fields.bucket,
+                              xAmzAlgorithm:
+                                  imageUploadingStatus[i].fields.xAmzAlgorithm,
+                              xAmzCredential:
+                                  imageUploadingStatus[i].fields.xAmzCredential,
+                              xAmzDate: imageUploadingStatus[i].fields.xAmzDate,
+                              policy: imageUploadingStatus[i].fields.policy,
+                              xAmzSignature:
+                                  imageUploadingStatus[i].fields.xAmzSignature,
+                              fileType: result[i]['fileType'],
+                            );
+
+                            print('][]' + uploadStatus.toString());
+                            _isImageUploaded.add(uploadStatus);
+                          }
+                        }
+
+                        bool saveAnimalData = false;
+                        if (animalInfo['animalType'] == 'cow'.tr ||
+                            animalInfo['animalType'] == 'buffalo_female'.tr) {
+                          saveAnimalData =
+                              await sellAnimalController.saveAnimal(
+                            animalType:
+                                animalTypeMapping[animalInfo['animalType']],
+                            animalBreed:
+                                ReusableWidgets.removeEnglisgDataFromName(
+                                    animalInfo['animalBreed']),
+                            animalAge: ReusableWidgets.convertStringToInt(
+                                animalInfo['animalAge']),
+                            animalBayat: animalBayaatMapping[
+                                animalInfo['animalIsPregnant']],
+                            animalPrice: ReusableWidgets.convertStringToInt(
+                                animalInfo['animalPrice']),
+                            animalMilk: ReusableWidgets.convertStringToInt(
+                                animalInfo['animalMilk']),
+                            animalMilkCapacity:
+                                ReusableWidgets.convertStringToInt(
+                                    animalInfo['animalMilkCapacity']),
+                            isRecentBayat: stringToYesNo[
+                                extraInfoData['alreadyPregnantYesNo']],
+                            recentBayatTime: stringToRecentBayaatTime[
+                                extraInfoData['animalAlreadyGivenBirth']],
+                            isPregnant:
+                                stringToYesNo[extraInfoData['isPregnantYesNo']],
+                            pregnantTime: stringToPregnantTime[
+                                extraInfoData['animalIfPregnant']],
+                            userId: prefs.getString('userId'),
+                            moreInfo: extraInfoData['moreInfo'],
+                            files: _imageToBeUploaded,
+                            token: prefs.getString("accessToken"),
+                          );
+                        } else {
+                          saveAnimalData =
+                              await sellAnimalController.saveAnimal(
+                            animalType:
+                                animalTypeMapping[animalInfo['animalType']],
+                            animalBreed:
+                                ReusableWidgets.removeEnglisgDataFromName(
+                                    animalInfo['animalBreed']),
+                            animalAge: ReusableWidgets.convertStringToInt(
+                                animalInfo['animalAge']),
+                            animalBayat: animalBayaatMapping[
+                                animalInfo['animalIsPregnant']],
+                            animalPrice: ReusableWidgets.convertStringToInt(
+                                animalInfo['animalPrice']),
+                            userId: prefs.getString('userId'),
+                            moreInfo: extraInfoData['moreInfo'],
+                            files: _imageToBeUploaded,
+                            token: prefs.getString("accessToken"),
                           );
                         }
 
-                        bool saveAnimalData =
-                            await sellAnimalController.saveAnimal(
-                          animalType:
-                              animalTypeMapping[animalInfo['animalType']],
-                          animalBreed:
-                              ReusableWidgets.removeEnglisgDataFromName(
-                                  animalInfo['animalBreed']),
-                          animalAge: ReusableWidgets.convertStringToInt(
-                              animalInfo['animalAge']),
-                          animalBayat: animalBayaatMapping[
-                              animalInfo['animalIsPregnant']],
-                          animalMilk: ReusableWidgets.convertStringToInt(
-                              animalInfo['animalMilk']),
-                          animalMilkCapacity:
-                              ReusableWidgets.convertStringToInt(
-                                  animalInfo['animalMilkCapacity']),
-                          animalPrice: ReusableWidgets.convertStringToInt(
-                              animalInfo['animalPrice']),
-                          isRecentBayat: stringToYesNo[
-                              extraInfoData['alreadyPregnantYesNo']],
-                          recentBayatTime: stringToRecentBayaatTime[
-                              extraInfoData['animalAlreadyGivenBirth']],
-                          isPregnant:
-                              stringToYesNo[extraInfoData['isPregnantYesNo']],
-                          pregnantTime: stringToPregnantTime[
-                              extraInfoData['animalIfPregnant']],
-                          userId: prefs.getString('userId'),
-                          moreInfo: extraInfoData['moreInfo'],
-                          files: imagesUpload,
-                          token: prefs.getString("aceessToken"),
-                        );
+                        bool uploadStatus = _isImageUploaded
+                            .every((element) => element == true);
 
-                        if (saveAnimalData && uploadStatus) {
+                        // print('][]' + uploadStatus.toString());
+                        print('][]==' + _imageToBeUploaded.toString());
+
+                        if (saveAnimalData && _imageToBeUploaded.isNotEmpty) {
                           pr.hide();
                           return showDialog(
                               context: context,
@@ -1232,7 +1273,10 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                         } else {
                           pr.hide();
                           ReusableWidgets.showDialogBox(
-                              context, 'error'.tr, Text('Save animal error'));
+                              context,
+                              'error'.tr,
+                              Text(
+                                  'Save animal error+${_imageToBeUploaded.isNotEmpty.toString()}'));
                         }
                       }
                     }),
