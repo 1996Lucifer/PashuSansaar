@@ -26,7 +26,7 @@ class ReusableWidgets {
           Text(heading),
         ],
       ),
-      backgroundColor: primaryColor,
+      backgroundColor: appPrimaryColor,
       automaticallyImplyLeading: automaticallyImplyLeading,
       actions: actions,
     );

@@ -38,28 +38,34 @@ class SellAnimalController extends GetxController {
       "moreInfo": moreInfo,
       "files": files,
     };
-    String url = GlobalUrl.baseUrl + GlobalUrl.saveAnimals;
-
-    dio.Options options = new dio.Options(
-      headers: {
-        "Authorization": token ?? '',
-      },
-    );
-
-    dio.Response res =
-        await dio.Dio().post(url, data: json.encode(payload), options: options);
 
     bool status = false;
-    if (res != null) {
-      try {
+
+    try {
+      String url = GlobalUrl.baseUrl + GlobalUrl.saveAnimals;
+
+      dio.Options options = new dio.Options(
+        headers: {
+          "Authorization": token ?? '',
+        },
+      );
+
+      dio.Response res = await dio.Dio()
+          .post(url, data: json.encode(payload), options: options);
+
+      if (res != null) {
         if (res.statusCode >= 200 && res.statusCode < 300) {
           status = true;
+        } else {
+          status = false;
         }
-      } catch (e) {
-        print("Exceptions save animal data_______$e");
+      } else {
+        status = false;
       }
+
       return status;
-    } else {
+    } catch (e) {
+      print("Exceptions save animal data_______$e");
       return status;
     }
   }

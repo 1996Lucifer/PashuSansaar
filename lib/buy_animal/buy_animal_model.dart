@@ -1,8 +1,9 @@
 class BuyAnimalModel {
   bool success;
   List<Result> result;
+  int page;
 
-  BuyAnimalModel({this.success, this.result});
+  BuyAnimalModel({this.success, this.result, this.page});
 
   BuyAnimalModel.fromJson(Map<String, dynamic> json) {
     success = json['success'];
@@ -12,6 +13,7 @@ class BuyAnimalModel {
         result.add(new Result.fromJson(v));
       });
     }
+    page = json['page'];
   }
 
   Map<String, dynamic> toJson() {

@@ -74,7 +74,7 @@ class ProfileMainState extends State<ProfileMain>
                   TextButton(
                       child: Text(
                         'Ok'.tr,
-                        style: TextStyle(color: primaryColor),
+                        style: TextStyle(color: appPrimaryColor),
                       ),
                       onPressed: () {
                         // pr.hide();
@@ -101,8 +101,7 @@ class ProfileMainState extends State<ProfileMain>
         userInfo['name'] = widget.profileData['name'];
         userInfo['mobile'] = widget.profileData['mobile'];
         userInfo['image'] = widget.profileData['image'];
-        userInfo['address'] =
-            first.addressLine ??
+        userInfo['address'] = first.addressLine ??
             (first.adminArea +
                 ' ' +
                 first.postalCode +
@@ -164,7 +163,7 @@ class ProfileMainState extends State<ProfileMain>
                         TextButton(
                             child: Text(
                               'Ok'.tr,
-                              style: TextStyle(color: primaryColor),
+                              style: TextStyle(color: appPrimaryColor),
                             ),
                             onPressed: () => Navigator.pop(context)),
                       ]);
@@ -223,7 +222,7 @@ class ProfileMainState extends State<ProfileMain>
                         TextButton(
                             child: Text(
                               'Ok'.tr,
-                              style: TextStyle(color: primaryColor),
+                              style: TextStyle(color: appPrimaryColor),
                             ),
                             onPressed: () => Navigator.pop(context)),
                       ]);
@@ -331,7 +330,7 @@ class ProfileMainState extends State<ProfileMain>
                                 TextButton(
                                     child: Text(
                                       'Ok'.tr,
-                                      style: TextStyle(color: primaryColor),
+                                      style: TextStyle(color: appPrimaryColor),
                                     ),
                                     onPressed: () {
                                       Navigator.pop(context);
@@ -691,7 +690,7 @@ class ProfileMainState extends State<ProfileMain>
                                     flex: 1,
                                     child: FaIcon(
                                       FontAwesomeIcons.shareAlt,
-                                      color: primaryColor,
+                                      color: appPrimaryColor,
                                       size: 40,
                                     ))
                               ],

@@ -5,7 +5,6 @@ import 'dart:core';
 import 'package:another_flushbar/flushbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
-import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:intl/intl.dart';
 import 'package:pashusansaar/refresh_token/refresh_token_controller.dart';
 import 'package:pashusansaar/seller_contact/seller_contact_controller.dart';
@@ -99,7 +98,7 @@ class _BuyAnimalState extends State<BuyAnimal>
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
-        if (lastDocument.isNotEmpty) _getNextSetOfBuyingAnimal();
+        _getNextSetOfBuyingAnimal();
       }
     });
     super.initState();
@@ -112,55 +111,48 @@ class _BuyAnimalState extends State<BuyAnimal>
   }
 
   _getNextSetOfBuyingAnimal() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
       setState(() {
         _isLoading = true;
       });
-      FirebaseFirestore.instance
-          .collection('buyingAnimalList1')
-          .orderBy('dateOfSaving', descending: true)
-          .where('dateOfSaving', isLessThan: lastDocument)
-          .where('district', whereIn: districtList)
-          .where('isValidUser', isEqualTo: 'Approved')
-          .limit(25)
-          .get()
-          .then((value) {
-        List _temp =
-            _tempAnimalList.isEmpty ? widget.animalInfo : _tempAnimalList;
-        value.docs.forEach((e) {
-          _temp.add(e);
-        });
 
-        setState(() {
-          lastDocument = value.docs.last['dateOfSaving'];
-          _isLoading = false;
-          if (_tempAnimalList.isEmpty) {
-            widget.animalInfo = _temp;
-            widget.animalInfo
-                .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
-          } else {
-            _tempAnimalList = _temp;
-            _tempAnimalList
-                .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
-          }
-        });
+      bool status;
 
-        print("=-=-=" + value.docs.length.toString());
+      if (ReusableWidgets.isTokenExpired(prefs.getInt('expires') ?? 0)) {
+        status = await refreshTokenController.getRefreshToken(
+            refresh: prefs.getString('refreshToken') ?? '');
+        if (status) {
+          setState(() {
+            prefs.setString(
+                'accessToken', refreshTokenController.accessToken.value);
+            prefs.setString(
+                'refreshToken', refreshTokenController.refreshToken.value);
+            prefs.setInt('expires', refreshTokenController.expires.value);
+          });
+        } else {
+          print('Error getting token==' + status.toString());
+        }
+      }
+
+      List data = await buyAnimalController.getAnimal(
+        latitude: 40.1,
+        longitude: -97.1,
+        // latitude: lat,
+        // longitude: long,
+        animalType: null,
+        minMilk: null,
+        maxMilk: null,
+        page: 2,
+        accessToken: prefs.getString('accessToken') ?? '',
+      );
+
+      setState(() {
+        _isLoading = false;
+        widget.animalInfo.add(data);
       });
     } catch (e) {
       print('=-=Error-Re-Buying-=->>>' + e.toString());
-      FirebaseFirestore.instance
-          .collection('logger')
-          .doc(widget.userMobileNumber)
-          .collection('home-re-buying')
-          .doc()
-          .set({
-        'issue': e.toString(),
-        'userId': FirebaseAuth.instance.currentUser == null
-            ? ''
-            : FirebaseAuth.instance.currentUser.uid,
-        'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
-      });
     }
   }
 
@@ -418,7 +410,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                           padding: const EdgeInsets.all(3.0),
                           child: ChoiceChip(
                             backgroundColor: Colors.white,
-                            side: BorderSide(color: primaryColor),
+                            side: BorderSide(color: appPrimaryColor),
                             label: Text(
                               e,
                               style: TextStyle(
@@ -426,9 +418,9 @@ class _BuyAnimalState extends State<BuyAnimal>
                                   fontSize: 15,
                                   color: _value == filterMilkValue.indexOf(e)
                                       ? Colors.white
-                                      : primaryColor),
+                                      : appPrimaryColor),
                             ),
-                            selectedColor: primaryColor,
+                            selectedColor: appPrimaryColor,
                             selected: _value == filterMilkValue.indexOf(e),
                             onSelected: (bool selected) {
                               setState(() {
@@ -462,7 +454,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                           padding: const EdgeInsets.all(3.0),
                           child: ChoiceChip(
                             backgroundColor: Colors.white,
-                            side: BorderSide(color: primaryColor),
+                            side: BorderSide(color: appPrimaryColor),
                             label: Text(
                               e,
                               style: TextStyle(
@@ -470,9 +462,9 @@ class _BuyAnimalState extends State<BuyAnimal>
                                   fontSize: 15,
                                   color: _valueRadius == radius.indexOf(e)
                                       ? Colors.white
-                                      : primaryColor),
+                                      : appPrimaryColor),
                             ),
-                            selectedColor: primaryColor,
+                            selectedColor: appPrimaryColor,
                             selected: _valueRadius == radius.indexOf(e),
                             onSelected: (bool selected) {
                               setState1(() {
@@ -524,651 +516,672 @@ class _BuyAnimalState extends State<BuyAnimal>
                                     padding: EdgeInsets.only(bottom: 60),
                                     controller: _scrollController,
                                     physics: BouncingScrollPhysics(),
-                                    itemBuilder: (context, index) => Padding(
-                                          padding: const EdgeInsets.only(
-                                              left: 8.0, right: 8, top: 8),
-                                          child: Column(
-                                            children: [
-                                              Card(
-                                                key: Key(index.toString()),
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          10.0),
-                                                ),
-                                                elevation: 5,
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    _buildInfowidget(index),
-                                                    _distanceTimeMethod(index),
-                                                    _animalImageWidget(index),
-                                                    _animalDescriptionMethod(
-                                                        index),
-                                                    Container(
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          color:
-                                                              Colors.grey[100],
-                                                          boxShadow: [
-                                                            BoxShadow(
-                                                              color:
-                                                                  Colors.grey,
-                                                              blurRadius: 1.0,
-                                                            ),
-                                                          ],
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(8),
-                                                        ),
-                                                        height: 80,
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .all(8.0),
-                                                          child: Row(children: [
-                                                            widget.userImage ==
-                                                                        null ||
-                                                                    widget.userImage ==
-                                                                        ""
-                                                                ? Image.asset(
-                                                                    'assets/images/profile.jpg',
-                                                                    width: 40,
-                                                                    height: 40)
-                                                                : Image.memory(
-                                                                    base64Decode(
-                                                                      widget
-                                                                          .userImage,
-                                                                    ),
-                                                                    width: 40,
-                                                                    height: 40),
-                                                            SizedBox(
-                                                              width: 5,
-                                                            ),
-                                                            Expanded(
-                                                              child: Text(
-                                                                _tempAnimalList[
-                                                                        index][
-                                                                    'userName'],
-                                                                style: TextStyle(
-                                                                    fontSize:
-                                                                        15,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .bold,
-                                                                    color: Colors
-                                                                        .black),
-                                                              ),
-                                                            ),
-                                                            RaisedButton.icon(
-                                                                shape: RoundedRectangleBorder(
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            18.0),
-                                                                    side: BorderSide(
-                                                                        color:
-                                                                            darkSecondaryColor)),
-                                                                color:
-                                                                    secondaryColor,
-                                                                onPressed:
-                                                                    () async {
-                                                                  SharedPreferences
-                                                                      prefs =
-                                                                      await SharedPreferences
-                                                                          .getInstance();
-                                                                  var addresses = await Geocoder.local.findAddressesFromCoordinates(Coordinates(
-                                                                      prefs.getDouble(
-                                                                          'latitude'),
-                                                                      prefs.getDouble(
-                                                                          'longitude')));
-                                                                  var first =
-                                                                      addresses
-                                                                          .first;
-
-                                                                  callingInfo[
-                                                                          'userIdCurrent'] =
-                                                                      FirebaseAuth
-                                                                          .instance
-                                                                          .currentUser
-                                                                          .uid;
-                                                                  callingInfo[
-                                                                      'userIdOther'] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'userId'];
-                                                                  callingInfo[
-                                                                      'otherListId'] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'uniqueId'];
-                                                                  callingInfo[
-                                                                          'channel'] =
-                                                                      "call";
-                                                                  callingInfo[
-                                                                      'userAddress'] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'userAddress'];
-                                                                  callingInfo[
-                                                                      "userAnimalDescription"] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'userAnimalDescription'];
-                                                                  callingInfo[
-                                                                          "userAnimalType"] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'userAnimalType'] ??
-                                                                          "";
-                                                                  callingInfo[
-                                                                          "userAnimalTypeOther"] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'userAnimalTypeOther'] ??
-                                                                          "";
-                                                                  callingInfo[
-                                                                          "userAnimalAge"] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'userAnimalAge'] ??
-                                                                          "";
-                                                                  callingInfo[
-                                                                      "userAddress"] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'userAddress'];
-                                                                  callingInfo[
-                                                                      "userName"] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'userName'];
-                                                                  callingInfo[
-                                                                          "userAnimalPrice"] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'userAnimalPrice'] ??
-                                                                          "0";
-                                                                  callingInfo[
-                                                                          "userAnimalBreed"] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'userAnimalBreed'] ??
-                                                                          "";
-                                                                  callingInfo[
-                                                                      "userMobileNumber"] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'userMobileNumber'];
-                                                                  callingInfo[
-                                                                          "userAnimalMilk"] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'userAnimalMilk'] ??
-                                                                          "";
-                                                                  callingInfo[
-                                                                          "userAnimalPregnancy"] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'userAnimalPregnancy'] ??
-                                                                          "";
-                                                                  callingInfo[
-                                                                      "image1"] = _tempAnimalList[index] ==
-                                                                              null ||
-                                                                          _tempAnimalList[index]['image1'] ==
-                                                                              ""
-                                                                      ? ""
-                                                                      : _tempAnimalList[
-                                                                              index]
-                                                                          [
-                                                                          'image1'];
-                                                                  callingInfo[
-                                                                      "image2"] = _tempAnimalList[index]['image2'] ==
-                                                                              null ||
-                                                                          _tempAnimalList[index]['image2'] ==
-                                                                              ""
-                                                                      ? ""
-                                                                      : _tempAnimalList[
-                                                                              index]
-                                                                          [
-                                                                          'image2'];
-                                                                  callingInfo[
-                                                                      "image3"] = _tempAnimalList[index]['image3'] ==
-                                                                              null ||
-                                                                          _tempAnimalList[index]['image3'] ==
-                                                                              ""
-                                                                      ? ""
-                                                                      : _tempAnimalList[
-                                                                              index]
-                                                                          [
-                                                                          'image3'];
-                                                                  callingInfo[
-                                                                      "image4"] = _tempAnimalList[index]['image4'] ==
-                                                                              null ||
-                                                                          _tempAnimalList[index]['image4'] ==
-                                                                              ""
-                                                                      ? ""
-                                                                      : _tempAnimalList[
-                                                                              index]
-                                                                          [
-                                                                          'image4'];
-                                                                  callingInfo[
-                                                                          "dateOfSaving"] =
-                                                                      ReusableWidgets
-                                                                          .dateTimeToEpoch(
-                                                                              DateTime.now());
-                                                                  callingInfo[
-                                                                      'isValidUser'] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'isValidUser'];
-                                                                  callingInfo[
-                                                                          'extraInfo'] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'extraInfo'] ??
-                                                                          {};
-
-                                                                  if (_tempAnimalList[
-                                                                              index]
-                                                                          [
-                                                                          'userId'] !=
-                                                                      FirebaseAuth
-                                                                          .instance
-                                                                          .currentUser
-                                                                          .uid) {
-                                                                    FirebaseFirestore
-                                                                        .instance
-                                                                        .collection(
-                                                                            "callingInfo")
-                                                                        .doc(callingInfo[
-                                                                            'otherListId'])
-                                                                        .collection(
-                                                                            'interestedBuyers')
-                                                                        .doc(FirebaseAuth
-                                                                            .instance
-                                                                            .currentUser
-                                                                            .uid)
-                                                                        .set({
-                                                                      'userName':
-                                                                          widget
-                                                                              .userName,
-                                                                      'userMobileNumber':
-                                                                          widget
-                                                                              .userMobileNumber,
-                                                                      "userAddress": first
-                                                                              .addressLine ??
-                                                                          (first.adminArea +
-                                                                              ' ' +
-                                                                              first.postalCode +
-                                                                              ', ' +
-                                                                              first.countryName),
-                                                                      'userIdCurrent': FirebaseAuth
-                                                                          .instance
-                                                                          .currentUser
-                                                                          .uid,
-                                                                      'userIdOther':
-                                                                          _tempAnimalList[index]
-                                                                              [
-                                                                              'userId'],
-                                                                      'otherListId':
-                                                                          _tempAnimalList[index]
-                                                                              [
-                                                                              'uniqueId'],
-                                                                      'channel':
-                                                                          "call",
-                                                                      "dateOfSaving":
-                                                                          ReusableWidgets.dateTimeToEpoch(
-                                                                              DateTime.now())
-                                                                    }, SetOptions(merge: true));
-
-                                                                    FirebaseFirestore
-                                                                        .instance
-                                                                        .collection(
-                                                                            "myCallingInfo")
-                                                                        .doc(FirebaseAuth
-                                                                            .instance
-                                                                            .currentUser
-                                                                            .uid)
-                                                                        .collection(
-                                                                            'myCalls')
-                                                                        .doc(callingInfo[
-                                                                            'otherListId'])
-                                                                        .set(
-                                                                            callingInfo,
-                                                                            SetOptions(merge: true));
-                                                                  }
-
-                                                                  return UrlLauncher
-                                                                      .launch(
-                                                                          'tel:+91 ${_tempAnimalList[index]['userMobileNumber']}');
-                                                                },
-                                                                icon: Icon(
-                                                                  Icons.call,
-                                                                  color: Colors
-                                                                      .white,
-                                                                  size: 14,
-                                                                ),
-                                                                label: Text(
-                                                                    'call'.tr,
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontWeight:
-                                                                            FontWeight
-                                                                                .bold,
-                                                                        fontSize:
-                                                                            14))),
-                                                            SizedBox(
-                                                              width: 5,
-                                                            ),
-                                                            RaisedButton.icon(
-                                                                shape: RoundedRectangleBorder(
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            18.0),
-                                                                    side: BorderSide(
-                                                                        color:
-                                                                            darkGreenColor)),
-                                                                color:
-                                                                    darkGreenColor,
-                                                                onPressed:
-                                                                    () async {
-                                                                  SharedPreferences
-                                                                      prefs =
-                                                                      await SharedPreferences
-                                                                          .getInstance();
-                                                                  var addresses = await Geocoder.local.findAddressesFromCoordinates(Coordinates(
-                                                                      prefs.getDouble(
-                                                                          'latitude'),
-                                                                      prefs.getDouble(
-                                                                          'longitude')));
-                                                                  var first =
-                                                                      addresses
-                                                                          .first;
-                                                                  String
-                                                                      whatsappUrl =
-                                                                      '';
-                                                                  callingInfo[
-                                                                          'userIdCurrent'] =
-                                                                      FirebaseAuth
-                                                                          .instance
-                                                                          .currentUser
-                                                                          .uid;
-                                                                  callingInfo[
-                                                                      'userIdOther'] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'userId'];
-                                                                  callingInfo[
-                                                                      'otherListId'] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'uniqueId'];
-                                                                  callingInfo[
-                                                                          'channel'] =
-                                                                      "whatsapp";
-                                                                  callingInfo[
-                                                                      'userAddress'] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'userAddress'];
-                                                                  callingInfo[
-                                                                      "userAnimalDescription"] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'userAnimalDescription'];
-                                                                  callingInfo[
-                                                                          "userAnimalType"] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'userAnimalType'] ??
-                                                                          "";
-                                                                  callingInfo[
-                                                                          "userAnimalTypeOther"] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'userAnimalTypeOther'] ??
-                                                                          "";
-                                                                  callingInfo[
-                                                                          "userAnimalAge"] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'userAnimalAge'] ??
-                                                                          "";
-                                                                  callingInfo[
-                                                                      "userAddress"] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'userAddress'];
-                                                                  callingInfo[
-                                                                      "userName"] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'userName'];
-                                                                  callingInfo[
-                                                                          "userAnimalPrice"] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'userAnimalPrice'] ??
-                                                                          "0";
-                                                                  callingInfo[
-                                                                          "userAnimalBreed"] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'userAnimalBreed'] ??
-                                                                          "";
-                                                                  callingInfo[
-                                                                      "userMobileNumber"] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'userMobileNumber'];
-                                                                  callingInfo[
-                                                                          "userAnimalMilk"] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'userAnimalMilk'] ??
-                                                                          "";
-                                                                  callingInfo[
-                                                                          "userAnimalPregnancy"] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'userAnimalPregnancy'] ??
-                                                                          "";
-                                                                  callingInfo[
-                                                                      "image1"] = _tempAnimalList[index] ==
-                                                                              null ||
-                                                                          _tempAnimalList[index]['image1'] ==
-                                                                              ""
-                                                                      ? ""
-                                                                      : _tempAnimalList[
-                                                                              index]
-                                                                          [
-                                                                          'image1'];
-                                                                  callingInfo[
-                                                                      "image2"] = _tempAnimalList[index]['image2'] ==
-                                                                              null ||
-                                                                          _tempAnimalList[index]['image2'] ==
-                                                                              ""
-                                                                      ? ""
-                                                                      : _tempAnimalList[
-                                                                              index]
-                                                                          [
-                                                                          'image2'];
-                                                                  callingInfo[
-                                                                      "image3"] = _tempAnimalList[index]['image3'] ==
-                                                                              null ||
-                                                                          _tempAnimalList[index]['image3'] ==
-                                                                              ""
-                                                                      ? ""
-                                                                      : _tempAnimalList[
-                                                                              index]
-                                                                          [
-                                                                          'image3'];
-                                                                  callingInfo[
-                                                                      "image4"] = _tempAnimalList[index]['image4'] ==
-                                                                              null ||
-                                                                          _tempAnimalList[index]['image4'] ==
-                                                                              ""
-                                                                      ? ""
-                                                                      : _tempAnimalList[
-                                                                              index]
-                                                                          [
-                                                                          'image4'];
-                                                                  callingInfo[
-                                                                          "dateOfSaving"] =
-                                                                      ReusableWidgets
-                                                                          .dateTimeToEpoch(
-                                                                              DateTime.now());
-                                                                  callingInfo[
-                                                                      'isValidUser'] = _tempAnimalList[
-                                                                          index]
-                                                                      [
-                                                                      'isValidUser'];
-                                                                  callingInfo[
-                                                                          'extraInfo'] =
-                                                                      _tempAnimalList[index]
-                                                                              [
-                                                                              'extraInfo'] ??
-                                                                          {};
-                                                                  if (_tempAnimalList[
-                                                                              index]
-                                                                          [
-                                                                          'userId'] !=
-                                                                      FirebaseAuth
-                                                                          .instance
-                                                                          .currentUser
-                                                                          .uid) {
-                                                                    FirebaseFirestore
-                                                                        .instance
-                                                                        .collection(
-                                                                            "callingInfo")
-                                                                        .doc(callingInfo[
-                                                                            'otherListId'])
-                                                                        .collection(
-                                                                            'interestedBuyers')
-                                                                        .doc(FirebaseAuth
-                                                                            .instance
-                                                                            .currentUser
-                                                                            .uid)
-                                                                        .set({
-                                                                      'userName':
-                                                                          widget
-                                                                              .userName,
-                                                                      'userMobileNumber':
-                                                                          widget
-                                                                              .userMobileNumber,
-                                                                      "userAddress": first
-                                                                              .addressLine ??
-                                                                          (first.adminArea +
-                                                                              ' ' +
-                                                                              first.postalCode +
-                                                                              ', ' +
-                                                                              first.countryName),
-                                                                      'userIdCurrent': FirebaseAuth
-                                                                          .instance
-                                                                          .currentUser
-                                                                          .uid,
-                                                                      'userIdOther':
-                                                                          _tempAnimalList[index]
-                                                                              [
-                                                                              'userId'],
-                                                                      'otherListId':
-                                                                          _tempAnimalList[index]
-                                                                              [
-                                                                              'uniqueId'],
-                                                                      'channel':
-                                                                          "whatsapp",
-                                                                      "dateOfSaving":
-                                                                          ReusableWidgets.dateTimeToEpoch(
-                                                                              DateTime.now())
-                                                                    }, SetOptions(merge: true));
-
-                                                                    FirebaseFirestore
-                                                                        .instance
-                                                                        .collection(
-                                                                            "myCallingInfo")
-                                                                        .doc(FirebaseAuth
-                                                                            .instance
-                                                                            .currentUser
-                                                                            .uid)
-                                                                        .collection(
-                                                                            'myCalls')
-                                                                        .doc(callingInfo[
-                                                                            'otherListId'])
-                                                                        .set(
-                                                                            callingInfo,
-                                                                            SetOptions(merge: true));
-                                                                  }
-
-                                                                  whatsappText =
-                                                                      'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${widget.userName}, ${prefs.getString('place')} \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
-                                                                  whatsappUrl =
-                                                                      "https://api.whatsapp.com/send/?phone=+91 ${_tempAnimalList[index]['userMobileNumber']}&text=$whatsappText";
-                                                                  await UrlLauncher.canLaunch(
-                                                                              whatsappUrl) !=
-                                                                          null
-                                                                      ? UrlLauncher.launch(
-                                                                          Uri.encodeFull(
-                                                                              whatsappUrl))
-                                                                      : ScaffoldMessenger.of(
-                                                                              context)
-                                                                          .showSnackBar(
-                                                                              SnackBar(
-                                                                          content:
-                                                                              Text('${_tempAnimalList[index]['userMobileNumber']} is not present in Whatsapp'),
-                                                                          duration:
-                                                                              Duration(milliseconds: 300),
-                                                                          padding:
-                                                                              EdgeInsets.symmetric(horizontal: 8),
-                                                                          behavior:
-                                                                              SnackBarBehavior.floating,
-                                                                          shape:
-                                                                              RoundedRectangleBorder(
-                                                                            borderRadius:
-                                                                                BorderRadius.circular(10.0),
-                                                                          ),
-                                                                        ));
-                                                                },
-                                                                icon: FaIcon(
-                                                                    FontAwesomeIcons
-                                                                        .whatsapp,
-                                                                    color: Colors
-                                                                        .white,
-                                                                    size: 14),
-                                                                label: Text(
-                                                                    'message'
-                                                                        .tr,
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontWeight:
-                                                                            FontWeight
-                                                                                .bold,
-                                                                        fontSize:
-                                                                            14)))
-                                                          ]),
-                                                        )),
-                                                  ],
-                                                ),
+                                    itemBuilder: (context, index) {
+                                      if (index >= widget.animalInfo.length) {
+                                        return CircularProgressIndicator();
+                                      }
+                                      return Padding(
+                                        padding: const EdgeInsets.only(
+                                            left: 8.0, right: 8, top: 8),
+                                        child: Column(
+                                          children: [
+                                            Card(
+                                              key: Key(index.toString()),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(10.0),
                                               ),
-                                              _isLoading
-                                                  ? Positioned(
-                                                      bottom: 0,
-                                                      child: Column(
-                                                        children: [
-                                                          SizedBox(height: 10),
-                                                          Center(
-                                                            child:
-                                                                CircularProgressIndicator(),
+                                              elevation: 5,
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  _buildInfowidget(index),
+                                                  _distanceTimeMethod(index),
+                                                  _animalImageWidget(index),
+                                                  _animalDescriptionMethod(
+                                                      index),
+                                                  Container(
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.grey[100],
+                                                        boxShadow: [
+                                                          BoxShadow(
+                                                            color: Colors.grey,
+                                                            blurRadius: 1.0,
                                                           ),
                                                         ],
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(8),
                                                       ),
-                                                    )
-                                                  : SizedBox.shrink(),
-                                            ],
-                                          ),
+                                                      height: 80,
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(8.0),
+                                                        child: Row(children: [
+                                                          widget.userImage ==
+                                                                      null ||
+                                                                  widget.userImage ==
+                                                                      ""
+                                                              ? Image.asset(
+                                                                  'assets/images/profile.jpg',
+                                                                  width: 40,
+                                                                  height: 40)
+                                                              : Image.memory(
+                                                                  base64Decode(
+                                                                    widget
+                                                                        .userImage,
+                                                                  ),
+                                                                  width: 40,
+                                                                  height: 40),
+                                                          SizedBox(
+                                                            width: 5,
+                                                          ),
+                                                          Expanded(
+                                                            child: Text(
+                                                              _tempAnimalList[
+                                                                      index]
+                                                                  ['userName'],
+                                                              style: TextStyle(
+                                                                  fontSize: 15,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  color: Colors
+                                                                      .black),
+                                                            ),
+                                                          ),
+                                                          RaisedButton.icon(
+                                                              shape: RoundedRectangleBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius.circular(
+                                                                          18.0),
+                                                                  side: BorderSide(
+                                                                      color:
+                                                                          darkSecondaryColor)),
+                                                              color:
+                                                                  secondaryColor,
+                                                              onPressed:
+                                                                  () async {
+                                                                SharedPreferences
+                                                                    prefs =
+                                                                    await SharedPreferences
+                                                                        .getInstance();
+                                                                var addresses = await Geocoder
+                                                                    .local
+                                                                    .findAddressesFromCoordinates(Coordinates(
+                                                                        prefs.getDouble(
+                                                                            'latitude'),
+                                                                        prefs.getDouble(
+                                                                            'longitude')));
+                                                                var first =
+                                                                    addresses
+                                                                        .first;
+
+                                                                callingInfo[
+                                                                        'userIdCurrent'] =
+                                                                    FirebaseAuth
+                                                                        .instance
+                                                                        .currentUser
+                                                                        .uid;
+                                                                callingInfo[
+                                                                        'userIdOther'] =
+                                                                    _tempAnimalList[
+                                                                            index]
+                                                                        [
+                                                                        'userId'];
+                                                                callingInfo[
+                                                                        'otherListId'] =
+                                                                    _tempAnimalList[
+                                                                            index]
+                                                                        [
+                                                                        'uniqueId'];
+                                                                callingInfo[
+                                                                        'channel'] =
+                                                                    "call";
+                                                                callingInfo[
+                                                                        'userAddress'] =
+                                                                    _tempAnimalList[
+                                                                            index]
+                                                                        [
+                                                                        'userAddress'];
+                                                                callingInfo[
+                                                                        "userAnimalDescription"] =
+                                                                    _tempAnimalList[
+                                                                            index]
+                                                                        [
+                                                                        'userAnimalDescription'];
+                                                                callingInfo[
+                                                                        "userAnimalType"] =
+                                                                    _tempAnimalList[index]
+                                                                            [
+                                                                            'userAnimalType'] ??
+                                                                        "";
+                                                                callingInfo[
+                                                                        "userAnimalTypeOther"] =
+                                                                    _tempAnimalList[index]
+                                                                            [
+                                                                            'userAnimalTypeOther'] ??
+                                                                        "";
+                                                                callingInfo[
+                                                                        "userAnimalAge"] =
+                                                                    _tempAnimalList[index]
+                                                                            [
+                                                                            'userAnimalAge'] ??
+                                                                        "";
+                                                                callingInfo[
+                                                                        "userAddress"] =
+                                                                    _tempAnimalList[
+                                                                            index]
+                                                                        [
+                                                                        'userAddress'];
+                                                                callingInfo[
+                                                                        "userName"] =
+                                                                    _tempAnimalList[
+                                                                            index]
+                                                                        [
+                                                                        'userName'];
+                                                                callingInfo[
+                                                                        "userAnimalPrice"] =
+                                                                    _tempAnimalList[index]
+                                                                            [
+                                                                            'userAnimalPrice'] ??
+                                                                        "0";
+                                                                callingInfo[
+                                                                        "userAnimalBreed"] =
+                                                                    _tempAnimalList[index]
+                                                                            [
+                                                                            'userAnimalBreed'] ??
+                                                                        "";
+                                                                callingInfo[
+                                                                        "userMobileNumber"] =
+                                                                    _tempAnimalList[
+                                                                            index]
+                                                                        [
+                                                                        'userMobileNumber'];
+                                                                callingInfo[
+                                                                        "userAnimalMilk"] =
+                                                                    _tempAnimalList[index]
+                                                                            [
+                                                                            'userAnimalMilk'] ??
+                                                                        "";
+                                                                callingInfo[
+                                                                        "userAnimalPregnancy"] =
+                                                                    _tempAnimalList[index]
+                                                                            [
+                                                                            'userAnimalPregnancy'] ??
+                                                                        "";
+                                                                callingInfo[
+                                                                    "image1"] = _tempAnimalList[index] ==
+                                                                            null ||
+                                                                        _tempAnimalList[index]['image1'] ==
+                                                                            ""
+                                                                    ? ""
+                                                                    : _tempAnimalList[
+                                                                            index]
+                                                                        [
+                                                                        'image1'];
+                                                                callingInfo[
+                                                                    "image2"] = _tempAnimalList[index]['image2'] ==
+                                                                            null ||
+                                                                        _tempAnimalList[index]['image2'] ==
+                                                                            ""
+                                                                    ? ""
+                                                                    : _tempAnimalList[
+                                                                            index]
+                                                                        [
+                                                                        'image2'];
+                                                                callingInfo[
+                                                                    "image3"] = _tempAnimalList[index]['image3'] ==
+                                                                            null ||
+                                                                        _tempAnimalList[index]['image3'] ==
+                                                                            ""
+                                                                    ? ""
+                                                                    : _tempAnimalList[
+                                                                            index]
+                                                                        [
+                                                                        'image3'];
+                                                                callingInfo[
+                                                                    "image4"] = _tempAnimalList[index]['image4'] ==
+                                                                            null ||
+                                                                        _tempAnimalList[index]['image4'] ==
+                                                                            ""
+                                                                    ? ""
+                                                                    : _tempAnimalList[
+                                                                            index]
+                                                                        [
+                                                                        'image4'];
+                                                                callingInfo[
+                                                                        "dateOfSaving"] =
+                                                                    ReusableWidgets
+                                                                        .dateTimeToEpoch(
+                                                                            DateTime.now());
+                                                                callingInfo[
+                                                                        'isValidUser'] =
+                                                                    _tempAnimalList[
+                                                                            index]
+                                                                        [
+                                                                        'isValidUser'];
+                                                                callingInfo[
+                                                                        'extraInfo'] =
+                                                                    _tempAnimalList[index]
+                                                                            [
+                                                                            'extraInfo'] ??
+                                                                        {};
+
+                                                                if (_tempAnimalList[
+                                                                            index]
+                                                                        [
+                                                                        'userId'] !=
+                                                                    FirebaseAuth
+                                                                        .instance
+                                                                        .currentUser
+                                                                        .uid) {
+                                                                  FirebaseFirestore
+                                                                      .instance
+                                                                      .collection(
+                                                                          "callingInfo")
+                                                                      .doc(callingInfo[
+                                                                          'otherListId'])
+                                                                      .collection(
+                                                                          'interestedBuyers')
+                                                                      .doc(FirebaseAuth
+                                                                          .instance
+                                                                          .currentUser
+                                                                          .uid)
+                                                                      .set({
+                                                                    'userName':
+                                                                        widget
+                                                                            .userName,
+                                                                    'userMobileNumber':
+                                                                        widget
+                                                                            .userMobileNumber,
+                                                                    "userAddress": first
+                                                                            .addressLine ??
+                                                                        (first.adminArea +
+                                                                            ' ' +
+                                                                            first.postalCode +
+                                                                            ', ' +
+                                                                            first.countryName),
+                                                                    'userIdCurrent': FirebaseAuth
+                                                                        .instance
+                                                                        .currentUser
+                                                                        .uid,
+                                                                    'userIdOther':
+                                                                        _tempAnimalList[index]
+                                                                            [
+                                                                            'userId'],
+                                                                    'otherListId':
+                                                                        _tempAnimalList[index]
+                                                                            [
+                                                                            'uniqueId'],
+                                                                    'channel':
+                                                                        "call",
+                                                                    "dateOfSaving":
+                                                                        ReusableWidgets.dateTimeToEpoch(
+                                                                            DateTime.now())
+                                                                  }, SetOptions(merge: true));
+
+                                                                  FirebaseFirestore
+                                                                      .instance
+                                                                      .collection(
+                                                                          "myCallingInfo")
+                                                                      .doc(FirebaseAuth
+                                                                          .instance
+                                                                          .currentUser
+                                                                          .uid)
+                                                                      .collection(
+                                                                          'myCalls')
+                                                                      .doc(callingInfo[
+                                                                          'otherListId'])
+                                                                      .set(
+                                                                          callingInfo,
+                                                                          SetOptions(
+                                                                              merge: true));
+                                                                }
+
+                                                                return UrlLauncher
+                                                                    .launch(
+                                                                        'tel:+91 ${_tempAnimalList[index]['userMobileNumber']}');
+                                                              },
+                                                              icon: Icon(
+                                                                Icons.call,
+                                                                color: Colors
+                                                                    .white,
+                                                                size: 14,
+                                                              ),
+                                                              label: Text(
+                                                                  'call'.tr,
+                                                                  style: TextStyle(
+                                                                      color: Colors
+                                                                          .white,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold,
+                                                                      fontSize:
+                                                                          14))),
+                                                          SizedBox(
+                                                            width: 5,
+                                                          ),
+                                                          RaisedButton.icon(
+                                                              shape: RoundedRectangleBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius.circular(
+                                                                          18.0),
+                                                                  side: BorderSide(
+                                                                      color:
+                                                                          darkGreenColor)),
+                                                              color:
+                                                                  darkGreenColor,
+                                                              onPressed:
+                                                                  () async {
+                                                                SharedPreferences
+                                                                    prefs =
+                                                                    await SharedPreferences
+                                                                        .getInstance();
+                                                                var addresses = await Geocoder
+                                                                    .local
+                                                                    .findAddressesFromCoordinates(Coordinates(
+                                                                        prefs.getDouble(
+                                                                            'latitude'),
+                                                                        prefs.getDouble(
+                                                                            'longitude')));
+                                                                var first =
+                                                                    addresses
+                                                                        .first;
+                                                                String
+                                                                    whatsappUrl =
+                                                                    '';
+                                                                callingInfo[
+                                                                        'userIdCurrent'] =
+                                                                    FirebaseAuth
+                                                                        .instance
+                                                                        .currentUser
+                                                                        .uid;
+                                                                callingInfo[
+                                                                        'userIdOther'] =
+                                                                    _tempAnimalList[
+                                                                            index]
+                                                                        [
+                                                                        'userId'];
+                                                                callingInfo[
+                                                                        'otherListId'] =
+                                                                    _tempAnimalList[
+                                                                            index]
+                                                                        [
+                                                                        'uniqueId'];
+                                                                callingInfo[
+                                                                        'channel'] =
+                                                                    "whatsapp";
+                                                                callingInfo[
+                                                                        'userAddress'] =
+                                                                    _tempAnimalList[
+                                                                            index]
+                                                                        [
+                                                                        'userAddress'];
+                                                                callingInfo[
+                                                                        "userAnimalDescription"] =
+                                                                    _tempAnimalList[
+                                                                            index]
+                                                                        [
+                                                                        'userAnimalDescription'];
+                                                                callingInfo[
+                                                                        "userAnimalType"] =
+                                                                    _tempAnimalList[index]
+                                                                            [
+                                                                            'userAnimalType'] ??
+                                                                        "";
+                                                                callingInfo[
+                                                                        "userAnimalTypeOther"] =
+                                                                    _tempAnimalList[index]
+                                                                            [
+                                                                            'userAnimalTypeOther'] ??
+                                                                        "";
+                                                                callingInfo[
+                                                                        "userAnimalAge"] =
+                                                                    _tempAnimalList[index]
+                                                                            [
+                                                                            'userAnimalAge'] ??
+                                                                        "";
+                                                                callingInfo[
+                                                                        "userAddress"] =
+                                                                    _tempAnimalList[
+                                                                            index]
+                                                                        [
+                                                                        'userAddress'];
+                                                                callingInfo[
+                                                                        "userName"] =
+                                                                    _tempAnimalList[
+                                                                            index]
+                                                                        [
+                                                                        'userName'];
+                                                                callingInfo[
+                                                                        "userAnimalPrice"] =
+                                                                    _tempAnimalList[index]
+                                                                            [
+                                                                            'userAnimalPrice'] ??
+                                                                        "0";
+                                                                callingInfo[
+                                                                        "userAnimalBreed"] =
+                                                                    _tempAnimalList[index]
+                                                                            [
+                                                                            'userAnimalBreed'] ??
+                                                                        "";
+                                                                callingInfo[
+                                                                        "userMobileNumber"] =
+                                                                    _tempAnimalList[
+                                                                            index]
+                                                                        [
+                                                                        'userMobileNumber'];
+                                                                callingInfo[
+                                                                        "userAnimalMilk"] =
+                                                                    _tempAnimalList[index]
+                                                                            [
+                                                                            'userAnimalMilk'] ??
+                                                                        "";
+                                                                callingInfo[
+                                                                        "userAnimalPregnancy"] =
+                                                                    _tempAnimalList[index]
+                                                                            [
+                                                                            'userAnimalPregnancy'] ??
+                                                                        "";
+                                                                callingInfo[
+                                                                    "image1"] = _tempAnimalList[index] ==
+                                                                            null ||
+                                                                        _tempAnimalList[index]['image1'] ==
+                                                                            ""
+                                                                    ? ""
+                                                                    : _tempAnimalList[
+                                                                            index]
+                                                                        [
+                                                                        'image1'];
+                                                                callingInfo[
+                                                                    "image2"] = _tempAnimalList[index]['image2'] ==
+                                                                            null ||
+                                                                        _tempAnimalList[index]['image2'] ==
+                                                                            ""
+                                                                    ? ""
+                                                                    : _tempAnimalList[
+                                                                            index]
+                                                                        [
+                                                                        'image2'];
+                                                                callingInfo[
+                                                                    "image3"] = _tempAnimalList[index]['image3'] ==
+                                                                            null ||
+                                                                        _tempAnimalList[index]['image3'] ==
+                                                                            ""
+                                                                    ? ""
+                                                                    : _tempAnimalList[
+                                                                            index]
+                                                                        [
+                                                                        'image3'];
+                                                                callingInfo[
+                                                                    "image4"] = _tempAnimalList[index]['image4'] ==
+                                                                            null ||
+                                                                        _tempAnimalList[index]['image4'] ==
+                                                                            ""
+                                                                    ? ""
+                                                                    : _tempAnimalList[
+                                                                            index]
+                                                                        [
+                                                                        'image4'];
+                                                                callingInfo[
+                                                                        "dateOfSaving"] =
+                                                                    ReusableWidgets
+                                                                        .dateTimeToEpoch(
+                                                                            DateTime.now());
+                                                                callingInfo[
+                                                                        'isValidUser'] =
+                                                                    _tempAnimalList[
+                                                                            index]
+                                                                        [
+                                                                        'isValidUser'];
+                                                                callingInfo[
+                                                                        'extraInfo'] =
+                                                                    _tempAnimalList[index]
+                                                                            [
+                                                                            'extraInfo'] ??
+                                                                        {};
+                                                                if (_tempAnimalList[
+                                                                            index]
+                                                                        [
+                                                                        'userId'] !=
+                                                                    FirebaseAuth
+                                                                        .instance
+                                                                        .currentUser
+                                                                        .uid) {
+                                                                  FirebaseFirestore
+                                                                      .instance
+                                                                      .collection(
+                                                                          "callingInfo")
+                                                                      .doc(callingInfo[
+                                                                          'otherListId'])
+                                                                      .collection(
+                                                                          'interestedBuyers')
+                                                                      .doc(FirebaseAuth
+                                                                          .instance
+                                                                          .currentUser
+                                                                          .uid)
+                                                                      .set({
+                                                                    'userName':
+                                                                        widget
+                                                                            .userName,
+                                                                    'userMobileNumber':
+                                                                        widget
+                                                                            .userMobileNumber,
+                                                                    "userAddress": first
+                                                                            .addressLine ??
+                                                                        (first.adminArea +
+                                                                            ' ' +
+                                                                            first.postalCode +
+                                                                            ', ' +
+                                                                            first.countryName),
+                                                                    'userIdCurrent': FirebaseAuth
+                                                                        .instance
+                                                                        .currentUser
+                                                                        .uid,
+                                                                    'userIdOther':
+                                                                        _tempAnimalList[index]
+                                                                            [
+                                                                            'userId'],
+                                                                    'otherListId':
+                                                                        _tempAnimalList[index]
+                                                                            [
+                                                                            'uniqueId'],
+                                                                    'channel':
+                                                                        "whatsapp",
+                                                                    "dateOfSaving":
+                                                                        ReusableWidgets.dateTimeToEpoch(
+                                                                            DateTime.now())
+                                                                  }, SetOptions(merge: true));
+
+                                                                  FirebaseFirestore
+                                                                      .instance
+                                                                      .collection(
+                                                                          "myCallingInfo")
+                                                                      .doc(FirebaseAuth
+                                                                          .instance
+                                                                          .currentUser
+                                                                          .uid)
+                                                                      .collection(
+                                                                          'myCalls')
+                                                                      .doc(callingInfo[
+                                                                          'otherListId'])
+                                                                      .set(
+                                                                          callingInfo,
+                                                                          SetOptions(
+                                                                              merge: true));
+                                                                }
+
+                                                                whatsappText =
+                                                                    'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${widget.userName}, ${prefs.getString('place')} \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
+                                                                whatsappUrl =
+                                                                    "https://api.whatsapp.com/send/?phone=+91 ${_tempAnimalList[index]['userMobileNumber']}&text=$whatsappText";
+                                                                await UrlLauncher.canLaunch(
+                                                                            whatsappUrl) !=
+                                                                        null
+                                                                    ? UrlLauncher.launch(
+                                                                        Uri.encodeFull(
+                                                                            whatsappUrl))
+                                                                    : ScaffoldMessenger.of(
+                                                                            context)
+                                                                        .showSnackBar(
+                                                                            SnackBar(
+                                                                        content:
+                                                                            Text('${_tempAnimalList[index]['userMobileNumber']} is not present in Whatsapp'),
+                                                                        duration:
+                                                                            Duration(milliseconds: 300),
+                                                                        padding:
+                                                                            EdgeInsets.symmetric(horizontal: 8),
+                                                                        behavior:
+                                                                            SnackBarBehavior.floating,
+                                                                        shape:
+                                                                            RoundedRectangleBorder(
+                                                                          borderRadius:
+                                                                              BorderRadius.circular(10.0),
+                                                                        ),
+                                                                      ));
+                                                              },
+                                                              icon: FaIcon(
+                                                                  FontAwesomeIcons
+                                                                      .whatsapp,
+                                                                  color: Colors
+                                                                      .white,
+                                                                  size: 14),
+                                                              label: Text(
+                                                                  'message'.tr,
+                                                                  style: TextStyle(
+                                                                      color: Colors
+                                                                          .white,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold,
+                                                                      fontSize:
+                                                                          14)))
+                                                        ]),
+                                                      )),
+                                                ],
+                                              ),
+                                            ),
+                                            _isLoading
+                                                ? Positioned(
+                                                    bottom: 0,
+                                                    child: Column(
+                                                      children: [
+                                                        SizedBox(height: 10),
+                                                        Center(
+                                                          child:
+                                                              CircularProgressIndicator(),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  )
+                                                : SizedBox.shrink(),
+                                          ],
                                         ),
+                                      );
+                                    },
                                     itemCount: _tempAnimalList.length),
                               ],
                             )
@@ -1176,11 +1189,17 @@ class _BuyAnimalState extends State<BuyAnimal>
                               alignment: Alignment.bottomCenter,
                               children: [
                                 ListView.builder(
-                                    key: ObjectKey(widget.animalInfo[0]),
-                                    padding: EdgeInsets.only(bottom: 60),
-                                    controller: _scrollController,
-                                    physics: BouncingScrollPhysics(),
-                                    itemBuilder: (context, index) => Padding(
+                                  key: ObjectKey(widget.animalInfo[0]),
+                                  padding: EdgeInsets.only(bottom: 60),
+                                  // controller: _scrollController,
+                                  physics: BouncingScrollPhysics(),
+                                  itemCount: widget.animalInfo.length,
+                                  itemBuilder: (context, index) {
+                                    // if (index >= widget.animalInfo.length) {
+                                    //   return CircularProgressIndicator();
+                                    // }
+
+                                    return Padding(
                                         padding: const EdgeInsets.only(
                                             left: 8.0, right: 8, top: 8),
                                         child: Card(
@@ -1854,8 +1873,9 @@ class _BuyAnimalState extends State<BuyAnimal>
                                           ),
                                         )
                                         // ),
-                                        ),
-                                    itemCount: widget.animalInfo.length),
+                                        );
+                                  },
+                                ),
                                 _isLoading
                                     ? Positioned(
                                         bottom: 0,
@@ -1935,7 +1955,8 @@ class _BuyAnimalState extends State<BuyAnimal>
                                     TextButton(
                                         child: Text(
                                           'Ok'.tr,
-                                          style: TextStyle(color: primaryColor),
+                                          style:
+                                              TextStyle(color: appPrimaryColor),
                                         ),
                                         onPressed: () async {
                                           if (_locationController.text.length ==
@@ -2048,7 +2069,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                                     style: TextStyle(color: Colors.black)),
                                 WidgetSpan(
                                   child: CircleAvatar(
-                                    backgroundColor: primaryColor,
+                                    backgroundColor: appPrimaryColor,
                                     radius: 10,
                                     child: Center(
                                       child: Text(
@@ -2125,7 +2146,6 @@ class _BuyAnimalState extends State<BuyAnimal>
         maxMilk: null,
         page: 1,
         accessToken: prefs.getString('accessToken') ?? '',
-        refreshToken: prefs.getString('refreshToken') ?? '',
       );
 
       setState(() {
@@ -2480,7 +2500,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                         child: Container(
                           width: 120,
                           height: 125,
-                          color: _index == 0 ? primaryColor : Colors.white,
+                          color: _index == 0 ? appPrimaryColor : Colors.white,
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -2525,7 +2545,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                         child: Container(
                             width: 120,
                             height: 125,
-                            color: _index == 1 ? primaryColor : Colors.white,
+                            color: _index == 1 ? appPrimaryColor : Colors.white,
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.stretch,

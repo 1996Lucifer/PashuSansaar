@@ -54,7 +54,7 @@ class _SplashScreenState extends State<SplashScreen> {
         fontWeight: FontWeight.bold,
         fontSize: 50.0,
       ),
-      backgroundColor: primaryColor,
+      backgroundColor: appPrimaryColor,
     );
   }
 }

@@ -1,13 +1,14 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:geocoder/geocoder.dart';
+import 'package:dio/dio.dart' as dio;
+import 'package:pashusansaar/refresh_token/refresh_token_controller.dart';
+import 'package:pashusansaar/upload_image/upload_image_controller.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/constants.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:dropdown_search/dropdown_search.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -19,9 +20,10 @@ import '../utils/constants.dart' as constant;
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:intl/intl.dart';
-import 'package:geoflutterfire/geoflutterfire.dart' as geoFire;
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'dart:math' as math;
+import 'package:mime/mime.dart';
+
+import 'sell_animal_controller.dart';
 
 class SellAnimalForm extends StatefulWidget {
   String userName;
@@ -41,29 +43,34 @@ class _SellAnimalFormState extends State<SellAnimalForm>
   ProgressDialog pr;
   Color backgroundColor = Colors.red[50];
   bool _showData = false, _isLoading = false;
-  // final _storage = new FlutterSecureStorage();
   SharedPreferences prefs;
   String desc = '', fileUrl = '';
   File filePath;
   String uniqueId;
 
   Map<String, dynamic> imagesUpload = {
-    'image1': '',
-    'image2': '',
-    'image3': '',
-    'image4': ''
+    'Image1': {},
+    'Image2': {},
+    'Image3': {},
+    'Image4': {}
   };
 
   Map<String, dynamic> imagesFileUpload = {
-    'image1': '',
-    'image2': '',
-    'image3': '',
-    'image4': ''
+    'Image1': '',
+    'Image2': '',
+    'Image3': '',
+    'Image4': ''
   };
-  final geo = geoFire.Geoflutterfire();
 
+  List _imageToBeUploaded = [];
   TextEditingController _controller;
   static const _locale = 'en_IN';
+  final UploadImageController _uploadImageController =
+      Get.put(UploadImageController());
+  final RefreshTokenController refreshTokenController =
+      Get.put(RefreshTokenController());
+  final SellAnimalController sellAnimalController =
+      Get.put(SellAnimalController());
 
   @override
   bool get wantKeepAlive => true;
@@ -80,26 +87,6 @@ class _SellAnimalFormState extends State<SellAnimalForm>
       NumberFormat.decimalPattern(_locale).format(int.parse(s));
   String get _currency =>
       NumberFormat.compactSimpleCurrency(locale: _locale).currencySymbol;
-
-  Future<void> uploadFile(File file, String index) async {
-    // try {
-    setState(() {
-      _isLoading = true;
-    });
-    await firebase_storage.FirebaseStorage.instance
-        .ref('${FirebaseAuth.instance.currentUser.uid}/${uniqueId}_$index.jpg')
-        .putFile(file);
-
-    String downloadURL = await firebase_storage.FirebaseStorage.instance
-        .ref('${FirebaseAuth.instance.currentUser.uid}/${uniqueId}_$index.jpg')
-        .getDownloadURL();
-
-    setState(() {
-      imagesUpload['image$index'] = downloadURL;
-      imagesFileUpload['image$index'] = downloadURL;
-      _isLoading = false;
-    });
-  }
 
   Future<void> _choose(String index) async {
     try {
@@ -144,12 +131,17 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                     quality: 60);
                 break;
             }
+            final mimeType = lookupMimeType(file.path);
 
-            // setState(() {
-            //   imagesFileUpload['image$index'] = file.path;
-            // });
+            setState(() {
+              imagesFileUpload['Image$index'] = compressedFile.path;
+              imagesUpload['Image$index'] = {
+                "fileName": "Image$index",
+                "fileType": mimeType
+              };
+            });
 
-            await uploadFile(compressedFile, index);
+            // await uploadFile(compressedFile, index);
           });
       }
     } catch (e) {}
@@ -210,52 +202,20 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                 break;
             }
 
-            // setState(() {
-            //   imagesFileUpload['image$index'] = file.path;
-            // });
+            final mimeType = lookupMimeType(file.path);
 
-            await uploadFile(compressedFile, index);
+            setState(() {
+              imagesFileUpload['Image$index'] = compressedFile.path;
+              imagesUpload['Image$index'] = {
+                "fileName": "Image$index",
+                "fileType": mimeType
+              };
+            });
+
+            // await uploadFile(compressedFile, index);
           });
       }
     } catch (e) {}
-  }
-
-  _descriptionText() {
-    String animalBreedCheck = animalInfo['animalBreed'] == 'not_known'.tr
-        ? ""
-        : animalInfo['animalBreed'];
-    String animalTypeCheck = animalInfo['animalType'] == 'other_animal'.tr
-        ? animalInfo['animalTypeOther']
-        : animalInfo['animalType'];
-
-    String desc = '';
-
-    String stmn2 = 'यह ${extraInfoData['animalAlreadyGivenBirth']} ब्यायी है ';
-    String stmn3 = 'और अभी ${extraInfoData['animalIfPregnant']} है। ';
-    String stmn41 = 'इसके साथ में बच्चा नहीं है। ';
-    String stmn42 = 'इसके साथ में ${extraInfoData['animalHasBaby']}। ';
-    String stmn5 =
-        'पिछले बार के हिसाब से दूध कैपेसिटी ${animalInfo['animalMilkCapacity']} लीटर है। ';
-
-    if (animalInfo['animalType'] == 'buffalo_male'.tr ||
-        animalInfo['animalType'] == 'ox'.tr ||
-        animalInfo['animalType'] == 'other_animal'.tr) {
-      desc =
-          'ये $animalBreedCheck $animalTypeCheck ${animalInfo['animalAge']} साल का है। ';
-    } else {
-      desc =
-          'ये $animalBreedCheck $animalTypeCheck ${animalInfo['animalAge']} साल की है। ';
-      if (extraInfoData['animalAlreadyGivenBirth'] != null) desc = desc + stmn2;
-      if (extraInfoData['animalIfPregnant'] != null) desc = desc + stmn3;
-      desc = desc +
-          (extraInfoData['animalHasBaby'] == null ||
-                  extraInfoData['animalHasBaby'] == 'nothing'.tr
-              ? stmn41
-              : stmn42);
-      if (animalInfo['animalMilkCapacity'] != null) desc = desc + stmn5;
-    }
-
-    return desc + (extraInfoData['moreInfo'] ?? '');
   }
 
   chooseOption(String index) => showDialog(
@@ -745,48 +705,41 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                     height: 150,
                     width: width * 0.3,
                     child: Visibility(
-                      visible: imagesFileUpload['image1'] != null &&
-                          imagesFileUpload['image1'].isNotEmpty,
-                      child: Image.network(
-                        imagesFileUpload['image1'],
+                      visible: imagesFileUpload['Image1'] != null &&
+                          imagesFileUpload['Image1'].isNotEmpty,
+                      child: Image.file(
+                        File(imagesFileUpload['Image1']),
                       ),
-                      replacement: _isLoading
-                          ? Center(
-                              child: Container(
-                                  child: CircularProgressIndicator(),
-                                  height: 50,
-                                  width: 50))
-                          : Column(children: [
-                              Opacity(
-                                opacity: 0.5,
-                                child: Image.asset(
-                                  'assets/images/photouploadfront.png',
-                                  height: 100,
-                                ),
-                              ),
-                              RaisedButton(
-                                onPressed: () => chooseOption('1'),
-                                child: Text(
-                                  'choose_photo'.tr,
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 16),
-                                ),
-                              )
-                            ]),
+                      replacement: Column(children: [
+                        Opacity(
+                          opacity: 0.5,
+                          child: Image.asset(
+                            'assets/images/photouploadfront.png',
+                            height: 100,
+                          ),
+                        ),
+                        RaisedButton(
+                          onPressed: () => chooseOption('1'),
+                          child: Text(
+                            'choose_photo'.tr,
+                            style: TextStyle(color: Colors.white, fontSize: 16),
+                          ),
+                        )
+                      ]),
                     ),
                   ),
                 ),
               ),
               Visibility(
-                visible: imagesFileUpload['image1'] != null &&
-                    imagesFileUpload['image1'].isNotEmpty,
+                visible: imagesFileUpload['Image1'] != null &&
+                    imagesFileUpload['Image1'].isNotEmpty,
                 child: Positioned(
                   top: -1,
                   right: -1,
                   child: GestureDetector(
                     onTap: () {
                       setState(() {
-                        imagesFileUpload['image1'] = '';
+                        imagesFileUpload['Image1'] = '';
                       });
                     },
                     child: Icon(
@@ -822,50 +775,40 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                     width: width * 0.3,
                     // color: Colors.amber,
                     child: Visibility(
-                      visible: imagesFileUpload['image2'] != null &&
-                          imagesFileUpload['image2'].isNotEmpty,
-                      child: Image.network(
-                        imagesFileUpload['image2'],
+                      visible: imagesFileUpload['Image2'] != null &&
+                          imagesFileUpload['Image2'].isNotEmpty,
+                      child: Image.file(
+                        File(imagesFileUpload['Image2']),
                       ),
-                      // Image.file(
-                      //   File(imagesFileUpload['image2']),
-                      // ),
-                      replacement: _isLoading
-                          ? Center(
-                              child: Container(
-                                  child: CircularProgressIndicator(),
-                                  height: 50,
-                                  width: 50))
-                          : Column(children: [
-                              Opacity(
-                                opacity: 0.5,
-                                child: Image.asset(
-                                  'assets/images/photouploadback.png',
-                                  height: 100,
-                                ),
-                              ),
-                              RaisedButton(
-                                onPressed: () => chooseOption('2'),
-                                child: Text(
-                                  'choose_photo'.tr,
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 16),
-                                ),
-                              )
-                            ]),
+                      replacement: Column(children: [
+                        Opacity(
+                          opacity: 0.5,
+                          child: Image.asset(
+                            'assets/images/photouploadback.png',
+                            height: 100,
+                          ),
+                        ),
+                        RaisedButton(
+                          onPressed: () => chooseOption('2'),
+                          child: Text(
+                            'choose_photo'.tr,
+                            style: TextStyle(color: Colors.white, fontSize: 16),
+                          ),
+                        )
+                      ]),
                     ),
                   )),
             ),
             Visibility(
-              visible: imagesFileUpload['image2'] != null &&
-                  imagesFileUpload['image2'].isNotEmpty,
+              visible: imagesFileUpload['Image2'] != null &&
+                  imagesFileUpload['Image2'].isNotEmpty,
               child: Positioned(
                 top: -1,
                 right: -1,
                 child: GestureDetector(
                   onTap: () {
                     setState(() {
-                      imagesFileUpload['image2'] = '';
+                      imagesFileUpload['Image2'] = '';
                     });
                   },
                   child: Icon(
@@ -900,50 +843,40 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                     width: width * 0.3,
                     // color: Colors.amber,
                     child: Visibility(
-                      visible: imagesFileUpload['image3'] != null &&
-                          imagesFileUpload['image3'].isNotEmpty,
-                      child: Image.network(
-                        imagesFileUpload['image3'],
+                      visible: imagesFileUpload['Image3'] != null &&
+                          imagesFileUpload['Image3'].isNotEmpty,
+                      child: Image.file(
+                        File(imagesFileUpload['Image3']),
                       ),
-                      // Image.file(
-                      //   File(imagesFileUpload['image3']),
-                      // ),
-                      replacement: _isLoading
-                          ? Center(
-                              child: Container(
-                                  child: CircularProgressIndicator(),
-                                  height: 50,
-                                  width: 50))
-                          : Column(children: [
-                              Opacity(
-                                opacity: 0.5,
-                                child: Image.asset(
-                                  'assets/images/photouploadside.png',
-                                  height: 100,
-                                ),
-                              ),
-                              RaisedButton(
-                                onPressed: () => chooseOption('3'),
-                                child: Text(
-                                  'choose_photo'.tr,
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 16),
-                                ),
-                              )
-                            ]),
+                      replacement: Column(children: [
+                        Opacity(
+                          opacity: 0.5,
+                          child: Image.asset(
+                            'assets/images/photouploadside.png',
+                            height: 100,
+                          ),
+                        ),
+                        RaisedButton(
+                          onPressed: () => chooseOption('3'),
+                          child: Text(
+                            'choose_photo'.tr,
+                            style: TextStyle(color: Colors.white, fontSize: 16),
+                          ),
+                        )
+                      ]),
                     ),
                   )),
             ),
             Visibility(
-              visible: imagesFileUpload['image3'] != null &&
-                  imagesFileUpload['image3'].isNotEmpty,
+              visible: imagesFileUpload['Image3'] != null &&
+                  imagesFileUpload['Image3'].isNotEmpty,
               child: Positioned(
                 top: -1,
                 right: -1,
                 child: GestureDetector(
                   onTap: () {
                     setState(() {
-                      imagesFileUpload['image3'] = '';
+                      imagesFileUpload['Image3'] = '';
                     });
                   },
                   child: Icon(
@@ -979,54 +912,47 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                     width: width * 0.3,
                     // color: Colors.amber,
                     child: Visibility(
-                      visible: imagesFileUpload['image4'] != null &&
-                          imagesFileUpload['image4'].isNotEmpty,
-                      child: Image.network(
-                        imagesFileUpload['image4'],
+                      visible: imagesFileUpload['Image4'] != null &&
+                          imagesFileUpload['Image4'].isNotEmpty,
+                      child: Image.file(
+                        File(imagesFileUpload['Image4']),
                       ),
                       // Image.file(
-                      //   File(imagesFileUpload['image3']),
+                      //   File(imagesFileUpload['Image3']),
                       // ),
-                      replacement: _isLoading
-                          ? Center(
-                              child: Container(
-                                  child: CircularProgressIndicator(),
-                                  height: 50,
-                                  width: 50))
-                          : Column(children: [
-                              Opacity(
-                                opacity: 0.5,
-                                child: Transform(
-                                  alignment: Alignment.center,
-                                  transform: Matrix4.rotationY(math.pi),
-                                  child: Image.asset(
-                                    'assets/images/photouploadside.png',
-                                    height: 100,
-                                  ),
-                                ),
-                              ),
-                              RaisedButton(
-                                onPressed: () => chooseOption('4'),
-                                child: Text(
-                                  'choose_photo'.tr,
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 16),
-                                ),
-                              )
-                            ]),
+                      replacement: Column(children: [
+                        Opacity(
+                          opacity: 0.5,
+                          child: Transform(
+                            alignment: Alignment.center,
+                            transform: Matrix4.rotationY(math.pi),
+                            child: Image.asset(
+                              'assets/images/photouploadside.png',
+                              height: 100,
+                            ),
+                          ),
+                        ),
+                        RaisedButton(
+                          onPressed: () => chooseOption('4'),
+                          child: Text(
+                            'choose_photo'.tr,
+                            style: TextStyle(color: Colors.white, fontSize: 16),
+                          ),
+                        )
+                      ]),
                     ),
                   )),
             ),
             Visibility(
-              visible: imagesFileUpload['image4'] != null &&
-                  imagesFileUpload['image4'].isNotEmpty,
+              visible: imagesFileUpload['Image4'] != null &&
+                  imagesFileUpload['Image4'].isNotEmpty,
               child: Positioned(
                 top: -1,
                 right: -1,
                 child: GestureDetector(
                   onTap: () {
                     setState(() {
-                      imagesFileUpload['image4'] = '';
+                      imagesFileUpload['Image4'] = '';
                     });
                   },
                   child: Icon(
@@ -1041,157 +967,319 @@ class _SellAnimalFormState extends State<SellAnimalForm>
         ),
       ));
 
+  _upload({
+    String path,
+    String fileName,
+    String url,
+    String key,
+    String bucket,
+    String xAmzAlgorithm,
+    String xAmzCredential,
+    String xAmzDate,
+    String policy,
+    String xAmzSignature,
+    fileType,
+  }) async {
+    try {
+      dio.FormData data = dio.FormData.fromMap({
+        "key": key,
+        "bucket": bucket,
+        "X-Amz-Algorithm": xAmzAlgorithm,
+        "X-Amz-Credential": xAmzCredential,
+        "X-Amz-Date": xAmzDate,
+        "Policy": policy,
+        "X-Amz-Signature": xAmzSignature,
+        "file": await dio.MultipartFile.fromFile(
+          path,
+        ),
+      });
+
+      dio.Response resp = await dio.Dio().post(
+        url,
+        data: data,
+      );
+
+      print('-=-=-=>>' + resp.toString());
+
+      setState(() {
+        _imageToBeUploaded.add({'fileName': key, 'fileType': fileType});
+      });
+      return true;
+    } catch (e) {
+      print('=-=-==>>' + e.toString());
+      return false;
+    }
+  }
+
   saveButton() => Padding(
         padding: EdgeInsets.all(15),
         child: SizedBox(
           width: double.infinity,
           child: RaisedButton(
-            padding: EdgeInsets.all(10.0),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
-            ),
-            elevation: 5,
-            // color: themeColor,
-            child: Text(
-              'save_button'.tr,
-              style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                  fontStyle: FontStyle.normal,
-                  fontWeight: FontWeight.w600),
-            ),
-            onPressed: _isLoading
-                ? null
-                : () async {
-                    if (animalInfo['animalType'] == null)
-                      ReusableWidgets.showDialogBox(
-                        context,
-                        'error'.tr,
-                        Text('animal_type_error'.tr),
-                      );
-                    else if (animalInfo['animalBreed'] == null)
-                      ReusableWidgets.showDialogBox(
-                        context,
-                        'error'.tr,
-                        Text('animal_breed_error'.tr),
-                      );
-                    else if (animalInfo['animalAge'] == null)
-                      ReusableWidgets.showDialogBox(
-                        context,
-                        'error'.tr,
-                        Text('animal_age_error'.tr),
-                      );
-                    else if ([0, 1].contains(
-                          constant.animalType.indexOf(animalInfo['animalType']),
-                        ) &&
-                        (animalInfo['animalIsPregnant'] == null))
-                      ReusableWidgets.showDialogBox(
-                        context,
-                        'error'.tr,
-                        Text('animal_pregnancy_error'.tr),
-                      );
-                    else if ([0, 1].contains(
-                          constant.animalType.indexOf(animalInfo['animalType']),
-                        ) &&
-                        (animalInfo['animalMilk'] == null ||
-                            animalInfo['animalMilk'].isEmpty))
-                      ReusableWidgets.showDialogBox(
-                        context,
-                        'error'.tr,
-                        Text('animal_milk_error'.tr),
-                      );
-                    else if ([0, 1].contains(constant.animalType
-                            .indexOf(animalInfo['animalType'])) &&
-                        (animalInfo['animalMilk'] != null ||
-                            animalInfo['animalMilk'].isNotEmpty) &&
-                        (int.parse(animalInfo['animalMilk']) > 70))
-                      ReusableWidgets.showDialogBox(
-                        context,
-                        'error'.tr,
-                        Text('maximum_milk_length'.tr),
-                      );
-                    else if (animalInfo['animalPrice'] == null ||
-                        animalInfo['animalPrice'].isEmpty)
-                      ReusableWidgets.showDialogBox(
-                        context,
-                        'error'.tr,
-                        Text('animal_price_error'.tr),
-                      );
-                    // else if (imagesFileUpload['image1'].isEmpty &&
-                    //     imagesFileUpload['image2'].isEmpty &&
-                    //     imagesFileUpload['image3'].isEmpty &&
-                    //     imagesFileUpload['image4'].isEmpty)
-                    //   ReusableWidgets.showDialogBox(
-                    //     context,
-                    //     'error'.tr,
-                    //     Text('animal_image_error'.tr),
-                    //   );
-                    else {
-                      pr = new ProgressDialog(context,
-                          type: ProgressDialogType.Normal,
-                          isDismissible: false);
-                      pr.style(message: 'progress_dialog_message'.tr);
-                      print(animalInfo);
-                      print(extraInfoData);
+              padding: EdgeInsets.all(10.0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
+              elevation: 5,
+              // color: themeColor,
+              child: Text(
+                'save_button'.tr,
+                style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
+                    fontStyle: FontStyle.normal,
+                    fontWeight: FontWeight.w600),
+              ),
+              onPressed: _isLoading
+                  ? null
+                  : () async {
+                      if (animalInfo['animalType'] == null)
+                        ReusableWidgets.showDialogBox(
+                          context,
+                          'error'.tr,
+                          Text('animal_type_error'.tr),
+                        );
+                      else if (animalInfo['animalBreed'] == null)
+                        ReusableWidgets.showDialogBox(
+                          context,
+                          'error'.tr,
+                          Text('animal_breed_error'.tr),
+                        );
+                      else if (animalInfo['animalAge'] == null)
+                        ReusableWidgets.showDialogBox(
+                          context,
+                          'error'.tr,
+                          Text('animal_age_error'.tr),
+                        );
+                      else if ([0, 1].contains(
+                            constant.animalType
+                                .indexOf(animalInfo['animalType']),
+                          ) &&
+                          (animalInfo['animalIsPregnant'] == null))
+                        ReusableWidgets.showDialogBox(
+                          context,
+                          'error'.tr,
+                          Text('animal_pregnancy_error'.tr),
+                        );
+                      else if ([0, 1].contains(
+                            constant.animalType
+                                .indexOf(animalInfo['animalType']),
+                          ) &&
+                          (animalInfo['animalMilk'] == null ||
+                              animalInfo['animalMilk'].isEmpty))
+                        ReusableWidgets.showDialogBox(
+                          context,
+                          'error'.tr,
+                          Text('animal_milk_error'.tr),
+                        );
+                      else if ([0, 1].contains(constant.animalType
+                              .indexOf(animalInfo['animalType'])) &&
+                          (animalInfo['animalMilk'] != null ||
+                              animalInfo['animalMilk'].isNotEmpty) &&
+                          (int.parse(animalInfo['animalMilk']) > 70))
+                        ReusableWidgets.showDialogBox(
+                          context,
+                          'error'.tr,
+                          Text('maximum_milk_length'.tr),
+                        );
+                      else if (animalInfo['animalPrice'] == null ||
+                          animalInfo['animalPrice'].isEmpty)
+                        ReusableWidgets.showDialogBox(
+                          context,
+                          'error'.tr,
+                          Text('animal_price_error'.tr),
+                        );
+                      else if (imagesFileUpload['Image1'].isEmpty &&
+                          imagesFileUpload['Image2'].isEmpty &&
+                          imagesFileUpload['Image3'].isEmpty &&
+                          imagesFileUpload['Image4'].isEmpty)
+                        ReusableWidgets.showDialogBox(
+                          context,
+                          'error'.tr,
+                          Text('animal_image_error'.tr),
+                        );
+                      else {
+                        setState(() {
+                          _imageToBeUploaded.clear();
+                        });
+                        pr = new ProgressDialog(context,
+                            type: ProgressDialogType.Normal,
+                            isDismissible: false);
+                        pr.style(message: 'progress_dialog_message'.tr);
+                        pr.show();
 
+                        SharedPreferences prefs =
+                            await SharedPreferences.getInstance();
+                        List result = [];
 
+                        if (ReusableWidgets.isTokenExpired(
+                            prefs.getInt('expires') ?? 0)) {
+                          bool status =
+                              await refreshTokenController.getRefreshToken(
+                                  refresh:
+                                      prefs.getString('refreshToken') ?? '');
+                          if (status) {
+                            setState(() {
+                              prefs.setString('accessToken',
+                                  refreshTokenController.accessToken.value);
+                              prefs.setString('refreshToken',
+                                  refreshTokenController.refreshToken.value);
+                              prefs.setInt('expires',
+                                  refreshTokenController.expires.value);
+                            });
+                          } else {
+                            print('Error getting token==' + status.toString());
+                          }
+                        }
 
-                      // pr.show();
+                        if (imagesUpload["Image1"].length != 0) {
+                          result.add(imagesUpload["Image1"]);
+                        }
+                        if (imagesUpload["Image2"].length != 0) {
+                          result.add(imagesUpload["Image2"]);
+                        }
+                        if (imagesUpload["Image3"].length != 0) {
+                          result.add(imagesUpload["Image3"]);
+                        }
+                        if (imagesUpload["Image4"].length != 0) {
+                          result.add(imagesUpload["Image4"]);
+                        }
 
-//                           "userAnimalTypeOther":
-//                               animalInfo['animalTypeOther'] ?? "",
+                        List imageUploadingStatus =
+                            await _uploadImageController.uploadImage(
+                          userId: prefs.getString('userId'),
+                          files: result,
+                          token: prefs.getString('accessToken'),
+                        );
 
-// {
-//     "animalType":animalTypeMapping(animalInfo['animalType']),
-//     "animalBreed":ReusableWidgets.removeEnglisgDataFromName(animalInfo['animalBreed']),
-//     "animalAge": ReusableWidgets.convertStringToInt(animalInfo['animalAge'])  ,
-//     "animalBayat":animalBayaatMapping(animalInfo['animalIsPregnant']),
-//     "animalMilk":ReusableWidgets.convertStringToInt(animalInfo['animalMilk']),
-//     "animalMilkCapacity":ReusableWidgets.convertStringToInt(animalInfo['animalMilkCapacity']),
-//     "animalPrice":ReusableWidgets.convertStringToInt(animalInfo['animalPrice']),
-//     "isRecentBayat":0,
-//     "recentBayatTime":"",
-//     "isPregnant":1,
-//     "pregnantTime":4,
-//     "userId":"60bddbd2cd9aab314508a153",
-//     "moreInfo":"no more info",
+                        List<bool> _isImageUploaded = [];
 
-//       "files":[
-//  {"fileName": "Image1","fileType":"image/png"},
-//  {"fileName": "Image2","fileType":"image/png"},
-//   {"fileName": "Image3","fileType":"image/png"},
-//    {"fileName": "Image4","fileType":"video/mp4"}
+                        if (imageUploadingStatus.isBlank) {
+                          ReusableWidgets.showDialogBox(context, 'error'.tr,
+                              Text('issue uploading image'));
+                        } else {
+                          for (int i = 0;
+                              i < imageUploadingStatus.length;
+                              i++) {
+                            bool uploadStatus = await _upload(
+                              path: imagesFileUpload[imageUploadingStatus[i]
+                                  .fields
+                                  .key
+                                  .split('_')[1]],
+                              fileName: imageUploadingStatus[i].fields.key,
+                              url: imageUploadingStatus[i].url,
+                              key: imageUploadingStatus[i].fields.key,
+                              bucket: imageUploadingStatus[i].fields.bucket,
+                              xAmzAlgorithm:
+                                  imageUploadingStatus[i].fields.xAmzAlgorithm,
+                              xAmzCredential:
+                                  imageUploadingStatus[i].fields.xAmzCredential,
+                              xAmzDate: imageUploadingStatus[i].fields.xAmzDate,
+                              policy: imageUploadingStatus[i].fields.policy,
+                              xAmzSignature:
+                                  imageUploadingStatus[i].fields.xAmzSignature,
+                              fileType: result[i]['fileType'],
+                            );
 
-//     ]
-// }
-// {
-//                           "animalType": animalTypeMapping(animalInfo['animalType']),
-//                           "animalBreed": ReusableWidgets.removeEnglisgDataFromName(animalInfo['animalBreed']),
-//                           "animalAge": animalInfo['animalAge'],
-//                           "userName": widget.userName,
-//                           "userAnimalPrice": animalInfo['animalPrice'] ?? "0",
-//                           "userMobileNumber": widget.userMobileNumber,
-//                           "userAnimalMilk": animalInfo['animalMilk'] ?? "",
-//                           "userAnimalPregnancy":
-//                               animalInfo['animalIsPregnant'] ?? "",
-//                           "userLatitude": prefs.getDouble('latitude'),
-//                           "userLongitude": prefs.getDouble('longitude'),
-//                           'moreInfo': extraInfoData,
-//                           "dateOfCreation":
-//                               ReusableWidgets.dateTimeToEpoch(DateTime.now()),
-//                           'dateOfUpdation':
-//                               ReusableWidgets.dateTimeToEpoch(DateTime.now()),
-//                           'isValidUser': 'Approved',
-//                           'uniqueId': uniqueId,
-//                           'userId': prefs.getString('userId'),
-//                           'district': prefs.getString('district'),
+                            print('][]' + uploadStatus.toString());
+                            _isImageUploaded.add(uploadStatus);
+                          }
+                        }
 
-//                           'zipCode': prefs.getString('zipCode'),
+                        bool saveAnimalData = false;
+                        if (animalInfo['animalType'] == 'cow'.tr ||
+                            animalInfo['animalType'] == 'buffalo_female'.tr) {
+                          saveAnimalData =
+                              await sellAnimalController.saveAnimal(
+                            animalType:
+                                animalTypeMapping[animalInfo['animalType']],
+                            animalBreed:
+                                ReusableWidgets.removeEnglisgDataFromName(
+                                    animalInfo['animalBreed']),
+                            animalAge: ReusableWidgets.convertStringToInt(
+                                animalInfo['animalAge']),
+                            animalBayat: animalBayaatMapping[
+                                animalInfo['animalIsPregnant']],
+                            animalPrice: ReusableWidgets.convertStringToInt(
+                                animalInfo['animalPrice']),
+                            animalMilk: ReusableWidgets.convertStringToInt(
+                                animalInfo['animalMilk']),
+                            animalMilkCapacity:
+                                ReusableWidgets.convertStringToInt(
+                                    animalInfo['animalMilkCapacity']),
+                            isRecentBayat: stringToYesNo[
+                                extraInfoData['alreadyPregnantYesNo']],
+                            recentBayatTime: stringToRecentBayaatTime[
+                                extraInfoData['animalAlreadyGivenBirth']],
+                            isPregnant:
+                                stringToYesNo[extraInfoData['isPregnantYesNo']],
+                            pregnantTime: stringToPregnantTime[
+                                extraInfoData['animalIfPregnant']],
+                            userId: prefs.getString('userId'),
+                            moreInfo: extraInfoData['moreInfo'],
+                            files: _imageToBeUploaded,
+                            token: prefs.getString("accessToken"),
+                          );
+                        } else {
+                          saveAnimalData =
+                              await sellAnimalController.saveAnimal(
+                            animalType:
+                                animalTypeMapping[animalInfo['animalType']],
+                            animalBreed:
+                                ReusableWidgets.removeEnglisgDataFromName(
+                                    animalInfo['animalBreed']),
+                            animalAge: ReusableWidgets.convertStringToInt(
+                                animalInfo['animalAge']),
+                            animalBayat: animalBayaatMapping[
+                                animalInfo['animalIsPregnant']],
+                            animalPrice: ReusableWidgets.convertStringToInt(
+                                animalInfo['animalPrice']),
+                            userId: prefs.getString('userId'),
+                            moreInfo: extraInfoData['moreInfo'],
+                            files: _imageToBeUploaded,
+                            token: prefs.getString("accessToken"),
+                          );
+                        }
 
-//                   };
-                    }
-                  },
-          ),
+                        bool uploadStatus = _isImageUploaded
+                            .every((element) => element == true);
+
+                        // print('][]' + uploadStatus.toString());
+                        print('][]==' + _imageToBeUploaded.toString());
+
+                        if (saveAnimalData && _imageToBeUploaded.isNotEmpty) {
+                          pr.hide();
+                          return showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                    title: Text('pashu_registered'.tr),
+                                    content: Text('new_animal'.tr),
+                                    actions: <Widget>[
+                                      TextButton(
+                                          child: Text(
+                                            'Ok'.tr,
+                                            style: TextStyle(
+                                                color: appPrimaryColor),
+                                          ),
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                            Get.offAll(() => HomeScreen(
+                                                  selectedIndex: 0,
+                                                ));
+                                          }),
+                                    ]);
+                              });
+                        } else {
+                          pr.hide();
+                          ReusableWidgets.showDialogBox(
+                              context,
+                              'error'.tr,
+                              Text(
+                                  'Save animal error+${_imageToBeUploaded.isNotEmpty.toString()}'));
+                        }
+                      }
+                    }),
         ),
       );
 

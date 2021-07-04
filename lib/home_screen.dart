@@ -235,7 +235,6 @@ class _HomeScreenState extends State<HomeScreen> {
       maxMilk: null,
       page: 1,
       accessToken: prefs.getString('accessToken') ?? '',
-      refreshToken: prefs.getString('refreshToken') ?? '',
     );
 
     setState(() {
@@ -372,11 +371,13 @@ class _HomeScreenState extends State<HomeScreen> {
           actions: <Widget>[
             new TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: new Text('no'.tr, style: TextStyle(color: primaryColor)),
+              child:
+                  new Text('no'.tr, style: TextStyle(color: appPrimaryColor)),
             ),
             new TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: new Text('yes'.tr, style: TextStyle(color: primaryColor)),
+              child:
+                  new Text('yes'.tr, style: TextStyle(color: appPrimaryColor)),
             ),
           ],
         ),

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:android_play_install_referrer/android_play_install_referrer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -55,8 +56,19 @@ Future _goToDeeplyNestedView(data) async {
   }
 }
 
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+  }
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  HttpOverrides.global = new MyHttpOverrides();
+
   await Firebase.initializeApp();
   remoteConfig = await RemoteConfig.instance;
   await remoteConfig.fetch(expiration: const Duration(seconds: 0));
@@ -280,7 +292,7 @@ class _MyAppState extends State<MyApp> {
                 forceUpdate
                     ? SizedBox.shrink()
                     : RaisedButton(
-                        color: primaryColor,
+                        color: appPrimaryColor,
                         child: Text(
                           btnLabelCancel,
                           style: TextStyle(color: Colors.white),
@@ -288,7 +300,7 @@ class _MyAppState extends State<MyApp> {
                         onPressed: () => Navigator.of(context).pop(),
                       ),
                 RaisedButton(
-                  color: primaryColor,
+                  color: appPrimaryColor,
                   child: Text(
                     btnLabel,
                     style: TextStyle(color: Colors.white),
@@ -317,16 +329,24 @@ class _MyAppState extends State<MyApp> {
         locale: Locale('hn', 'IN'),
         theme: ThemeData(
           fontFamily: 'Mukta',
-          primaryColor: primaryColor,
-          buttonColor: primaryColor,
-          iconTheme: IconThemeData(color: primaryColor),
-          accentColor: primaryColor,
+          primaryColor: appPrimaryColor,
+          buttonColor: appPrimaryColor,
+          iconTheme: IconThemeData(color: appPrimaryColor),
+          accentColor: appPrimaryColor,
           textSelectionTheme: TextSelectionThemeData(
-            cursorColor: primaryColor,
-            selectionHandleColor: primaryColor,
+            cursorColor: appPrimaryColor,
+            selectionHandleColor: appPrimaryColor,
           ),
-          indicatorColor: primaryColor,
+          indicatorColor: appPrimaryColor,
           scaffoldBackgroundColor: Colors.white,
+          inputDecorationTheme: InputDecorationTheme(
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                color: appPrimaryColor,
+              ),
+            ),
+            // labelStyle: TextStyle(color: appPrimaryColor),
+          ),
         ),
         home: SplashScreen());
   }

@@ -289,7 +289,7 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
                               text: "click_here".tr,
                               recognizer: onTapRecognizer,
                               style: TextStyle(
-                                  color: primaryColor,
+                                  color: appPrimaryColor,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16))
                         ]),
@@ -305,7 +305,7 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
                             child: PinCodeTextField(
                               appContext: context,
                               pastedTextStyle: TextStyle(
-                                color: primaryColor,
+                                color: appPrimaryColor,
                                 fontWeight: FontWeight.bold,
                               ),
                               length: 6,
@@ -319,11 +319,11 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
                                 borderRadius: BorderRadius.circular(5),
                                 fieldHeight: 50,
                                 fieldWidth: 40,
-                                activeColor: primaryColor,
+                                activeColor: appPrimaryColor,
                                 activeFillColor: Colors.white,
-                                inactiveColor: primaryColor,
+                                inactiveColor: appPrimaryColor,
                                 inactiveFillColor: Colors.white,
-                                selectedColor: primaryColor,
+                                selectedColor: appPrimaryColor,
                                 selectedFillColor: Colors.white,
                               ),
                               cursorColor: Colors.black,
@@ -374,7 +374,7 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
                           borderRadius: BorderRadius.circular(24),
                         ),
                         elevation: 5,
-                        color: primaryColor,
+                        color: appPrimaryColor,
                         child: Text('proceed_button'.tr,
                             style: TextStyle(
                                 color: Colors.white,
@@ -429,7 +429,8 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
                                               style: ButtonStyle(
                                                   backgroundColor:
                                                       MaterialStateProperty.all<
-                                                          Color>(primaryColor)),
+                                                              Color>(
+                                                          appPrimaryColor)),
                                               child: Text(
                                                 'Ok'.tr,
                                                 style: TextStyle(
