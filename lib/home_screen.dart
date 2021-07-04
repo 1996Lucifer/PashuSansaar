@@ -5,6 +5,7 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:intl/intl.dart';
 import 'package:location/location.dart';
 import 'package:pashusansaar/buy_animal/buy_animal.dart';
+import 'package:pashusansaar/seller_contact/seller_contact_controller.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -46,6 +47,8 @@ class _HomeScreenState extends State<HomeScreen> {
       Get.put(BuyAnimalController());
   final RefreshTokenController refreshTokenController =
       Get.put(RefreshTokenController());
+  final SellerContactController sellerContactController =
+      Get.put(SellerContactController());
 
   @override
   void initState() {

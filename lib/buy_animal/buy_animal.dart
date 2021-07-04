@@ -8,6 +8,7 @@ import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:intl/intl.dart';
 import 'package:pashusansaar/refresh_token/refresh_token_controller.dart';
+import 'package:pashusansaar/seller_contact/seller_contact_controller.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/constants.dart';
 import 'package:pashusansaar/utils/global.dart';
@@ -76,6 +77,8 @@ class _BuyAnimalState extends State<BuyAnimal>
   TextEditingController _locationController = TextEditingController();
   ScrollController _scrollController =
       ScrollController(keepScrollOffset: false);
+  final SellerContactController sellerContactController =
+      Get.put(SellerContactController());
   bool _isLoading = false;
 
   File fileUrl;
@@ -1497,9 +1500,15 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                             //                   true));
                                                             // }
 
+                                                            int myNum = await sellerContactController.getSellerContact(
+                                                                animalId: widget.animalInfo[index].sId,
+                                                                userId: widget.animalInfo[index].userId,
+                                                                token: prefs.getString('accessToken'),
+                                                                channel: [{"contactMedium":"Call"}]);
+
                                                             return UrlLauncher
                                                                 .launch(
-                                                                    'tel:+91 ${widget.animalInfo[index].mobile}');
+                                                                    'tel:+91 $myNum');
                                                           },
                                                           icon: Icon(
                                                             Icons.call,
@@ -1782,10 +1791,16 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                             //                   true));
                                                             // }
 
+                                                            int myNum = await sellerContactController.getSellerContact(
+                                                                animalId: widget.animalInfo[index].sId,
+                                                                userId: widget.animalInfo[index].userId,
+                                                                token: prefs.getString('accessToken'),
+                                                                channel: [{"contactMedium": "Whatsapp"}]);
+
                                                             whatsappText =
                                                                 'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${widget.userName}, ${prefs.getString('district')} \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
                                                             whatsappUrl =
-                                                                "https://api.whatsapp.com/send/?phone=+91 ${widget.animalInfo[index].mobile}&text=$whatsappText";
+                                                                "https://api.whatsapp.com/send/?phone=+91 $myNum &text=$whatsappText";
                                                             await UrlLauncher
                                                                         .canLaunch(
                                                                             whatsappUrl) !=
@@ -1798,7 +1813,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                                     .showSnackBar(
                                                                         SnackBar(
                                                                     content: Text(
-                                                                        '${widget.animalInfo[index].mobile} is not present in Whatsapp'),
+                                                                        '$myNum is not present in Whatsapp'),
                                                                     duration: Duration(
                                                                         milliseconds:
                                                                             300),
