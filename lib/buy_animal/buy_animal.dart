@@ -524,30 +524,6 @@ class _BuyAnimalState extends State<BuyAnimal>
               userMobileNumber: widget.userMobileNumber,
             ),
           ),
-          // floatingActionButton: FloatingActionButton(
-          //   onPressed: () => Navigator.of(context).push(
-          //     PageRouteBuilder(
-          //       pageBuilder: (context, animation, secondaryAnimation) =>
-          //           AnimalInfoForm(
-          //         userMobileNumber: widget.userMobileNumber,
-          //       ),
-          //       transitionsBuilder:
-          //           (context, animation, secondaryAnimation, child) {
-          //         var begin = Offset(0.0, 1.0);
-          //         var end = Offset.zero;
-          //         var tween = Tween(begin: begin, end: end);
-          //         var offsetAnimation = animation.drive(tween);
-
-          //         return SlideTransition(
-          //           position: offsetAnimation,
-          //           child: child,
-          //         );
-          //       },
-          //       opaque: false,
-          //     ),
-          //   ),
-          //   child: const Icon(Icons.chat),
-          // ),
           backgroundColor: Colors.grey[100],
           body: Stack(
             children: [
@@ -1895,96 +1871,49 @@ class _BuyAnimalState extends State<BuyAnimal>
                                 Visibility(
                                   visible: _isCardVisible,
                                   child: Positioned(
-                                      bottom: 0,
-                                      right: 0,
-                                      child: Padding(
-                                          padding: EdgeInsets.all(10),
-                                          child: OpenContainer(
-                                            transitionDuration:
-                                                Duration(seconds: 2),
-                                            openBuilder: (context, _) =>
-                                                AnimalInfoForm(
-                                                    userMobileNumber: widget
-                                                        .userMobileNumber),
-                                            // closedShape: CircleBorder(),
-                                            closedColor:
-                                                Theme.of(context).primaryColor,
-                                            closedBuilder:
-                                                (context, openContainer) =>
-                                                    Container(
-                                              height: 220,
-                                              width: 180,
-                                              child: Card(
-                                                elevation: 10,
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text('Hello'),
-                                                    CloseButton(
-                                                        onPressed: () =>
-                                                            setState(() {
-                                                              _isVisible = true;
-                                                              _isCardVisible =
-                                                                  false;
-                                                            }))
-                                                  ],
-                                                ),
-                                              ),
+                                    bottom: 0,
+                                    right: 0,
+                                    child: Padding(
+                                      padding: EdgeInsets.all(10),
+                                      child: OpenContainer(
+                                        transitionDuration:
+                                            Duration(seconds: 2),
+                                        openBuilder: (context, _) =>
+                                            AnimalInfoForm(
+                                                userMobileNumber:
+                                                    widget.userMobileNumber),
+                                        // closedShape: CircleBorder(),
+                                        closedColor:
+                                            Theme.of(context).primaryColor,
+                                        closedBuilder:
+                                            (context, openContainer) =>
+                                                Container(
+                                          height: 220,
+                                          width: 180,
+                                          child: Card(
+                                            elevation: 10,
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text('Hello'),
+                                                CloseButton(
+                                                    onPressed: () =>
+                                                        setState(() {
+                                                          _isVisible = true;
+                                                          _isCardVisible =
+                                                              false;
+                                                        }))
+                                              ],
                                             ),
-                                          ))
-
-                                      // Padding(
-                                      //   padding: const EdgeInsets.all(10.0),
-                                      //   child: Container(
-                                      //     height: 250,
-                                      //     width: 180,
-                                      //     child: GestureDetector(
-                                      //       onTap: () => OpenContainer(
-                                      //         transitionDuration:
-                                      //             Duration(seconds: 2),
-                                      //         openBuilder: (context, _) =>
-                                      //             AnimalInfoForm(
-                                      //                 userMobileNumber: widget
-                                      //                     .userMobileNumber),
-                                      //         // closedShape: CircleBorder(),
-                                      //         closedColor:
-                                      //             Theme.of(context).primaryColor,
-                                      //         closedBuilder:
-                                      //             (context, openContainer)=>
-                                      //                 Container(
-                                      //           height: 250,
-                                      //           width: 180,
-                                      //           child: Card(
-                                      //             child: Text('Hello'),
-                                      //           ),
-                                      //         ),
-                                      //       ),
-                                      //       child: Card(
-                                      //         elevation: 10,
-                                      //         child: Row(
-                                      //           mainAxisAlignment:
-                                      //               MainAxisAlignment
-                                      //                   .spaceBetween,
-                                      //           children: [
-                                      //             Text('Hello'),
-                                      //             CloseButton(
-                                      //                 onPressed: () =>
-                                      //                     setState(() {
-                                      //                       _isVisible = true;
-                                      //                       _isCardVisible =
-                                      //                           false;
-                                      //                     }))
-                                      //           ],
-                                      //         ),
-                                      //       ),
-                                      //     ),
-                                      //   ),
-                                      // ),
+                                          ),
+                                        ),
                                       ),
+                                    ),
+                                  ),
                                 ),
                                 _isLoading
                                     ? Positioned(
