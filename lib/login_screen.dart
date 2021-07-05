@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:pashusansaar/otp_screen.dart';
 import 'package:pashusansaar/utils/colors.dart';
-import 'package:pashusansaar/utils/global.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -89,15 +88,19 @@ class _LoginState extends State<Login> {
                   ),
                 ),
                 Padding(
-                    padding: EdgeInsets.all(15),
-                    child: Container(
-                        child: TextFormField(
+                  padding: EdgeInsets.all(15),
+                  child: Container(
+                    child: TextFormField(
                       inputFormatters: <TextInputFormatter>[
                         FilteringTextInputFormatter.digitsOnly,
+                        FilteringTextInputFormatter.allow(r'^[6-9]\d{9}$'),
                       ],
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.account_box),
+                          prefixIcon: Icon(
+                            Icons.account_box,
+                            color: primaryColor,
+                          ),
                           border: OutlineInputBorder(),
                           labelText: 'mobile_label'.tr,
                           hintText: 'mobile_hint'.tr,
@@ -105,7 +108,9 @@ class _LoginState extends State<Login> {
                       maxLength: 10,
                       autofocus: false,
                       controller: phoneNumberController,
-                    ))),
+                    ),
+                  ),
+                ),
                 SizedBox(
                   height: 20,
                 ),

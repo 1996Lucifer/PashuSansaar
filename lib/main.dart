@@ -311,20 +311,31 @@ class _MyAppState extends State<MyApp> {
     ]);
 
     return GetMaterialApp(
-        title: 'PashuSansaar',
-        debugShowCheckedModeBanner: false,
-        translations: Messages(), // translations
-        locale: Locale('hn', 'IN'),
-        theme: ThemeData(
-            fontFamily: 'Mukta',
-            primaryColor: primaryColor,
-            buttonColor: primaryColor,
-            iconTheme: IconThemeData(color: primaryColor),
-            accentColor: primaryColor,
-            textSelectionTheme:
-                TextSelectionThemeData(cursorColor: primaryColor),
-            indicatorColor: primaryColor,
-            scaffoldBackgroundColor: Colors.white),
-        home: SplashScreen());
+      title: 'PashuSansaar',
+      debugShowCheckedModeBanner: false,
+      translations: Messages(), // translations
+      locale: Locale('hn', 'IN'),
+      theme: ThemeData(
+        fontFamily: 'Mukta',
+        primaryColor: primaryColor,
+        buttonColor: primaryColor,
+        iconTheme: IconThemeData(color: primaryColor),
+        accentColor: primaryColor,
+        textSelectionTheme: TextSelectionThemeData(
+          cursorColor: primaryColor,
+        ),
+        indicatorColor: primaryColor,
+        scaffoldBackgroundColor: Colors.white,
+        inputDecorationTheme: InputDecorationTheme(
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(
+              color: primaryColor,
+            ),
+          ),
+          // labelStyle: TextStyle(color: appPrimaryColor),
+        ),
+      ),
+      home: SplashScreen(),
+    );
   }
 }

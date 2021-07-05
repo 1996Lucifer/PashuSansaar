@@ -24,6 +24,7 @@ dependencies:
   flutter:
     sdk: flutter
   android_play_install_referrer: any
+  animations: ^2.0.0
   another_flushbar: null
   carousel_slider: ^3.0.0
   check_vpn_connection: ^0.0.1

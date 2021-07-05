@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:core';
+import 'package:animations/animations.dart';
 import 'package:another_flushbar/flushbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
@@ -9,6 +10,7 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:intl/intl.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/constants.dart';
+import 'package:pashusansaar/utils/custom_fab_button.dart';
 import 'package:pashusansaar/utils/global.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:dropdown_search/dropdown_search.dart';
@@ -30,6 +32,8 @@ import 'package:pashusansaar/utils/constants.dart' as constant;
 import 'package:geoflutterfire/geoflutterfire.dart' as geoFire;
 import 'package:path_provider/path_provider.dart';
 import 'dart:ui' as ui;
+
+import 'animal_info_form.dart';
 
 class BuyAnimal extends StatefulWidget {
   List animalInfo;
@@ -73,7 +77,7 @@ class _BuyAnimalState extends State<BuyAnimal>
       ScrollController(keepScrollOffset: false);
   String directory = '';
   String url1 = '', url2 = '', url3 = '', url4 = '';
-  bool _isLoading = false;
+  bool _isLoading = false, _isVisible = false, _isCardVisible = false;
 
   File fileUrl;
 
@@ -128,6 +132,8 @@ class _BuyAnimalState extends State<BuyAnimal>
             widget.animalInfo = _temp;
             widget.animalInfo
                 .sort((a, b) => b['dateOfSaving'].compareTo(a['dateOfSaving']));
+            _isCardVisible = widget.animalInfo.length % 5 == 0;
+            _isVisible = false;
           } else {
             _tempAnimalList = _temp;
             _tempAnimalList
@@ -185,6 +191,7 @@ class _BuyAnimalState extends State<BuyAnimal>
   _getInitialData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
+      _isCardVisible = widget.animalInfo.length % 5 == 0;
       if (widget.latitude == 0.0 || widget.longitude == 0.0) {
         _latitude = prefs.getDouble('latitude');
         _longitude = prefs.getDouble('longitude');
@@ -510,6 +517,37 @@ class _BuyAnimalState extends State<BuyAnimal>
       child: RepaintBoundary(
         key: previewContainer,
         child: Scaffold(
+          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+          floatingActionButton: Visibility(
+            visible: _isVisible,
+            child: CustomFABWidget(
+              userMobileNumber: widget.userMobileNumber,
+            ),
+          ),
+          // floatingActionButton: FloatingActionButton(
+          //   onPressed: () => Navigator.of(context).push(
+          //     PageRouteBuilder(
+          //       pageBuilder: (context, animation, secondaryAnimation) =>
+          //           AnimalInfoForm(
+          //         userMobileNumber: widget.userMobileNumber,
+          //       ),
+          //       transitionsBuilder:
+          //           (context, animation, secondaryAnimation, child) {
+          //         var begin = Offset(0.0, 1.0);
+          //         var end = Offset.zero;
+          //         var tween = Tween(begin: begin, end: end);
+          //         var offsetAnimation = animation.drive(tween);
+
+          //         return SlideTransition(
+          //           position: offsetAnimation,
+          //           child: child,
+          //         );
+          //       },
+          //       opaque: false,
+          //     ),
+          //   ),
+          //   child: const Icon(Icons.chat),
+          // ),
           backgroundColor: Colors.grey[100],
           body: Stack(
             children: [
@@ -1854,6 +1892,100 @@ class _BuyAnimalState extends State<BuyAnimal>
                                         // ),
                                         ),
                                     itemCount: widget.animalInfo.length),
+                                Visibility(
+                                  visible: _isCardVisible,
+                                  child: Positioned(
+                                      bottom: 0,
+                                      right: 0,
+                                      child: Padding(
+                                          padding: EdgeInsets.all(10),
+                                          child: OpenContainer(
+                                            transitionDuration:
+                                                Duration(seconds: 2),
+                                            openBuilder: (context, _) =>
+                                                AnimalInfoForm(
+                                                    userMobileNumber: widget
+                                                        .userMobileNumber),
+                                            // closedShape: CircleBorder(),
+                                            closedColor:
+                                                Theme.of(context).primaryColor,
+                                            closedBuilder:
+                                                (context, openContainer) =>
+                                                    Container(
+                                              height: 220,
+                                              width: 180,
+                                              child: Card(
+                                                elevation: 10,
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text('Hello'),
+                                                    CloseButton(
+                                                        onPressed: () =>
+                                                            setState(() {
+                                                              _isVisible = true;
+                                                              _isCardVisible =
+                                                                  false;
+                                                            }))
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ))
+
+                                      // Padding(
+                                      //   padding: const EdgeInsets.all(10.0),
+                                      //   child: Container(
+                                      //     height: 250,
+                                      //     width: 180,
+                                      //     child: GestureDetector(
+                                      //       onTap: () => OpenContainer(
+                                      //         transitionDuration:
+                                      //             Duration(seconds: 2),
+                                      //         openBuilder: (context, _) =>
+                                      //             AnimalInfoForm(
+                                      //                 userMobileNumber: widget
+                                      //                     .userMobileNumber),
+                                      //         // closedShape: CircleBorder(),
+                                      //         closedColor:
+                                      //             Theme.of(context).primaryColor,
+                                      //         closedBuilder:
+                                      //             (context, openContainer)=>
+                                      //                 Container(
+                                      //           height: 250,
+                                      //           width: 180,
+                                      //           child: Card(
+                                      //             child: Text('Hello'),
+                                      //           ),
+                                      //         ),
+                                      //       ),
+                                      //       child: Card(
+                                      //         elevation: 10,
+                                      //         child: Row(
+                                      //           mainAxisAlignment:
+                                      //               MainAxisAlignment
+                                      //                   .spaceBetween,
+                                      //           children: [
+                                      //             Text('Hello'),
+                                      //             CloseButton(
+                                      //                 onPressed: () =>
+                                      //                     setState(() {
+                                      //                       _isVisible = true;
+                                      //                       _isCardVisible =
+                                      //                           false;
+                                      //                     }))
+                                      //           ],
+                                      //         ),
+                                      //       ),
+                                      //     ),
+                                      //   ),
+                                      // ),
+                                      ),
+                                ),
                                 _isLoading
                                     ? Positioned(
                                         bottom: 0,
@@ -2337,7 +2469,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                       text:
                           // "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
                           "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nपशु देखे: ${shortUrl.toString()}",
-                      subject: 'पशु की जानकारी');
+                      subject: 'animal_info'.tr);
 
                   // Share.share(shortUrl.toString());
                 },
@@ -2381,8 +2513,10 @@ class _BuyAnimalState extends State<BuyAnimal>
               text: TextSpan(
                   text: ' ' +
                       ReusableWidgets.dateDifference(
-                          ReusableWidgets.epochToDateTime(
-                              _list[index]['dateOfSaving'])),
+                        ReusableWidgets.epochToDateTime(
+                          _list[index]['dateOfSaving'],
+                        ),
+                      ),
                   style: TextStyle(
                       color: Colors.grey[500],
                       fontWeight: FontWeight.bold,

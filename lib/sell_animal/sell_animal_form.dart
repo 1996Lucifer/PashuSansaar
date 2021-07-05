@@ -1141,9 +1141,6 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                               .get(GetOptions(source: Source.serverAndCache))
                               .then(
                             (value) async {
-                              SharedPreferences prefs =
-                                  await SharedPreferences.getInstance();
-
                               setState(() {
                                 widget.userName = value.data()['name'];
                                 widget.userMobileNumber =

@@ -253,7 +253,6 @@ class Messages extends Translations {
           'empty_removal_price_error': 'कृपया दाम डाले',
           'removal_price_error':
               'आपके पशु बेचने का दाम गलत लग रहा हैं, कृपया सही दाम डाले',
-          // 'removal_price_error': 'galti @minPrice and @maxPrice',
           'tell_price_with_name': '@name को कितने में बेचीं ?',
           'pashu_removed': 'आपका पशु हटा दिया गया हैं',
           'cancel': 'कैंसिल करे',
@@ -266,7 +265,9 @@ class Messages extends Translations {
               'आपका लोकेशन प्राप्त करने में दिक्कत हो रही है|\nकृपया दोबारा कोशिश करे',
           'invalid_zipcode_error':
               'ये ज़िपकोड भारत का नहीं हैं, कृपया सही ज़िपकोड दर्ज़ करे|',
-          'see_more_animal': 'और पशु देखे'
+          'see_more_animal': 'और पशु देखे',
+          'animal_info':'पशु की जानकारी',
+          'animal_info_saved': 'जानकारी दर्ज़ कर दी गयी हैं ।'
         }
       };
 }

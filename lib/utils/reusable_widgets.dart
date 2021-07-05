@@ -39,7 +39,18 @@ class ReusableWidgets {
         barrierDismissible: barrierDismissible,
         builder: (context) {
           return AlertDialog(
-              title: Text(type),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(10.0),
+                ),
+              ),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(type),
+                  CloseButton(),
+                ],
+              ),
               content: content,
               actions: <Widget>[
                 RaisedButton(
@@ -50,6 +61,11 @@ class ReusableWidgets {
                           fontWeight: FontWeight.bold,
                           fontSize: 16),
                     ),
+                    padding: EdgeInsets.all(5.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    elevation: 5,
                     onPressed: () {
                       cta ? exit(0) : Navigator.pop(context);
                     }),
