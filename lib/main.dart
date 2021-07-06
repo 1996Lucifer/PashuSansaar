@@ -332,7 +332,12 @@ class _MyAppState extends State<MyApp> {
               color: primaryColor,
             ),
           ),
-          // labelStyle: TextStyle(color: appPrimaryColor),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(
+              color: primaryColor,
+            ),
+          ),
+          labelStyle: TextStyle(color: primaryColor),
         ),
       ),
       home: SplashScreen(),

@@ -266,8 +266,9 @@ class Messages extends Translations {
           'invalid_zipcode_error':
               'ये ज़िपकोड भारत का नहीं हैं, कृपया सही ज़िपकोड दर्ज़ करे|',
           'see_more_animal': 'और पशु देखे',
-          'animal_info':'पशु की जानकारी',
-          'animal_info_saved': 'जानकारी दर्ज़ कर दी गयी हैं ।'
+          'animal_info': 'पशु की जानकारी',
+          'animal_info_saved': 'जानकारी दर्ज़ कर दी गयी हैं ।',
+          'mobile_number_format': 'मोबाइल नंबर 6,7,8 या 9 से शुरू होना चाहिए ।'
         }
       };
 }

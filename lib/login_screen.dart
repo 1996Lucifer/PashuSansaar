@@ -93,18 +93,18 @@ class _LoginState extends State<Login> {
                     child: TextFormField(
                       inputFormatters: <TextInputFormatter>[
                         FilteringTextInputFormatter.digitsOnly,
-                        FilteringTextInputFormatter.allow(r'^[6-9]\d{9}$'),
                       ],
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
-                          prefixIcon: Icon(
-                            Icons.account_box,
-                            color: primaryColor,
-                          ),
-                          border: OutlineInputBorder(),
-                          labelText: 'mobile_label'.tr,
-                          hintText: 'mobile_hint'.tr,
-                          counterText: ""),
+                        prefixIcon: Icon(
+                          Icons.account_box,
+                          color: primaryColor,
+                        ),
+                        border: OutlineInputBorder(),
+                        labelText: 'mobile_label'.tr,
+                        hintText: 'mobile_hint'.tr,
+                        counterText: "",
+                      ),
                       maxLength: 10,
                       autofocus: false,
                       controller: phoneNumberController,
@@ -137,6 +137,10 @@ class _LoginState extends State<Login> {
                         } else if (phoneNumberController.text.length < 10) {
                           ReusableWidgets.showDialogBox(context, 'error'.tr,
                               Text("error_length_mobile".tr));
+                        } else if (phoneNumberController.text
+                            .startsWith(RegExp(r'[0-5]'))) {
+                          ReusableWidgets.showDialogBox(context, 'error'.tr,
+                              Text("mobile_number_format".tr));
                         } else {
                           await assignDeviceID();
                           await FirebaseFirestore.instance

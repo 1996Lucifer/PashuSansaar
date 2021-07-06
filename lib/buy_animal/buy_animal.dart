@@ -7,7 +7,7 @@ import 'package:another_flushbar/flushbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' as intl;
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/constants.dart';
 import 'package:pashusansaar/utils/custom_fab_button.dart';
@@ -155,7 +155,7 @@ class _BuyAnimalState extends State<BuyAnimal>
         'userId': FirebaseAuth.instance.currentUser == null
             ? ''
             : FirebaseAuth.instance.currentUser.uid,
-        'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
+        'date': intl.DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
       });
     }
   }
@@ -1891,22 +1891,46 @@ class _BuyAnimalState extends State<BuyAnimal>
                                           height: 220,
                                           width: 180,
                                           child: Card(
+                                            color: primaryColor,
                                             elevation: 10,
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
+                                            child: Column(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
-                                                Text('Hello'),
-                                                CloseButton(
-                                                    onPressed: () =>
-                                                        setState(() {
-                                                          _isVisible = true;
-                                                          _isCardVisible =
-                                                              false;
-                                                        }))
+                                                // Row(
+                                                //   mainAxisAlignment:
+                                                //       MainAxisAlignment
+                                                //           .spaceBetween,
+                                                //   crossAxisAlignment:
+                                                //       CrossAxisAlignment.start,
+                                                //   children: [
+                                                //     CloseButton(
+                                                //         color: Colors.white,
+                                                //         onPressed: () =>
+                                                //             setState(() {
+                                                //               _isVisible = true;
+                                                //               _isCardVisible =
+                                                //                   false;
+                                                //             }))
+                                                //   ],
+                                                // ),
+                                                Align(
+                                                  alignment: Alignment.centerRight,
+                                                  child: CloseButton(
+                                                    color: Colors.white,
+                                                    onPressed: () => setState(() {
+                                                      _isVisible = true;
+                                                      _isCardVisible = false;
+                                                    }),
+                                                  ),
+                                                ),
+                                                Text('पशु की जानकारी भरे ।',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      fontSize: 30,
+                                                    ))
                                               ],
                                             ),
                                           ),

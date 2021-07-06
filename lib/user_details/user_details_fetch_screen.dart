@@ -245,7 +245,10 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                       padding: EdgeInsets.all(15),
                       child: TextFormField(
                         decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.account_box),
+                            prefixIcon: Icon(
+                              Icons.account_box,
+                              color: primaryColor,
+                            ),
                             border: OutlineInputBorder(),
                             labelText: 'name_label'.tr,
                             hintText: 'name_hint'.tr,
@@ -261,7 +264,10 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                         child: TextFormField(
                           maxLength: 6,
                           decoration: InputDecoration(
-                              prefixIcon: Icon(Icons.location_on),
+                              prefixIcon: Icon(
+                                Icons.location_on,
+                                color: primaryColor,
+                              ),
                               border: OutlineInputBorder(),
                               labelText: 'zipcode_label'.tr,
                               hintText: 'zipcode_hint'.tr,
