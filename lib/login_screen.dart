@@ -98,7 +98,6 @@ class _LoginState extends State<Login> {
                       decoration: InputDecoration(
                         prefixIcon: Icon(
                           Icons.account_box,
-                          color: primaryColor,
                         ),
                         border: OutlineInputBorder(),
                         labelText: 'mobile_label'.tr,

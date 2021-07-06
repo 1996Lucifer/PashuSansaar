@@ -189,8 +189,12 @@ class _BuyAnimalState extends State<BuyAnimal>
 
   _getInitialData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    Future.delayed(Duration(seconds: 5)).then((value) => setState(() {
+          _isCardVisible = widget.animalInfo.length % 5 == 0;
+        }));
     setState(() {
-      _isCardVisible = widget.animalInfo.length % 5 == 0;
+      // _isCardVisible = widget.animalInfo.length % 5 == 0;
+
       if (widget.latitude == 0.0 || widget.longitude == 0.0) {
         _latitude = prefs.getDouble('latitude');
         _longitude = prefs.getDouble('longitude');
@@ -517,10 +521,12 @@ class _BuyAnimalState extends State<BuyAnimal>
         key: previewContainer,
         child: Scaffold(
           floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-          floatingActionButton: Visibility(
-            visible: _isVisible,
+          floatingActionButton: AnimatedOpacity(
+            opacity: _isVisible ? 1.0 : 0.0,
+            duration: Duration(milliseconds: 800),
             child: CustomFABWidget(
               userMobileNumber: widget.userMobileNumber,
+              userName: widget.userName,
             ),
           ),
           backgroundColor: Colors.grey[100],
@@ -1867,21 +1873,32 @@ class _BuyAnimalState extends State<BuyAnimal>
                                         // ),
                                         ),
                                     itemCount: widget.animalInfo.length),
-                                Visibility(
-                                  visible: _isCardVisible,
-                                  child: Positioned(
-                                    bottom: 0,
-                                    right: 0,
+                                // Visibility(
+                                //   visible: _isCardVisible,
+                                //   child:
+                                Positioned(
+                                  bottom: 0,
+                                  right: 0,
+                                  child: AnimatedOpacity(
+                                    opacity: _isCardVisible ? 1.0 : 0.0,
+                                    duration: Duration(milliseconds: 800),
                                     child: Padding(
                                       padding: EdgeInsets.all(10),
                                       child: OpenContainer(
+                                        closedElevation: 0,
                                         transitionDuration:
                                             Duration(seconds: 2),
                                         openBuilder: (context, _) =>
                                             AnimalInfoForm(
-                                                userMobileNumber:
-                                                    widget.userMobileNumber),
-                                        // closedShape: CircleBorder(),
+                                          userMobileNumber:
+                                              widget.userMobileNumber,
+                                          userName: widget.userName,
+                                        ),
+                                        closedShape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.all(
+                                            Radius.circular(10.0),
+                                          ),
+                                        ),
                                         closedColor:
                                             Theme.of(context).primaryColor,
                                         closedBuilder:
@@ -1889,51 +1906,38 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                 Container(
                                           height: 220,
                                           width: 180,
-                                          child: Card(
-                                            color: primaryColor,
-                                            elevation: 10,
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                // Row(
-                                                //   mainAxisAlignment:
-                                                //       MainAxisAlignment
-                                                //           .spaceBetween,
-                                                //   crossAxisAlignment:
-                                                //       CrossAxisAlignment.start,
-                                                //   children: [
-                                                //     CloseButton(
-                                                //         color: Colors.white,
-                                                //         onPressed: () =>
-                                                //             setState(() {
-                                                //               _isVisible = true;
-                                                //               _isCardVisible =
-                                                //                   false;
-                                                //             }))
-                                                //   ],
-                                                // ),
-                                                Align(
-                                                  alignment:
-                                                      Alignment.centerRight,
-                                                  child: CloseButton(
-                                                    color: Colors.white,
-                                                    onPressed: () =>
-                                                        setState(() {
-                                                      _isVisible = true;
-                                                      _isCardVisible = false;
-                                                    }),
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                                left: 8.0),
+                                            child: Card(
+                                              color: primaryColor,
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Align(
+                                                    alignment:
+                                                        Alignment.centerRight,
+                                                    child: CloseButton(
+                                                      color: Colors.white,
+                                                      onPressed: () =>
+                                                          setState(() {
+                                                        _isVisible = true;
+                                                        _isCardVisible = false;
+                                                      }),
+                                                    ),
                                                   ),
-                                                ),
-                                                Text(
-                                                  'पशु की जानकारी भरे ।',
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.w500,
-                                                    fontSize: 30,
-                                                  ),
-                                                )
-                                              ],
+                                                  Text(
+                                                    'animal_info_header'.tr,
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 30,
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -1941,6 +1945,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                                     ),
                                   ),
                                 ),
+                                // ),
                                 _isLoading
                                     ? Positioned(
                                         bottom: 0,

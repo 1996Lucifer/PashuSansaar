@@ -247,7 +247,6 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                         decoration: InputDecoration(
                             prefixIcon: Icon(
                               Icons.account_box,
-                              color: primaryColor,
                             ),
                             border: OutlineInputBorder(),
                             labelText: 'name_label'.tr,
@@ -266,7 +265,6 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                           decoration: InputDecoration(
                               prefixIcon: Icon(
                                 Icons.location_on,
-                                color: primaryColor,
                               ),
                               border: OutlineInputBorder(),
                               labelText: 'zipcode_label'.tr,
@@ -334,7 +332,7 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                               backgroundColor: Colors.white,
                               enableActiveFill: true,
                               controller: referralCodeController,
-                              autoDisposeControllers: false,
+                              autoDisposeControllers: true,
                               keyboardType: TextInputType.text,
                               boxShadows: [
                                 BoxShadow(

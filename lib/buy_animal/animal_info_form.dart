@@ -3,6 +3,7 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:geocoder/geocoder.dart';
 import 'package:intl/intl.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
@@ -12,8 +13,12 @@ import '../home_screen.dart';
 import '../utils/constants.dart' as constant;
 
 class AnimalInfoForm extends StatefulWidget {
-  final String userMobileNumber;
-  AnimalInfoForm({Key key, @required this.userMobileNumber}) : super(key: key);
+  final String userMobileNumber, userName;
+  AnimalInfoForm({
+    Key key,
+    @required this.userMobileNumber,
+    @required this.userName,
+  }) : super(key: key);
 
   @override
   _AnimalInfoFormState createState() => _AnimalInfoFormState();
@@ -21,7 +26,7 @@ class AnimalInfoForm extends StatefulWidget {
 
 class _AnimalInfoFormState extends State<AnimalInfoForm> {
   Map<String, dynamic> animalInfo = {};
-  TextEditingController _priceFromController, _priceToController;
+  TextEditingController _budgetController;
   String _formatNumber(String s) =>
       NumberFormat.decimalPattern('en_IN').format(int.parse(s));
   String get _currency =>
@@ -30,8 +35,7 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
 
   @override
   void initState() {
-    _priceFromController = TextEditingController();
-    _priceToController = TextEditingController();
+    _budgetController = TextEditingController();
 
     super.initState();
   }
@@ -174,58 +178,6 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
         ],
       );
 
-  Column animalAge() => Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-            child: Row(
-              children: [
-                Text(
-                  'animal_age'.tr,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(width: 5),
-                Text(
-                  '*',
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.red),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-            child: DropdownSearch<String>(
-              mode: Mode.BOTTOM_SHEET,
-              showSelectedItem: true,
-              selectedItem: animalInfo['animalAge'],
-              items: constant.animalAge,
-              label: 'animal_age'.tr,
-              hint: 'animal_age'.tr,
-              onChanged: (String age) {
-                setState(() {
-                  animalInfo['animalAge'] = age;
-                });
-              },
-              dropdownSearchDecoration: InputDecoration(
-                  contentPadding:
-                      EdgeInsets.symmetric(vertical: 1, horizontal: 10),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(5),
-                  )),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-            child: Divider(
-              thickness: 1,
-            ),
-          ),
-        ],
-      );
-
   Column animalMilkPerDay() => Column(
         children: [
           Padding(
@@ -233,7 +185,7 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
             child: Row(
               children: [
                 Text(
-                  'animal_milk_per_day'.tr,
+                  'दूध',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(width: 5),
@@ -278,15 +230,30 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
         ],
       );
 
-  Column animalPrice(TextEditingController controller, String key) => Column(
+  Column animalBudget() => Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-            child: Text(
-              'animal_price'.tr,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            child: Row(
+              children: [
+                Text(
+                  'आपका बजट क्या हैं (₹)',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(width: 5),
+                Text(
+                  '*',
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red),
+                ),
+              ],
             ),
           ),
           Padding(
@@ -296,25 +263,83 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
                 FilteringTextInputFormatter.digitsOnly,
                 FilteringTextInputFormatter.deny(RegExp(r'^0+'))
               ],
-              controller: controller,
+              controller: _budgetController,
               keyboardType: TextInputType.number,
               onChanged: (String price) {
                 String string = '${_formatNumber(price.replaceAll(',', ''))}';
 
-                controller.value = TextEditingValue(
+                _budgetController.value = TextEditingValue(
                   text: _currency + string,
                   selection: TextSelection.collapsed(offset: string.length),
                 );
 
-                controller.selection = TextSelection.fromPosition(
-                    TextPosition(offset: controller.text.length));
+                _budgetController.selection = TextSelection.fromPosition(
+                    TextPosition(offset: _budgetController.text.length));
 
                 setState(() {
-                  animalInfo[key] = price;
+                  animalInfo['animalBudget'] = price;
                 });
               },
               decoration: InputDecoration(
                 hintText: 'price_hint_text'.tr,
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 1, horizontal: 10),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+            child: Divider(
+              thickness: 1,
+            ),
+          ),
+        ],
+      );
+  Column zipCodeField() => Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+            child: Row(
+              children: [
+                Text(
+                  'ज़िपकोड'.tr,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(width: 5),
+                Text(
+                  '*',
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+            child: TextFormField(
+              inputFormatters: <TextInputFormatter>[
+                FilteringTextInputFormatter.digitsOnly,
+              ],
+              keyboardType: TextInputType.number,
+              maxLength: 6,
+              onChanged: (String zipcode) {
+                setState(() {
+                  animalInfo['zipCode'] = zipcode;
+                });
+              },
+              decoration: InputDecoration(
+                counterText: '',
+                hintText: 'ज़िपकोड दर्ज करें'.tr,
                 contentPadding:
                     EdgeInsets.symmetric(vertical: 1, horizontal: 10),
                 border: OutlineInputBorder(
@@ -351,6 +376,16 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
                     fontWeight: FontWeight.w600),
               ),
               onPressed: () async {
+                String countryCode = '';
+                try {
+                  var addresses = await Geocoder.local
+                      .findAddressesFromQuery(animalInfo['zipCode']);
+                  var first = addresses.first;
+                  countryCode = first.countryCode;
+                } catch (e) {
+                  countryCode = 'XYZ';
+                }
+
                 if (animalInfo['animalType'] == null)
                   ReusableWidgets.showDialogBox(
                     context,
@@ -362,12 +397,6 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
                     context,
                     'error'.tr,
                     Text('animal_breed_error'.tr),
-                  );
-                else if (animalInfo['animalAge'] == null)
-                  ReusableWidgets.showDialogBox(
-                    context,
-                    'error'.tr,
-                    Text('animal_age_error'.tr),
                   );
                 else if ([0, 1].contains(
                       constant.animalType.indexOf(animalInfo['animalType']),
@@ -389,28 +418,23 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
                     'error'.tr,
                     Text('maximum_milk_length'.tr),
                   );
-                else if (animalInfo['animalFromPrice'] == null ||
-                    animalInfo['animalFromPrice'].isEmpty)
+                else if (animalInfo['animalBudget'] == null ||
+                    animalInfo['animalBudget'].isEmpty)
                   ReusableWidgets.showDialogBox(
                     context,
                     'error'.tr,
                     Text('animal_price_error'.tr),
                   );
-                else if (animalInfo['animalToPrice'] == null ||
-                    animalInfo['animalToPrice'].isEmpty)
+                else if (animalInfo['zipCode'] == null) {
                   ReusableWidgets.showDialogBox(
-                    context,
-                    'error'.tr,
-                    Text('animal_price_error'.tr),
-                  );
-                else if (int.parse(animalInfo['animalFromPrice']) >
-                    int.parse(animalInfo['animalToPrice']))
+                      context, 'error'.tr, Text("error_empty_zipcode".tr));
+                } else if (int.parse(animalInfo['zipCode']) < 6) {
                   ReusableWidgets.showDialogBox(
-                    context,
-                    'error'.tr,
-                    Text('animal_price_error'.tr),
-                  );
-                else {
+                      context, 'error'.tr, Text("error_length_zipcode".tr));
+                } else if (countryCode != "IN" || countryCode == 'XYZ') {
+                  ReusableWidgets.showDialogBox(
+                      context, 'error'.tr, Text("invalid_zipcode_error".tr));
+                } else {
                   print(animalInfo);
                   pr = new ProgressDialog(context,
                       type: ProgressDialogType.Normal, isDismissible: false);
@@ -428,10 +452,12 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
                         "animalBreed":
                             ReusableWidgets.removeEnglisgDataFromName(
                                 animalInfo['animalBreed']),
-                        "animalAge": animalInfo['animalAge'],
                         "animalMilk": animalInfo['animalMilk'],
-                        "animalFromPrice": animalInfo['animalFromPrice'],
-                        "animalToPrice": animalInfo['animalToPrice'],
+                        "animalBudget": animalInfo['animalBudget'],
+                        'mobile': widget.userMobileNumber,
+                        'userName': widget.userName,
+                        'userId': FirebaseAuth.instance.currentUser.uid,
+                        "zipCode": animalInfo['zipCode'],
                         "dateOfSaving": DateFormat()
                             .add_yMMMd()
                             .add_jm()
@@ -472,6 +498,7 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
                       'userId': FirebaseAuth.instance.currentUser == null
                           ? ''
                           : FirebaseAuth.instance.currentUser.uid,
+                      'mobile': widget.userMobileNumber,
                       'date': DateFormat()
                           .add_yMMMd()
                           .add_jm()
@@ -491,20 +518,21 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
         child: SingleChildScrollView(
           child: Column(
             children: [
+              Text(
+                'animal_info_header'.tr,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(
+                width: 3,
+              ),
               animalType(),
               animalBreed(),
-              animalAge(),
               animalMilkPerDay(),
-              Row(
-                children: [
-                  Expanded(
-                    child: animalPrice(_priceFromController, 'animalFromPrice'),
-                  ),
-                  Expanded(
-                    child: animalPrice(_priceToController, 'animalToPrice'),
-                  ),
-                ],
-              ),
+              animalBudget(),
+              zipCodeField(),
               saveButton()
             ],
           ),

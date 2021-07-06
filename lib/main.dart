@@ -326,19 +326,19 @@ class _MyAppState extends State<MyApp> {
         ),
         indicatorColor: primaryColor,
         scaffoldBackgroundColor: Colors.white,
-        inputDecorationTheme: InputDecorationTheme(
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-              color: primaryColor,
-            ),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-              color: primaryColor,
-            ),
-          ),
-          labelStyle: TextStyle(color: primaryColor),
-        ),
+        // inputDecorationTheme: InputDecorationTheme(
+        //   focusedBorder: OutlineInputBorder(
+        //     borderSide: BorderSide(
+        //       color: primaryColor,
+        //     ),
+        //   ),
+        //   enabledBorder: OutlineInputBorder(
+        //     borderSide: BorderSide(
+        //       color: primaryColor,
+        //     ),
+        //   ),
+        //   labelStyle: TextStyle(color: primaryColor),
+        // ),
       ),
       home: SplashScreen(),
     );

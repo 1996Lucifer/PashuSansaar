@@ -6,18 +6,21 @@ import 'package:pashusansaar/buy_animal/animal_info_form.dart';
 const double fabSize = 56;
 
 class CustomFABWidget extends StatelessWidget {
-  final String userMobileNumber;
+  final String userMobileNumber, userName;
 
   const CustomFABWidget({
     Key key,
     @required this.userMobileNumber,
+    @required this.userName,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) => OpenContainer(
         transitionDuration: Duration(seconds: 2),
-        openBuilder: (context, _) =>
-            AnimalInfoForm(userMobileNumber: userMobileNumber),
+        openBuilder: (context, _) => AnimalInfoForm(
+          userMobileNumber: userMobileNumber,
+          userName: userName,
+        ),
         closedShape: CircleBorder(),
         closedColor: Theme.of(context).primaryColor,
         closedBuilder: (context, openContainer) => Container(
