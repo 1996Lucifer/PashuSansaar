@@ -23,7 +23,6 @@ import 'package:geocoder/geocoder.dart';
 import 'package:geodesy/geodesy.dart';
 import 'package:get/get.dart';
 import 'package:progress_dialog/progress_dialog.dart';
-import 'package:intl/intl.dart' as intl;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart' as UrlLauncher;
 import 'package:carousel_slider/carousel_slider.dart';

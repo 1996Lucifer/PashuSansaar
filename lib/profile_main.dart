@@ -44,7 +44,6 @@ class ProfileMain extends StatefulWidget {
 
 class ProfileMainState extends State<ProfileMain>
     with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
-  bool _status = true;
   final FocusNode myFocusNode = FocusNode();
   ImagePicker _picker;
   String _base64Image = "", _currentVersion = '';
