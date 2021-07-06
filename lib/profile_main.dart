@@ -56,8 +56,6 @@ class ProfileMainState extends State<ProfileMain>
 
   @override
   void initState() {
-    // TODO: implement initState
-    // getCallingInfo();
     populateData();
     super.initState();
   }

@@ -1915,22 +1915,25 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                 //   ],
                                                 // ),
                                                 Align(
-                                                  alignment: Alignment.centerRight,
+                                                  alignment:
+                                                      Alignment.centerRight,
                                                   child: CloseButton(
                                                     color: Colors.white,
-                                                    onPressed: () => setState(() {
+                                                    onPressed: () =>
+                                                        setState(() {
                                                       _isVisible = true;
                                                       _isCardVisible = false;
                                                     }),
                                                   ),
                                                 ),
-                                                Text('पशु की जानकारी भरे ।',
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      fontSize: 30,
-                                                    ))
+                                                Text(
+                                                  'पशु की जानकारी भरे ।',
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.w500,
+                                                    fontSize: 30,
+                                                  ),
+                                                )
                                               ],
                                             ),
                                           ),
