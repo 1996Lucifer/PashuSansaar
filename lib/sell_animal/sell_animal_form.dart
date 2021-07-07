@@ -1125,6 +1125,44 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                         'error'.tr,
                         Text('animal_image_error'.tr),
                       );
+                    else if (([0, 1].contains(constant.animalType
+                            .indexOf(animalInfo['animalType']))) &&
+                        extraInfoData['alreadyPregnantYesNo'] == null)
+                      ReusableWidgets.showDialogBox(
+                        context,
+                        'error'.tr,
+                        Text('animal_pregnant_empty_error'.tr),
+                      );
+                    else if (([0, 1].contains(constant.animalType
+                            .indexOf(animalInfo['animalType']))) &&
+                        constant.yesNo.indexOf(
+                                extraInfoData['alreadyPregnantYesNo']) ==
+                            0 &&
+                        extraInfoData['animalAlreadyGivenBirth'] == null)
+                      ReusableWidgets.showDialogBox(
+                        context,
+                        'error'.tr,
+                        Text('animal_pregnant_time_error'.tr),
+                      );
+                    else if (([0, 1].contains(constant.animalType
+                            .indexOf(animalInfo['animalType']))) &&
+                        extraInfoData['isPregnantYesNo'] == null)
+                      ReusableWidgets.showDialogBox(
+                        context,
+                        'error'.tr,
+                        Text('animal_gayabhin_empty_error'.tr),
+                      );
+                    else if (([0, 1].contains(constant.animalType
+                            .indexOf(animalInfo['animalType']))) &&
+                        constant.yesNo
+                                .indexOf(extraInfoData['isPregnantYesNo']) ==
+                            0 &&
+                        extraInfoData['animalIfPregnant'] == null)
+                      ReusableWidgets.showDialogBox(
+                        context,
+                        'error'.tr,
+                        Text('animal_gayabhin_time_error'.tr),
+                      );
                     else {
                       pr = new ProgressDialog(context,
                           type: ProgressDialogType.Normal,
@@ -1666,22 +1704,6 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                     ? extraINfoData()
                     : moreInfoTextArea(),
               ),
-              // AnimatedOpacity(
-              //   opacity: 1,
-              //   // opacity: _showData ? 1 : 0,
-              //   duration: Duration(seconds: 2),
-              //   child: _showData
-              //       ? Padding(
-              //           padding: const EdgeInsets.symmetric(
-              //               vertical: 4, horizontal: 8),
-              //           child: [0, 1].contains(
-              //             constant.animalType.indexOf(animalInfo['animalType']),
-              //           )
-              //               ? extraINfoData()
-              //               : moreInfoTextArea(),
-              //         )
-              //       : SizedBox.shrink(),
-              // ),
               saveButton()
             ],
           ),

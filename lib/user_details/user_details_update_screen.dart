@@ -145,34 +145,37 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
   }
 
   storeFCMToken() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String _token = await FirebaseMessaging.instance.getToken();
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String _token = await FirebaseMessaging.instance.getToken();
 
-    var addresses = await Geocoder.local.findAddressesFromCoordinates(
-        Coordinates(prefs.getDouble('latitude'), prefs.getDouble('longitude')));
-    var first = addresses.first;
+      var addresses = await Geocoder.local.findAddressesFromCoordinates(
+          Coordinates(
+              prefs.getDouble('latitude'), prefs.getDouble('longitude')));
+      var first = addresses.first;
 
-    print(_token);
+      print(_token);
 
-    FirebaseFirestore.instance
-        .collection("fcmToken")
-        .doc(widget.currentUser)
-        .set({
-      "id": widget.currentUser,
-      'lat': prefs.getDouble('latitude').toString(),
-      'long': prefs.getDouble('longitude').toString(),
-      'userToken': _token,
-      'district': ReusableWidgets.mappingDistrict(
-        first.subAdminArea ?? first.locality ?? first.featureName,
-      )
-    }).catchError((err) {
+      FirebaseFirestore.instance
+          .collection("fcmToken")
+          .doc(widget.currentUser)
+          .set({
+        "id": widget.currentUser,
+        'lat': prefs.getDouble('latitude').toString(),
+        'long': prefs.getDouble('longitude').toString(),
+        'userToken': _token,
+        'district': ReusableWidgets.mappingDistrict(
+          first.subAdminArea ?? first.locality ?? first.featureName,
+        )
+      });
+    } catch (err) {
       print(
         "errToken->" + err.toString(),
       );
       FirebaseFirestore.instance
           .collection('logger')
           .doc(widget.mobile)
-          .collection('token')
+          .collection('token-update')
           .doc()
           .set({
         'issue': err.toString(),
@@ -181,7 +184,7 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
             : FirebaseAuth.instance.currentUser.uid,
         'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
       });
-    });
+    }
   }
 
   loadAsset() async {

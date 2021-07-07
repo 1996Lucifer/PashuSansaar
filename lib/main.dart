@@ -324,6 +324,47 @@ class _MyAppState extends State<MyApp> {
         textSelectionTheme: TextSelectionThemeData(
           cursorColor: primaryColor,
         ),
+        textTheme: TextTheme(
+          headline1: TextStyle(
+            fontSize: 15,
+          ),
+          headline2: TextStyle(
+            fontSize: 15,
+          ),
+          headline3: TextStyle(
+            fontSize: 15,
+          ),
+          headline4: TextStyle(
+            fontSize: 15,
+          ),
+          headline5: TextStyle(
+            fontSize: 15,
+          ),
+          headline6: TextStyle(
+            fontSize: 15,
+          ),
+          subtitle1: TextStyle(
+            fontSize: 15,
+          ),
+          subtitle2: TextStyle(
+            fontSize: 15,
+          ),
+          bodyText1: TextStyle(
+            fontSize: 15,
+          ),
+          bodyText2: TextStyle(
+            fontSize: 15,
+          ),
+          caption: TextStyle(
+            fontSize: 15,
+          ),
+          button: TextStyle(
+            fontSize: 15,
+          ),
+          overline: TextStyle(
+            fontSize: 15,
+          ),
+        ),
         indicatorColor: primaryColor,
         scaffoldBackgroundColor: Colors.white,
         // inputDecorationTheme: InputDecorationTheme(
@@ -337,7 +378,7 @@ class _MyAppState extends State<MyApp> {
         //       color: primaryColor,
         //     ),
         //   ),
-        //   labelStyle: TextStyle(color: primaryColor),
+        //   labelStyle:  (color: primaryColor),
         // ),
       ),
       home: SplashScreen(),

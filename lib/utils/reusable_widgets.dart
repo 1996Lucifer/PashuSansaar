@@ -47,7 +47,13 @@ class ReusableWidgets {
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(type),
+                  Text(
+                    type,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
                   CloseButton(),
                 ],
               ),
@@ -57,9 +63,10 @@ class ReusableWidgets {
                     child: Text(
                       'Ok'.tr,
                       style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16),
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                     padding: EdgeInsets.all(5.0),
                     shape: RoundedRectangleBorder(

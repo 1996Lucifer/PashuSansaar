@@ -469,7 +469,7 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
                           context: context,
                           builder: (context) {
                             return AlertDialog(
-                                title: Text('animal_info'.tr),
+                                title: Text('info'.tr),
                                 content: Text('animal_info_saved'.tr),
                                 actions: <Widget>[
                                   TextButton(

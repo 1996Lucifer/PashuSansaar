@@ -167,23 +167,7 @@ class _OTPScreenState extends State<OTPScreen>
                       }));
             },
             codeAutoRetrievalTimeout: (String verificationID) {
-              // FirebaseFirestore.instance
-              //     .collection('logger')
-              //     .doc(widget.phoneNumber)
-              //     .collection('OTP-CodeAutoRetrieval')
-              //     .doc()
-              //     .set({
-              //   'otp': verificationID,
-              //   'mobile': widget.phoneNumber,
-              //   'userId': FirebaseAuth.instance.currentUser == null
-              //       ? ''
-              //       : FirebaseAuth.instance.currentUser.uid,
-              //   'date':
-              //       DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
-              // }).then((value) => setState(() {
-              //           _verificationCode = verificationID;
-              //           _startTimer = false;
-              //         }));
+              print('codeAutoTimeout===' + verificationID);
             },
             timeout: Duration(seconds: 60),
             forceResendingToken: _resendToken)
