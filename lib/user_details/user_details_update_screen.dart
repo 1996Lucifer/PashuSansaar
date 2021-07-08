@@ -144,14 +144,15 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
     }
   }
 
-  storeFCMToken() async {
+  storeFCMToken(SharedPreferences prefs) async {
     try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
+      // SharedPreferences prefs = await SharedPreferences.getInstance();
       String _token = await FirebaseMessaging.instance.getToken();
+      Coordinates coordinates = Coordinates(
+          prefs.getDouble('latitude'), prefs.getDouble('longitude'));
 
-      var addresses = await Geocoder.local.findAddressesFromCoordinates(
-          Coordinates(
-              prefs.getDouble('latitude'), prefs.getDouble('longitude')));
+      var addresses =
+          await Geocoder.local.findAddressesFromCoordinates(coordinates);
       var first = addresses.first;
 
       print(_token);
@@ -410,7 +411,7 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
                                 zipCodeController.text.isNotEmpty)
                               await loadAsset();
 
-                            await storeFCMToken();
+                            await storeFCMToken(prefs);
 
                             if (prefs.getDouble('latitude') == null ||
                                 prefs.getDouble('longitude') == null) {

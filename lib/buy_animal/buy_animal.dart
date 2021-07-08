@@ -189,7 +189,7 @@ class _BuyAnimalState extends State<BuyAnimal>
 
   _getInitialData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    Future.delayed(Duration(seconds: 12)).then((value) => setState(() {
+    Future.delayed(Duration(seconds: 7)).then((value) => setState(() {
           _isCardVisible = widget.animalInfo.length % 5 == 0;
         }));
     setState(() {

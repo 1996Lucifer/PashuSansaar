@@ -1343,6 +1343,13 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                       fontWeight: FontWeight.bold,
                       color: Colors.grey[500]),
                 ),
+                Text(
+                  '*',
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red),
+                ),
               ],
             ),
           ),
@@ -1433,6 +1440,13 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                       color: Colors.grey[500]),
+                ),
+                Text(
+                  '*',
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red),
                 ),
               ],
             ),
