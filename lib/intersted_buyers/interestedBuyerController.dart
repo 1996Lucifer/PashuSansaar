@@ -4,17 +4,19 @@ import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:pashusansaar/utils/urls.dart';
 
-class SellerContactController extends GetxController {
-  getSellerContact({String animalId, String userId, List<Map> channel,String token,}) async {
+import 'interestedBuyerModel.dart';
+
+class InterestedBuyerController extends GetxController {
+  interstedBuyers({String animalId, String userId,int page, String token,}) async {
     Map<String, dynamic> payload = {
       "animalId": animalId,
       "userId": userId,
-      "channel": channel
+      "page": page
     };
 
     try {
       var response = await Dio().post(
-        GlobalUrl.baseUrl + GlobalUrl.getSellerContact,
+        GlobalUrl.baseUrl + GlobalUrl.interestedBuyers,
         data: json.encode(payload),
         options: Options(
           headers: {
@@ -24,13 +26,15 @@ class SellerContactController extends GetxController {
       );
 
       if (response.data != null) {
+        InterestedBuyerModel interstedBuyersData;
         if (response.statusCode == 200 || response.statusCode == 201) {
-          return response.data['sellerMobile'];
+          interstedBuyersData = InterestedBuyerModel.fromJson(response.data);
         }
+        return interstedBuyersData.interestedBuyers;
       }
     } catch (e) {
-      print("Getting seller contact number exception _______$e");
-      return '';
+      print("Getting my animal list exception _______$e");
+      return [];
     }
   }
 }

@@ -531,6 +531,8 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                                       'userId', _authController.userId.value);
                                   prefs.setInt(
                                       'expires', _authController.expires.value);
+                                  prefs.setString(
+                                      'userName', nameController.text);
                                 });
 
                                 pr.hide();

@@ -1521,9 +1521,11 @@ class _BuyAnimalState extends State<BuyAnimal>
 
                                                             int myNum = await sellerContactController.getSellerContact(
                                                                 animalId: widget.animalInfo[index].sId,
-                                                                userId: widget.animalInfo[index].userId,
+                                                                userId: prefs.getString('userId'),
                                                                 token: prefs.getString('accessToken'),
-                                                                channel: [{"contactMedium":"Call"}]);
+                                                                channel: [{"contactMedium": "Call"}]);
+
+
 
                                                             return UrlLauncher
                                                                 .launch(
@@ -1812,7 +1814,7 @@ class _BuyAnimalState extends State<BuyAnimal>
 
                                                             int myNum = await sellerContactController.getSellerContact(
                                                                 animalId: widget.animalInfo[index].sId,
-                                                                userId: widget.animalInfo[index].userId,
+                                                                userId: prefs.getString('userId'),
                                                                 token: prefs.getString('accessToken'),
                                                                 channel: [{"contactMedium": "Whatsapp"}]);
 
@@ -2220,7 +2222,7 @@ class _BuyAnimalState extends State<BuyAnimal>
         _tempAnimalList.length != 0 ? _tempAnimalList : widget.animalInfo;
 
     List<String> _images = [];
-    _list[index].files.forEach((elem) => _images.add(elem.fileUrl));
+    _list[index].files.forEach((img) => _images.addIf(img.fileName != null, img.fileName));
 
     return Padding(
       padding: EdgeInsets.only(left: 8.0, right: 8, bottom: 4),

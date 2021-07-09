@@ -2,19 +2,19 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
+import 'package:pashusansaar/my_calls/myCallsModel.dart';
 import 'package:pashusansaar/utils/urls.dart';
 
-class SellerContactController extends GetxController {
-  getSellerContact({String animalId, String userId, List<Map> channel,String token,}) async {
+class MyCallListController extends GetxController {
+  getCallList({String userId, String token, int page}) async {
     Map<String, dynamic> payload = {
-      "animalId": animalId,
       "userId": userId,
-      "channel": channel
+      "page": page,
     };
 
     try {
       var response = await Dio().post(
-        GlobalUrl.baseUrl + GlobalUrl.getSellerContact,
+        GlobalUrl.baseUrl + GlobalUrl.getCallList,
         data: json.encode(payload),
         options: Options(
           headers: {
@@ -24,13 +24,15 @@ class SellerContactController extends GetxController {
       );
 
       if (response.data != null) {
+        MyCallsModel myCallData;
         if (response.statusCode == 200 || response.statusCode == 201) {
-          return response.data['sellerMobile'];
+          myCallData = MyCallsModel.fromJson(response.data);
         }
+        return myCallData.myCalls;
       }
     } catch (e) {
-      print("Getting seller contact number exception _______$e");
-      return '';
+      print("Getting my call list exception _______$e");
+      return [];
     }
   }
 }

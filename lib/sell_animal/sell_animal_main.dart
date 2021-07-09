@@ -16,7 +16,7 @@ class SellAnimalMain extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return sellingAnimalInfo.length == 0
+    return sellingAnimalInfo.length != 0
         ? SellAnimalForm(userName: userName, userMobileNumber: userMobileNumber)
         : SellingAnimalInfo(
             animalInfo: sellingAnimalInfo,

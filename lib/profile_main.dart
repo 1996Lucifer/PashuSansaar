@@ -11,11 +11,13 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:pashusansaar/user_details/user_details_fetch_screen.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'home_screen.dart';
 import 'my_called_list.dart';
+import 'my_calls/myCallsController.dart';
 import 'sell_animal/sell_animal_info.dart';
 import 'utils/colors.dart';
 import 'utils/reusable_widgets.dart';
@@ -53,12 +55,26 @@ class ProfileMainState extends State<ProfileMain>
 
   @override
   bool get wantKeepAlive => true;
+  final MyCallListController myCallListController =
+      Get.put(MyCallListController());
+
+  String userAddress = '';
+  String userName = 'ashok';
+
+  getMyLocation() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userAddress = prefs.getString('userAddress');
+      userName = prefs.getString('userName');
+    });
+  }
 
   @override
   void initState() {
     // TODO: implement initState
     // getCallingInfo();
     populateData();
+    getMyLocation();
     super.initState();
   }
 
@@ -466,33 +482,35 @@ class ProfileMainState extends State<ProfileMain>
                           child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                userInfo['name'] == null
+                                userName.length == null
                                     ? Text('progress_dialog_message'.tr)
                                     : Row(
                                         children: [
                                           Icon(Icons.account_circle_outlined),
                                           SizedBox(width: 5),
-                                          Text(userInfo['name'],
+                                          Text(userName,
                                               style: TextStyle(
                                                   fontWeight: FontWeight.w500,
                                                   fontSize: 14)),
                                         ],
                                       ),
                                 SizedBox(height: 5),
-                                userInfo['mobile'] == null
+                                widget.userMobileNumber.length == null
                                     ? Text('progress_dialog_message'.tr)
                                     : Row(
                                         children: [
                                           Icon(Icons.call),
                                           SizedBox(width: 5),
-                                          Text(userInfo['mobile'],
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.w500,
-                                                  fontSize: 14)),
+                                          Text(
+                                            widget.userMobileNumber,
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 14),
+                                          ),
                                         ],
                                       ),
                                 SizedBox(height: 5),
-                                userInfo['address'] == null
+                                userAddress.length == null
                                     ? Text('progress_dialog_message'.tr)
                                     : Row(
                                         crossAxisAlignment:
@@ -501,7 +519,7 @@ class ProfileMainState extends State<ProfileMain>
                                           Icon(Icons.location_on_outlined),
                                           SizedBox(width: 5),
                                           Expanded(
-                                              child: Text(userInfo['address'],
+                                              child: Text(userAddress,
                                                   style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.w500,
@@ -568,7 +586,7 @@ class ProfileMainState extends State<ProfileMain>
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => MyCalledList(
-                                      // animalInfo: widget.sellingAnimalInfo,
+                                      //animalInfo: widget.sellingAnimalInfo,
                                       // userName: widget.userName,
                                       // userMobileNumber: widget.userMobileNumber,
                                       // showExtraData: false

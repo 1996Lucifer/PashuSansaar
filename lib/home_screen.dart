@@ -38,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Map _referralWinnerData = {};
   final geo = Geoflutterfire();
   PageController _pageController;
-  String _referralUniqueValue = '', _mobileNumber = '';
+  String _referralUniqueValue = '', _mobileNumber = '', _userAddress = '';
   bool _checkReferral = false;
   double lat = 0.0, long = 0.0;
   LocationData _locate;
@@ -47,8 +47,6 @@ class _HomeScreenState extends State<HomeScreen> {
       Get.put(BuyAnimalController());
   final RefreshTokenController refreshTokenController =
       Get.put(RefreshTokenController());
-  final SellerContactController sellerContactController =
-      Get.put(SellerContactController());
 
   @override
   void initState() {
@@ -196,6 +194,8 @@ class _HomeScreenState extends State<HomeScreen> {
       _referralUniqueValue = prefs.getString('referralUniqueValue');
       _checkReferral = prefs.getBool('checkReferral') ?? false;
       _mobileNumber = prefs.getString('mobileNumber');
+      _userAddress = prefs.getString('userAddress');
+
 
       lat = prefs.getDouble('latitude');
       long = prefs.getDouble('longitude');
@@ -402,53 +402,55 @@ class _HomeScreenState extends State<HomeScreen> {
     // if (pr.isShowing()) pr.hide();
 
     return WillPopScope(
-        onWillPop: _onWillPop,
-        child: Scaffold(
-          body: PageView(
-              controller: _pageController,
-              physics: NeverScrollableScrollPhysics(),
-              children: [
-                BuyAnimal(
-                    animalInfo: _animalInfo,
-                    userName: _profileData['name'],
-                    userMobileNumber: _profileData['mobile'],
-                    userImage: _profileData['image'],
-                    latitude: lat,
-                    longitude: long),
-                SellAnimalMain(
-                    sellingAnimalInfo: _sellingAnimalInfo,
-                    userName: _profileData['name'],
-                    userMobileNumber: _profileData['mobile']),
-                ProfileMain(
-                  profileData: _profileData,
-                  sellingAnimalInfo: _sellingAnimalInfo,
-                  userName: _profileData['name'],
-                  userMobileNumber: _profileData['mobile'],
-                  refData: _referralWinnerData,
-                ),
-              ]),
-          bottomNavigationBar: BottomNavigationBar(
-            items: <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: Image.asset('assets/images/buy3.png',
-                    height: 25, width: 25),
-                label: 'buy'.tr,
-              ),
-              BottomNavigationBarItem(
-                icon: Image.asset('assets/images/Sell.png',
-                    height: 25, width: 25),
-                label: 'sell'.tr,
-              ),
-              BottomNavigationBarItem(
-                icon: Image.asset('assets/images/profile.jpg',
-                    height: 25, width: 25),
-                label: 'profile'.tr,
-              ),
-            ],
-            currentIndex: widget.selectedIndex,
-            // selectedItemColor: themeColor,
-            onTap: _onItemTapped,
-          ),
-        ));
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        body: PageView(
+          controller: _pageController,
+          physics: NeverScrollableScrollPhysics(),
+          children: [
+            BuyAnimal(
+                animalInfo: _animalInfo,
+                userName: _profileData['name'],
+                userMobileNumber: _profileData['mobile'],
+                userImage: _profileData['image'],
+                latitude: lat,
+                longitude: long),
+            SellAnimalMain(
+                sellingAnimalInfo: _sellingAnimalInfo,
+                userName: _profileData['name'],
+                userMobileNumber: _profileData['mobile']),
+            ProfileMain(
+              profileData: _profileData,
+              sellingAnimalInfo: _sellingAnimalInfo,
+              userName: _profileData['name'],
+              userMobileNumber: _mobileNumber,
+              refData: _referralWinnerData,
+            ),
+          ],
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          items: <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon:
+                  Image.asset('assets/images/buy3.png', height: 25, width: 25),
+              label: 'buy'.tr,
+            ),
+            BottomNavigationBarItem(
+              icon:
+                  Image.asset('assets/images/Sell.png', height: 25, width: 25),
+              label: 'sell'.tr,
+            ),
+            BottomNavigationBarItem(
+              icon: Image.asset('assets/images/profile.jpg',
+                  height: 25, width: 25),
+              label: 'profile'.tr,
+            ),
+          ],
+          currentIndex: widget.selectedIndex,
+          // selectedItemColor: themeColor,
+          onTap: _onItemTapped,
+        ),
+      ),
+    );
   }
 }
