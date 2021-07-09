@@ -524,10 +524,12 @@ class _BuyAnimalState extends State<BuyAnimal>
           floatingActionButton: AnimatedOpacity(
             opacity: _isVisible ? 1.0 : 0.0,
             duration: Duration(seconds: 3),
-            child: CustomFABWidget(
-              userMobileNumber: widget.userMobileNumber,
-              userName: widget.userName,
-            ),
+            child: _isVisible
+                ? CustomFABWidget(
+                    userMobileNumber: widget.userMobileNumber,
+                    userName: widget.userName,
+                  )
+                : SizedBox.shrink(),
           ),
           backgroundColor: Colors.grey[100],
           body: Stack(
@@ -1903,103 +1905,113 @@ class _BuyAnimalState extends State<BuyAnimal>
                                   child: AnimatedOpacity(
                                     opacity: _isCardVisible ? 1.0 : 0.0,
                                     duration: Duration(seconds: 3),
-                                    child: Padding(
-                                      padding: EdgeInsets.all(10),
-                                      child: OpenContainer(
-                                        closedElevation: 0,
-                                        transitionDuration:
-                                            Duration(seconds: 2),
-                                        openBuilder: (context, _) =>
-                                            AnimalInfoForm(
-                                          userMobileNumber:
-                                              widget.userMobileNumber,
-                                          userName: widget.userName,
-                                        ),
-                                        closedShape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(10.0),
+                                    child: Visibility(
+                                      visible: _isCardVisible,
+                                      child: Padding(
+                                        padding: EdgeInsets.all(10),
+                                        child: OpenContainer(
+                                          closedElevation: 0,
+                                          transitionDuration:
+                                              Duration(seconds: 2),
+                                          openBuilder: (context, _) =>
+                                              AnimalInfoForm(
+                                            userMobileNumber:
+                                                widget.userMobileNumber,
+                                            userName: widget.userName,
                                           ),
-                                        ),
-                                        closedColor:
-                                            Theme.of(context).primaryColor,
-                                        closedBuilder:
-                                            (context, openContainer) =>
-                                                Container(
-                                          height: 220,
-                                          width: 150,
-                                          child: Padding(
-                                            padding: const EdgeInsets.only(
-                                              left: 8.0,
-                                              right: 8,
+                                          closedShape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.all(
+                                              Radius.circular(10.0),
                                             ),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Align(
-                                                  alignment:
-                                                      Alignment.centerRight,
-                                                  child: CloseButton(
-                                                    color: Colors.white,
-                                                    onPressed: () =>
-                                                        setState(() {
-                                                      _isVisible = true;
-                                                      _isCardVisible = false;
-                                                    }),
-                                                  ),
-                                                ),
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          left: 12.0),
-                                                  child: Text(
-                                                    'कौन सा पशु खरीदना चाहते है ?',
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 22,
+                                          ),
+                                          closedColor:
+                                              Theme.of(context).primaryColor,
+                                          closedBuilder:
+                                              (context, openContainer) =>
+                                                  Container(
+                                            height: 220,
+                                            width: 150,
+                                            child: Padding(
+                                              padding: const EdgeInsets.only(
+                                                left: 8.0,
+                                                right: 8,
+                                              ),
+                                              child: SingleChildScrollView(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Align(
+                                                      alignment:
+                                                          Alignment.centerRight,
+                                                      child: CloseButton(
+                                                        color: Colors.white,
+                                                        onPressed: () =>
+                                                            setState(() {
+                                                          _isVisible = true;
+                                                          _isCardVisible =
+                                                              false;
+                                                        }),
+                                                      ),
                                                     ),
-                                                  ),
-                                                ),
-                                                SizedBox(
-                                                  width: double.infinity,
-                                                  child: RaisedButton(
-                                                    shape: OutlineInputBorder(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(10)),
-                                                    color: Colors.white,
-                                                    onPressed: null,
-                                                    disabledColor: Colors.white,
-                                                    disabledTextColor:
-                                                        primaryColor,
-                                                    child: Row(
-                                                      textDirection:
-                                                          TextDirection.rtl,
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceBetween,
-                                                      children: [
-                                                        Icon(
-                                                          Icons
-                                                              .arrow_forward_ios_sharp,
-                                                          color: primaryColor,
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              left: 12.0),
+                                                      child: Text(
+                                                        'कौन सा पशु खरीदना चाहते है ?',
+                                                        style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 22,
                                                         ),
-                                                        Text('हमें बताये',
-                                                            style: TextStyle(
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                      width: double.infinity,
+                                                      child: RaisedButton(
+                                                        shape: OutlineInputBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10)),
+                                                        color: Colors.white,
+                                                        onPressed: null,
+                                                        disabledColor:
+                                                            Colors.white,
+                                                        disabledTextColor:
+                                                            primaryColor,
+                                                        child: Row(
+                                                          textDirection:
+                                                              TextDirection.rtl,
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceBetween,
+                                                          children: [
+                                                            Icon(
+                                                              Icons
+                                                                  .arrow_forward_ios_sharp,
                                                               color:
                                                                   primaryColor,
-                                                              fontSize: 20,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                            )),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                )
-                                              ],
+                                                            ),
+                                                            Text('हमें बताये',
+                                                                style:
+                                                                    TextStyle(
+                                                                  color:
+                                                                      primaryColor,
+                                                                  fontSize: 20,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                )),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
                                             ),
                                           ),
                                         ),

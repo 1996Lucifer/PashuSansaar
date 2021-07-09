@@ -145,47 +145,55 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
   }
 
   storeFCMToken(SharedPreferences prefs) async {
-    try {
-      // SharedPreferences prefs = await SharedPreferences.getInstance();
-      String _token = await FirebaseMessaging.instance.getToken();
-      Coordinates coordinates = Coordinates(
-          prefs.getDouble('latitude'), prefs.getDouble('longitude'));
+    double _latx, _longx;
+    Future.delayed(Duration(seconds: 1)).then((value) async {
+      _latx = prefs.getDouble('latitude');
+      _longx = prefs.getDouble('longitude');
 
-      var addresses =
-          await Geocoder.local.findAddressesFromCoordinates(coordinates);
-      var first = addresses.first;
+      try {
+        // SharedPreferences prefs = await SharedPreferences.getInstance();
+        String _token = await FirebaseMessaging.instance.getToken();
+        Coordinates coordinates = Coordinates(_latx, _longx);
 
-      print(_token);
+        print('coordinates===' + coordinates.toString());
 
-      FirebaseFirestore.instance
-          .collection("fcmToken")
-          .doc(widget.currentUser)
-          .set({
-        "id": widget.currentUser,
-        'lat': prefs.getDouble('latitude').toString(),
-        'long': prefs.getDouble('longitude').toString(),
-        'userToken': _token,
-        'district': ReusableWidgets.mappingDistrict(
-          first.subAdminArea ?? first.locality ?? first.featureName,
-        )
-      });
-    } catch (err) {
-      print(
-        "errToken->" + err.toString(),
-      );
-      FirebaseFirestore.instance
-          .collection('logger')
-          .doc(widget.mobile)
-          .collection('token-update')
-          .doc()
-          .set({
-        'issue': err.toString(),
-        'userId': FirebaseAuth.instance.currentUser == null
-            ? ''
-            : FirebaseAuth.instance.currentUser.uid,
-        'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
-      });
-    }
+        var addresses =
+            await Geocoder.local.findAddressesFromCoordinates(coordinates);
+
+        print('address===' + addresses.toString());
+        var first = addresses.first;
+
+        print(_token);
+        FirebaseFirestore.instance
+            .collection("fcmToken")
+            .doc(widget.currentUser)
+            .set({
+          "id": widget.currentUser,
+          'lat': prefs.getDouble('latitude').toString(),
+          'long': prefs.getDouble('longitude').toString(),
+          'userToken': _token,
+          'district': ReusableWidgets.mappingDistrict(
+            first.subAdminArea ?? first.locality ?? first.featureName,
+          )
+        });
+      } catch (err) {
+        print(
+          "errToken->" + err.toString(),
+        );
+        FirebaseFirestore.instance
+            .collection('logger')
+            .doc(widget.mobile)
+            .collection('token-update')
+            .doc()
+            .set({
+          'issue': err.toString(),
+          'userId': FirebaseAuth.instance.currentUser == null
+              ? ''
+              : FirebaseAuth.instance.currentUser.uid,
+          'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
+        });
+      }
+    });
   }
 
   loadAsset() async {
@@ -493,16 +501,19 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
                                   'zipcode': zipCodeController.text ?? ''
                                 }).then((result) {
                                   pr.hide().then(
-                                    (isHidden) {
-                                      return Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              HomeScreen(selectedIndex: 0),
+                                        (isHidden) => Get.off(
+                                          () => HomeScreen(
+                                            selectedIndex: 0,
+                                          ),
                                         ),
+                                        // return Navigator.pushReplacement(
+                                        //   context,
+                                        //   MaterialPageRoute(
+                                        //     builder: (context) =>
+                                        //         HomeScreen(selectedIndex: 0),
+                                        //   ),
+                                        // );
                                       );
-                                    },
-                                  );
                                 });
                               } catch (err) {
                                 // pr.hide();

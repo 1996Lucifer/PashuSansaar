@@ -498,16 +498,19 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                                   'zipcode': zipCodeController.text ?? ''
                                 }).then((result) {
                                   pr.hide().then(
-                                    (isHidden) {
-                                      return Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              HomeScreen(selectedIndex: 0),
+                                        (isHidden) => Get.off(
+                                          () => HomeScreen(
+                                            selectedIndex: 0,
+                                          ),
                                         ),
+                                        // return Navigator.pushReplacement(
+                                        //   context,
+                                        //   MaterialPageRoute(
+                                        //     builder: (context) =>
+                                        //         HomeScreen(selectedIndex: 0),
+                                        //   ),
+                                        // );
                                       );
-                                    },
-                                  );
                                 });
                               } catch (err) {
                                 // pr.hide();
