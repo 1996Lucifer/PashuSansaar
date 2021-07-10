@@ -311,20 +311,77 @@ class _MyAppState extends State<MyApp> {
     ]);
 
     return GetMaterialApp(
-        title: 'PashuSansaar',
-        debugShowCheckedModeBanner: false,
-        translations: Messages(), // translations
-        locale: Locale('hn', 'IN'),
-        theme: ThemeData(
-            fontFamily: 'Mukta',
-            primaryColor: primaryColor,
-            buttonColor: primaryColor,
-            iconTheme: IconThemeData(color: primaryColor),
-            accentColor: primaryColor,
-            textSelectionTheme:
-                TextSelectionThemeData(cursorColor: primaryColor),
-            indicatorColor: primaryColor,
-            scaffoldBackgroundColor: Colors.white),
-        home: SplashScreen());
+      title: 'PashuSansaar',
+      debugShowCheckedModeBanner: false,
+      translations: Messages(), // translations
+      locale: Locale('hn', 'IN'),
+      theme: ThemeData(
+        fontFamily: 'Mukta',
+        primaryColor: primaryColor,
+        buttonColor: primaryColor,
+        iconTheme: IconThemeData(color: primaryColor),
+        accentColor: primaryColor,
+        textSelectionTheme: TextSelectionThemeData(
+          cursorColor: primaryColor,
+        ),
+        textTheme: TextTheme(
+          headline1: TextStyle(
+            fontSize: 16,
+          ),
+          headline2: TextStyle(
+            fontSize: 16,
+          ),
+          headline3: TextStyle(
+            fontSize: 16,
+          ),
+          headline4: TextStyle(
+            fontSize: 16,
+          ),
+          headline5: TextStyle(
+            fontSize: 16,
+          ),
+          headline6: TextStyle(
+            fontSize: 16,
+          ),
+          subtitle1: TextStyle(
+            fontSize: 16,
+          ),
+          subtitle2: TextStyle(
+            fontSize: 16,
+          ),
+          bodyText1: TextStyle(
+            fontSize: 16,
+          ),
+          bodyText2: TextStyle(
+            fontSize: 16,
+          ),
+          caption: TextStyle(
+            fontSize: 16,
+          ),
+          button: TextStyle(
+            fontSize: 16,
+          ),
+          overline: TextStyle(
+            fontSize: 16,
+          ),
+        ),
+        indicatorColor: primaryColor,
+        scaffoldBackgroundColor: Colors.white,
+        // inputDecorationTheme: InputDecorationTheme(
+        //   focusedBorder: OutlineInputBorder(
+        //     borderSide: BorderSide(
+        //       color: primaryColor,
+        //     ),
+        //   ),
+        //   enabledBorder: OutlineInputBorder(
+        //     borderSide: BorderSide(
+        //       color: primaryColor,
+        //     ),
+        //   ),
+        //   labelStyle:  (color: primaryColor),
+        // ),
+      ),
+      home: SplashScreen(),
+    );
   }
 }

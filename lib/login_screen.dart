@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:pashusansaar/otp_screen.dart';
 import 'package:pashusansaar/utils/colors.dart';
-import 'package:pashusansaar/utils/global.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -89,23 +88,28 @@ class _LoginState extends State<Login> {
                   ),
                 ),
                 Padding(
-                    padding: EdgeInsets.all(15),
-                    child: Container(
-                        child: TextFormField(
+                  padding: EdgeInsets.all(15),
+                  child: Container(
+                    child: TextFormField(
                       inputFormatters: <TextInputFormatter>[
                         FilteringTextInputFormatter.digitsOnly,
                       ],
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.account_box),
-                          border: OutlineInputBorder(),
-                          labelText: 'mobile_label'.tr,
-                          hintText: 'mobile_hint'.tr,
-                          counterText: ""),
+                        prefixIcon: Icon(
+                          Icons.account_box,
+                        ),
+                        border: OutlineInputBorder(),
+                        labelText: 'mobile_label'.tr,
+                        hintText: 'mobile_hint'.tr,
+                        counterText: "",
+                      ),
                       maxLength: 10,
                       autofocus: false,
                       controller: phoneNumberController,
-                    ))),
+                    ),
+                  ),
+                ),
                 SizedBox(
                   height: 20,
                 ),
@@ -132,6 +136,10 @@ class _LoginState extends State<Login> {
                         } else if (phoneNumberController.text.length < 10) {
                           ReusableWidgets.showDialogBox(context, 'error'.tr,
                               Text("error_length_mobile".tr));
+                        } else if (phoneNumberController.text
+                            .startsWith(RegExp(r'[0-5]'))) {
+                          ReusableWidgets.showDialogBox(context, 'error'.tr,
+                              Text("mobile_number_format".tr));
                         } else {
                           await assignDeviceID();
                           await FirebaseFirestore.instance

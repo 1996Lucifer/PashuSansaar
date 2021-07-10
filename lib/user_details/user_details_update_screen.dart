@@ -61,12 +61,12 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
     super.initState();
   }
 
-  getInitialData() {
+  getInitialData() async {
     setState(() {
       nameController.text = widget.name;
       referralCodeController.text = widget.referralCode;
     });
-    getLocationLocate();
+    await getLocationLocate();
   }
 
   getLocationLocate() async {
@@ -144,35 +144,42 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
     }
   }
 
-  storeFCMToken() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String _token = await FirebaseMessaging.instance.getToken();
+  storeFCMToken(SharedPreferences prefs) async {
+    try {
+      // SharedPreferences prefs = await SharedPreferences.getInstance();
+      String _token = await FirebaseMessaging.instance.getToken();
+      Coordinates coordinates = Coordinates(
+          prefs.getDouble('latitude'), prefs.getDouble('longitude'));
 
-    var addresses = await Geocoder.local.findAddressesFromCoordinates(
-        Coordinates(prefs.getDouble('latitude'), prefs.getDouble('longitude')));
-    var first = addresses.first;
+      print('coordinates===' + coordinates.toString());
 
-    print(_token);
+      var addresses =
+          await Geocoder.local.findAddressesFromCoordinates(coordinates);
 
-    FirebaseFirestore.instance
-        .collection("fcmToken")
-        .doc(widget.currentUser)
-        .set({
-      "id": widget.currentUser,
-      'lat': prefs.getDouble('latitude').toString(),
-      'long': prefs.getDouble('longitude').toString(),
-      'userToken': _token,
-      'district': ReusableWidgets.mappingDistrict(
-        first.subAdminArea ?? first.locality ?? first.featureName,
-      )
-    }).catchError((err) {
+      print('address===' + addresses.toString());
+      var first = addresses.first;
+
+      print(_token);
+      FirebaseFirestore.instance
+          .collection("fcmToken")
+          .doc(widget.currentUser)
+          .set({
+        "id": widget.currentUser,
+        'lat': prefs.getDouble('latitude').toString(),
+        'long': prefs.getDouble('longitude').toString(),
+        'userToken': _token,
+        'district': ReusableWidgets.mappingDistrict(
+          first.subAdminArea ?? first.locality ?? first.featureName,
+        )
+      });
+    } catch (err) {
       print(
         "errToken->" + err.toString(),
       );
       FirebaseFirestore.instance
           .collection('logger')
           .doc(widget.mobile)
-          .collection('token')
+          .collection('token-update')
           .doc()
           .set({
         'issue': err.toString(),
@@ -181,7 +188,7 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
             : FirebaseAuth.instance.currentUser.uid,
         'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
       });
-    });
+    }
   }
 
   loadAsset() async {
@@ -248,7 +255,9 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
                       padding: EdgeInsets.all(15),
                       child: TextFormField(
                         decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.account_box),
+                            prefixIcon: Icon(
+                              Icons.account_box,
+                            ),
                             border: OutlineInputBorder(),
                             labelText: 'name_label'.tr,
                             hintText: 'name_hint'.tr,
@@ -264,7 +273,9 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
                         child: TextFormField(
                           maxLength: 6,
                           decoration: InputDecoration(
-                              prefixIcon: Icon(Icons.location_on),
+                              prefixIcon: Icon(
+                                Icons.location_on,
+                              ),
                               border: OutlineInputBorder(),
                               labelText: 'zipcode_label'.tr,
                               hintText: 'zipcode_hint'.tr,
@@ -331,7 +342,7 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
                               backgroundColor: Colors.white,
                               enableActiveFill: true,
                               controller: referralCodeController,
-                              autoDisposeControllers: false,
+                              autoDisposeControllers: true,
                               keyboardType: TextInputType.text,
                               boxShadows: [
                                 BoxShadow(
@@ -381,6 +392,9 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
                                 fontStyle: FontStyle.normal,
                                 fontWeight: FontWeight.w600)),
                         onPressed: () async {
+                          SharedPreferences prefs =
+                              await SharedPreferences.getInstance();
+
                           if (nameController.text.isEmpty) {
                             ReusableWidgets.showDialogBox(context, 'error'.tr,
                                 Text("error_empty_name".tr));
@@ -396,129 +410,139 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
                             ReusableWidgets.showDialogBox(context, 'error'.tr,
                                 Text("error_length_zipcode".tr));
                           } else {
-                            SharedPreferences prefs =
-                                await SharedPreferences.getInstance();
+                            pr = new ProgressDialog(context,
+                                type: ProgressDialogType.Normal,
+                                isDismissible: false);
 
-                            if (_zipCodeTextField &&
-                                zipCodeController.text.isNotEmpty)
-                              await loadAsset();
+                            pr.style(message: 'progress_dialog_message'.tr);
+                            pr.show();
 
-                            await storeFCMToken();
+                            Future.delayed(Duration(seconds: 2))
+                                .then((value) async {
+                              pr.hide();
+                              if (_zipCodeTextField &&
+                                  zipCodeController.text.isNotEmpty)
+                                await loadAsset();
 
-                            if (prefs.getDouble('latitude') == null ||
-                                prefs.getDouble('longitude') == null) {
-                              return showDialog(
-                                  context: context,
-                                  barrierDismissible: false,
-                                  builder: (context) {
-                                    return AlertDialog(
-                                        title: Text('warning'.tr),
-                                        content: RichText(
-                                          text: TextSpan(
-                                              text: prefs.getInt('count') == 1
-                                                  ? 'location_error_supportive_exit'
-                                                      .tr
-                                                  : 'location_error_supportive_again'
-                                                      .tr,
-                                              style: TextStyle(
-                                                  color: Colors.black,
-                                                  fontSize: 16)),
-                                        ),
-                                        actions: <Widget>[
-                                          ElevatedButton(
-                                              style: ButtonStyle(
-                                                  backgroundColor:
-                                                      MaterialStateProperty.all<
-                                                          Color>(primaryColor)),
-                                              child: Text(
-                                                'Ok'.tr,
+                              await storeFCMToken(prefs);
+
+                              if (prefs.getDouble('latitude') == null ||
+                                  prefs.getDouble('longitude') == null) {
+                                return showDialog(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (context) {
+                                      return AlertDialog(
+                                          title: Text('warning'.tr),
+                                          content: RichText(
+                                            text: TextSpan(
+                                                text: prefs.getInt('count') == 1
+                                                    ? 'location_error_supportive_exit'
+                                                        .tr
+                                                    : 'location_error_supportive_again'
+                                                        .tr,
                                                 style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 16),
-                                              ),
-                                              onPressed: () {
-                                                if (prefs.getInt('count') == 1)
-                                                  SystemNavigator.pop();
-                                                else {
-                                                  setState(() {
-                                                    _zipCodeTextField = true;
-                                                    prefs.setInt('count', 1);
-                                                  });
-                                                  Navigator.pop(context);
-                                                }
-                                              }),
-                                        ]);
+                                                    color: Colors.black,
+                                                    fontSize: 16)),
+                                          ),
+                                          actions: <Widget>[
+                                            ElevatedButton(
+                                                style: ButtonStyle(
+                                                    backgroundColor:
+                                                        MaterialStateProperty
+                                                            .all<Color>(
+                                                                primaryColor)),
+                                                child: Text(
+                                                  'Ok'.tr,
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 16),
+                                                ),
+                                                onPressed: () {
+                                                  if (prefs.getInt('count') ==
+                                                      1)
+                                                    SystemNavigator.pop();
+                                                  else {
+                                                    setState(() {
+                                                      _zipCodeTextField = true;
+                                                      prefs.setInt('count', 1);
+                                                    });
+                                                    Navigator.pop(context);
+                                                  }
+                                                }),
+                                          ]);
+                                    });
+                              } else {
+                                try {
+                                  pr.show();
+                                  FirebaseFirestore.instance
+                                      .collection("userInfo")
+                                      .doc(widget.currentUser)
+                                      .update({
+                                    "name": nameController.text,
+                                    "mobileInfo": mobileInfo,
+                                    'latitude':
+                                        prefs.getDouble('latitude').toString(),
+                                    'longitude':
+                                        prefs.getDouble('longitude').toString(),
+                                    'enteredReferralCode':
+                                        referralCodeController.text.isNotEmpty
+                                            ? referralCodeController.text
+                                                .toUpperCase()
+                                            : '',
+                                    'appVersion': prefs
+                                        .getStringList('currentVersion')
+                                        .join('.'),
+                                    'dateOfCreation': FirebaseAuth.instance
+                                        .currentUser.metadata.creationTime
+                                        .toString(),
+                                    'dateOfUpdation': FirebaseAuth.instance
+                                        .currentUser.metadata.lastSignInTime
+                                        .toString(),
+                                    'zipcode': zipCodeController.text ?? ''
+                                  }).then((result) {
+                                    pr.hide().then(
+                                          (isHidden) => Get.off(
+                                            () => HomeScreen(
+                                              selectedIndex: 0,
+                                            ),
+                                          ),
+                                          // return Navigator.pushReplacement(
+                                          //   context,
+                                          //   MaterialPageRoute(
+                                          //     builder: (context) =>
+                                          //         HomeScreen(selectedIndex: 0),
+                                          //   ),
+                                          // );
+                                        );
                                   });
-                            } else {
-                              try {
-                                pr = new ProgressDialog(context,
-                                    type: ProgressDialogType.Normal,
-                                    isDismissible: false);
-
-                                pr.style(message: 'progress_dialog_message'.tr);
-                                pr.show();
-                                FirebaseFirestore.instance
-                                    .collection("userInfo")
-                                    .doc(widget.currentUser)
-                                    .update({
-                                  "name": nameController.text,
-                                  "mobileInfo": mobileInfo,
-                                  'latitude':
-                                      prefs.getDouble('latitude').toString(),
-                                  'longitude':
-                                      prefs.getDouble('longitude').toString(),
-                                  'enteredReferralCode':
-                                      referralCodeController.text.isNotEmpty
-                                          ? referralCodeController.text
-                                              .toUpperCase()
-                                          : '',
-                                  'appVersion': prefs
-                                      .getStringList('currentVersion')
-                                      .join('.'),
-                                  'dateOfCreation': FirebaseAuth.instance
-                                      .currentUser.metadata.creationTime
-                                      .toString(),
-                                  'dateOfUpdation': FirebaseAuth.instance
-                                      .currentUser.metadata.lastSignInTime
-                                      .toString(),
-                                  'zipcode': zipCodeController.text ?? ''
-                                }).then((result) {
-                                  pr.hide().then(
-                                    (isHidden) {
-                                      return Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              HomeScreen(selectedIndex: 0),
-                                        ),
-                                      );
-                                    },
+                                } catch (err) {
+                                  // pr.hide();
+                                  print(
+                                    "err->" + err.toString(),
                                   );
-                                });
-                              } catch (err) {
-                                // pr.hide();
-                                print(
-                                  "err->" + err.toString(),
-                                );
-                                FirebaseFirestore.instance
-                                    .collection('logger')
-                                    .doc(widget.mobile)
-                                    .collection('userDetails')
-                                    .doc()
-                                    .set({
-                                  'issue': err.toString(),
-                                  'userId': FirebaseAuth.instance.currentUser ==
-                                          null
-                                      ? ''
-                                      : FirebaseAuth.instance.currentUser.uid,
-                                  'date': DateFormat()
-                                      .add_yMMMd()
-                                      .add_jm()
-                                      .format(DateTime.now()),
-                                });
+                                  FirebaseFirestore.instance
+                                      .collection('logger')
+                                      .doc(widget.mobile)
+                                      .collection('userDetails')
+                                      .doc()
+                                      .set({
+                                    'issue': err.toString(),
+                                    'userId': FirebaseAuth
+                                                .instance.currentUser ==
+                                            null
+                                        ? ''
+                                        : FirebaseAuth.instance.currentUser.uid,
+                                    'date': DateFormat()
+                                        .add_yMMMd()
+                                        .add_jm()
+                                        .format(DateTime.now()),
+                                  });
+                                }
                               }
-                            }
+                            });
                           }
                         },
                       ),

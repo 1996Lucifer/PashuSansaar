@@ -352,8 +352,7 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     } catch (e) {
       print('=-=Error-Home=->>>' + e.toString());
-      // if (pr.isShowing()) pr.hide();
-
+      
       FirebaseFirestore.instance
           .collection('logger')
           .doc(_mobileNumber)
@@ -369,8 +368,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     print('=-=-==-=' + pr.isShowing().toString());
-
-    // if (pr.isShowing()) pr.hide();
 
     getAnimalSellingInfo();
   }
@@ -571,7 +568,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
             currentIndex: widget.selectedIndex,
-            // selectedItemColor: themeColor,
+            selectedItemColor: primaryColor,
             onTap: _onItemTapped,
           ),
         ));

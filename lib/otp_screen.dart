@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import 'package:pashusansaar/home_screen.dart';
 import 'package:pashusansaar/user_details/user_details_update_screen.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -33,7 +32,7 @@ class _OTPScreenState extends State<OTPScreen>
 
   StreamController<ErrorAnimationType> errorController;
 
-  bool hasError = false, _checkUserLoginState = false, _startTimer = false;
+  bool hasError = false, _startTimer = false;
   String currentText = "";
   final GlobalKey<ScaffoldState> scaffoldKey =
       GlobalKey<ScaffoldState>(debugLabel: 'otpScaffoldKey');
@@ -82,7 +81,6 @@ class _OTPScreenState extends State<OTPScreen>
   checkUserLoginState() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _checkUserLoginState = prefs.getBool('alreadyUser') ?? false;
       prefs.setString('mobileNumber', widget.phoneNumber);
     });
   }
@@ -169,23 +167,7 @@ class _OTPScreenState extends State<OTPScreen>
                       }));
             },
             codeAutoRetrievalTimeout: (String verificationID) {
-              // FirebaseFirestore.instance
-              //     .collection('logger')
-              //     .doc(widget.phoneNumber)
-              //     .collection('OTP-CodeAutoRetrieval')
-              //     .doc()
-              //     .set({
-              //   'otp': verificationID,
-              //   'mobile': widget.phoneNumber,
-              //   'userId': FirebaseAuth.instance.currentUser == null
-              //       ? ''
-              //       : FirebaseAuth.instance.currentUser.uid,
-              //   'date':
-              //       DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
-              // }).then((value) => setState(() {
-              //           _verificationCode = verificationID;
-              //           _startTimer = false;
-              //         }));
+              print('codeAutoTimeout===' + verificationID);
             },
             timeout: Duration(seconds: 60),
             forceResendingToken: _resendToken)

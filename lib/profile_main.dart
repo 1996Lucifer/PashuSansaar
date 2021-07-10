@@ -44,7 +44,6 @@ class ProfileMain extends StatefulWidget {
 
 class ProfileMainState extends State<ProfileMain>
     with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
-  bool _status = true;
   final FocusNode myFocusNode = FocusNode();
   ImagePicker _picker;
   String _base64Image = "", _currentVersion = '';
@@ -56,8 +55,6 @@ class ProfileMainState extends State<ProfileMain>
 
   @override
   void initState() {
-    // TODO: implement initState
-    // getCallingInfo();
     populateData();
     super.initState();
   }

@@ -454,11 +454,13 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
           final Uri shortUrl = shortDynamicLink.shortUrl;
 
           await takeScreenShot(_animalInfo['uniqueId']);
-          Share.shareFiles([fileUrl.path],
-              mimeTypes: ['images/png'],
-              text:
-                  "नस्ल: ${_animalInfo['userAnimalBreed']}\nजानकारी: ${_animalInfo['userAnimalDescription']}\nदूध(प्रति दिन): ${_animalInfo['userAnimalMilk']} Litre\n\nपशु देखे: ${shortUrl.toString()}",
-              subject: 'पशु की जानकारी');
+          Share.shareFiles(
+            [fileUrl.path],
+            mimeTypes: ['images/png'],
+            text:
+                "नस्ल: ${_animalInfo['userAnimalBreed']}\nजानकारी: ${_animalInfo['userAnimalDescription']}\nदूध(प्रति दिन): ${_animalInfo['userAnimalMilk']} Litre\n\nपशु देखे: ${shortUrl.toString()}",
+            subject: 'animal_info'.tr,
+          );
         },
         icon: Icon(Icons.share, color: Colors.white, size: 16),
         label: Text(
