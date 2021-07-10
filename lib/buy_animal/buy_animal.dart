@@ -522,14 +522,12 @@ class _BuyAnimalState extends State<BuyAnimal>
         child: Scaffold(
           floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
           floatingActionButton: AnimatedOpacity(
-            opacity: _isVisible ? 1.0 : 0.0,
+            opacity: !_isCardVisible ? 1.0 : 0.0,
             duration: Duration(seconds: 3),
-            child: _isVisible
-                ? CustomFABWidget(
-                    userMobileNumber: widget.userMobileNumber,
-                    userName: widget.userName,
-                  )
-                : SizedBox.shrink(),
+            child: CustomFABWidget(
+              userMobileNumber: widget.userMobileNumber,
+              userName: widget.userName,
+            ),
           ),
           backgroundColor: Colors.grey[100],
           body: Stack(
@@ -1943,15 +1941,26 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                   children: [
                                                     Align(
                                                       alignment:
-                                                          Alignment.centerRight,
-                                                      child: CloseButton(
-                                                        color: Colors.white,
+                                                          Alignment.bottomRight,
+                                                      child: RawMaterialButton(
                                                         onPressed: () =>
                                                             setState(() {
                                                           _isVisible = true;
                                                           _isCardVisible =
                                                               false;
                                                         }),
+                                                        elevation: 2.0,
+                                                        fillColor: Colors.white,
+                                                        child: Icon(
+                                                          Icons.close,
+                                                          size: 20.0,
+                                                          color: primaryColor,
+                                                        ),
+                                                        shape: CircleBorder(),
+                                                        constraints:
+                                                            BoxConstraints(
+                                                                minWidth: 30,
+                                                                minHeight: 30),
                                                       ),
                                                     ),
                                                     Padding(

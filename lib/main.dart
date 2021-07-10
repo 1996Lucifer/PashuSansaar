@@ -326,43 +326,43 @@ class _MyAppState extends State<MyApp> {
         ),
         textTheme: TextTheme(
           headline1: TextStyle(
-            fontSize: 15,
+            fontSize: 16,
           ),
           headline2: TextStyle(
-            fontSize: 15,
+            fontSize: 16,
           ),
           headline3: TextStyle(
-            fontSize: 15,
+            fontSize: 16,
           ),
           headline4: TextStyle(
-            fontSize: 15,
+            fontSize: 16,
           ),
           headline5: TextStyle(
-            fontSize: 15,
+            fontSize: 16,
           ),
           headline6: TextStyle(
-            fontSize: 15,
+            fontSize: 16,
           ),
           subtitle1: TextStyle(
-            fontSize: 15,
+            fontSize: 16,
           ),
           subtitle2: TextStyle(
-            fontSize: 15,
+            fontSize: 16,
           ),
           bodyText1: TextStyle(
-            fontSize: 15,
+            fontSize: 16,
           ),
           bodyText2: TextStyle(
-            fontSize: 15,
+            fontSize: 16,
           ),
           caption: TextStyle(
-            fontSize: 15,
+            fontSize: 16,
           ),
           button: TextStyle(
-            fontSize: 15,
+            fontSize: 16,
           ),
           overline: TextStyle(
-            fontSize: 15,
+            fontSize: 16,
           ),
         ),
         indicatorColor: primaryColor,
