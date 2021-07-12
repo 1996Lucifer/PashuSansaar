@@ -1098,6 +1098,44 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                           'error'.tr,
                           Text('animal_image_error'.tr),
                         );
+                      else if (([0, 1].contains(constant.animalType
+                              .indexOf(animalInfo['animalType']))) &&
+                          extraInfoData['alreadyPregnantYesNo'] == null)
+                        ReusableWidgets.showDialogBox(
+                          context,
+                          'error'.tr,
+                          Text('animal_pregnant_empty_error'.tr),
+                        );
+                      else if (([0, 1].contains(constant.animalType
+                              .indexOf(animalInfo['animalType']))) &&
+                          constant.yesNo.indexOf(
+                                  extraInfoData['alreadyPregnantYesNo']) ==
+                              0 &&
+                          extraInfoData['animalAlreadyGivenBirth'] == null)
+                        ReusableWidgets.showDialogBox(
+                          context,
+                          'error'.tr,
+                          Text('animal_pregnant_time_error'.tr),
+                        );
+                      else if (([0, 1].contains(constant.animalType
+                              .indexOf(animalInfo['animalType']))) &&
+                          extraInfoData['isPregnantYesNo'] == null)
+                        ReusableWidgets.showDialogBox(
+                          context,
+                          'error'.tr,
+                          Text('animal_gayabhin_empty_error'.tr),
+                        );
+                      else if (([0, 1].contains(constant.animalType
+                              .indexOf(animalInfo['animalType']))) &&
+                          constant.yesNo
+                                  .indexOf(extraInfoData['isPregnantYesNo']) ==
+                              0 &&
+                          extraInfoData['animalIfPregnant'] == null)
+                        ReusableWidgets.showDialogBox(
+                          context,
+                          'error'.tr,
+                          Text('animal_gayabhin_time_error'.tr),
+                        );
                       else {
                         setState(() {
                           _imageToBeUploaded.clear();
@@ -1253,8 +1291,53 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                               context: context,
                               builder: (context) {
                                 return AlertDialog(
-                                    title: Text('pashu_registered'.tr),
-                                    content: Text('new_animal'.tr),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(10.0),
+                                      ),
+                                    ),
+                                    title: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          'pashu_registered'.tr,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18,
+                                          ),
+                                        ),
+                                        CloseButton(),
+                                      ],
+                                    ),
+                                    content: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text('new_animal'.tr),
+                                        SizedBox(
+                                          height: 5,
+                                        ),
+                                        Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'सूचना -',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            Expanded(
+                                              child: Text(
+                                                ' ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें, खासकर कि गूगल पे, फ़ोन पे, वरना नुकसान हो सकता है |',
+                                              ),
+                                            ),
+                                          ],
+                                        )
+                                      ],
+                                    ),
                                     actions: <Widget>[
                                       TextButton(
                                           child: Text(
@@ -1300,6 +1383,13 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                       color: Colors.grey[500]),
+                ),
+                Text(
+                  '*',
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red),
                 ),
               ],
             ),
@@ -1391,6 +1481,13 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                       color: Colors.grey[500]),
+                ),
+                Text(
+                  '*',
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red),
                 ),
               ],
             ),

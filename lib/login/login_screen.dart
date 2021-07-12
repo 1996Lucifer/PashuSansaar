@@ -162,6 +162,9 @@ Widget _getLogInButton(context, phoneNumberController, loginController) {
           } else if (phoneNumberController.text.length < 10) {
             ReusableWidgets.showDialogBox(
                 context, 'error'.tr, Text("error_length_mobile".tr));
+          } else if (phoneNumberController.text.startsWith(RegExp(r'[0-5]'))) {
+            ReusableWidgets.showDialogBox(
+                context, 'error'.tr, Text("mobile_number_format".tr));
           } else {
             // bool status = await loginController.fetchUser(
             //     number: phoneNumberController.text);

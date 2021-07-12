@@ -23,8 +23,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  android_play_install_referrer: any
-  another_flushbar: null
+  # android_play_install_referrer: any
+  animations: any
+  another_flushbar: any
   carousel_slider: ^3.0.0
   check_vpn_connection: ^0.0.1
   cloud_firestore: ^0.16.0+1

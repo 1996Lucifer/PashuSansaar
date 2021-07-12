@@ -39,17 +39,40 @@ class ReusableWidgets {
         barrierDismissible: barrierDismissible,
         builder: (context) {
           return AlertDialog(
-              title: Text(type),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(10.0),
+                ),
+              ),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    type,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  CloseButton(),
+                ],
+              ),
               content: content,
               actions: <Widget>[
                 RaisedButton(
                     child: Text(
                       'Ok'.tr,
                       style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16),
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
+                    padding: EdgeInsets.all(5.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    elevation: 5,
                     onPressed: () {
                       cta ? exit(0) : Navigator.pop(context);
                     }),

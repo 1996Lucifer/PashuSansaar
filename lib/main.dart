@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:android_play_install_referrer/android_play_install_referrer.dart';
+// import 'package:android_play_install_referrer/android_play_install_referrer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
@@ -220,7 +220,7 @@ class _MyAppState extends State<MyApp> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     String _unique = ReusableWidgets.randomIDGenerator();
-    if (!_checkReferral) await initReferrerDetails(_unique);
+    // if (!_checkReferral) await initReferrerDetails(_unique);
     final PackageInfo info = await PackageInfo.fromPlatform();
 
     try {
@@ -233,12 +233,12 @@ class _MyAppState extends State<MyApp> {
         prefs.setStringList('currentVersion', currentVersion1);
         prefs.setString('referralUniqueValue', _unique);
       });
-      if ((newVersion1[0].compareTo(currentVersion1[0]) == 1) ||
-          (newVersion1[1].compareTo(currentVersion1[1]) == 1)) {
-        await _showVersionDialog(newVersion1, currentVersion1, true);
-      }
-      if (newVersion1[2].compareTo(currentVersion1[2]) == 1)
-        await _showVersionDialog(newVersion1, currentVersion1, false);
+      // if ((newVersion1[0].compareTo(currentVersion1[0]) == 1) ||
+      //     (newVersion1[1].compareTo(currentVersion1[1]) == 1)) {
+      //   await _showVersionDialog(newVersion1, currentVersion1, true);
+      // }
+      // if (newVersion1[2].compareTo(currentVersion1[2]) == 1)
+      //   await _showVersionDialog(newVersion1, currentVersion1, false);
     } catch (exception) {
       print(exception);
     }
@@ -246,26 +246,26 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> initReferrerDetails(String unique) async {
     try {
-      ReferrerDetails referrerDetails =
-          await AndroidPlayInstallReferrer.installReferrer;
+      // ReferrerDetails referrerDetails =
+      //     await AndroidPlayInstallReferrer.installReferrer;
 
-      List<String> str = referrerDetails.installReferrer.split('&');
+      // List<String> str = referrerDetails.installReferrer.split('&');
 
-      Map<String, dynamic> _referralInfo1 = {
-        'installBeginTimestampSeconds':
-            referrerDetails.installBeginTimestampSeconds,
-        'installReferrer': {
-          'utmSource': str[0].substring(11),
-          'utmMedium': str[1].substring(11)
-        },
-        'installVersion': referrerDetails.installVersion,
-        'dateOfSaving': ReusableWidgets.dateTimeToEpoch(DateTime.now()),
-      };
+      // Map<String, dynamic> _referralInfo1 = {
+      //   'installBeginTimestampSeconds':
+      //       referrerDetails.installBeginTimestampSeconds,
+      //   'installReferrer': {
+      //     'utmSource': str[0].substring(11),
+      //     'utmMedium': str[1].substring(11)
+      //   },
+      //   'installVersion': referrerDetails.installVersion,
+      //   'dateOfSaving': ReusableWidgets.dateTimeToEpoch(DateTime.now()),
+      // };
 
-      await FirebaseFirestore.instance
-          .collection('referralData')
-          .doc(unique)
-          .set(_referralInfo1);
+      // await FirebaseFirestore.instance
+      //     .collection('referralData')
+      //     .doc(unique)
+      //     .set(_referralInfo1);
     } catch (e) {
       print('e-referral--->' + e.toString());
     }

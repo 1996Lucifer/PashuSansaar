@@ -5,7 +5,6 @@ import 'dart:core';
 import 'package:another_flushbar/flushbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
-import 'package:intl/intl.dart';
 import 'package:pashusansaar/refresh_token/refresh_token_controller.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/constants.dart';
@@ -30,7 +29,10 @@ import 'package:pashusansaar/utils/constants.dart' as constant;
 import 'package:geoflutterfire/geoflutterfire.dart' as geoFire;
 import 'package:path_provider/path_provider.dart';
 import 'dart:ui' as ui;
+import 'package:animations/animations.dart';
+import 'package:pashusansaar/utils/custom_fab.dart';
 
+import 'animal_info_form.dart';
 import 'buy_animal_controller.dart';
 
 class BuyAnimal extends StatefulWidget {
@@ -75,7 +77,7 @@ class _BuyAnimalState extends State<BuyAnimal>
   TextEditingController _locationController = TextEditingController();
   ScrollController _scrollController =
       ScrollController(keepScrollOffset: false);
-  bool _isLoading = false;
+  bool _isLoading = false, _isVisible = false, _isCardVisible = false;
 
   File fileUrl;
   final BuyAnimalController buyAnimalController =
@@ -147,6 +149,8 @@ class _BuyAnimalState extends State<BuyAnimal>
       setState(() {
         _isLoading = false;
         widget.animalInfo.add(data);
+        _isCardVisible = widget.animalInfo.length % 5 == 0;
+        _isVisible = false;
       });
     } catch (e) {
       print('=-=Error-Re-Buying-=->>>' + e.toString());
@@ -182,6 +186,10 @@ class _BuyAnimalState extends State<BuyAnimal>
   // }
 
   _getInitialData() async {
+    Future.delayed(Duration(seconds: 7)).then((value) => setState(() {
+          _isCardVisible = widget.animalInfo.length % 5 == 0;
+        }));
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       _userLocality = prefs.getString('district');
@@ -489,6 +497,15 @@ class _BuyAnimalState extends State<BuyAnimal>
         key: previewContainer,
         child: Scaffold(
           backgroundColor: Colors.grey[100],
+          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+          floatingActionButton: AnimatedOpacity(
+            opacity: !_isCardVisible ? 1.0 : 0.0,
+            duration: Duration(seconds: 3),
+            child: CustomFABWidget(
+              userMobileNumber: widget.userMobileNumber,
+              userName: widget.userName,
+            ),
+          ),
           body: Stack(
             children: [
               _tempAnimalList.length == 0 && widget.animalInfo.length == 0
@@ -1279,243 +1296,6 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                             var first =
                                                                 addresses.first;
 
-                                                            // callingInfo[
-                                                            //         'userIdCurrent'] =
-                                                            //     FirebaseAuth
-                                                            //         .instance
-                                                            //         .currentUser
-                                                            //         .uid;
-                                                            // callingInfo[
-                                                            //         'userIdOther'] =
-                                                            //     widget.animalInfo[
-                                                            //             index]
-                                                            //         ['userId'];
-                                                            // callingInfo[
-                                                            //         'otherListId'] =
-                                                            //     widget.animalInfo[
-                                                            //             index][
-                                                            //         'uniqueId'];
-                                                            // callingInfo[
-                                                            //         'channel'] =
-                                                            //     "call";
-                                                            // callingInfo[
-                                                            //         'userAddress'] =
-                                                            //     widget.animalInfo[
-                                                            //             index][
-                                                            //         'userAddress'];
-                                                            // callingInfo[
-                                                            //         "userAnimalDescription"] =
-                                                            //     widget.animalInfo[
-                                                            //             index][
-                                                            //         'userAnimalDescription'];
-                                                            // callingInfo[
-                                                            //         "userAnimalType"] =
-                                                            //     widget.animalInfo[
-                                                            //                 index]
-                                                            //             [
-                                                            //             'userAnimalType'] ??
-                                                            //         "";
-                                                            // callingInfo[
-                                                            //         "userAnimalTypeOther"] =
-                                                            //     widget.animalInfo[
-                                                            //                 index]
-                                                            //             [
-                                                            //             'userAnimalTypeOther'] ??
-                                                            //         "";
-                                                            // callingInfo[
-                                                            //         "userAnimalAge"] =
-                                                            //     widget.animalInfo[
-                                                            //                 index]
-                                                            //             [
-                                                            //             'userAnimalAge'] ??
-                                                            //         "";
-                                                            // callingInfo[
-                                                            //         "userAddress"] =
-                                                            //     widget.animalInfo[
-                                                            //             index][
-                                                            //         'userAddress'];
-                                                            // callingInfo[
-                                                            //         "userName"] =
-                                                            //     widget.animalInfo[
-                                                            //             index][
-                                                            //         'userName'];
-                                                            // callingInfo[
-                                                            //         "userAnimalPrice"] =
-                                                            //     widget.animalInfo[
-                                                            //                 index]
-                                                            //             [
-                                                            //             'userAnimalPrice'] ??
-                                                            //         "0";
-                                                            // callingInfo[
-                                                            //         "userAnimalBreed"] =
-                                                            //     widget.animalInfo[
-                                                            //                 index]
-                                                            //             [
-                                                            //             'userAnimalBreed'] ??
-                                                            //         "";
-                                                            // callingInfo[
-                                                            //         "userMobileNumber"] =
-                                                            //     widget.animalInfo[
-                                                            //             index][
-                                                            //         'userMobileNumber'];
-                                                            // callingInfo[
-                                                            //         "userAnimalMilk"] =
-                                                            //     widget.animalInfo[
-                                                            //                 index]
-                                                            //             [
-                                                            //             'userAnimalMilk'] ??
-                                                            //         "";
-                                                            // callingInfo[
-                                                            //         "userAnimalPregnancy"] =
-                                                            //     widget.animalInfo[
-                                                            //                 index]
-                                                            //             [
-                                                            //             'userAnimalPregnancy'] ??
-                                                            //         "";
-                                                            // callingInfo[
-                                                            //     "image1"] = widget.animalInfo[
-                                                            //                 index] ==
-                                                            //             null ||
-                                                            //         widget.animalInfo[index]
-                                                            //                 [
-                                                            //                 'image1'] ==
-                                                            //             ""
-                                                            //     ? ""
-                                                            //     : widget.animalInfo[
-                                                            //             index]
-                                                            //         ['image1'];
-                                                            // callingInfo[
-                                                            //     "image2"] = widget.animalInfo[index]
-                                                            //                 [
-                                                            //                 'image2'] ==
-                                                            //             null ||
-                                                            //         widget.animalInfo[index]
-                                                            //                 [
-                                                            //                 'image2'] ==
-                                                            //             ""
-                                                            //     ? ""
-                                                            //     : widget.animalInfo[
-                                                            //             index]
-                                                            //         ['image2'];
-                                                            // callingInfo[
-                                                            //     "image3"] = widget.animalInfo[index]
-                                                            //                 [
-                                                            //                 'image3'] ==
-                                                            //             null ||
-                                                            //         widget.animalInfo[index]
-                                                            //                 [
-                                                            //                 'image3'] ==
-                                                            //             ""
-                                                            //     ? ""
-                                                            //     : widget.animalInfo[
-                                                            //             index]
-                                                            //         ['image3'];
-                                                            // callingInfo[
-                                                            //     "image4"] = widget.animalInfo[index]
-                                                            //                 [
-                                                            //                 'image4'] ==
-                                                            //             null ||
-                                                            //         widget.animalInfo[index]
-                                                            //                 [
-                                                            //                 'image4'] ==
-                                                            //             ""
-                                                            //     ? ""
-                                                            //     : widget.animalInfo[
-                                                            //             index]
-                                                            //         ['image4'];
-                                                            // callingInfo[
-                                                            //         "dateOfSaving"] =
-                                                            //     ReusableWidgets
-                                                            //         .dateTimeToEpoch(
-                                                            //             DateTime
-                                                            //                 .now());
-                                                            // callingInfo[
-                                                            //         'isValidUser'] =
-                                                            //     widget.animalInfo[
-                                                            //             index][
-                                                            //         'isValidUser'];
-                                                            // callingInfo[
-                                                            //         'extraInfo'] =
-                                                            //     widget.animalInfo[
-                                                            //                 index]
-                                                            //             [
-                                                            //             'extraInfo'] ??
-                                                            //         {};
-                                                            // if (widget.animalInfo[
-                                                            //             index][
-                                                            //         'userId'] !=
-                                                            //     FirebaseAuth
-                                                            //         .instance
-                                                            //         .currentUser
-                                                            //         .uid) {
-                                                            //   FirebaseFirestore
-                                                            //       .instance
-                                                            //       .collection(
-                                                            //           "callingInfo")
-                                                            //       .doc(callingInfo[
-                                                            //           'otherListId'])
-                                                            //       .collection(
-                                                            //           'interestedBuyers')
-                                                            //       .doc(FirebaseAuth
-                                                            //           .instance
-                                                            //           .currentUser
-                                                            //           .uid)
-                                                            //       .set(
-                                                            //           {
-                                                            //         'userName':
-                                                            //             widget
-                                                            //                 .userName,
-                                                            //         'userMobileNumber':
-                                                            //             widget
-                                                            //                 .userMobileNumber,
-                                                            //         "userAddress": first
-                                                            //                 .addressLine ??
-                                                            //             (first.adminArea +
-                                                            //                 ' ' +
-                                                            //                 first.postalCode +
-                                                            //                 ', ' +
-                                                            //                 first.countryName),
-                                                            //         'userIdCurrent': FirebaseAuth
-                                                            //             .instance
-                                                            //             .currentUser
-                                                            //             .uid,
-                                                            //         'userIdOther':
-                                                            //             widget.animalInfo[index]
-                                                            //                 [
-                                                            //                 'userId'],
-                                                            //         'otherListId':
-                                                            //             widget.animalInfo[index]
-                                                            //                 [
-                                                            //                 'uniqueId'],
-                                                            //         'channel':
-                                                            //             "call",
-                                                            //         "dateOfSaving":
-                                                            //             ReusableWidgets.dateTimeToEpoch(
-                                                            //                 DateTime.now())
-                                                            //       },
-                                                            //           SetOptions(
-                                                            //               merge:
-                                                            //                   true));
-
-                                                            //   FirebaseFirestore
-                                                            //       .instance
-                                                            //       .collection(
-                                                            //           "myCallingInfo")
-                                                            //       .doc(FirebaseAuth
-                                                            //           .instance
-                                                            //           .currentUser
-                                                            //           .uid)
-                                                            //       .collection(
-                                                            //           'myCalls')
-                                                            //       .doc(callingInfo[
-                                                            //           'otherListId'])
-                                                            //       .set(
-                                                            //           callingInfo,
-                                                            //           SetOptions(
-                                                            //               merge:
-                                                            //                   true));
-                                                            // }
-
                                                             return UrlLauncher
                                                                 .launch(
                                                                     'tel:+91 ${widget.animalInfo[index].mobile}');
@@ -1563,243 +1343,6 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                                         'longitude')));
                                                             var first =
                                                                 addresses.first;
-
-                                                            // callingInfo[
-                                                            //         'userIdCurrent'] =
-                                                            //     FirebaseAuth
-                                                            //         .instance
-                                                            //         .currentUser
-                                                            //         .uid;
-                                                            // callingInfo[
-                                                            //         'userIdOther'] =
-                                                            //     widget.animalInfo[
-                                                            //             index]
-                                                            //         ['userId'];
-                                                            // callingInfo[
-                                                            //         'otherListId'] =
-                                                            //     widget.animalInfo[
-                                                            //             index][
-                                                            //         'uniqueId'];
-                                                            // callingInfo[
-                                                            //         'channel'] =
-                                                            //     "whatsapp";
-                                                            // callingInfo[
-                                                            //         'userAddress'] =
-                                                            //     widget.animalInfo[
-                                                            //             index][
-                                                            //         'userAddress'];
-                                                            // callingInfo[
-                                                            //         "userAnimalDescription"] =
-                                                            //     widget.animalInfo[
-                                                            //             index][
-                                                            //         'userAnimalDescription'];
-                                                            // callingInfo[
-                                                            //         "userAnimalType"] =
-                                                            //     widget.animalInfo[
-                                                            //                 index]
-                                                            //             [
-                                                            //             'userAnimalType'] ??
-                                                            //         "";
-                                                            // callingInfo[
-                                                            //         "userAnimalTypeOther"] =
-                                                            //     widget.animalInfo[
-                                                            //                 index]
-                                                            //             [
-                                                            //             'userAnimalTypeOther'] ??
-                                                            //         "";
-                                                            // callingInfo[
-                                                            //         "userAnimalAge"] =
-                                                            //     widget.animalInfo[
-                                                            //                 index]
-                                                            //             [
-                                                            //             'userAnimalAge'] ??
-                                                            //         "";
-                                                            // callingInfo[
-                                                            //         "userAddress"] =
-                                                            //     widget.animalInfo[
-                                                            //             index][
-                                                            //         'userAddress'];
-                                                            // callingInfo[
-                                                            //         "userName"] =
-                                                            //     widget.animalInfo[
-                                                            //             index][
-                                                            //         'userName'];
-                                                            // callingInfo[
-                                                            //         "userAnimalPrice"] =
-                                                            //     widget.animalInfo[
-                                                            //                 index]
-                                                            //             [
-                                                            //             'userAnimalPrice'] ??
-                                                            //         "0";
-                                                            // callingInfo[
-                                                            //         "userAnimalBreed"] =
-                                                            //     widget.animalInfo[
-                                                            //                 index]
-                                                            //             [
-                                                            //             'userAnimalBreed'] ??
-                                                            //         "";
-                                                            // callingInfo[
-                                                            //         "userMobileNumber"] =
-                                                            //     widget.animalInfo[
-                                                            //             index][
-                                                            //         'userMobileNumber'];
-                                                            // callingInfo[
-                                                            //         "userAnimalMilk"] =
-                                                            //     widget.animalInfo[
-                                                            //                 index]
-                                                            //             [
-                                                            //             'userAnimalMilk'] ??
-                                                            //         "";
-                                                            // callingInfo[
-                                                            //         "userAnimalPregnancy"] =
-                                                            //     widget.animalInfo[
-                                                            //                 index]
-                                                            //             [
-                                                            //             'userAnimalPregnancy'] ??
-                                                            //         "";
-                                                            // callingInfo[
-                                                            //     "image1"] = widget.animalInfo[
-                                                            //                 index] ==
-                                                            //             null ||
-                                                            //         widget.animalInfo[index]
-                                                            //                 [
-                                                            //                 'image1'] ==
-                                                            //             ""
-                                                            //     ? ""
-                                                            //     : widget.animalInfo[
-                                                            //             index]
-                                                            //         ['image1'];
-                                                            // callingInfo[
-                                                            //     "image2"] = widget.animalInfo[index]
-                                                            //                 [
-                                                            //                 'image2'] ==
-                                                            //             null ||
-                                                            //         widget.animalInfo[index]
-                                                            //                 [
-                                                            //                 'image2'] ==
-                                                            //             ""
-                                                            //     ? ""
-                                                            //     : widget.animalInfo[
-                                                            //             index]
-                                                            //         ['image2'];
-                                                            // callingInfo[
-                                                            //     "image3"] = widget.animalInfo[index]
-                                                            //                 [
-                                                            //                 'image3'] ==
-                                                            //             null ||
-                                                            //         widget.animalInfo[index]
-                                                            //                 [
-                                                            //                 'image3'] ==
-                                                            //             ""
-                                                            //     ? ""
-                                                            //     : widget.animalInfo[
-                                                            //             index]
-                                                            //         ['image3'];
-                                                            // callingInfo[
-                                                            //     "image4"] = widget.animalInfo[index]
-                                                            //                 [
-                                                            //                 'image4'] ==
-                                                            //             null ||
-                                                            //         widget.animalInfo[index]
-                                                            //                 [
-                                                            //                 'image4'] ==
-                                                            //             ""
-                                                            //     ? ""
-                                                            //     : widget.animalInfo[
-                                                            //             index]
-                                                            //         ['image4'];
-                                                            // callingInfo[
-                                                            //         "dateOfSaving"] =
-                                                            //     ReusableWidgets
-                                                            //         .dateTimeToEpoch(
-                                                            //             DateTime
-                                                            //                 .now());
-                                                            // callingInfo[
-                                                            //         'isValidUser'] =
-                                                            //     widget.animalInfo[
-                                                            //             index][
-                                                            //         'isValidUser'];
-                                                            // callingInfo[
-                                                            //         'extraInfo'] =
-                                                            //     widget.animalInfo[
-                                                            //                 index]
-                                                            //             [
-                                                            //             'extraInfo'] ??
-                                                            //         {};
-                                                            // if (widget.animalInfo[
-                                                            //             index][
-                                                            //         'userId'] !=
-                                                            //     FirebaseAuth
-                                                            //         .instance
-                                                            //         .currentUser
-                                                            //         .uid) {
-                                                            //   FirebaseFirestore
-                                                            //       .instance
-                                                            //       .collection(
-                                                            //           "callingInfo")
-                                                            //       .doc(callingInfo[
-                                                            //           'otherListId'])
-                                                            //       .collection(
-                                                            //           'interestedBuyers')
-                                                            //       .doc(FirebaseAuth
-                                                            //           .instance
-                                                            //           .currentUser
-                                                            //           .uid)
-                                                            //       .set(
-                                                            //           {
-                                                            //         'userName':
-                                                            //             widget
-                                                            //                 .userName,
-                                                            //         'userMobileNumber':
-                                                            //             widget
-                                                            //                 .userMobileNumber,
-                                                            //         "userAddress": first
-                                                            //                 .addressLine ??
-                                                            //             (first.adminArea +
-                                                            //                 ' ' +
-                                                            //                 first.postalCode +
-                                                            //                 ', ' +
-                                                            //                 first.countryName),
-                                                            //         'userIdCurrent': FirebaseAuth
-                                                            //             .instance
-                                                            //             .currentUser
-                                                            //             .uid,
-                                                            //         'userIdOther':
-                                                            //             widget.animalInfo[index]
-                                                            //                 [
-                                                            //                 'userId'],
-                                                            //         'otherListId':
-                                                            //             widget.animalInfo[index]
-                                                            //                 [
-                                                            //                 'uniqueId'],
-                                                            //         'channel':
-                                                            //             "whatsapp",
-                                                            //         "dateOfSaving":
-                                                            //             ReusableWidgets.dateTimeToEpoch(
-                                                            //                 DateTime.now())
-                                                            //       },
-                                                            //           SetOptions(
-                                                            //               merge:
-                                                            //                   true));
-
-                                                            //   FirebaseFirestore
-                                                            //       .instance
-                                                            //       .collection(
-                                                            //           "myCallingInfo")
-                                                            //       .doc(FirebaseAuth
-                                                            //           .instance
-                                                            //           .currentUser
-                                                            //           .uid)
-                                                            //       .collection(
-                                                            //           'myCalls')
-                                                            //       .doc(callingInfo[
-                                                            //           'otherListId'])
-                                                            //       .set(
-                                                            //           callingInfo,
-                                                            //           SetOptions(
-                                                            //               merge:
-                                                            //                   true));
-                                                            // }
 
                                                             whatsappText =
                                                                 'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${widget.userName}, ${prefs.getString('district')} \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
@@ -1861,6 +1404,140 @@ class _BuyAnimalState extends State<BuyAnimal>
                                         );
                                   },
                                 ),
+                                Positioned(
+                                  bottom: 0,
+                                  right: 0,
+                                  child: AnimatedOpacity(
+                                    opacity: _isCardVisible ? 1.0 : 0.0,
+                                    duration: Duration(seconds: 3),
+                                    child: Visibility(
+                                      visible: _isCardVisible,
+                                      child: Padding(
+                                        padding: EdgeInsets.all(10),
+                                        child: OpenContainer(
+                                          closedElevation: 0,
+                                          transitionDuration:
+                                              Duration(seconds: 2),
+                                          openBuilder: (context, _) =>
+                                              AnimalInfoForm(
+                                            userMobileNumber:
+                                                widget.userMobileNumber,
+                                            userName: widget.userName,
+                                          ),
+                                          closedShape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.all(
+                                              Radius.circular(10.0),
+                                            ),
+                                          ),
+                                          closedColor:
+                                              Theme.of(context).primaryColor,
+                                          closedBuilder:
+                                              (context, openContainer) =>
+                                                  Container(
+                                            height: 220,
+                                            width: 150,
+                                            child: Padding(
+                                              padding: const EdgeInsets.only(
+                                                left: 8.0,
+                                                right: 8,
+                                              ),
+                                              child: SingleChildScrollView(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Align(
+                                                      alignment:
+                                                          Alignment.bottomRight,
+                                                      child: RawMaterialButton(
+                                                        onPressed: () =>
+                                                            setState(() {
+                                                          _isVisible = true;
+                                                          _isCardVisible =
+                                                              false;
+                                                        }),
+                                                        elevation: 2.0,
+                                                        fillColor: Colors.white,
+                                                        child: Icon(
+                                                          Icons.close,
+                                                          size: 20.0,
+                                                          color:
+                                                              appPrimaryColor,
+                                                        ),
+                                                        shape: CircleBorder(),
+                                                        constraints:
+                                                            BoxConstraints(
+                                                                minWidth: 30,
+                                                                minHeight: 30),
+                                                      ),
+                                                    ),
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              left: 12.0),
+                                                      child: Text(
+                                                        'कौन सा पशु खरीदना चाहते है ?',
+                                                        style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 22,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                      width: double.infinity,
+                                                      child: RaisedButton(
+                                                        shape: OutlineInputBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10)),
+                                                        color: Colors.white,
+                                                        onPressed: null,
+                                                        disabledColor:
+                                                            Colors.white,
+                                                        disabledTextColor:
+                                                            appPrimaryColor,
+                                                        child: Row(
+                                                          textDirection:
+                                                              TextDirection.rtl,
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceBetween,
+                                                          children: [
+                                                            Icon(
+                                                              Icons
+                                                                  .arrow_forward_ios_sharp,
+                                                              color:
+                                                                  appPrimaryColor,
+                                                            ),
+                                                            Text(
+                                                              'हमें बताये',
+                                                              style: TextStyle(
+                                                                color:
+                                                                    appPrimaryColor,
+                                                                fontSize: 20,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                // ),
                                 _isLoading
                                     ? Positioned(
                                         bottom: 0,
@@ -2336,7 +2013,7 @@ class _BuyAnimalState extends State<BuyAnimal>
 
                   Share.share(
                       "नस्ल: ${_list[index].animalBreed}\nजानकारी: description\nदूध(प्रति दिन): ${_list[index].animalMilk} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
-                      subject: 'पशु की जानकारी');
+                      subject: 'animal_info'.tr);
 
                   // Share.shareFiles([fileUrl.path],
                   //     mimeTypes: ['images/png'],

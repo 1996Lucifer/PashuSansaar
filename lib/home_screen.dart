@@ -443,7 +443,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
             currentIndex: widget.selectedIndex,
-            // selectedItemColor: themeColor,
+            selectedItemColor: appPrimaryColor,
             onTap: _onItemTapped,
           ),
         ));

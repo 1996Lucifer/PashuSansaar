@@ -81,7 +81,7 @@ class Messages extends Translations {
           'price_hint_text': 'जैसे: 30,000',
           'choose_photo': 'फोटो चुनें',
           'save_button': 'दर्ज़ (Save) करे',
-          'upload_image_text': 'फोटो डालें (कम से कम एक)',
+          'upload_image_text': 'फोटो डालें (कम से कम तीन)',
           'cow': 'गाय',
           'buffalo_female': 'भैंस',
           'ox': 'बैल',
@@ -170,7 +170,7 @@ class Messages extends Translations {
           'animal_pregnancy_error': 'कृपया पशु की ब्यात चुने',
           'animal_milk_error': 'कृपया पशु का अभी का दूध दर्ज़ करे',
           'animal_price_error': 'कृपया मूल्य दर्ज़ करे',
-          'animal_image_error': 'कम से कम एक चित्र चुने',
+          'animal_image_error': 'कम से कम तीन चित्र चुने',
           'animal_already_pregnant': 'ब्यायी हुई है?',
           'already_pregnant_supportive_text': '(अगर हाँ तो कब ब्यायी थी?)',
           'animal_if_pregnant': 'क्या गयाभिन है?',
@@ -266,7 +266,18 @@ class Messages extends Translations {
               'आपका लोकेशन प्राप्त करने में दिक्कत हो रही है|\nकृपया दोबारा कोशिश करे',
           'invalid_zipcode_error':
               'ये ज़िपकोड भारत का नहीं हैं, कृपया सही ज़िपकोड दर्ज़ करे|',
-          'see_more_animal': 'और पशु देखे'
+          'see_more_animal': 'और पशु देखे',
+          'animal_info': 'पशु की जानकारी',
+          'animal_info_header': 'कौन सा पशु खरीदना चाहते है ? हमें बताये',
+          'animal_info_saved': 'आपकी जानकारी दर्ज़ कर दी गयी हैं ।',
+          'mobile_number_format': 'मोबाइल नंबर 6,7,8 या 9 से शुरू होना चाहिए ।',
+          'animal_pregnant_empty_error':
+              'कृपया पशु की ब्यायी जानकारी दर्ज़ करे ।',
+          'animal_pregnant_time_error': 'पशु कब ब्यायी है, वो चुने ।',
+          'animal_gayabhin_empty_error':
+              'कृपया पशु की गयाभिन जानकारी दर्ज़ करे ।',
+          'animal_gayabhin_time_error':
+              'पशु कितने महीने की गयाभिन है, वो चुने ।',
         }
       };
 }
