@@ -44,7 +44,7 @@ class BuyAnimalController extends GetxController {
         if (response.statusCode == 200 || response.statusCode == 201) {
           buyAnimalData = BuyAnimalModel.fromJson(response.data);
         }
-        return buyAnimalData.result;
+        return buyAnimalData;
       }
     } catch (e) {
       print("Exceptions get animal _______$e");

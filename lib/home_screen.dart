@@ -5,6 +5,7 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:intl/intl.dart';
 import 'package:location/location.dart';
 import 'package:pashusansaar/buy_animal/buy_animal.dart';
+import 'package:pashusansaar/buy_animal/buy_animal_model.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -32,7 +33,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   ProgressDialog pr;
 
-  List _animalInfo = [], _sellingAnimalInfo = [];
+  List<Result> _animalInfo = [];
+  List _sellingAnimalInfo = [];
   Map _profileData = {};
   Map _referralWinnerData = {};
   final geo = Geoflutterfire();
@@ -222,11 +224,11 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     }
 
-    List data = await buyAnimalController.getAnimal(
-      latitude: 40.1,
-      longitude: -97.1,
-      // latitude: lat,
-      // longitude: long,
+    BuyAnimalModel data = await buyAnimalController.getAnimal(
+      // latitude: 40.1,
+      // longitude: -97.1,
+      latitude: lat,
+      longitude: long,
       animalType: null,
       minMilk: null,
       maxMilk: null,
@@ -235,7 +237,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     setState(() {
-      _animalInfo = data;
+      _animalInfo = data.result;
+      prefs.setInt('page', data.page);
     });
 
     pr.hide();

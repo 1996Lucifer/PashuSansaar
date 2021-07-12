@@ -3,15 +3,13 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:core';
 import 'package:another_flushbar/flushbar.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
+import 'package:pashusansaar/buy_animal/buy_animal_model.dart';
 import 'package:pashusansaar/refresh_token/refresh_token_controller.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/constants.dart';
-import 'package:pashusansaar/utils/global.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:dropdown_search/dropdown_search.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -36,7 +34,7 @@ import 'animal_info_form.dart';
 import 'buy_animal_controller.dart';
 
 class BuyAnimal extends StatefulWidget {
-  List animalInfo;
+  List<Result> animalInfo;
   final String userName;
   final String userMobileNumber;
   final String userImage;
@@ -60,11 +58,18 @@ class _BuyAnimalState extends State<BuyAnimal>
   var formatter = intl.NumberFormat('#,##,000');
   final geo = geoFire.Geoflutterfire();
 
-  int perPage = 10, _index = 0, _value, _valueRadius, _current = 0;
+  int perPage = 10,
+      _index = 0,
+      _value,
+      _valueRadius,
+      _current = 0,
+      _page,
+      animalType,
+      minMilk,
+      maxMilk;
   Map<String, dynamic> _filterDropDownMap = {};
   ProgressDialog pr;
   double _latitude = 0.0, _longitude = 0.0;
-  List _infoList = [], _tempAnimalList = [], _resetFilterData = [];
   String _filterAnimalType,
       desc = '',
       _userLocality = '',
@@ -77,7 +82,7 @@ class _BuyAnimalState extends State<BuyAnimal>
   TextEditingController _locationController = TextEditingController();
   ScrollController _scrollController =
       ScrollController(keepScrollOffset: false);
-  bool _isLoading = false, _isVisible = false, _isCardVisible = false;
+  bool _isCardVisible = false;
 
   File fileUrl;
   final BuyAnimalController buyAnimalController =
@@ -112,10 +117,6 @@ class _BuyAnimalState extends State<BuyAnimal>
   _getNextSetOfBuyingAnimal() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
-      setState(() {
-        _isLoading = true;
-      });
-
       bool status;
 
       if (ReusableWidgets.isTokenExpired(prefs.getInt('expires') ?? 0)) {
@@ -134,23 +135,23 @@ class _BuyAnimalState extends State<BuyAnimal>
         }
       }
 
-      List data = await buyAnimalController.getAnimal(
-        latitude: 40.1,
-        longitude: -97.1,
-        // latitude: lat,
-        // longitude: long,
-        animalType: null,
-        minMilk: null,
-        maxMilk: null,
-        page: 2,
+      BuyAnimalModel data = await buyAnimalController.getAnimal(
+        latitude: _latitude,
+        longitude: _longitude,
+        animalType: animalType,
+        minMilk: minMilk,
+        maxMilk: maxMilk,
+        page: _page,
         accessToken: prefs.getString('accessToken') ?? '',
       );
 
+      List<Result> _temp = widget.animalInfo;
+      data.result.forEach((element) => _temp.add(element));
+
       setState(() {
-        _isLoading = false;
-        widget.animalInfo.add(data);
+        widget.animalInfo = _temp;
         _isCardVisible = widget.animalInfo.length % 5 == 0;
-        _isVisible = false;
+        prefs.setInt('page', data.page);
       });
     } catch (e) {
       print('=-=Error-Re-Buying-=->>>' + e.toString());
@@ -193,6 +194,7 @@ class _BuyAnimalState extends State<BuyAnimal>
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       _userLocality = prefs.getString('district');
+      _page = prefs.getInt('page') ?? 1;
       if (widget.latitude == 0.0 || widget.longitude == 0.0) {
         _latitude = prefs.getDouble('latitude');
         _longitude = prefs.getDouble('longitude');
@@ -266,8 +268,7 @@ class _BuyAnimalState extends State<BuyAnimal>
   }
 
   Row _buildInfowidget(int index) {
-    List _list =
-        _tempAnimalList.length != 0 ? _tempAnimalList : widget.animalInfo;
+    List _list = widget.animalInfo;
     return Row(
       children: [
         Padding(
@@ -333,7 +334,8 @@ class _BuyAnimalState extends State<BuyAnimal>
                 : TextSpan(
                     text: _list[index].animalBreed == 'not_known'.tr
                         ? ""
-                        : _list[index].animalBreed,
+                        : ReusableWidgets.removeEnglisgDataFromName(
+                            _list[index].animalBreed),
                     style: TextStyle(
                         color: Colors.grey[700],
                         fontWeight: FontWeight.bold,
@@ -508,7 +510,7 @@ class _BuyAnimalState extends State<BuyAnimal>
           ),
           body: Stack(
             children: [
-              _tempAnimalList.length == 0 && widget.animalInfo.length == 0
+              widget.animalInfo.length == 0
                   ? Center(
                       child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -521,1039 +523,316 @@ class _BuyAnimalState extends State<BuyAnimal>
                     ))
                   : Padding(
                       padding: const EdgeInsets.only(top: 50.0),
-                      child: _tempAnimalList.length != 0
-                          ? Stack(
-                              alignment: Alignment.bottomCenter,
-                              children: [
-                                ListView.builder(
-                                    key: ObjectKey(_tempAnimalList[0]),
-                                    padding: EdgeInsets.only(bottom: 60),
-                                    controller: _scrollController,
-                                    physics: BouncingScrollPhysics(),
-                                    itemBuilder: (context, index) {
-                                      if (index >= widget.animalInfo.length) {
-                                        return CircularProgressIndicator();
-                                      }
-                                      return Padding(
-                                        padding: const EdgeInsets.only(
-                                            left: 8.0, right: 8, top: 8),
-                                        child: Column(
-                                          children: [
-                                            Card(
-                                              key: Key(index.toString()),
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(10.0),
+                      child: Stack(
+                        alignment: Alignment.bottomCenter,
+                        children: [
+                          ListView.builder(
+                            key: ObjectKey(widget.animalInfo[0]),
+                            padding: EdgeInsets.only(bottom: 60),
+                            controller: _scrollController,
+                            physics: BouncingScrollPhysics(),
+                            itemCount: _page == null
+                                ? widget.animalInfo.length
+                                : widget.animalInfo.length + 1,
+                            itemBuilder: (context, index) {
+                              if (index >= widget.animalInfo.length) {
+                                return Column(
+                                  children: [
+                                    SizedBox(height: 10),
+                                    Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  ],
+                                );
+                              }
+
+                              return Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 8.0, right: 8, top: 8),
+                                child: Card(
+                                  key: Key(index.toString()),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
+                                  elevation: 5,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      _buildInfowidget(index),
+                                      _distanceTimeMethod(index),
+                                      _animalImageWidget(index),
+                                      _animalDescriptionMethod(index),
+                                      Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey[100],
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.grey,
+                                                blurRadius: 1.0,
                                               ),
-                                              elevation: 5,
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  _buildInfowidget(index),
-                                                  _distanceTimeMethod(index),
-                                                  _animalImageWidget(index),
-                                                  _animalDescriptionMethod(
-                                                      index),
-                                                  Container(
-                                                      decoration: BoxDecoration(
-                                                        color: Colors.grey[100],
-                                                        boxShadow: [
-                                                          BoxShadow(
-                                                            color: Colors.grey,
-                                                            blurRadius: 1.0,
-                                                          ),
-                                                        ],
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(8),
-                                                      ),
-                                                      height: 80,
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(8.0),
-                                                        child: Row(children: [
-                                                          widget.userImage ==
-                                                                      null ||
-                                                                  widget.userImage ==
-                                                                      ""
-                                                              ? Image.asset(
-                                                                  'assets/images/profile.jpg',
-                                                                  width: 40,
-                                                                  height: 40)
-                                                              : Image.memory(
-                                                                  base64Decode(
-                                                                    widget
-                                                                        .userImage,
-                                                                  ),
-                                                                  width: 40,
-                                                                  height: 40),
-                                                          SizedBox(
-                                                            width: 5,
-                                                          ),
-                                                          Expanded(
-                                                            child: Text(
-                                                              _tempAnimalList[
-                                                                      index]
-                                                                  ['userName'],
-                                                              style: TextStyle(
-                                                                  fontSize: 15,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                  color: Colors
-                                                                      .black),
-                                                            ),
-                                                          ),
-                                                          RaisedButton.icon(
-                                                              shape: RoundedRectangleBorder(
-                                                                  borderRadius:
-                                                                      BorderRadius.circular(
-                                                                          18.0),
-                                                                  side: BorderSide(
-                                                                      color:
-                                                                          darkSecondaryColor)),
-                                                              color:
-                                                                  secondaryColor,
-                                                              onPressed:
-                                                                  () async {
-                                                                SharedPreferences
-                                                                    prefs =
-                                                                    await SharedPreferences
-                                                                        .getInstance();
-                                                                var addresses = await Geocoder
-                                                                    .local
-                                                                    .findAddressesFromCoordinates(Coordinates(
-                                                                        prefs.getDouble(
-                                                                            'latitude'),
-                                                                        prefs.getDouble(
-                                                                            'longitude')));
-                                                                var first =
-                                                                    addresses
-                                                                        .first;
-
-                                                                callingInfo[
-                                                                        'userIdCurrent'] =
-                                                                    FirebaseAuth
-                                                                        .instance
-                                                                        .currentUser
-                                                                        .uid;
-                                                                callingInfo[
-                                                                        'userIdOther'] =
-                                                                    _tempAnimalList[
-                                                                            index]
-                                                                        [
-                                                                        'userId'];
-                                                                callingInfo[
-                                                                        'otherListId'] =
-                                                                    _tempAnimalList[
-                                                                            index]
-                                                                        [
-                                                                        'uniqueId'];
-                                                                callingInfo[
-                                                                        'channel'] =
-                                                                    "call";
-                                                                callingInfo[
-                                                                        'userAddress'] =
-                                                                    _tempAnimalList[
-                                                                            index]
-                                                                        [
-                                                                        'userAddress'];
-                                                                callingInfo[
-                                                                        "userAnimalDescription"] =
-                                                                    _tempAnimalList[
-                                                                            index]
-                                                                        [
-                                                                        'userAnimalDescription'];
-                                                                callingInfo[
-                                                                        "userAnimalType"] =
-                                                                    _tempAnimalList[index]
-                                                                            [
-                                                                            'userAnimalType'] ??
-                                                                        "";
-                                                                callingInfo[
-                                                                        "userAnimalTypeOther"] =
-                                                                    _tempAnimalList[index]
-                                                                            [
-                                                                            'userAnimalTypeOther'] ??
-                                                                        "";
-                                                                callingInfo[
-                                                                        "userAnimalAge"] =
-                                                                    _tempAnimalList[index]
-                                                                            [
-                                                                            'userAnimalAge'] ??
-                                                                        "";
-                                                                callingInfo[
-                                                                        "userAddress"] =
-                                                                    _tempAnimalList[
-                                                                            index]
-                                                                        [
-                                                                        'userAddress'];
-                                                                callingInfo[
-                                                                        "userName"] =
-                                                                    _tempAnimalList[
-                                                                            index]
-                                                                        [
-                                                                        'userName'];
-                                                                callingInfo[
-                                                                        "userAnimalPrice"] =
-                                                                    _tempAnimalList[index]
-                                                                            [
-                                                                            'userAnimalPrice'] ??
-                                                                        "0";
-                                                                callingInfo[
-                                                                        "userAnimalBreed"] =
-                                                                    _tempAnimalList[index]
-                                                                            [
-                                                                            'userAnimalBreed'] ??
-                                                                        "";
-                                                                callingInfo[
-                                                                        "userMobileNumber"] =
-                                                                    _tempAnimalList[
-                                                                            index]
-                                                                        [
-                                                                        'userMobileNumber'];
-                                                                callingInfo[
-                                                                        "userAnimalMilk"] =
-                                                                    _tempAnimalList[index]
-                                                                            [
-                                                                            'userAnimalMilk'] ??
-                                                                        "";
-                                                                callingInfo[
-                                                                        "userAnimalPregnancy"] =
-                                                                    _tempAnimalList[index]
-                                                                            [
-                                                                            'userAnimalPregnancy'] ??
-                                                                        "";
-                                                                callingInfo[
-                                                                    "image1"] = _tempAnimalList[index] ==
-                                                                            null ||
-                                                                        _tempAnimalList[index]['image1'] ==
-                                                                            ""
-                                                                    ? ""
-                                                                    : _tempAnimalList[
-                                                                            index]
-                                                                        [
-                                                                        'image1'];
-                                                                callingInfo[
-                                                                    "image2"] = _tempAnimalList[index]['image2'] ==
-                                                                            null ||
-                                                                        _tempAnimalList[index]['image2'] ==
-                                                                            ""
-                                                                    ? ""
-                                                                    : _tempAnimalList[
-                                                                            index]
-                                                                        [
-                                                                        'image2'];
-                                                                callingInfo[
-                                                                    "image3"] = _tempAnimalList[index]['image3'] ==
-                                                                            null ||
-                                                                        _tempAnimalList[index]['image3'] ==
-                                                                            ""
-                                                                    ? ""
-                                                                    : _tempAnimalList[
-                                                                            index]
-                                                                        [
-                                                                        'image3'];
-                                                                callingInfo[
-                                                                    "image4"] = _tempAnimalList[index]['image4'] ==
-                                                                            null ||
-                                                                        _tempAnimalList[index]['image4'] ==
-                                                                            ""
-                                                                    ? ""
-                                                                    : _tempAnimalList[
-                                                                            index]
-                                                                        [
-                                                                        'image4'];
-                                                                callingInfo[
-                                                                        "dateOfSaving"] =
-                                                                    ReusableWidgets
-                                                                        .dateTimeToEpoch(
-                                                                            DateTime.now());
-                                                                callingInfo[
-                                                                        'isValidUser'] =
-                                                                    _tempAnimalList[
-                                                                            index]
-                                                                        [
-                                                                        'isValidUser'];
-                                                                callingInfo[
-                                                                        'extraInfo'] =
-                                                                    _tempAnimalList[index]
-                                                                            [
-                                                                            'extraInfo'] ??
-                                                                        {};
-
-                                                                if (_tempAnimalList[
-                                                                            index]
-                                                                        [
-                                                                        'userId'] !=
-                                                                    FirebaseAuth
-                                                                        .instance
-                                                                        .currentUser
-                                                                        .uid) {
-                                                                  FirebaseFirestore
-                                                                      .instance
-                                                                      .collection(
-                                                                          "callingInfo")
-                                                                      .doc(callingInfo[
-                                                                          'otherListId'])
-                                                                      .collection(
-                                                                          'interestedBuyers')
-                                                                      .doc(FirebaseAuth
-                                                                          .instance
-                                                                          .currentUser
-                                                                          .uid)
-                                                                      .set({
-                                                                    'userName':
-                                                                        widget
-                                                                            .userName,
-                                                                    'userMobileNumber':
-                                                                        widget
-                                                                            .userMobileNumber,
-                                                                    "userAddress": first
-                                                                            .addressLine ??
-                                                                        (first.adminArea +
-                                                                            ' ' +
-                                                                            first.postalCode +
-                                                                            ', ' +
-                                                                            first.countryName),
-                                                                    'userIdCurrent': FirebaseAuth
-                                                                        .instance
-                                                                        .currentUser
-                                                                        .uid,
-                                                                    'userIdOther':
-                                                                        _tempAnimalList[index]
-                                                                            [
-                                                                            'userId'],
-                                                                    'otherListId':
-                                                                        _tempAnimalList[index]
-                                                                            [
-                                                                            'uniqueId'],
-                                                                    'channel':
-                                                                        "call",
-                                                                    "dateOfSaving":
-                                                                        ReusableWidgets.dateTimeToEpoch(
-                                                                            DateTime.now())
-                                                                  }, SetOptions(merge: true));
-
-                                                                  FirebaseFirestore
-                                                                      .instance
-                                                                      .collection(
-                                                                          "myCallingInfo")
-                                                                      .doc(FirebaseAuth
-                                                                          .instance
-                                                                          .currentUser
-                                                                          .uid)
-                                                                      .collection(
-                                                                          'myCalls')
-                                                                      .doc(callingInfo[
-                                                                          'otherListId'])
-                                                                      .set(
-                                                                          callingInfo,
-                                                                          SetOptions(
-                                                                              merge: true));
-                                                                }
-
-                                                                return UrlLauncher
-                                                                    .launch(
-                                                                        'tel:+91 ${_tempAnimalList[index]['userMobileNumber']}');
-                                                              },
-                                                              icon: Icon(
-                                                                Icons.call,
-                                                                color: Colors
-                                                                    .white,
-                                                                size: 14,
-                                                              ),
-                                                              label: Text(
-                                                                  'call'.tr,
-                                                                  style: TextStyle(
-                                                                      color: Colors
-                                                                          .white,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .bold,
-                                                                      fontSize:
-                                                                          14))),
-                                                          SizedBox(
-                                                            width: 5,
-                                                          ),
-                                                          RaisedButton.icon(
-                                                              shape: RoundedRectangleBorder(
-                                                                  borderRadius:
-                                                                      BorderRadius.circular(
-                                                                          18.0),
-                                                                  side: BorderSide(
-                                                                      color:
-                                                                          darkGreenColor)),
-                                                              color:
-                                                                  darkGreenColor,
-                                                              onPressed:
-                                                                  () async {
-                                                                SharedPreferences
-                                                                    prefs =
-                                                                    await SharedPreferences
-                                                                        .getInstance();
-                                                                var addresses = await Geocoder
-                                                                    .local
-                                                                    .findAddressesFromCoordinates(Coordinates(
-                                                                        prefs.getDouble(
-                                                                            'latitude'),
-                                                                        prefs.getDouble(
-                                                                            'longitude')));
-                                                                var first =
-                                                                    addresses
-                                                                        .first;
-                                                                String
-                                                                    whatsappUrl =
-                                                                    '';
-                                                                callingInfo[
-                                                                        'userIdCurrent'] =
-                                                                    FirebaseAuth
-                                                                        .instance
-                                                                        .currentUser
-                                                                        .uid;
-                                                                callingInfo[
-                                                                        'userIdOther'] =
-                                                                    _tempAnimalList[
-                                                                            index]
-                                                                        [
-                                                                        'userId'];
-                                                                callingInfo[
-                                                                        'otherListId'] =
-                                                                    _tempAnimalList[
-                                                                            index]
-                                                                        [
-                                                                        'uniqueId'];
-                                                                callingInfo[
-                                                                        'channel'] =
-                                                                    "whatsapp";
-                                                                callingInfo[
-                                                                        'userAddress'] =
-                                                                    _tempAnimalList[
-                                                                            index]
-                                                                        [
-                                                                        'userAddress'];
-                                                                callingInfo[
-                                                                        "userAnimalDescription"] =
-                                                                    _tempAnimalList[
-                                                                            index]
-                                                                        [
-                                                                        'userAnimalDescription'];
-                                                                callingInfo[
-                                                                        "userAnimalType"] =
-                                                                    _tempAnimalList[index]
-                                                                            [
-                                                                            'userAnimalType'] ??
-                                                                        "";
-                                                                callingInfo[
-                                                                        "userAnimalTypeOther"] =
-                                                                    _tempAnimalList[index]
-                                                                            [
-                                                                            'userAnimalTypeOther'] ??
-                                                                        "";
-                                                                callingInfo[
-                                                                        "userAnimalAge"] =
-                                                                    _tempAnimalList[index]
-                                                                            [
-                                                                            'userAnimalAge'] ??
-                                                                        "";
-                                                                callingInfo[
-                                                                        "userAddress"] =
-                                                                    _tempAnimalList[
-                                                                            index]
-                                                                        [
-                                                                        'userAddress'];
-                                                                callingInfo[
-                                                                        "userName"] =
-                                                                    _tempAnimalList[
-                                                                            index]
-                                                                        [
-                                                                        'userName'];
-                                                                callingInfo[
-                                                                        "userAnimalPrice"] =
-                                                                    _tempAnimalList[index]
-                                                                            [
-                                                                            'userAnimalPrice'] ??
-                                                                        "0";
-                                                                callingInfo[
-                                                                        "userAnimalBreed"] =
-                                                                    _tempAnimalList[index]
-                                                                            [
-                                                                            'userAnimalBreed'] ??
-                                                                        "";
-                                                                callingInfo[
-                                                                        "userMobileNumber"] =
-                                                                    _tempAnimalList[
-                                                                            index]
-                                                                        [
-                                                                        'userMobileNumber'];
-                                                                callingInfo[
-                                                                        "userAnimalMilk"] =
-                                                                    _tempAnimalList[index]
-                                                                            [
-                                                                            'userAnimalMilk'] ??
-                                                                        "";
-                                                                callingInfo[
-                                                                        "userAnimalPregnancy"] =
-                                                                    _tempAnimalList[index]
-                                                                            [
-                                                                            'userAnimalPregnancy'] ??
-                                                                        "";
-                                                                callingInfo[
-                                                                    "image1"] = _tempAnimalList[index] ==
-                                                                            null ||
-                                                                        _tempAnimalList[index]['image1'] ==
-                                                                            ""
-                                                                    ? ""
-                                                                    : _tempAnimalList[
-                                                                            index]
-                                                                        [
-                                                                        'image1'];
-                                                                callingInfo[
-                                                                    "image2"] = _tempAnimalList[index]['image2'] ==
-                                                                            null ||
-                                                                        _tempAnimalList[index]['image2'] ==
-                                                                            ""
-                                                                    ? ""
-                                                                    : _tempAnimalList[
-                                                                            index]
-                                                                        [
-                                                                        'image2'];
-                                                                callingInfo[
-                                                                    "image3"] = _tempAnimalList[index]['image3'] ==
-                                                                            null ||
-                                                                        _tempAnimalList[index]['image3'] ==
-                                                                            ""
-                                                                    ? ""
-                                                                    : _tempAnimalList[
-                                                                            index]
-                                                                        [
-                                                                        'image3'];
-                                                                callingInfo[
-                                                                    "image4"] = _tempAnimalList[index]['image4'] ==
-                                                                            null ||
-                                                                        _tempAnimalList[index]['image4'] ==
-                                                                            ""
-                                                                    ? ""
-                                                                    : _tempAnimalList[
-                                                                            index]
-                                                                        [
-                                                                        'image4'];
-                                                                callingInfo[
-                                                                        "dateOfSaving"] =
-                                                                    ReusableWidgets
-                                                                        .dateTimeToEpoch(
-                                                                            DateTime.now());
-                                                                callingInfo[
-                                                                        'isValidUser'] =
-                                                                    _tempAnimalList[
-                                                                            index]
-                                                                        [
-                                                                        'isValidUser'];
-                                                                callingInfo[
-                                                                        'extraInfo'] =
-                                                                    _tempAnimalList[index]
-                                                                            [
-                                                                            'extraInfo'] ??
-                                                                        {};
-                                                                if (_tempAnimalList[
-                                                                            index]
-                                                                        [
-                                                                        'userId'] !=
-                                                                    FirebaseAuth
-                                                                        .instance
-                                                                        .currentUser
-                                                                        .uid) {
-                                                                  FirebaseFirestore
-                                                                      .instance
-                                                                      .collection(
-                                                                          "callingInfo")
-                                                                      .doc(callingInfo[
-                                                                          'otherListId'])
-                                                                      .collection(
-                                                                          'interestedBuyers')
-                                                                      .doc(FirebaseAuth
-                                                                          .instance
-                                                                          .currentUser
-                                                                          .uid)
-                                                                      .set({
-                                                                    'userName':
-                                                                        widget
-                                                                            .userName,
-                                                                    'userMobileNumber':
-                                                                        widget
-                                                                            .userMobileNumber,
-                                                                    "userAddress": first
-                                                                            .addressLine ??
-                                                                        (first.adminArea +
-                                                                            ' ' +
-                                                                            first.postalCode +
-                                                                            ', ' +
-                                                                            first.countryName),
-                                                                    'userIdCurrent': FirebaseAuth
-                                                                        .instance
-                                                                        .currentUser
-                                                                        .uid,
-                                                                    'userIdOther':
-                                                                        _tempAnimalList[index]
-                                                                            [
-                                                                            'userId'],
-                                                                    'otherListId':
-                                                                        _tempAnimalList[index]
-                                                                            [
-                                                                            'uniqueId'],
-                                                                    'channel':
-                                                                        "whatsapp",
-                                                                    "dateOfSaving":
-                                                                        ReusableWidgets.dateTimeToEpoch(
-                                                                            DateTime.now())
-                                                                  }, SetOptions(merge: true));
-
-                                                                  FirebaseFirestore
-                                                                      .instance
-                                                                      .collection(
-                                                                          "myCallingInfo")
-                                                                      .doc(FirebaseAuth
-                                                                          .instance
-                                                                          .currentUser
-                                                                          .uid)
-                                                                      .collection(
-                                                                          'myCalls')
-                                                                      .doc(callingInfo[
-                                                                          'otherListId'])
-                                                                      .set(
-                                                                          callingInfo,
-                                                                          SetOptions(
-                                                                              merge: true));
-                                                                }
-
-                                                                whatsappText =
-                                                                    'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${widget.userName}, ${prefs.getString('place')} \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
-                                                                whatsappUrl =
-                                                                    "https://api.whatsapp.com/send/?phone=+91 ${_tempAnimalList[index]['userMobileNumber']}&text=$whatsappText";
-                                                                await UrlLauncher.canLaunch(
-                                                                            whatsappUrl) !=
-                                                                        null
-                                                                    ? UrlLauncher.launch(
-                                                                        Uri.encodeFull(
-                                                                            whatsappUrl))
-                                                                    : ScaffoldMessenger.of(
-                                                                            context)
-                                                                        .showSnackBar(
-                                                                            SnackBar(
-                                                                        content:
-                                                                            Text('${_tempAnimalList[index]['userMobileNumber']} is not present in Whatsapp'),
-                                                                        duration:
-                                                                            Duration(milliseconds: 300),
-                                                                        padding:
-                                                                            EdgeInsets.symmetric(horizontal: 8),
-                                                                        behavior:
-                                                                            SnackBarBehavior.floating,
-                                                                        shape:
-                                                                            RoundedRectangleBorder(
-                                                                          borderRadius:
-                                                                              BorderRadius.circular(10.0),
-                                                                        ),
-                                                                      ));
-                                                              },
-                                                              icon: FaIcon(
-                                                                  FontAwesomeIcons
-                                                                      .whatsapp,
-                                                                  color: Colors
-                                                                      .white,
-                                                                  size: 14),
-                                                              label: Text(
-                                                                  'message'.tr,
-                                                                  style: TextStyle(
-                                                                      color: Colors
-                                                                          .white,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .bold,
-                                                                      fontSize:
-                                                                          14)))
-                                                        ]),
-                                                      )),
-                                                ],
-                                              ),
-                                            ),
-                                            _isLoading
-                                                ? Positioned(
-                                                    bottom: 0,
-                                                    child: Column(
-                                                      children: [
-                                                        SizedBox(height: 10),
-                                                        Center(
-                                                          child:
-                                                              CircularProgressIndicator(),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  )
-                                                : SizedBox.shrink(),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                    itemCount: _tempAnimalList.length),
-                              ],
-                            )
-                          : Stack(
-                              alignment: Alignment.bottomCenter,
-                              children: [
-                                ListView.builder(
-                                  key: ObjectKey(widget.animalInfo[0]),
-                                  padding: EdgeInsets.only(bottom: 60),
-                                  // controller: _scrollController,
-                                  physics: BouncingScrollPhysics(),
-                                  itemCount: widget.animalInfo.length,
-                                  itemBuilder: (context, index) {
-                                    // if (index >= widget.animalInfo.length) {
-                                    //   return CircularProgressIndicator();
-                                    // }
-
-                                    return Padding(
-                                        padding: const EdgeInsets.only(
-                                            left: 8.0, right: 8, top: 8),
-                                        child: Card(
-                                          key: Key(index.toString()),
-                                          shape: RoundedRectangleBorder(
+                                            ],
                                             borderRadius:
-                                                BorderRadius.circular(10.0),
+                                                BorderRadius.circular(8),
                                           ),
-                                          elevation: 5,
+                                          height: 80,
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Row(children: [
+                                              Image.asset(
+                                                  'assets/images/profile.jpg',
+                                                  width: 40,
+                                                  height: 40),
+                                              SizedBox(
+                                                width: 5,
+                                              ),
+                                              Expanded(
+                                                child: Text(
+                                                  widget.animalInfo[index]
+                                                      .userName,
+                                                  style: TextStyle(
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: Colors.black),
+                                                ),
+                                              ),
+                                              RaisedButton.icon(
+                                                  shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              18.0),
+                                                      side: BorderSide(
+                                                          color:
+                                                              darkSecondaryColor)),
+                                                  color: secondaryColor,
+                                                  onPressed: () async {
+                                                    SharedPreferences prefs =
+                                                        await SharedPreferences
+                                                            .getInstance();
+                                                    var addresses = await Geocoder
+                                                        .local
+                                                        .findAddressesFromCoordinates(
+                                                            Coordinates(
+                                                                prefs.getDouble(
+                                                                    'latitude'),
+                                                                prefs.getDouble(
+                                                                    'longitude')));
+                                                    var first = addresses.first;
+
+                                                    return UrlLauncher.launch(
+                                                        'tel:+91 ${widget.animalInfo[index].mobile}');
+                                                  },
+                                                  icon: Icon(
+                                                    Icons.call,
+                                                    color: Colors.white,
+                                                    size: 14,
+                                                  ),
+                                                  label: Text('call'.tr,
+                                                      style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 14))),
+                                              SizedBox(
+                                                width: 5,
+                                              ),
+                                              RaisedButton.icon(
+                                                  shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              18.0),
+                                                      side: BorderSide(
+                                                          color:
+                                                              darkGreenColor)),
+                                                  color: darkGreenColor,
+                                                  onPressed: () async {
+                                                    String whatsappUrl = '';
+                                                    SharedPreferences prefs =
+                                                        await SharedPreferences
+                                                            .getInstance();
+                                                    var addresses = await Geocoder
+                                                        .local
+                                                        .findAddressesFromCoordinates(
+                                                            Coordinates(
+                                                                prefs.getDouble(
+                                                                    'latitude'),
+                                                                prefs.getDouble(
+                                                                    'longitude')));
+                                                    var first = addresses.first;
+
+                                                    whatsappText =
+                                                        'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${widget.userName}, ${prefs.getString('district')} \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
+                                                    whatsappUrl =
+                                                        "https://api.whatsapp.com/send/?phone=+91 ${widget.animalInfo[index].mobile}&text=$whatsappText";
+                                                    await UrlLauncher.canLaunch(
+                                                                whatsappUrl) !=
+                                                            null
+                                                        ? UrlLauncher.launch(
+                                                            Uri.encodeFull(
+                                                                whatsappUrl))
+                                                        : ScaffoldMessenger.of(
+                                                                context)
+                                                            .showSnackBar(
+                                                                SnackBar(
+                                                            content: Text(
+                                                                '${widget.animalInfo[index].mobile} is not present in Whatsapp'),
+                                                            duration: Duration(
+                                                                milliseconds:
+                                                                    300),
+                                                            padding: EdgeInsets
+                                                                .symmetric(
+                                                                    horizontal:
+                                                                        8),
+                                                            behavior:
+                                                                SnackBarBehavior
+                                                                    .floating,
+                                                            shape:
+                                                                RoundedRectangleBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          10.0),
+                                                            ),
+                                                          ));
+                                                  },
+                                                  icon: FaIcon(
+                                                      FontAwesomeIcons.whatsapp,
+                                                      color: Colors.white,
+                                                      size: 14),
+                                                  label: Text('message'.tr,
+                                                      style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 14)))
+                                            ]),
+                                          )),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: AnimatedOpacity(
+                              opacity: _isCardVisible ? 1.0 : 0.0,
+                              duration: Duration(seconds: 3),
+                              child: Visibility(
+                                visible: _isCardVisible,
+                                child: Padding(
+                                  padding: EdgeInsets.all(10),
+                                  child: OpenContainer(
+                                    closedElevation: 0,
+                                    transitionDuration: Duration(seconds: 2),
+                                    openBuilder: (context, _) => AnimalInfoForm(
+                                      userMobileNumber: widget.userMobileNumber,
+                                      userName: widget.userName,
+                                    ),
+                                    closedShape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(10.0),
+                                      ),
+                                    ),
+                                    closedColor: Theme.of(context).primaryColor,
+                                    closedBuilder: (context, openContainer) =>
+                                        Container(
+                                      height: 220,
+                                      width: 150,
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(
+                                          left: 8.0,
+                                          right: 8,
+                                        ),
+                                        child: SingleChildScrollView(
                                           child: Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              _buildInfowidget(index),
-                                              _distanceTimeMethod(index),
-                                              _animalImageWidget(index),
-                                              _animalDescriptionMethod(index),
-                                              Container(
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.grey[100],
-                                                    boxShadow: [
-                                                      BoxShadow(
-                                                        color: Colors.grey,
-                                                        blurRadius: 1.0,
-                                                      ),
-                                                    ],
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8),
+                                              Align(
+                                                alignment:
+                                                    Alignment.bottomRight,
+                                                child: RawMaterialButton(
+                                                  onPressed: () => setState(() {
+                                                    _isCardVisible = false;
+                                                  }),
+                                                  elevation: 2.0,
+                                                  fillColor: Colors.white,
+                                                  child: Icon(
+                                                    Icons.close,
+                                                    size: 20.0,
+                                                    color: appPrimaryColor,
                                                   ),
-                                                  height: 80,
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            8.0),
-                                                    child: Row(children: [
-                                                      Image.asset(
-                                                          'assets/images/profile.jpg',
-                                                          width: 40,
-                                                          height: 40),
-                                                      SizedBox(
-                                                        width: 5,
-                                                      ),
-                                                      Expanded(
-                                                        child: Text(
-                                                          widget
-                                                              .animalInfo[index]
-                                                              .userName,
-                                                          style: TextStyle(
-                                                              fontSize: 15,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              color:
-                                                                  Colors.black),
-                                                        ),
-                                                      ),
-                                                      RaisedButton.icon(
-                                                          shape: RoundedRectangleBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          18.0),
-                                                              side: BorderSide(
-                                                                  color:
-                                                                      darkSecondaryColor)),
-                                                          color: secondaryColor,
-                                                          onPressed: () async {
-                                                            SharedPreferences
-                                                                prefs =
-                                                                await SharedPreferences
-                                                                    .getInstance();
-                                                            var addresses = await Geocoder
-                                                                .local
-                                                                .findAddressesFromCoordinates(Coordinates(
-                                                                    prefs.getDouble(
-                                                                        'latitude'),
-                                                                    prefs.getDouble(
-                                                                        'longitude')));
-                                                            var first =
-                                                                addresses.first;
-
-                                                            return UrlLauncher
-                                                                .launch(
-                                                                    'tel:+91 ${widget.animalInfo[index].mobile}');
-                                                          },
-                                                          icon: Icon(
-                                                            Icons.call,
-                                                            color: Colors.white,
-                                                            size: 14,
-                                                          ),
-                                                          label: Text('call'.tr,
-                                                              style: TextStyle(
-                                                                  color: Colors
-                                                                      .white,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                  fontSize:
-                                                                      14))),
-                                                      SizedBox(
-                                                        width: 5,
-                                                      ),
-                                                      RaisedButton.icon(
-                                                          shape: RoundedRectangleBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          18.0),
-                                                              side: BorderSide(
-                                                                  color:
-                                                                      darkGreenColor)),
-                                                          color: darkGreenColor,
-                                                          onPressed: () async {
-                                                            String whatsappUrl =
-                                                                '';
-                                                            SharedPreferences
-                                                                prefs =
-                                                                await SharedPreferences
-                                                                    .getInstance();
-                                                            var addresses = await Geocoder
-                                                                .local
-                                                                .findAddressesFromCoordinates(Coordinates(
-                                                                    prefs.getDouble(
-                                                                        'latitude'),
-                                                                    prefs.getDouble(
-                                                                        'longitude')));
-                                                            var first =
-                                                                addresses.first;
-
-                                                            whatsappText =
-                                                                'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${widget.userName}, ${prefs.getString('district')} \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
-                                                            whatsappUrl =
-                                                                "https://api.whatsapp.com/send/?phone=+91 ${widget.animalInfo[index].mobile}&text=$whatsappText";
-                                                            await UrlLauncher
-                                                                        .canLaunch(
-                                                                            whatsappUrl) !=
-                                                                    null
-                                                                ? UrlLauncher.launch(Uri
-                                                                    .encodeFull(
-                                                                        whatsappUrl))
-                                                                : ScaffoldMessenger.of(
-                                                                        context)
-                                                                    .showSnackBar(
-                                                                        SnackBar(
-                                                                    content: Text(
-                                                                        '${widget.animalInfo[index].mobile} is not present in Whatsapp'),
-                                                                    duration: Duration(
-                                                                        milliseconds:
-                                                                            300),
-                                                                    padding: EdgeInsets
-                                                                        .symmetric(
-                                                                            horizontal:
-                                                                                8),
-                                                                    behavior:
-                                                                        SnackBarBehavior
-                                                                            .floating,
-                                                                    shape:
-                                                                        RoundedRectangleBorder(
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              10.0),
-                                                                    ),
-                                                                  ));
-                                                          },
-                                                          icon: FaIcon(
-                                                              FontAwesomeIcons
-                                                                  .whatsapp,
-                                                              color:
-                                                                  Colors.white,
-                                                              size: 14),
-                                                          label: Text(
-                                                              'message'.tr,
-                                                              style: TextStyle(
-                                                                  color: Colors
-                                                                      .white,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                  fontSize:
-                                                                      14)))
-                                                    ]),
-                                                  )),
-                                            ],
-                                          ),
-                                        )
-                                        // ),
-                                        );
-                                  },
-                                ),
-                                Positioned(
-                                  bottom: 0,
-                                  right: 0,
-                                  child: AnimatedOpacity(
-                                    opacity: _isCardVisible ? 1.0 : 0.0,
-                                    duration: Duration(seconds: 3),
-                                    child: Visibility(
-                                      visible: _isCardVisible,
-                                      child: Padding(
-                                        padding: EdgeInsets.all(10),
-                                        child: OpenContainer(
-                                          closedElevation: 0,
-                                          transitionDuration:
-                                              Duration(seconds: 2),
-                                          openBuilder: (context, _) =>
-                                              AnimalInfoForm(
-                                            userMobileNumber:
-                                                widget.userMobileNumber,
-                                            userName: widget.userName,
-                                          ),
-                                          closedShape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.all(
-                                              Radius.circular(10.0),
-                                            ),
-                                          ),
-                                          closedColor:
-                                              Theme.of(context).primaryColor,
-                                          closedBuilder:
-                                              (context, openContainer) =>
-                                                  Container(
-                                            height: 220,
-                                            width: 150,
-                                            child: Padding(
-                                              padding: const EdgeInsets.only(
-                                                left: 8.0,
-                                                right: 8,
-                                              ),
-                                              child: SingleChildScrollView(
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Align(
-                                                      alignment:
-                                                          Alignment.bottomRight,
-                                                      child: RawMaterialButton(
-                                                        onPressed: () =>
-                                                            setState(() {
-                                                          _isVisible = true;
-                                                          _isCardVisible =
-                                                              false;
-                                                        }),
-                                                        elevation: 2.0,
-                                                        fillColor: Colors.white,
-                                                        child: Icon(
-                                                          Icons.close,
-                                                          size: 20.0,
-                                                          color:
-                                                              appPrimaryColor,
-                                                        ),
-                                                        shape: CircleBorder(),
-                                                        constraints:
-                                                            BoxConstraints(
-                                                                minWidth: 30,
-                                                                minHeight: 30),
-                                                      ),
-                                                    ),
-                                                    Padding(
-                                                      padding:
-                                                          const EdgeInsets.only(
-                                                              left: 12.0),
-                                                      child: Text(
-                                                        'कौन सा पशु खरीदना चाहते है ?',
-                                                        style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          fontSize: 22,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    SizedBox(
-                                                      width: double.infinity,
-                                                      child: RaisedButton(
-                                                        shape: OutlineInputBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        10)),
-                                                        color: Colors.white,
-                                                        onPressed: null,
-                                                        disabledColor:
-                                                            Colors.white,
-                                                        disabledTextColor:
-                                                            appPrimaryColor,
-                                                        child: Row(
-                                                          textDirection:
-                                                              TextDirection.rtl,
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceBetween,
-                                                          children: [
-                                                            Icon(
-                                                              Icons
-                                                                  .arrow_forward_ios_sharp,
-                                                              color:
-                                                                  appPrimaryColor,
-                                                            ),
-                                                            Text(
-                                                              'हमें बताये',
-                                                              style: TextStyle(
-                                                                color:
-                                                                    appPrimaryColor,
-                                                                fontSize: 20,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    )
-                                                  ],
+                                                  shape: CircleBorder(),
+                                                  constraints: BoxConstraints(
+                                                      minWidth: 30,
+                                                      minHeight: 30),
                                                 ),
                                               ),
-                                            ),
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    left: 12.0),
+                                                child: Text(
+                                                  'कौन सा पशु खरीदना चाहते है ?',
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 22,
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: double.infinity,
+                                                child: RaisedButton(
+                                                  shape: OutlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              10)),
+                                                  color: Colors.white,
+                                                  onPressed: null,
+                                                  disabledColor: Colors.white,
+                                                  disabledTextColor:
+                                                      appPrimaryColor,
+                                                  child: Row(
+                                                    textDirection:
+                                                        TextDirection.rtl,
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      Icon(
+                                                        Icons
+                                                            .arrow_forward_ios_sharp,
+                                                        color: appPrimaryColor,
+                                                      ),
+                                                      Text(
+                                                        'हमें बताये',
+                                                        style: TextStyle(
+                                                          color:
+                                                              appPrimaryColor,
+                                                          fontSize: 20,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              )
+                                            ],
                                           ),
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
-                                // ),
-                                _isLoading
-                                    ? Positioned(
-                                        bottom: 0,
-                                        child: Column(
-                                          children: [
-                                            SizedBox(height: 60),
-                                            Center(
-                                              child:
-                                                  CircularProgressIndicator(),
-                                            ),
-                                          ],
-                                        ),
-                                      )
-                                    : SizedBox.shrink(),
-                              ],
+                              ),
                             ),
+                          ),
+                        ],
+                      ),
                     ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -1634,8 +913,6 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                   Text('error_length_zipcode'
                                                       .tr));
                                             else {
-                                              _tempAnimalList.clear();
-
                                               try {
                                                 var address = await Geocoder
                                                     .local
@@ -1862,8 +1139,7 @@ class _BuyAnimalState extends State<BuyAnimal>
   }
 
   Padding _animalDescriptionMethod(int index) {
-    List _list =
-        _tempAnimalList.length != 0 ? _tempAnimalList : widget.animalInfo;
+    List _list = widget.animalInfo;
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -1878,11 +1154,12 @@ class _BuyAnimalState extends State<BuyAnimal>
   }
 
   Padding _animalImageWidget(int index) {
-    List _list =
-        _tempAnimalList.length != 0 ? _tempAnimalList : widget.animalInfo;
+    List _list = widget.animalInfo;
 
-    List<String> _images = [];
-    _list[index].files.forEach((elem) => _images.add(elem.fileUrl));
+    List<String> _images = ['assets/images/AppIcon.jpg'];
+    // _list[index]
+    //     .files
+    //     .forEach((elem) => _images.addIf(elem.fileName != null, elem.fileName));
 
     return Padding(
       padding: EdgeInsets.only(left: 8.0, right: 8, bottom: 4),
@@ -1916,28 +1193,29 @@ class _BuyAnimalState extends State<BuyAnimal>
                         ),
                         items: _images.map((i) {
                           return InteractiveViewer(
-                            boundaryMargin: const EdgeInsets.all(20.0),
-                            minScale: 0.1,
-                            maxScale: 1.6,
-                            child: Image.network(
-                              '$i',
-                              loadingBuilder: (BuildContext context,
-                                  Widget child,
-                                  ImageChunkEvent loadingProgress) {
-                                if (loadingProgress == null) return child;
-                                return Center(
-                                  child: CircularProgressIndicator(
-                                    value: loadingProgress.expectedTotalBytes !=
-                                            null
-                                        ? loadingProgress
-                                                .cumulativeBytesLoaded /
-                                            loadingProgress.expectedTotalBytes
-                                        : null,
-                                  ),
-                                );
-                              },
-                            ),
-                          );
+                              boundaryMargin: const EdgeInsets.all(20.0),
+                              minScale: 0.1,
+                              maxScale: 1.6,
+                              child: Image.asset('$i')
+                              // Image.network(
+                              //   '$i',
+                              //   loadingBuilder: (BuildContext context,
+                              //       Widget child,
+                              //       ImageChunkEvent loadingProgress) {
+                              //     if (loadingProgress == null) return child;
+                              //     return Center(
+                              //       child: CircularProgressIndicator(
+                              //         value: loadingProgress.expectedTotalBytes !=
+                              //                 null
+                              //             ? loadingProgress
+                              //                     .cumulativeBytesLoaded /
+                              //                 loadingProgress.expectedTotalBytes
+                              //             : null,
+                              //       ),
+                              //     );
+                              //   },
+                              // ),
+                              );
                         }).toList(),
                       ),
                       Row(
@@ -1968,7 +1246,8 @@ class _BuyAnimalState extends State<BuyAnimal>
               decoration: BoxDecoration(
                 image: DecorationImage(
                   fit: BoxFit.cover,
-                  image: NetworkImage(_images[0]),
+                  image: AssetImage(_images[0]),
+                  // image: NetworkImage(_images[0]),
                 ),
                 borderRadius: BorderRadius.all(Radius.circular(8.0)),
                 color: Colors.redAccent,
@@ -2038,8 +1317,7 @@ class _BuyAnimalState extends State<BuyAnimal>
 
   _distanceTimeMethod(int index) {
     String val = '';
-    List _list =
-        _tempAnimalList.length != 0 ? _tempAnimalList : widget.animalInfo;
+    List _list = widget.animalInfo;
 
     return StatefulBuilder(builder: (context, setState1) {
       getPositionBasedOnLatLong(_list[index].latitude, _list[index].longitude)
@@ -2286,180 +1564,155 @@ class _BuyAnimalState extends State<BuyAnimal>
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               RaisedButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      _filterDropDownMap.remove('filter1');
-                                      _filterDropDownMap.remove('filter2');
-                                      _tempAnimalList = _resetFilterData;
-                                      _value = null;
-                                      _filterAnimalType = null;
-                                    });
+                                onPressed: () async {
+                                  SharedPreferences prefs =
+                                      await SharedPreferences.getInstance();
+                                  bool status;
+                                  pr.show();
 
-                                    Navigator.pop(context);
-                                  },
-                                  child: Text('कैंसिल',
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold))),
-                              RaisedButton(
-                                  onPressed: () {
-                                    List _data = [];
-                                    (_tempAnimalList.length == 0
-                                            ? widget.animalInfo
-                                            : _tempAnimalList)
-                                        .forEach((element) {
-                                      if (_filterDropDownMap == null ||
-                                          _filterDropDownMap == {}) {
-                                        _data.add(_infoList);
-                                      } else if ((_filterDropDownMap[
-                                                      'filter1'] !=
-                                                  null &&
-                                              _filterDropDownMap['filter1']
-                                                  .isNotEmpty) &&
-                                          (_filterDropDownMap['filter2'] !=
-                                              null)) {
-                                        switch (_filterDropDownMap['filter2']) {
-                                          case 0:
-                                            _data.addIf(
-                                                _filterDropDownMap['filter1'] ==
-                                                        element[
-                                                            'userAnimalType'] &&
-                                                    ((double.parse(_milkValueCheck(
-                                                                element[
-                                                                    'userAnimalMilk'])) >=
-                                                            0.0) &&
-                                                        (double.parse(
-                                                                _milkValueCheck(
-                                                                    element[
-                                                                        'userAnimalMilk'])) <=
-                                                            10.0)),
-                                                element);
-
-                                            break;
-                                          case 1:
-                                            _data.addIf(
-                                                _filterDropDownMap['filter1'] ==
-                                                        element[
-                                                            'userAnimalType'] &&
-                                                    ((double.parse(_milkValueCheck(
-                                                                element[
-                                                                    'userAnimalMilk'])) >
-                                                            10.0) &&
-                                                        (double.parse(
-                                                                _milkValueCheck(
-                                                                    element[
-                                                                        'userAnimalMilk'])) <=
-                                                            15.0)),
-                                                element);
-                                            break;
-                                          case 2:
-                                            _data.addIf(
-                                                _filterDropDownMap['filter1'] ==
-                                                        element[
-                                                            'userAnimalType'] &&
-                                                    ((double.parse(_milkValueCheck(
-                                                                element[
-                                                                    'userAnimalMilk'])) >
-                                                            15.0) &&
-                                                        (double.parse(
-                                                                _milkValueCheck(
-                                                                    element[
-                                                                        'userAnimalMilk'])) <=
-                                                            20.0)),
-                                                element);
-                                            break;
-                                          case 3:
-                                            _data.addIf(
-                                                _filterDropDownMap['filter1'] ==
-                                                        element[
-                                                            'userAnimalType'] &&
-                                                    (double.parse(_milkValueCheck(
-                                                            element[
-                                                                'userAnimalMilk'])) >
-                                                        20.0),
-                                                element);
-                                            break;
-                                        }
-                                      } else if (_filterDropDownMap[
-                                                  'filter1'] !=
-                                              null &&
-                                          _filterDropDownMap['filter1']
-                                              .isNotEmpty) {
-                                        _data.addIf(
-                                            _filterDropDownMap['filter1'] ==
-                                                element['userAnimalType'],
-                                            element);
-                                      } else if (_filterDropDownMap[
-                                              'filter2'] !=
-                                          null) {
-                                        switch (_filterDropDownMap['filter2']) {
-                                          case 0:
-                                            _data.addIf(
-                                                (double.parse(_milkValueCheck(
-                                                            element[
-                                                                'userAnimalMilk'])) >=
-                                                        0.0) &&
-                                                    (double.parse(_milkValueCheck(
-                                                            element[
-                                                                'userAnimalMilk'])) <=
-                                                        10.0),
-                                                element);
-
-                                            break;
-                                          case 1:
-                                            _data.addIf(
-                                                (double.parse(_milkValueCheck(
-                                                            element[
-                                                                'userAnimalMilk'])) >
-                                                        10.0) &&
-                                                    (double.parse(_milkValueCheck(
-                                                            element[
-                                                                'userAnimalMilk'])) <=
-                                                        15.0),
-                                                element);
-                                            break;
-                                          case 2:
-                                            _data.addIf(
-                                                (double.parse(_milkValueCheck(
-                                                            element[
-                                                                'userAnimalMilk'])) >
-                                                        15.0) &&
-                                                    (double.parse(_milkValueCheck(
-                                                            element[
-                                                                'userAnimalMilk'])) <=
-                                                        20.0),
-                                                element);
-                                            break;
-                                          case 3:
-                                            _data.addIf(
-                                                double.parse(_milkValueCheck(
-                                                        element[
-                                                            'userAnimalMilk'])) >
-                                                    20.0,
-                                                element);
-                                            break;
-                                        }
-                                      }
-                                    });
-                                    setState(() {
-                                      // _resetFilterData = _tempAnimalList;
-                                      _tempAnimalList = _data;
-                                      // _tempAnimalList.sort((a, b) =>
-                                      //     a['userAnimalMilk']
-                                      //         .compareTo(b['userAnimalMilk']));
-                                    });
-
-                                    Navigator.pop(context);
-                                    if (_tempAnimalList.length == 0) {
-                                      Flushbar(
-                                        message: "no_animal_present".tr,
-                                        duration: Duration(seconds: 2),
-                                      )..show(context);
-
+                                  if (ReusableWidgets.isTokenExpired(
+                                      prefs.getInt('expires') ?? 0)) {
+                                    status = await refreshTokenController
+                                        .getRefreshToken(
+                                            refresh: prefs.getString(
+                                                    'refreshToken') ??
+                                                '');
+                                    if (status) {
                                       setState(() {
-                                        _tempAnimalList = _resetFilterData;
+                                        prefs.setString(
+                                            'accessToken',
+                                            refreshTokenController
+                                                .accessToken.value);
+                                        prefs.setString(
+                                            'refreshToken',
+                                            refreshTokenController
+                                                .refreshToken.value);
+                                        prefs.setInt(
+                                            'expires',
+                                            refreshTokenController
+                                                .expires.value);
                                       });
+                                    } else {
+                                      ReusableWidgets.showDialogBox(
+                                          context,
+                                          'warning'.tr,
+                                          Text('Error getting token'));
                                     }
+                                  }
+
+                                  BuyAnimalModel data =
+                                      await buyAnimalController.getAnimal(
+                                    latitude: _latitude,
+                                    longitude: _longitude,
+                                    animalType: null,
+                                    minMilk: null,
+                                    maxMilk: null,
+                                    page: 1,
+                                    accessToken:
+                                        prefs.getString('accessToken') ?? '',
+                                  );
+
+                                  setState(() {
+                                    _filterDropDownMap.remove('filter1');
+                                    _filterDropDownMap.remove('filter2');
+                                    _value = _filterAnimalType =
+                                        animalType = minMilk = maxMilk = null;
+                                    widget.animalInfo = data.result;
+                                    prefs.setInt('page', data.page);
+                                  });
+
+                                  pr.hide().then(
+                                        (value) => Navigator.of(context).pop(),
+                                      );
+                                },
+                                child: Text(
+                                  'कैंसिल',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              RaisedButton(
+                                  onPressed: () async {
+                                    SharedPreferences prefs =
+                                        await SharedPreferences.getInstance();
+                                    pr.show();
+                                    int _minMilk, _maxMilk;
+                                    List<String> _getMinMaxMilk = [];
+                                    bool status;
+                                    if (_filterDropDownMap
+                                        .containsKey('filter2')) {
+                                      if (_filterDropDownMap['filter2'] == 3) {
+                                        _getMinMaxMilk = filterMilkValue[
+                                                _filterDropDownMap['filter2']]
+                                            .split(' ');
+                                        _minMilk = 0;
+                                        _maxMilk = int.parse(_getMinMaxMilk[1]);
+                                      } else {
+                                        _getMinMaxMilk = filterMilkValue[
+                                                _filterDropDownMap['filter2']]
+                                            .split('-');
+                                        _minMilk = int.parse(_getMinMaxMilk[0]);
+                                        _maxMilk = int.parse(
+                                            _getMinMaxMilk[1].split(' ')[0]);
+                                      }
+                                    }
+
+                                    if (ReusableWidgets.isTokenExpired(
+                                        prefs.getInt('expires') ?? 0)) {
+                                      status = await refreshTokenController
+                                          .getRefreshToken(
+                                              refresh: prefs.getString(
+                                                      'refreshToken') ??
+                                                  '');
+                                      if (status) {
+                                        setState(() {
+                                          prefs.setString(
+                                              'accessToken',
+                                              refreshTokenController
+                                                  .accessToken.value);
+                                          prefs.setString(
+                                              'refreshToken',
+                                              refreshTokenController
+                                                  .refreshToken.value);
+                                          prefs.setInt(
+                                              'expires',
+                                              refreshTokenController
+                                                  .expires.value);
+                                        });
+                                      } else {
+                                        ReusableWidgets.showDialogBox(
+                                            context,
+                                            'warning'.tr,
+                                            Text('Error getting token'));
+                                      }
+                                    }
+
+                                    BuyAnimalModel data =
+                                        await buyAnimalController.getAnimal(
+                                      latitude: _latitude,
+                                      longitude: _longitude,
+                                      animalType: animalTypeMapping[
+                                          _filterDropDownMap['filter1']],
+                                      minMilk: minMilk,
+                                      maxMilk: maxMilk,
+                                      page: 1,
+                                      accessToken:
+                                          prefs.getString('accessToken') ?? '',
+                                    );
+
+                                    setState(() {
+                                      widget.animalInfo = data.result;
+                                      prefs.setInt('page', data.page);
+                                      minMilk = _minMilk;
+                                      maxMilk = _maxMilk;
+                                      animalType = animalTypeMapping[
+                                          _filterDropDownMap['filter1']];
+                                    });
+                                    pr.hide().then(
+                                          (value) =>
+                                              Navigator.of(context).pop(),
+                                        );
                                   },
                                   child: Text('ओके',
                                       style: TextStyle(
@@ -2474,9 +1727,5 @@ class _BuyAnimalState extends State<BuyAnimal>
                 )
               ],
             ));
-  }
-
-  _milkValueCheck(milk) {
-    return (milk == null || milk == "") ? '0' : milk;
   }
 }
