@@ -131,7 +131,7 @@ class ReusableWidgets {
     return '${duration + ' ' + suffix}';
   }
 
-  static String removeEnglisgDataFromName(String str) {
+  static String removeEnglishDataFromName(String str) {
     List<String> x = str.split(' (')[0].split(' ');
     String str1 = x.length > 2 ? x[0] + ' ' + x[1] : x.join(' ');
 

@@ -6,6 +6,7 @@ import 'package:another_flushbar/flushbar.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:pashusansaar/buy_animal/buy_animal_model.dart';
 import 'package:pashusansaar/refresh_token/refresh_token_controller.dart';
+import 'package:pashusansaar/seller_contact/seller_contact_controller.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/constants.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
@@ -66,7 +67,8 @@ class _BuyAnimalState extends State<BuyAnimal>
       _page,
       animalType,
       minMilk,
-      maxMilk;
+      maxMilk,
+      _distance;
   Map<String, dynamic> _filterDropDownMap = {};
   ProgressDialog pr;
   double _latitude = 0.0, _longitude = 0.0;
@@ -83,6 +85,8 @@ class _BuyAnimalState extends State<BuyAnimal>
   ScrollController _scrollController =
       ScrollController(keepScrollOffset: false);
   bool _isCardVisible = false;
+  final SellerContactController sellerContactController =
+      Get.put(SellerContactController());
 
   File fileUrl;
   final BuyAnimalController buyAnimalController =
@@ -141,6 +145,7 @@ class _BuyAnimalState extends State<BuyAnimal>
         animalType: animalType,
         minMilk: minMilk,
         maxMilk: maxMilk,
+        distance: _distance ?? 50000,
         page: _page,
         accessToken: prefs.getString('accessToken') ?? '',
       );
@@ -334,7 +339,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                 : TextSpan(
                     text: _list[index].animalBreed == 'not_known'.tr
                         ? ""
-                        : ReusableWidgets.removeEnglisgDataFromName(
+                        : ReusableWidgets.removeEnglishDataFromName(
                             _list[index].animalBreed),
                     style: TextStyle(
                         color: Colors.grey[700],
@@ -598,114 +603,166 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                 ),
                                               ),
                                               RaisedButton.icon(
-                                                  shape: RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              18.0),
-                                                      side: BorderSide(
-                                                          color:
-                                                              darkSecondaryColor)),
-                                                  color: secondaryColor,
-                                                  onPressed: () async {
-                                                    SharedPreferences prefs =
-                                                        await SharedPreferences
-                                                            .getInstance();
-                                                    var addresses = await Geocoder
-                                                        .local
-                                                        .findAddressesFromCoordinates(
-                                                            Coordinates(
-                                                                prefs.getDouble(
-                                                                    'latitude'),
-                                                                prefs.getDouble(
-                                                                    'longitude')));
-                                                    var first = addresses.first;
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            18.0),
+                                                    side: BorderSide(
+                                                        color:
+                                                            darkSecondaryColor)),
+                                                color: secondaryColor,
+                                                onPressed: () async {
+                                                  SharedPreferences prefs =
+                                                      await SharedPreferences
+                                                          .getInstance();
+                                                  var addresses = await Geocoder
+                                                      .local
+                                                      .findAddressesFromCoordinates(
+                                                          Coordinates(
+                                                              prefs.getDouble(
+                                                                  'latitude'),
+                                                              prefs.getDouble(
+                                                                  'longitude')));
+                                                  var first = addresses.first;
 
-                                                    return UrlLauncher.launch(
-                                                        'tel:+91 ${widget.animalInfo[index].mobile}');
-                                                  },
-                                                  icon: Icon(
-                                                    Icons.call,
-                                                    color: Colors.white,
-                                                    size: 14,
-                                                  ),
-                                                  label: Text('call'.tr,
-                                                      style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          fontSize: 14))),
+                                                  int
+                                                      myNum =
+                                                      await sellerContactController
+                                                          .getSellerContact(
+                                                              animalId: widget
+                                                                  .animalInfo[
+                                                                      index]
+                                                                  .sId,
+                                                              userId: prefs
+                                                                  .getString(
+                                                                      'userId'),
+                                                              token: prefs
+                                                                  .getString(
+                                                                      'accessToken'),
+                                                              channel: [
+                                                        {
+                                                          "contactMedium":
+                                                              "Call"
+                                                        }
+                                                      ]);
+
+                                                  print(
+                                                      'userId is ${prefs.getString('userId')}');
+                                                  print(
+                                                      'token is ${prefs.getString('accessToken')}');
+
+                                                  return UrlLauncher.launch(
+                                                      'tel:+91 $myNum');
+                                                },
+                                                icon: Icon(
+                                                  Icons.call,
+                                                  color: Colors.white,
+                                                  size: 14,
+                                                ),
+                                                label: Text(
+                                                  'call'.tr,
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 14),
+                                                ),
+                                              ),
                                               SizedBox(
                                                 width: 5,
                                               ),
                                               RaisedButton.icon(
-                                                  shape: RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              18.0),
-                                                      side: BorderSide(
-                                                          color:
-                                                              darkGreenColor)),
-                                                  color: darkGreenColor,
-                                                  onPressed: () async {
-                                                    String whatsappUrl = '';
-                                                    SharedPreferences prefs =
-                                                        await SharedPreferences
-                                                            .getInstance();
-                                                    var addresses = await Geocoder
-                                                        .local
-                                                        .findAddressesFromCoordinates(
-                                                            Coordinates(
-                                                                prefs.getDouble(
-                                                                    'latitude'),
-                                                                prefs.getDouble(
-                                                                    'longitude')));
-                                                    var first = addresses.first;
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            18.0),
+                                                    side: BorderSide(
+                                                        color: darkGreenColor)),
+                                                color: darkGreenColor,
+                                                onPressed: () async {
+                                                  String whatsappUrl = '';
+                                                  SharedPreferences prefs =
+                                                      await SharedPreferences
+                                                          .getInstance();
+                                                  var addresses = await Geocoder
+                                                      .local
+                                                      .findAddressesFromCoordinates(
+                                                          Coordinates(
+                                                              prefs.getDouble(
+                                                                  'latitude'),
+                                                              prefs.getDouble(
+                                                                  'longitude')));
+                                                  var first = addresses.first;
 
-                                                    whatsappText =
-                                                        'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${widget.userName}, ${prefs.getString('district')} \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
-                                                    whatsappUrl =
-                                                        "https://api.whatsapp.com/send/?phone=+91 ${widget.animalInfo[index].mobile}&text=$whatsappText";
-                                                    await UrlLauncher.canLaunch(
-                                                                whatsappUrl) !=
-                                                            null
-                                                        ? UrlLauncher.launch(
-                                                            Uri.encodeFull(
-                                                                whatsappUrl))
-                                                        : ScaffoldMessenger.of(
-                                                                context)
-                                                            .showSnackBar(
-                                                                SnackBar(
-                                                            content: Text(
-                                                                '${widget.animalInfo[index].mobile} is not present in Whatsapp'),
-                                                            duration: Duration(
-                                                                milliseconds:
-                                                                    300),
-                                                            padding: EdgeInsets
-                                                                .symmetric(
-                                                                    horizontal:
-                                                                        8),
-                                                            behavior:
-                                                                SnackBarBehavior
-                                                                    .floating,
-                                                            shape:
-                                                                RoundedRectangleBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          10.0),
-                                                            ),
-                                                          ));
-                                                  },
-                                                  icon: FaIcon(
-                                                      FontAwesomeIcons.whatsapp,
-                                                      color: Colors.white,
-                                                      size: 14),
-                                                  label: Text('message'.tr,
-                                                      style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          fontSize: 14)))
+                                                  int
+                                                      myNum =
+                                                      await sellerContactController
+                                                          .getSellerContact(
+                                                              animalId: widget
+                                                                  .animalInfo[
+                                                                      index]
+                                                                  .sId,
+                                                              userId: prefs
+                                                                  .getString(
+                                                                      'userId'),
+                                                              token: prefs
+                                                                  .getString(
+                                                                      'accessToken'),
+                                                              channel: [
+                                                        {
+                                                          "contactMedium":
+                                                              "Whatsapp"
+                                                        }
+                                                      ]);
+
+                                                  whatsappText =
+                                                      'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${widget.userName}, ${prefs.getString('district')} \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
+                                                  whatsappUrl =
+                                                      "https://api.whatsapp.com/send/?phone=+91 $myNum &text=$whatsappText";
+                                                  await UrlLauncher.canLaunch(
+                                                              whatsappUrl) !=
+                                                          null
+                                                      ? UrlLauncher.launch(
+                                                          Uri.encodeFull(
+                                                              whatsappUrl))
+                                                      : ScaffoldMessenger.of(
+                                                              context)
+                                                          .showSnackBar(
+                                                              SnackBar(
+                                                          content: Text(
+                                                              '$myNum is not present in Whatsapp'),
+                                                          duration: Duration(
+                                                              milliseconds:
+                                                                  300),
+                                                          padding: EdgeInsets
+                                                              .symmetric(
+                                                                  horizontal:
+                                                                      8),
+                                                          behavior:
+                                                              SnackBarBehavior
+                                                                  .floating,
+                                                          shape:
+                                                              RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10.0),
+                                                          ),
+                                                        ));
+                                                },
+                                                icon: FaIcon(
+                                                    FontAwesomeIcons.whatsapp,
+                                                    color: Colors.white,
+                                                    size: 14),
+                                                label: Text(
+                                                  'message'.tr,
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
+                                              ),
                                             ]),
                                           )),
                                     ],
@@ -784,43 +841,43 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                 ),
                                               ),
                                               SizedBox(
-                                                width: double.infinity,
-                                                child: RaisedButton(
-                                                  shape: OutlineInputBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              10)),
-                                                  color: Colors.white,
-                                                  onPressed: null,
-                                                  disabledColor: Colors.white,
-                                                  disabledTextColor:
-                                                      appPrimaryColor,
-                                                  child: Row(
-                                                    textDirection:
-                                                        TextDirection.rtl,
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      Icon(
-                                                        Icons
-                                                            .arrow_forward_ios_sharp,
-                                                        color: appPrimaryColor,
-                                                      ),
-                                                      Text(
-                                                        'हमें बताये',
-                                                        style: TextStyle(
-                                                          color:
-                                                              appPrimaryColor,
-                                                          fontSize: 20,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              )
+                                                  width: double.infinity,
+                                                  child: RaisedButton(
+                                                    shape: OutlineInputBorder(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(10)),
+                                                    color: Colors.white,
+                                                    onPressed: null,
+                                                    disabledColor: Colors.white,
+                                                    disabledTextColor:
+                                                        appPrimaryColor,
+                                                    child: Row(
+                                                        textDirection:
+                                                            TextDirection.rtl,
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          Icon(
+                                                            Icons
+                                                                .arrow_forward_ios_sharp,
+                                                            color:
+                                                                appPrimaryColor,
+                                                          ),
+                                                          Text(
+                                                            'हमें बताये',
+                                                            style: TextStyle(
+                                                              color:
+                                                                  appPrimaryColor,
+                                                              fontSize: 20,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                            ),
+                                                          ),
+                                                        ]),
+                                                  )),
                                             ],
                                           ),
                                         ),
@@ -1074,21 +1131,21 @@ class _BuyAnimalState extends State<BuyAnimal>
         }
       }
 
-      List data = await buyAnimalController.getAnimal(
-        latitude: 40.1,
-        longitude: -97.1,
-        // latitude: first.coordinates.latitude,
-        // longitude: first.coordinates.longitude,
+      BuyAnimalModel data = await buyAnimalController.getAnimal(
+        latitude: first.coordinates.latitude,
+        longitude: first.coordinates.longitude,
         distance: _radiusData * 1000,
-        animalType: null,
-        minMilk: null,
-        maxMilk: null,
+        animalType: animalType,
+        minMilk: minMilk,
+        maxMilk: maxMilk,
         page: 1,
         accessToken: prefs.getString('accessToken') ?? '',
       );
 
       setState(() {
-        widget.animalInfo = data;
+        widget.animalInfo = data.result;
+        prefs.setInt('page', data.page);
+        _distance = _radiusData * 1000;
       });
 
       pr.hide();
