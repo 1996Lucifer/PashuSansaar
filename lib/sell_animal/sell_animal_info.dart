@@ -82,8 +82,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
     }
 
     List data = await myAnimalListController.getAnimalList(
-       userId: prefs.getString('userId'),
-      //userId: "60cb37f83ae6298e527a58e1",
+      userId: prefs.getString('userId'),
       token: prefs.getString('accessToken'),
       page: 1,
     );
@@ -481,12 +480,12 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
         ),
       );
 
-  _openAddEntryDialog(int index) {
+  _openAddEntryDialog(_list) {
     Navigator.of(context).push(new MaterialPageRoute<Null>(
         builder: (BuildContext context) {
           return RemoveAnimal(
-              listId: widget.animalInfo[index]['uniqueId'],
-              price: widget.animalInfo[index]['animalInfo']['animalPrice']);
+              listId: _list.sId,
+              price: _list.animalPrice.toString());
         },
         fullscreenDialog: true));
   }
@@ -694,52 +693,103 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
         ),
       );
 
-  showRemoveAnimalDialog(index) {
+
+  showRemoveAnimalDialog(_list) {
     return showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-              title: Text('warning'.tr),
-              content: Text('remove_animal_warning_text'.tr),
-              actions: <Widget>[
-                RaisedButton(
-                    child: Text(
-                      'no'.tr,
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16),
-                    ),
-                    onPressed: () => Navigator.of(context).pop()),
-                RaisedButton(
-                    child: Text(
-                      'yes'.tr,
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16),
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      FirebaseFirestore.instance
-                          .collection('callingInfo')
-                          .doc(widget.animalInfo[index]['uniqueId'])
-                          .collection('interestedBuyers')
-                          .orderBy('dateOfSaving')
-                          .limit(1)
-                          .get()
-                          .then((value) {
-                        if (value.docs.length == 0) {
-                          _showPriceDialog(index);
-                        } else {
-                          _openAddEntryDialog(index);
-                        }
-                      });
-                    }),
-              ]);
-        });
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('warning'.tr),
+          content: Text('remove_animal_warning_text'.tr),
+          actions: <Widget>[
+            RaisedButton(
+                child: Text(
+                  'no'.tr,
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16),
+                ),
+                onPressed: () => Navigator.of(context).pop()),
+            RaisedButton(
+              child: Text(
+                'yes'.tr,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _openAddEntryDialog(_list);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }
+
+
+
+
+
+/////<<<<<<<<<<<< previous dialog box >>>>>>>>>>>>>>>
+
+
+
+//   showRemoveAnimalDialog(index) {
+//     return showDialog(
+//       context: context,
+//       builder: (context) {
+//         return AlertDialog(
+//           title: Text('warning'.tr),
+//           content: Text('remove_animal_warning_text'.tr),
+//           actions: <Widget>[
+//             RaisedButton(
+//                 child: Text(
+//                   'no'.tr,
+//                   style: TextStyle(
+//                       color: Colors.white,
+//                       fontWeight: FontWeight.bold,
+//                       fontSize: 16),
+//                 ),
+//                 onPressed: () => Navigator.of(context).pop()),
+//             RaisedButton(
+//               child: Text(
+//                 'yes'.tr,
+//                 style: TextStyle(
+//                     color: Colors.white,
+//                     fontWeight: FontWeight.bold,
+//                     fontSize: 16),
+//               ),
+//               onPressed: () {
+//                 Navigator.of(context).pop();
+//                 FirebaseFirestore.instance
+//                     .collection('callingInfo')
+//                     .doc(widget.animalInfo[index]['uniqueId'])
+//                     .collection('interestedBuyers')
+//                     .orderBy('dateOfSaving')
+//                     .limit(1)
+//                     .get()
+//                     .then(
+//                   (value) {
+//                     if (value.docs.length == 0) {
+//                       _showPriceDialog(index);
+//                     } else {
+//                       _openAddEntryDialog(index);
+//                     }
+//                   },
+//                 );
+//               },
+//             ),
+//           ],
+//         );
+//       },
+//     );
+//   }
+// }
 
 //////////////////// Previous Build ???????????????
 

@@ -1525,7 +1525,9 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                                 token: prefs.getString('accessToken'),
                                                                 channel: [{"contactMedium": "Call"}]);
 
-
+                                                            print('animal id is ${widget.animalInfo[index].sId}');
+                                                            print('userId is ${prefs.getString('userId')}');
+                                                            print('token is ${prefs.getString('accessToken')}');
 
                                                             return UrlLauncher
                                                                 .launch(

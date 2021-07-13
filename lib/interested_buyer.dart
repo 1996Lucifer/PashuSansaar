@@ -66,10 +66,6 @@ class _InterestedBuyerState extends State<InterestedBuyer> {
       page: 1,
     );
 
-    print('user id is: ${prefs.getString('userId')}');
-    print('animal id is: ${widget.listId}');
-    print('token id is: ${prefs.getString('accessToken')}');
-
     setState(() {
       interestedBuyers = data;
     });
@@ -236,105 +232,215 @@ class _InterestedBuyerState extends State<InterestedBuyer> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     return Scaffold(
-        backgroundColor: Colors.grey[100],
-        appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),
-        body: SingleChildScrollView(
-          child: widget.animalInfo == []
-              ? Center(
-                  child: Text(
-                    'आपका कोई पशु दर्ज़ नहीं है',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                )
-              : Column(
-                  children: <Widget>[
-                    Container(
-                      height: 210,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Card(
-                          // key: Key(
-                          //     widget.animalInfo[widget.index]['uniqueId']),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                          elevation: 5,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              _buildBreedTypeWidget(
-                                  widget.animalInfo[widget.index]),
-                              _buildImageDescriptionWidget(
-                                  width, widget.animalInfo[widget.index]),
-                            ],
-                          ),
+      backgroundColor: Colors.grey[100],
+      appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),
+      body: SingleChildScrollView(
+        child: widget.animalInfo == []
+            ? Center(
+                child: Text(
+                  'आपका कोई पशु दर्ज़ नहीं है',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              )
+            : Column(
+                children: <Widget>[
+                  Container(
+                    height: 210,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Card(
+                        // key: Key(
+                        //     widget.animalInfo[widget.index]['uniqueId']),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        elevation: 5,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _buildBreedTypeWidget(
+                                widget.animalInfo[widget.index]),
+                            _buildImageDescriptionWidget(
+                                width, widget.animalInfo[widget.index]),
+                          ],
                         ),
                       ),
                     ),
-                    Text('इच्छुक खरीदार की सूचि',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold)),
-                    Container(
-                      height: MediaQuery.of(context).size.height - 300,
-                      child: interestedBuyers.length == null ||
-                              interestedBuyers.isEmpty
-                          ? Center(
-                              child: Text(
-                                'किसी ग्राहक ने अभी तक संपर्क नहीं किया है',
-                                style: TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.bold),
-                              ),
-                            )
-                          : ListView.separated(
-                              separatorBuilder: (context, index) => Divider(),
-                              itemCount: interestedBuyers.length,
-                              itemBuilder: (context, index) {
-                                return Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: <Widget>[
-                                      Expanded(
-                                        flex: 3,
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: <Widget>[
-                                            Row(
-                                              children: [
-                                                FaIcon(
-                                                  FontAwesomeIcons.userAlt,
-                                                  color: Colors.grey[500],
-                                                  size: 13,
-                                                ),
-                                                SizedBox(
-                                                  width: 5,
-                                                ),
-                                                Text(
-                                                  interestedBuyers[index]
-                                                      .userId
-                                                      .name,
-                                                  style: TextStyle(
-                                                      fontSize: 15,
-                                                      fontWeight:
-                                                          FontWeight.w400),
-                                                ),
-                                              ],
-                                            )
-                                          ],
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                );
-                              },
+                  ),
+                  Text('इच्छुक खरीदार की सूचि',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  Container(
+                    height: MediaQuery.of(context).size.height - 300,
+                    child: interestedBuyers.length == null ||
+                            interestedBuyers.isEmpty
+                        ? Center(
+                            child: Text(
+                              'किसी ग्राहक ने अभी तक संपर्क नहीं किया है',
+                              style: TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.bold),
                             ),
-                    )
-                  ],
-                ),
-        ));
+                          )
+                        : ListView.separated(
+                            separatorBuilder: (context, index) => Divider(),
+                            itemCount: interestedBuyers.length,
+                            itemBuilder: (context, index) {
+                              return Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: <Widget>[
+                                    Expanded(
+                                      flex: 3,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: <Widget>[
+                                          Row(
+                                            children: [
+                                              FaIcon(
+                                                FontAwesomeIcons.userAlt,
+                                                color: Colors.grey[500],
+                                                size: 13,
+                                              ),
+                                              SizedBox(
+                                                width: 5,
+                                              ),
+                                              Text(
+                                                interestedBuyers[index]
+                                                    .userId
+                                                    .name,
+                                                style: TextStyle(
+                                                    fontSize: 15,
+                                                    fontWeight:
+                                                        FontWeight.w400),
+                                              ),
+                                            ],
+                                          ),
+                                          Row(
+                                            children: [
+                                              FaIcon(
+                                                FontAwesomeIcons.phone,
+                                                color: Colors.grey[500],
+                                                size: 13,
+                                              ),
+                                              SizedBox(
+                                                width: 5,
+                                              ),
+                                              Text(
+                                                interestedBuyers[index]
+                                                    .userId
+                                                    .mobile
+                                                    .toString(),
+                                                style: TextStyle(
+                                                    fontSize: 15,
+                                                    fontWeight:
+                                                        FontWeight.w400),
+                                              ),
+                                            ],
+                                          ),
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                Icons.location_on,
+                                                color: Colors.grey[500],
+                                                size: 13,
+                                              ),
+                                              SizedBox(
+                                                width: 5,
+                                              ),
+                                              Text(
+                                                interestedBuyers[index]
+                                                    .userId
+                                                    .userAddress,
+                                                style: TextStyle(
+                                                    fontSize: 15,
+                                                    fontWeight:
+                                                        FontWeight.w400),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 1,
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                              child: GestureDetector(
+                                            onTap: () {
+                                              return UrlLauncher.launch(
+                                                  'tel:+91 ${interestedBuyers[index].userId.mobile}');
+                                            },
+                                            child: FaIcon(
+                                              FontAwesomeIcons.phoneAlt,
+                                              color: secondaryColor,
+                                              size: 30,
+                                            ),
+                                          )),
+                                          SizedBox(width: 12),
+                                          Expanded(
+                                            child: GestureDetector(
+                                              onTap: () async {
+                                                String whatsappText =
+                                                    'नमस्कार ${interestedBuyers[index].userId.name}, आपको मेरा पशु अगर पसंद आया हो तो फ़ोन पे बात करें?';
+                                                String whatsappUrl =
+                                                    "https://api.whatsapp.com/send/?phone=+91 ${interestedBuyers[index].userId.mobile}&text=$whatsappText";
+                                                await UrlLauncher.canLaunch(
+                                                            whatsappUrl) !=
+                                                        null
+                                                    ? UrlLauncher.launch(
+                                                        Uri.encodeFull(
+                                                            whatsappUrl))
+                                                    : ScaffoldMessenger.of(
+                                                            context)
+                                                        .showSnackBar(
+                                                        SnackBar(
+                                                          content: Text(
+                                                              '${interestedBuyers[index].userId.mobile} is not present in Whatsapp'),
+                                                          duration: Duration(
+                                                              milliseconds:
+                                                                  300),
+                                                          padding: EdgeInsets
+                                                              .symmetric(
+                                                                  horizontal:
+                                                                      8),
+                                                          behavior:
+                                                              SnackBarBehavior
+                                                                  .floating,
+                                                          shape:
+                                                              RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10.0),
+                                                          ),
+                                                        ),
+                                                      );
+                                              },
+                                              child: FaIcon(
+                                                FontAwesomeIcons.whatsapp,
+                                                color: greenColor,
+                                                size: 30,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                  )
+                ],
+              ),
+      ),
+    );
   }
 }
 

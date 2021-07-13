@@ -1678,7 +1678,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
               //         )
               //       : SizedBox.shrink(),
               // ),
-              saveButton()
+              saveButton(),
             ],
           ),
         ),

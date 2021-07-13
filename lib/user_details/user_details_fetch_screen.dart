@@ -74,9 +74,11 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
     if (!_serviceEnabled) {
       _serviceEnabled = await location.requestService();
       if (!_serviceEnabled) {
-        setState(() {
-          _zipCodeTextField = true;
-        });
+        setState(
+          () {
+            _zipCodeTextField = true;
+          },
+        );
         await assignDeviceID();
         return;
       }
@@ -108,25 +110,27 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
 
     print('first===' + first.toString());
 
-    setState(() {
-      prefs.setDouble("latitude", first.coordinates.latitude);
-      prefs.setDouble("longitude", first.coordinates.longitude);
+    setState(
+      () {
+        prefs.setDouble("latitude", first.coordinates.latitude);
+        prefs.setDouble("longitude", first.coordinates.longitude);
 
-      prefs.setString(
-          "district",
-          ReusableWidgets.mappingDistrict(
-              first.subAdminArea ?? first.locality ?? first.featureName));
-      prefs.setString("zipCode", first.postalCode);
-      prefs.setString(
-        "userAddress",
-        first.addressLine ??
-            (first.adminArea +
-                ' ' +
-                first.postalCode +
-                ', ' +
-                first.countryName),
-      );
-    });
+        prefs.setString(
+            "district",
+            ReusableWidgets.mappingDistrict(
+                first.subAdminArea ?? first.locality ?? first.featureName));
+        prefs.setString("zipCode", first.postalCode);
+        prefs.setString(
+          "userAddress",
+          first.addressLine ??
+              (first.adminArea +
+                  ' ' +
+                  first.postalCode +
+                  ', ' +
+                  first.countryName),
+        );
+      },
+    );
     await assignDeviceID();
   }
 
@@ -139,13 +143,15 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
         deviceType = "android";
         deviceId = build.androidId; //UUID for Android
         deviceName = build.model;
-        setState(() {
-          mobileInfo = {
-            'deviceType': deviceType,
-            'deviceId': deviceId,
-            'deviceName': deviceName
-          };
-        });
+        setState(
+          () {
+            mobileInfo = {
+              'deviceType': deviceType,
+              'deviceId': deviceId,
+              'deviceName': deviceName
+            };
+          },
+        );
       } else if (Platform.isIOS) {
         var data = await deviceInfoPlugin.iosInfo;
         deviceType = "ios";

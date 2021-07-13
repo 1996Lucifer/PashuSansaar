@@ -58,14 +58,14 @@ class _MyCalledListState extends State<MyCalledList> {
     }
 
     List data = await myCallListController.getCallList(
-      userId: prefs.getString('userId'),
+      //userId: "60cb37f83ae6298e527a58e1",
+     userId: prefs.getString('userId'),
       token: prefs.getString('accessToken'),
       page: 1,
     );
 
     print('user id is: ${prefs.getString('userId')}');
     print('token id is: ${prefs.getString('accessToken')}');
-
 
     setState(() {
       myCallList = data;
@@ -446,7 +446,9 @@ class _MyCalledListState extends State<MyCalledList> {
                       Text('ब्यात',
                           style: TextStyle(
                               fontSize: 15, fontWeight: FontWeight.bold)),
-                      Text(intToAnimalBayaatMapping[_list.animalBayat].toString(),
+                      Text(
+                          intToAnimalBayaatMapping[_list.animalBayat]
+                              .toString(),
                           style: TextStyle(
                               fontSize: 14, fontWeight: FontWeight.w500))
                     ],
@@ -477,13 +479,11 @@ class _MyCalledListState extends State<MyCalledList> {
                           style: TextStyle(
                               fontSize: 15, fontWeight: FontWeight.bold)),
                       Text(
-                        _list.moreInfo == null ||
-                        _list.moreInfo.isEmpty ||
-                                _list.moreInfo == {} ||
-                                _list.isRecentBayat == false ||
+                        _list.isRecentBayat == false ||
                                 _list.isRecentBayat == 'no'.tr
                             ? 'ब्यायी नहीं है'
-                            : intToRecentBayaatTime[_list.recentBayatTime].toString(),
+                            : intToRecentBayaatTime[_list.recentBayatTime]
+                                .toString(),
                         style: TextStyle(
                             fontSize: 14, fontWeight: FontWeight.w500),
                       )
@@ -511,12 +511,11 @@ class _MyCalledListState extends State<MyCalledList> {
                           style: TextStyle(
                               fontSize: 15, fontWeight: FontWeight.bold)),
                       Text(
-                        _list.moreInfo == null ||
-                                _list.moreInfo == {} ||
-                                _list.isPregnant == null ||
-                                _list.isPregnant == 'no'.tr
+                        _list.isPregnant == null ||
+                                _list.isPregnant == 'no'.tr ||
+                                _list.isPregnant == false
                             ? 'गर्भवती नहीं है'
-                            : intToPregnantTime[_list.pregnantTime],
+                            : intToPregnantTime[_list.pregnantTime].toString(),
                         style: TextStyle(
                             fontSize: 14, fontWeight: FontWeight.w500),
                       )

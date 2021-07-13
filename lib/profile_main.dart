@@ -59,7 +59,7 @@ class ProfileMainState extends State<ProfileMain>
       Get.put(MyCallListController());
 
   String userAddress = '';
-  String userName = 'ashok';
+  String userName = '';
 
   getMyLocation() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -510,20 +510,23 @@ class ProfileMainState extends State<ProfileMain>
                                         ],
                                       ),
                                 SizedBox(height: 5),
-                                userAddress.length == null
-                                    ? Text('progress_dialog_message'.tr)
-                                    : Row(
+                                // userAddress.length == null
+                                //     ? Text('progress_dialog_message'.tr)
+                                //     :
+                                Row(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
                                           Icon(Icons.location_on_outlined),
                                           SizedBox(width: 5),
                                           Expanded(
-                                              child: Text(userAddress,
-                                                  style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      fontSize: 14))),
+                                            child: Text(
+                                              userAddress.toString(),
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 14),
+                                            ),
+                                          ),
                                         ],
                                       ),
                               ]),
