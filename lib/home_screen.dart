@@ -1,11 +1,11 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:intl/intl.dart';
 import 'package:location/location.dart';
 import 'package:pashusansaar/buy_animal/buy_animal.dart';
 import 'package:pashusansaar/buy_animal/buy_animal_model.dart';
+import 'package:pashusansaar/seller_contact/seller_contact_controller.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -39,7 +39,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Map _referralWinnerData = {};
   final geo = Geoflutterfire();
   PageController _pageController;
-  String _referralUniqueValue = '', _mobileNumber = '';
+  String _referralUniqueValue = '',
+      _mobileNumber = '';
   bool _checkReferral = false;
   double lat = 0.0, long = 0.0;
   LocationData _locate;
@@ -402,53 +403,53 @@ class _HomeScreenState extends State<HomeScreen> {
     // if (pr.isShowing()) pr.hide();
 
     return WillPopScope(
-        onWillPop: _onWillPop,
-        child: Scaffold(
-          body: PageView(
-              controller: _pageController,
-              physics: NeverScrollableScrollPhysics(),
-              children: [
-                BuyAnimal(
-                    animalInfo: _animalInfo,
-                    userName: _profileData['name'],
-                    userMobileNumber: _profileData['mobile'],
-                    userImage: _profileData['image'],
-                    latitude: lat,
-                    longitude: long),
-                SellAnimalMain(
-                    sellingAnimalInfo: _sellingAnimalInfo,
-                    userName: _profileData['name'],
-                    userMobileNumber: _profileData['mobile']),
-                ProfileMain(
-                  profileData: _profileData,
-                  sellingAnimalInfo: _sellingAnimalInfo,
-                  userName: _profileData['name'],
-                  userMobileNumber: _profileData['mobile'],
-                  refData: _referralWinnerData,
-                ),
-              ]),
-          bottomNavigationBar: BottomNavigationBar(
-            items: <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: Image.asset('assets/images/buy3.png',
-                    height: 25, width: 25),
-                label: 'buy'.tr,
-              ),
-              BottomNavigationBarItem(
-                icon: Image.asset('assets/images/Sell.png',
-                    height: 25, width: 25),
-                label: 'sell'.tr,
-              ),
-              BottomNavigationBarItem(
-                icon: Image.asset('assets/images/profile.jpg',
-                    height: 25, width: 25),
-                label: 'profile'.tr,
-              ),
-            ],
-            currentIndex: widget.selectedIndex,
-            selectedItemColor: appPrimaryColor,
-            onTap: _onItemTapped,
-          ),
-        ));
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        body: PageView(
+          controller: _pageController,
+          physics: NeverScrollableScrollPhysics(),
+          children: [
+            BuyAnimal(
+                animalInfo: _animalInfo,
+                userName: _profileData['name'],
+                userMobileNumber: _profileData['mobile'],
+                userImage: _profileData['image'],
+                latitude: lat,
+                longitude: long),
+            SellAnimalMain(
+                sellingAnimalInfo: _sellingAnimalInfo,
+                userName: _profileData['name'],
+                userMobileNumber: _profileData['mobile']),
+            ProfileMain(
+              profileData: _profileData,
+              sellingAnimalInfo: _sellingAnimalInfo,
+              refData: _referralWinnerData,
+            ),
+          ],
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          items: <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon:
+                  Image.asset('assets/images/buy3.png', height: 25, width: 25),
+              label: 'buy'.tr,
+            ),
+            BottomNavigationBarItem(
+              icon:
+                  Image.asset('assets/images/Sell.png', height: 25, width: 25),
+              label: 'sell'.tr,
+            ),
+            BottomNavigationBarItem(
+              icon: Image.asset('assets/images/profile.jpg',
+                  height: 25, width: 25),
+              label: 'profile'.tr,
+            ),
+          ],
+          currentIndex: widget.selectedIndex,
+          // selectedItemColor: themeColor,
+          onTap: _onItemTapped,
+        ),
+      ),
+    );
   }
 }

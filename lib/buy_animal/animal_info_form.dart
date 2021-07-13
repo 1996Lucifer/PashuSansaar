@@ -450,7 +450,7 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
                       {
                         "animalType": animalInfo['animalType'],
                         "animalBreed":
-                            ReusableWidgets.removeEnglisgDataFromName(
+                            ReusableWidgets.removeEnglishDataFromName(
                                 animalInfo['animalBreed']),
                         "animalMilk": animalInfo['animalMilk'],
                         "animalBudget": animalInfo['animalBudget'],

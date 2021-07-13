@@ -10,6 +10,7 @@ class OtpController extends GetxController {
   var status = false.obs;
   var isUser = false.obs;
   var authorization = ''.obs;
+  static var isUserPresent = false;
 
   verifyOTP({
     String number,
@@ -33,20 +34,21 @@ class OtpController extends GetxController {
           isUser.value = false;
           status.value = otpData.success;
           authorization.value = otpData.authorizationToken;
+          return otpData;
         } else if (response.statusCode == 211) {
           OtpModel otpData = OtpModel.fromJson(data);
 
           authorization.value = otpData.authorizationToken;
           isUser.value = true;
+          isUserPresent = true;
           status.value = true;
+          return otpData;
         }
-        return isUser.value;
       } catch (e) {
         status.value = false;
         print("Exceptions user Login otp _______$e");
+        return '';
       }
     }
-    print("this is the ststus $status");
-    return status.value;
   }
 }

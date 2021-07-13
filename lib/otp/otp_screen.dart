@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:pashusansaar/home_screen.dart';
 import 'package:pashusansaar/login/login_controller.dart';
 import 'package:pashusansaar/otp/otp_controller.dart';
+import 'package:pashusansaar/otp/otp_model.dart';
 import 'package:pashusansaar/user_details/user_details_update_screen.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -44,27 +45,31 @@ class _OTPScreenState extends State<OTPScreen>
   CountdownTimerController countdownTimerController;
   final OtpController otpController = Get.put(OtpController());
   final LoginController loginController = Get.put(LoginController());
+  OtpModel otpContResponse;
 
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      loginController.requestOTP(number: widget.phoneNumber);
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) {
+        loginController.requestOTP(number: widget.phoneNumber);
 
-      countdownTimerController =
-          CountdownTimerController(endTime: endTime, onEnd: onEnd);
-      setState(() {
-        _startTimer = true;
-      });
-      return ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('OTP भेजा गया है')));
-    });
+        countdownTimerController =
+            CountdownTimerController(endTime: endTime, onEnd: onEnd);
+        setState(() {
+          _startTimer = true;
+        });
+        return ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('OTP भेजा गया है')));
+      },
+    );
 
     onTapRecognizer = TapGestureRecognizer()
       ..onTap = () {
         loginController.requestOTP(number: widget.phoneNumber);
         countdownTimerController = CountdownTimerController(
-            endTime: DateTime.now().millisecondsSinceEpoch + 1000 * 60,
-            onEnd: onEnd);
+          endTime: DateTime.now().millisecondsSinceEpoch + 1000 * 60,
+          onEnd: onEnd,
+        );
 
         setState(() {
           _startTimer = true;
@@ -94,20 +99,22 @@ class _OTPScreenState extends State<OTPScreen>
   textWidget() => RichText(
         textAlign: TextAlign.center,
         text: TextSpan(
-            text: "did_not_receive_code".tr,
-            style: TextStyle(color: Colors.black54, fontSize: 15),
-            children: [
-              TextSpan(
-                  text: "resend_button".tr,
-                  // recognizer: TapGestureRecognizer()..onTap(),
-                  recognizer: onTapRecognizer,
-                  style: TextStyle(
-                      color: appPrimaryColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16)),
-              // WidgetSpan(
-              //     child: _startTimer ? Text('Hello') : Text('.'))
-            ]),
+          text: "did_not_receive_code".tr,
+          style: TextStyle(color: Colors.black54, fontSize: 15),
+          children: [
+            TextSpan(
+              text: "resend_button".tr,
+              // recognizer: TapGestureRecognizer()..onTap(),
+              recognizer: onTapRecognizer,
+              style: TextStyle(
+                  color: appPrimaryColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16),
+            ),
+            // WidgetSpan(
+            //     child: _startTimer ? Text('Hello') : Text('.'))
+          ],
+        ),
       );
 
   @override
@@ -292,16 +299,23 @@ class _OTPScreenState extends State<OTPScreen>
                         hasError = false;
                       });
                       try {
-                        bool isUserPresent = await otpController.verifyOTP(
+                        var otpResponse = await otpController.verifyOTP(
                           number: widget.phoneNumber,
                           otp: textEditingController.text,
                         );
-                        if (isUserPresent) {
+                        setState(() {
+                          otpContResponse = otpResponse;
+                        });
+                        if (OtpController.isUserPresent) {
                           Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => UserDetailsFetch(
+                                  builder: (context) => UserDetailsUpdate(
                                         mobile: widget.phoneNumber,
+                                        name: otpContResponse.name,
+                                        zipcode: otpContResponse.zipCode,
+                                        referralCode: '',
+                                        currentUser: '',
                                       )));
                         } else {
                           Navigator.pushReplacement(

@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:geocoder/geocoder.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:progress_dialog/progress_dialog.dart';
@@ -16,6 +15,7 @@ import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'home_screen.dart';
 import 'my_called_list.dart';
+import 'my_calls/myCallsController.dart';
 import 'sell_animal/sell_animal_info.dart';
 import 'utils/colors.dart';
 import 'utils/reusable_widgets.dart';
@@ -44,7 +44,6 @@ class ProfileMain extends StatefulWidget {
 
 class ProfileMainState extends State<ProfileMain>
     with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
-  bool _status = true;
   final FocusNode myFocusNode = FocusNode();
   ImagePicker _picker;
   String _base64Image = "", _currentVersion = '';
@@ -53,11 +52,13 @@ class ProfileMainState extends State<ProfileMain>
 
   @override
   bool get wantKeepAlive => true;
+  final MyCallListController myCallListController =
+      Get.put(MyCallListController());
+
+  String userAddress = '',userName = '';
 
   @override
   void initState() {
-    // TODO: implement initState
-    // getCallingInfo();
     populateData();
     super.initState();
   }
@@ -92,22 +93,13 @@ class ProfileMainState extends State<ProfileMain>
     } else {
       // pr.show();
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      var address = await Geocoder.local.findAddressesFromCoordinates(
-          Coordinates(
-              prefs.getDouble('latitude'), prefs.getDouble('longitude')));
-      var first = address.first;
-
       setState(() {
         userInfo['name'] = widget.profileData['name'];
         userInfo['mobile'] = widget.profileData['mobile'];
         userInfo['image'] = widget.profileData['image'];
-        userInfo['address'] = first.addressLine ??
-            (first.adminArea +
-                ' ' +
-                first.postalCode +
-                ', ' +
-                first.countryName);
         _currentVersion = prefs.getStringList('currentVersion').join('.');
+        userAddress = prefs.getString('userAddress');
+        userName = prefs.getString('userName');
       });
       // getCallingInfo();
     }
@@ -466,33 +458,35 @@ class ProfileMainState extends State<ProfileMain>
                           child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                userInfo['name'] == null
+                                userName == null
                                     ? Text('progress_dialog_message'.tr)
                                     : Row(
                                         children: [
                                           Icon(Icons.account_circle_outlined),
                                           SizedBox(width: 5),
-                                          Text(userInfo['name'],
+                                          Text(userName,
                                               style: TextStyle(
                                                   fontWeight: FontWeight.w500,
                                                   fontSize: 14)),
                                         ],
                                       ),
                                 SizedBox(height: 5),
-                                userInfo['mobile'] == null
+                                widget.userMobileNumber == null
                                     ? Text('progress_dialog_message'.tr)
                                     : Row(
                                         children: [
                                           Icon(Icons.call),
                                           SizedBox(width: 5),
-                                          Text(userInfo['mobile'],
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.w500,
-                                                  fontSize: 14)),
+                                          Text(
+                                            widget.userMobileNumber,
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 14),
+                                          ),
                                         ],
                                       ),
                                 SizedBox(height: 5),
-                                userInfo['address'] == null
+                                userAddress == null
                                     ? Text('progress_dialog_message'.tr)
                                     : Row(
                                         crossAxisAlignment:
@@ -501,11 +495,13 @@ class ProfileMainState extends State<ProfileMain>
                                           Icon(Icons.location_on_outlined),
                                           SizedBox(width: 5),
                                           Expanded(
-                                              child: Text(userInfo['address'],
-                                                  style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      fontSize: 14))),
+                                            child: Text(
+                                              userAddress.toString(),
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 14),
+                                            ),
+                                          ),
                                         ],
                                       ),
                               ]),
@@ -568,7 +564,7 @@ class ProfileMainState extends State<ProfileMain>
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => MyCalledList(
-                                      // animalInfo: widget.sellingAnimalInfo,
+                                      //animalInfo: widget.sellingAnimalInfo,
                                       // userName: widget.userName,
                                       // userMobileNumber: widget.userMobileNumber,
                                       // showExtraData: false

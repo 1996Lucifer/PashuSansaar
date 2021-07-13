@@ -1232,7 +1232,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                             animalType:
                                 animalTypeMapping[animalInfo['animalType']],
                             animalBreed:
-                                ReusableWidgets.removeEnglisgDataFromName(
+                                ReusableWidgets.removeEnglishDataFromName(
                                     animalInfo['animalBreed']),
                             animalAge: ReusableWidgets.convertStringToInt(
                                 animalInfo['animalAge']),
@@ -1264,7 +1264,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                             animalType:
                                 animalTypeMapping[animalInfo['animalType']],
                             animalBreed:
-                                ReusableWidgets.removeEnglisgDataFromName(
+                                ReusableWidgets.removeEnglishDataFromName(
                                     animalInfo['animalBreed']),
                             animalAge: ReusableWidgets.convertStringToInt(
                                 animalInfo['animalAge']),
@@ -1775,7 +1775,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
               //         )
               //       : SizedBox.shrink(),
               // ),
-              saveButton()
+              saveButton(),
             ],
           ),
         ),
