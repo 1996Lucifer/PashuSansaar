@@ -52,60 +52,41 @@ class _HomeScreenState extends State<HomeScreen> {
 //https://script.google.com/macros/s/AKfycbwzLm_QkArFGt2y-3Aa-RvSeZQY7hLVOpBXHrRjjU-QzQHRDpmUnCaUH5efwvrq1IXe/exec
 // AKfycbwzLm_QkArFGt2y-3Aa-RvSeZQY7hLVOpBXHrRjjU-QzQHRDpmUnCaUH5efwvrq1IXe
 
-  // updateData() async {
-  //   var addresses =
-  //       await geoCoder.Geocoder.local.findAddressesFromQuery("621719");
-  //   var first = addresses.first;
+  updateData() async {
+    FirebaseFirestore.instance
+        .collection('userInfo')
+        // .where('mobile', isGreaterThanOrEqualTo: '7408818079')
+        .where('mobile', isGreaterThanOrEqualTo: '9500000000')
+        .where('mobile', isLessThanOrEqualTo: '9999999999')
+        .get()
+        .then((value) {
+      value.docs.forEach((element) async {
+        if (element['latitude'] != "null" || element['longitude'] != "null") {
+          var addresses = await geoCoder.Geocoder.local
+              .findAddressesFromCoordinates(geoCoder.Coordinates(
+                  double.parse(element['latitude']),
+                  double.parse(element['longitude'])));
+          var first = addresses.first;
 
-  //   Map<String, dynamic> data = {
-  //     "addressLine": first.addressLine,
-  //     "adminArea": first.adminArea,
-  //     "coordinates": first.coordinates.toString(),
-  //     "countryCode": first.countryCode,
-  //     "countryName": first.countryName,
-  //     "featureName": first.featureName,
-  //     "locality": first.locality,
-  //     "postalCode": first.postalCode,
-  //     "subAdminArea": first.subAdminArea,
-  //     "subLocality": first.subLocality
-  //   };
+          await FirebaseFirestore.instance
+              .collection('userInfo')
+              .doc(element.reference.id)
+              .update({
+            'district':
+                first.subAdminArea ?? first.locality ?? first.featureName,
+            'userAddress': first.addressLine ??
+                (first.adminArea +
+                    ' ' +
+                    first.postalCode +
+                    ', ' +
+                    first.countryName),
+          });
 
-  //   print(data);
 
-  // FirebaseFirestore.instance
-  //     .collection('userInfo')
-  //     .limit(500)
-  //     .get()
-  //     .then((value) {
-  //   value.docs.forEach((element) async {
-  //     if (element['latitude'] != "null" || element['longitude'] != "null") {
-  //       var addresses = await geoCoder.Geocoder.local
-  //           .findAddressesFromCoordinates(geoCoder.Coordinates(
-  //               double.parse(element['latitude']),
-  //               double.parse(element['longitude'])));
-  //       var first = addresses.first;
-
-  //       Map<String, dynamic> data = {
-  //         "addressLine": first.addressLine,
-  //         "adminArea": first.adminArea,
-  //         "coordinates": first.coordinates.toString(),
-  //         "countryCode": first.countryCode,
-  //         "countryName": first.countryName,
-  //         "featureName": first.featureName,
-  //         "locality": first.locality,
-  //         "postalCode": first.postalCode,
-  //         "subAdminArea": first.subAdminArea,
-  //         "subLocality": first.subLocality
-  //       };
-
-  //       await FirebaseFirestore.instance
-  //           .collection('addressCollection')
-  //           .doc(element.reference.id)
-  //           .set(data);
-  //     }
-  //   });
-  // });
-  // }
+        }
+      });
+    });
+  }
 
   checkInitialData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -352,7 +333,7 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     } catch (e) {
       print('=-=Error-Home=->>>' + e.toString());
-      
+
       FirebaseFirestore.instance
           .collection('logger')
           .doc(_mobileNumber)
