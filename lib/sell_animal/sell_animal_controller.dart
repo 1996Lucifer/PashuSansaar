@@ -50,8 +50,13 @@ class SellAnimalController extends GetxController {
         },
       );
 
+
+      print('payload is $payload');
+
+
       dio.Response res = await dio.Dio()
           .post(url, data: json.encode(payload), options: options);
+      print('response will be called');
 
       if (res != null) {
         if (res.statusCode >= 200 && res.statusCode < 300) {

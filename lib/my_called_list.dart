@@ -59,7 +59,7 @@ class _MyCalledListState extends State<MyCalledList> {
 
     List data = await myCallListController.getCallList(
       //userId: "60cb37f83ae6298e527a58e1",
-     userId: prefs.getString('userId'),
+      userId: prefs.getString('userId'),
       token: prefs.getString('accessToken'),
       page: 1,
     );
@@ -556,40 +556,49 @@ class _MyCalledListState extends State<MyCalledList> {
                 itemCount: myCallList.length,
                 separatorBuilder: (context, index) => Divider(),
                 itemBuilder: (context, index) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      _buildInfowidget(myCallList[index].animalId),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8, bottom: 5.0),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.location_on,
-                              color: Colors.grey[500],
-                              size: 13,
-                            ),
-                            SizedBox(
-                              width: 5,
-                            ),
-                            Expanded(
-                              child: Text(
-                                  myCallList[index].animalId.userAddress == null
-                                      ? 'पता मौजूद नहीं है'
-                                      : myCallList[index].animalId.userAddress,
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w200,
-                                  )),
-                            ),
-                          ],
+                  return Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    elevation: 5.0,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        _buildInfowidget(myCallList[index].animalId),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8, bottom: 5.0),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.location_on,
+                                color: Colors.grey[500],
+                                size: 13,
+                              ),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Expanded(
+                                child: Text(
+                                    myCallList[index].animalId.userAddress ==
+                                            null
+                                        ? 'पता मौजूद नहीं है'
+                                        : myCallList[index]
+                                            .animalId
+                                            .userAddress,
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w200,
+                                    )),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      _animalImageWidget(myCallList[index]),
-                      _extraInfoWidget(myCallList[index].animalId, width),
-                      _extraInfoWidget1(myCallList[index].animalId, width),
-                    ],
+                        _animalImageWidget(myCallList[index]),
+                        _extraInfoWidget(myCallList[index].animalId, width),
+                        _extraInfoWidget1(myCallList[index].animalId, width),
+                      ],
+                    ),
                   );
                 },
               ),

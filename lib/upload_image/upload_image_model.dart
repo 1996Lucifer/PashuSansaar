@@ -1,11 +1,13 @@
 class UploadImageModel {
+  bool success;
   List<Urls> urls;
 
-  UploadImageModel({this.urls});
+  UploadImageModel({this.success, this.urls});
 
   UploadImageModel.fromJson(Map<String, dynamic> json) {
+    success = json['success'];
     if (json['urls'] != null) {
-      urls = <Urls>[];
+      urls = new List<Urls>();
       json['urls'].forEach((v) {
         urls.add(new Urls.fromJson(v));
       });
@@ -14,6 +16,7 @@ class UploadImageModel {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['success'] = this.success;
     if (this.urls != null) {
       data['urls'] = this.urls.map((v) => v.toJson()).toList();
     }
@@ -30,7 +33,7 @@ class Urls {
   Urls.fromJson(Map<String, dynamic> json) {
     url = json['url'];
     fields =
-        json['fields'] != null ? new Fields.fromJson(json['fields']) : null;
+    json['fields'] != null ? new Fields.fromJson(json['fields']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -54,12 +57,12 @@ class Fields {
 
   Fields(
       {this.key,
-      this.bucket,
-      this.xAmzAlgorithm,
-      this.xAmzCredential,
-      this.xAmzDate,
-      this.policy,
-      this.xAmzSignature});
+        this.bucket,
+        this.xAmzAlgorithm,
+        this.xAmzCredential,
+        this.xAmzDate,
+        this.policy,
+        this.xAmzSignature});
 
   Fields.fromJson(Map<String, dynamic> json) {
     key = json['key'];

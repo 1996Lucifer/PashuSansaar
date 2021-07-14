@@ -60,7 +60,15 @@ class ProfileMainState extends State<ProfileMain>
   @override
   void initState() {
     populateData();
+    getMyLocationAndName();
     super.initState();
+  }
+  getMyLocationAndName() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userAddress = prefs.getString('userAddress');
+      userName = prefs.getString('userName');
+    });
   }
 
   populateData() async {

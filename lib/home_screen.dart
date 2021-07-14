@@ -14,6 +14,7 @@ import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'buy_animal/buy_animal_controller.dart';
+import 'my_animals/myAnimalController.dart';
 import 'profile_main.dart';
 import 'refresh_token/refresh_token_controller.dart';
 import 'sell_animal/sell_animal_main.dart';
@@ -49,6 +50,8 @@ class _HomeScreenState extends State<HomeScreen> {
       Get.put(BuyAnimalController());
   final RefreshTokenController refreshTokenController =
       Get.put(RefreshTokenController());
+  final MyAnimalListController myAnimalListController =
+  Get.put(MyAnimalListController());
 
   @override
   void initState() {
@@ -237,6 +240,7 @@ class _HomeScreenState extends State<HomeScreen> {
       accessToken: prefs.getString('accessToken') ?? '',
     );
 
+
     setState(() {
       _animalInfo = data.result;
       prefs.setInt('page', data.page);
@@ -246,49 +250,42 @@ class _HomeScreenState extends State<HomeScreen> {
 
     print('animalInfo===' + _animalInfo.length.toString());
 
-    // getAnimalSellingInfo();
+     getAnimalSellingInfo();
   }
 
   getAnimalSellingInfo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool status;
+    //pr.show();
 
-    try {
-      await FirebaseFirestore.instance
-          .collection("animalSellingInfo")
-          .doc(FirebaseAuth.instance.currentUser.uid)
-          .collection('sellingAnimalList')
-          .orderBy('dateOfSaving', descending: true)
-          .get(GetOptions(source: Source.serverAndCache))
-          .then(
-        (value) {
-          List _info = [];
-          value.docs.forEach((element) {
-            _info.addIf(
-                element.data()['isValidUser'] == 'Approved', element.data());
-          });
-
-          setState(() {
-            _sellingAnimalInfo = _info;
-            prefs.setString('animalDetails', jsonEncode(_info));
-          });
-        },
-      );
-    } catch (e) {
-      FirebaseFirestore.instance
-          .collection('logger')
-          .doc(_mobileNumber)
-          .collection('home')
-          .doc('home-selling')
-          .set({
-        'issue': e.toString(),
-        'userId': FirebaseAuth.instance.currentUser == null
-            ? ''
-            : FirebaseAuth.instance.currentUser.uid,
-        'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
-      });
+    if (ReusableWidgets.isTokenExpired(prefs.getInt('expires') ?? 0)) {
+      status = await refreshTokenController.getRefreshToken(
+          refresh: prefs.getString('refreshToken') ?? '');
+      if (status) {
+        setState(() {
+          prefs.setString(
+              'accessToken', refreshTokenController.accessToken.value);
+          prefs.setString(
+              'refreshToken', refreshTokenController.refreshToken.value);
+          prefs.setInt('expires', refreshTokenController.expires.value);
+        });
+      } else {
+        print('Error getting token==' + status.toString());
+      }
     }
 
-    getProfileInfo();
+    List dataSellingInfo = await myAnimalListController.getAnimalList(
+      userId: prefs.getString('userId'),
+      token: prefs.getString('accessToken'),
+      page: 1,
+    );
+
+    setState(() {
+      _sellingAnimalInfo = dataSellingInfo;
+    });
+
+    pr.hide();
+
   }
 
   getProfileInfo() async {
@@ -423,6 +420,8 @@ class _HomeScreenState extends State<HomeScreen> {
             ProfileMain(
               profileData: _profileData,
               sellingAnimalInfo: _sellingAnimalInfo,
+              userName: _profileData['name'],
+              userMobileNumber: _mobileNumber,
               refData: _referralWinnerData,
             ),
           ],

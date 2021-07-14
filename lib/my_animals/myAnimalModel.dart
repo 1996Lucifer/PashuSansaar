@@ -1,7 +1,7 @@
 class MyAnimalModel {
   bool success;
   List<MyAnimals> myAnimals;
-  int page;
+  Null page;
 
   MyAnimalModel({this.success, this.myAnimals, this.page});
 
@@ -33,29 +33,30 @@ class MyAnimals {
   int animalType;
   String animalBreed;
   int animalAge;
-  int animalPrice;
-  List<Files> files;
-  String userId;
-  String moreInfo;
-  double longitude;
-  double latitude;
-  String district;
-  int zipCode;
-  String userAddress;
-  String userName;
-  String createdAt;
-  String updatedAt;
-  int iV;
-  int mobile;
-  String animalStatus;
-  int pregnantTime;
-  int recentBayatTime;
   int animalBayat;
   int animalMilk;
   int animalMilkCapacity;
+  int animalPrice;
   bool isRecentBayat;
+  Null recentBayatTime;
   bool isPregnant;
+  int pregnantTime;
+  int animalHasBaby;
+  String moreInfo;
+  List<Files> files;
+  String userId;
+  int animalStatus;
   String verificationStatus;
+  double longitude;
+  double latitude;
+  String userName;
+  String district;
+  int zipCode;
+  String userAddress;
+  int mobile;
+  String createdAt;
+  String updatedAt;
+  int iV;
 
   MyAnimals(
       {this.location,
@@ -63,29 +64,30 @@ class MyAnimals {
         this.animalType,
         this.animalBreed,
         this.animalAge,
-        this.animalPrice,
-        this.files,
-        this.userId,
-        this.moreInfo,
-        this.longitude,
-        this.latitude,
-        this.district,
-        this.zipCode,
-        this.userAddress,
-        this.userName,
-        this.createdAt,
-        this.updatedAt,
-        this.iV,
-        this.mobile,
-        this.animalStatus,
-        this.pregnantTime,
-        this.recentBayatTime,
         this.animalBayat,
         this.animalMilk,
         this.animalMilkCapacity,
+        this.animalPrice,
         this.isRecentBayat,
+        this.recentBayatTime,
         this.isPregnant,
-        this.verificationStatus});
+        this.pregnantTime,
+        this.animalHasBaby,
+        this.moreInfo,
+        this.files,
+        this.userId,
+        this.animalStatus,
+        this.verificationStatus,
+        this.longitude,
+        this.latitude,
+        this.userName,
+        this.district,
+        this.zipCode,
+        this.userAddress,
+        this.mobile,
+        this.createdAt,
+        this.updatedAt,
+        this.iV});
 
   MyAnimals.fromJson(Map<String, dynamic> json) {
     location = json['location'] != null
@@ -95,7 +97,16 @@ class MyAnimals {
     animalType = json['animalType'];
     animalBreed = json['animalBreed'];
     animalAge = json['animalAge'];
+    animalBayat = json['animalBayat'];
+    animalMilk = json['animalMilk'];
+    animalMilkCapacity = json['animalMilkCapacity'];
     animalPrice = json['animalPrice'];
+    isRecentBayat = json['isRecentBayat'];
+    recentBayatTime = json['recentBayatTime'];
+    isPregnant = json['isPregnant'];
+    pregnantTime = json['pregnantTime'];
+    animalHasBaby = json['animalHasBaby'];
+    moreInfo = json['moreInfo'];
     if (json['files'] != null) {
       files = new List<Files>();
       json['files'].forEach((v) {
@@ -103,26 +114,18 @@ class MyAnimals {
       });
     }
     userId = json['userId'];
-    moreInfo = json['moreInfo'];
+    animalStatus = json['animalStatus'];
+    verificationStatus = json['verificationStatus'];
     longitude = json['longitude'];
     latitude = json['latitude'];
+    userName = json['userName'];
     district = json['district'];
     zipCode = json['zipCode'];
     userAddress = json['userAddress'];
-    userName = json['userName'];
+    mobile = json['mobile'];
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
     iV = json['__v'];
-    mobile = json['mobile'];
-    animalStatus = json['animalStatus'];
-    pregnantTime = json['pregnantTime'];
-    recentBayatTime = json['recentBayatTime'];
-    animalBayat = json['animalBayat'];
-    animalMilk = json['animalMilk'];
-    animalMilkCapacity = json['animalMilkCapacity'];
-    isRecentBayat = json['isRecentBayat'];
-    isPregnant = json['isPregnant'];
-    verificationStatus = json['verificationStatus'];
   }
 
   Map<String, dynamic> toJson() {
@@ -134,31 +137,32 @@ class MyAnimals {
     data['animalType'] = this.animalType;
     data['animalBreed'] = this.animalBreed;
     data['animalAge'] = this.animalAge;
+    data['animalBayat'] = this.animalBayat;
+    data['animalMilk'] = this.animalMilk;
+    data['animalMilkCapacity'] = this.animalMilkCapacity;
     data['animalPrice'] = this.animalPrice;
+    data['isRecentBayat'] = this.isRecentBayat;
+    data['recentBayatTime'] = this.recentBayatTime;
+    data['isPregnant'] = this.isPregnant;
+    data['pregnantTime'] = this.pregnantTime;
+    data['animalHasBaby'] = this.animalHasBaby;
+    data['moreInfo'] = this.moreInfo;
     if (this.files != null) {
       data['files'] = this.files.map((v) => v.toJson()).toList();
     }
     data['userId'] = this.userId;
-    data['moreInfo'] = this.moreInfo;
+    data['animalStatus'] = this.animalStatus;
+    data['verificationStatus'] = this.verificationStatus;
     data['longitude'] = this.longitude;
     data['latitude'] = this.latitude;
+    data['userName'] = this.userName;
     data['district'] = this.district;
     data['zipCode'] = this.zipCode;
     data['userAddress'] = this.userAddress;
-    data['userName'] = this.userName;
+    data['mobile'] = this.mobile;
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
     data['__v'] = this.iV;
-    data['mobile'] = this.mobile;
-    data['animalStatus'] = this.animalStatus;
-    data['pregnantTime'] = this.pregnantTime;
-    data['recentBayatTime'] = this.recentBayatTime;
-    data['animalBayat'] = this.animalBayat;
-    data['animalMilk'] = this.animalMilk;
-    data['animalMilkCapacity'] = this.animalMilkCapacity;
-    data['isRecentBayat'] = this.isRecentBayat;
-    data['isPregnant'] = this.isPregnant;
-    data['verificationStatus'] = this.verificationStatus;
     return data;
   }
 }
