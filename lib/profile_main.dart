@@ -55,7 +55,7 @@ class ProfileMainState extends State<ProfileMain>
   final MyCallListController myCallListController =
       Get.put(MyCallListController());
 
-  String userAddress = '',userName = '';
+  String userAddress = '', userName = '';
 
   @override
   void initState() {
@@ -63,6 +63,7 @@ class ProfileMainState extends State<ProfileMain>
     getMyLocationAndName();
     super.initState();
   }
+
   getMyLocationAndName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -72,46 +73,16 @@ class ProfileMainState extends State<ProfileMain>
   }
 
   populateData() async {
-    if (widget.profileData == null || widget.profileData.isEmpty) {
-      return showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-                title: Text('error'.tr),
-                content: Text('problem_loading_data'.tr),
-                actions: <Widget>[
-                  TextButton(
-                      child: Text(
-                        'Ok'.tr,
-                        style: TextStyle(color: appPrimaryColor),
-                      ),
-                      onPressed: () {
-                        // pr.hide();
-                        Navigator.pop(context);
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => HomeScreen(
-                                selectedIndex: 0,
-                              ),
-                            ));
-                      }),
-                ]);
-          });
-    } else {
-      // pr.show();
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      setState(() {
-        userInfo['name'] = widget.profileData['name'];
-        userInfo['mobile'] = widget.profileData['mobile'];
-        userInfo['image'] = widget.profileData['image'];
-        _currentVersion = prefs.getStringList('currentVersion').join('.');
-        userAddress = prefs.getString('userAddress');
-        userName = prefs.getString('userName');
-      });
-      // getCallingInfo();
-    }
-    // pr.hide();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userInfo['name'] = widget.profileData['name'];
+      userInfo['mobile'] = widget.profileData['mobile'];
+      userInfo['image'] = widget.profileData['image'];
+      _currentVersion = prefs.getStringList('currentVersion').join('.');
+      userAddress = prefs.getString('userAddress');
+      userName = prefs.getString('userName');
+    });
+    // getCallingInfo();
   }
 
   Future<void> _choose() async {
@@ -494,7 +465,7 @@ class ProfileMainState extends State<ProfileMain>
                                         ],
                                       ),
                                 SizedBox(height: 5),
-                                userAddress == null
+                                userAddress == null || userAddress.isEmpty
                                     ? Text('progress_dialog_message'.tr)
                                     : Row(
                                         crossAxisAlignment:
