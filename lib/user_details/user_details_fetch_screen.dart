@@ -1,10 +1,6 @@
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:device_info/device_info.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:intl/intl.dart';
 import 'package:pashusansaar/auth_token/auth_token_controller.dart';
 import 'package:pashusansaar/home_screen.dart';
 import 'package:pashusansaar/otp/otp_controller.dart';
@@ -22,7 +18,6 @@ import 'package:get/get.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 
 import '../utils/reusable_widgets.dart';
-// import 'package:geoflutterfire/geoflutterfire.dart' as geoFire;
 
 class UserDetailsFetch extends StatefulWidget {
   final String mobile;

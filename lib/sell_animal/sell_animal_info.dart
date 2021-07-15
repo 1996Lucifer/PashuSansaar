@@ -160,11 +160,11 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
           text: TextSpan(
             style:
                 TextStyle(color: Colors.grey[500], fontWeight: FontWeight.bold),
-            text: (_list.createdAt) + ' ',
+            text: ReusableWidgets.utcToDateTime(_list.createdAt) + ' ',
             children: <InlineSpan>[
               TextSpan(
                 text: ' (' +
-                    ReusableWidgets.dateDifference((_list.createdAt)) +
+                    ReusableWidgets.dateDifference(_list.createdAt) +
                     ')',
                 style: TextStyle(
                     color: Colors.grey[500], fontWeight: FontWeight.bold),
@@ -609,189 +609,189 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
     super.build(context);
     final double width = MediaQuery.of(context).size.width;
     return Scaffold(
-        backgroundColor: Colors.grey[100],
-        appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),
-        body: !widget.showExtraData && (widget.animalInfo.length == 0)
-            ? Center(
-                child: Column(
-                  children: [
-                    Text(
-                      'आपका कोई पशु दर्ज़ नहीं है| कृपया पशु दर्ज़ करे',
-                      style: TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    _buildSellingFormButton(context)
-                  ],
-                ),
-              )
-            : SingleChildScrollView(
-          physics: BouncingScrollPhysics(),
+      backgroundColor: Colors.grey[100],
+      appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),
+      body: !widget.showExtraData && (widget.animalInfo.length == 0)
+          ? Center(
               child: Column(
-                  children: [
-                    widget.showExtraData
-                        ? _buildSellingFormButton(context)
-                        : SizedBox.shrink(),
-                    widget.showExtraData
-                        ? Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Container(
-                              height: 30,
-                              child: Text('your_selling_animal_info'.tr,
-                                  style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black)),
-                            ),
-                          )
-                        : SizedBox.shrink(),
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      itemCount: widget.animalInfo.length,
-                      itemBuilder: (context, index) {
-                        return Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
+                children: [
+                  Text(
+                    'आपका कोई पशु दर्ज़ नहीं है| कृपया पशु दर्ज़ करे',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  _buildSellingFormButton(context)
+                ],
+              ),
+            )
+          : SingleChildScrollView(
+              physics: BouncingScrollPhysics(),
+              child: Column(
+                children: [
+                  widget.showExtraData
+                      ? _buildSellingFormButton(context)
+                      : SizedBox.shrink(),
+                  widget.showExtraData
+                      ? Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            height: 30,
+                            child: Text('your_selling_animal_info'.tr,
+                                style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black)),
                           ),
-                          elevation: 5.0,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              _buildBreedTypeWidget(widget.animalInfo[index]),
-                              _buildDateWidget(widget.animalInfo[index]),
-                              _buildImageDescriptionWidget(
-                                  width, widget.animalInfo[index]),
-                              widget.showExtraData
-                                  ? Row(
-                                      textDirection: TextDirection.rtl,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        TextButton(
-                                            onPressed: () => Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        SellAnimalEditForm(
-                                                      index: index,
-                                                      userName:
-                                                          widget.userName,
-                                                      userMobileNumber: widget
-                                                          .userMobileNumber,
-                                                    ),
-                                                  ),
-                                                ),
-                                            child: Row(
-                                              children: [
-                                                Text(
-                                                  'change_info'.tr,
-                                                  style: TextStyle(
-                                                      color: appPrimaryColor,
-                                                      fontSize: 15),
-                                                ),
-                                                SizedBox(
-                                                  width: 5,
-                                                ),
-                                                FaIcon(
-                                                  FontAwesomeIcons.edit,
-                                                  color: appPrimaryColor,
-                                                  size: 16,
-                                                )
-                                              ],
-                                            )),
-                                        TextButton(
-                                            onPressed: () => Navigator.push(
+                        )
+                      : SizedBox.shrink(),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: widget.animalInfo.length,
+                    itemBuilder: (context, index) {
+                      return Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        elevation: 5.0,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            _buildBreedTypeWidget(widget.animalInfo[index]),
+                            _buildDateWidget(widget.animalInfo[index]),
+                            _buildImageDescriptionWidget(
+                                width, widget.animalInfo[index]),
+                            widget.showExtraData
+                                ? Row(
+                                    textDirection: TextDirection.rtl,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      TextButton(
+                                          onPressed: () => Navigator.push(
                                                 context,
                                                 MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        InterestedBuyer(
-                                                          listId: widget
-                                                                  .animalInfo[
-                                                                      index]
-                                                                  .sId ??
-                                                              '',
-                                                          index: index,
-                                                          animalInfo: widget
-                                                              .animalInfo,
-                                                        ))),
-                                            child: Row(
-                                              children: [
-                                                Text(
-                                                  'इच्छुक खरीदार की सूचि',
-                                                  style: TextStyle(
-                                                      color: appPrimaryColor,
-                                                      fontSize: 15),
-                                                ),
-                                                SizedBox(
-                                                  width: 5,
-                                                ),
-                                                FaIcon(
-                                                  FontAwesomeIcons.arrowRight,
-                                                  color: appPrimaryColor,
-                                                  size: 16,
-                                                )
-                                              ],
-                                            )),
-                                      ],
-                                    )
-                                  : GestureDetector(
-                                      onTap: () => Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  InterestedBuyer(
-                                                    // key:
-                                                    //     Key(widget.animalInfo[index]
-                                                    //         ['uniqueId']),
-                                                    listId: widget
-                                                            .animalInfo[index]
-                                                            .sId ??
-                                                        '',
+                                                  builder: (context) =>
+                                                      SellAnimalEditForm(
+                                                    animalInfo: widget
+                                                        .animalInfo[index],
                                                     index: index,
-                                                    animalInfo:
-                                                        widget.animalInfo,
-                                                  ))),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey[100],
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.grey,
-                                              blurRadius: 1.0,
-                                            ),
-                                          ],
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                        ),
-                                        height: 50,
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
+                                                    userName: widget.userName,
+                                                    userMobileNumber:
+                                                        widget.userMobileNumber,
+                                                  ),
+                                                ),
+                                              ),
                                           child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment
-                                                    .spaceBetween,
                                             children: [
                                               Text(
-                                                  "इच्छुक खरीदार की सूचि देखे",
-                                                  style: TextStyle(
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.bold)),
-                                              Icon(Icons.arrow_forward_ios)
+                                                'change_info'.tr,
+                                                style: TextStyle(
+                                                    color: appPrimaryColor,
+                                                    fontSize: 15),
+                                              ),
+                                              SizedBox(
+                                                width: 5,
+                                              ),
+                                              FaIcon(
+                                                FontAwesomeIcons.edit,
+                                                color: appPrimaryColor,
+                                                size: 16,
+                                              )
                                             ],
+                                          )),
+                                      TextButton(
+                                          onPressed: () => Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      InterestedBuyer(
+                                                        listId: widget
+                                                                .animalInfo[
+                                                                    index]
+                                                                .sId ??
+                                                            '',
+                                                        index: index,
+                                                        animalInfo:
+                                                            widget.animalInfo,
+                                                      ))),
+                                          child: Row(
+                                            children: [
+                                              Text(
+                                                'इच्छुक खरीदार की सूचि',
+                                                style: TextStyle(
+                                                    color: appPrimaryColor,
+                                                    fontSize: 15),
+                                              ),
+                                              SizedBox(
+                                                width: 5,
+                                              ),
+                                              FaIcon(
+                                                FontAwesomeIcons.arrowRight,
+                                                color: appPrimaryColor,
+                                                size: 16,
+                                              )
+                                            ],
+                                          )),
+                                    ],
+                                  )
+                                : GestureDetector(
+                                    onTap: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                InterestedBuyer(
+                                                  // key:
+                                                  //     Key(widget.animalInfo[index]
+                                                  //         ['uniqueId']),
+                                                  listId: widget
+                                                          .animalInfo[index]
+                                                          .sId ??
+                                                      '',
+                                                  index: index,
+                                                  animalInfo: widget.animalInfo,
+                                                ))),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey[100],
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.grey,
+                                            blurRadius: 1.0,
                                           ),
+                                        ],
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      height: 50,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text("इच्छुक खरीदार की सूचि देखे",
+                                                style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                            Icon(Icons.arrow_forward_ios)
+                                          ],
                                         ),
                                       ),
-                                    )
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-            ));
+                                    ),
+                                  )
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+    );
   }
 }
 

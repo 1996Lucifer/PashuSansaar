@@ -109,12 +109,41 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
       }
     }
 
+    var first;
     _locationData = await location.getLocation();
-    setState(() {
-      _locate = _locationData;
-      prefs.setDouble("latitude", _locate.latitude);
-      prefs.setDouble("longitude", _locate.longitude);
-    });
+
+    print('_locationData===' + _locationData.toString());
+    var address = await Geocoder.local.findAddressesFromCoordinates(
+      Coordinates(
+        _locationData.latitude,
+        _locationData.longitude,
+      ),
+    );
+    first = address.first;
+
+    print('first===' + first.toString());
+
+    setState(
+      () {
+        prefs.setDouble("latitude", first.coordinates.latitude);
+        prefs.setDouble("longitude", first.coordinates.longitude);
+
+        prefs.setString(
+            "district",
+            ReusableWidgets.mappingDistrict(
+                first.subAdminArea ?? first.locality ?? first.featureName));
+        prefs.setString("zipCode", first.postalCode);
+        prefs.setString(
+          "userAddress",
+          first.addressLine ??
+              (first.adminArea +
+                  ' ' +
+                  first.postalCode +
+                  ', ' +
+                  first.countryName),
+        );
+      },
+    );
     await assignDeviceID();
   }
 
@@ -152,45 +181,45 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
     }
   }
 
-  storeFCMToken() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String _token = await FirebaseMessaging.instance.getToken();
+  // storeFCMToken() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   String _token = await FirebaseMessaging.instance.getToken();
 
-    var addresses = await Geocoder.local.findAddressesFromCoordinates(
-        Coordinates(prefs.getDouble('latitude'), prefs.getDouble('longitude')));
-    var first = addresses.first;
+  //   var addresses = await Geocoder.local.findAddressesFromCoordinates(
+  //       Coordinates(prefs.getDouble('latitude'), prefs.getDouble('longitude')));
+  //   var first = addresses.first;
 
-    print(_token);
+  //   print(_token);
 
-    FirebaseFirestore.instance
-        .collection("fcmToken")
-        .doc(widget.currentUser)
-        .set({
-      "id": widget.currentUser,
-      'lat': prefs.getDouble('latitude').toString(),
-      'long': prefs.getDouble('longitude').toString(),
-      'userToken': _token,
-      'district': ReusableWidgets.mappingDistrict(
-        first.subAdminArea ?? first.locality ?? first.featureName,
-      )
-    }).catchError((err) {
-      print(
-        "errToken->" + err.toString(),
-      );
-      FirebaseFirestore.instance
-          .collection('logger')
-          .doc(widget.mobile)
-          .collection('token')
-          .doc()
-          .set({
-        'issue': err.toString(),
-        'userId': FirebaseAuth.instance.currentUser == null
-            ? ''
-            : FirebaseAuth.instance.currentUser.uid,
-        'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
-      });
-    });
-  }
+  //   FirebaseFirestore.instance
+  //       .collection("fcmToken")
+  //       .doc(widget.currentUser)
+  //       .set({
+  //     "id": widget.currentUser,
+  //     'lat': prefs.getDouble('latitude').toString(),
+  //     'long': prefs.getDouble('longitude').toString(),
+  //     'userToken': _token,
+  //     'district': ReusableWidgets.mappingDistrict(
+  //       first.subAdminArea ?? first.locality ?? first.featureName,
+  //     )
+  //   }).catchError((err) {
+  //     print(
+  //       "errToken->" + err.toString(),
+  //     );
+  //     FirebaseFirestore.instance
+  //         .collection('logger')
+  //         .doc(widget.mobile)
+  //         .collection('token')
+  //         .doc()
+  //         .set({
+  //       'issue': err.toString(),
+  //       'userId': FirebaseAuth.instance.currentUser == null
+  //           ? ''
+  //           : FirebaseAuth.instance.currentUser.uid,
+  //       'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
+  //     });
+  //   });
+  // }
 
   loadAsset() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -202,6 +231,18 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
         setState(() {
           prefs.setDouble("latitude", first.coordinates.latitude);
           prefs.setDouble("longitude", first.coordinates.longitude);
+          prefs.setString("district",
+              first.subAdminArea ?? first.locality ?? first.featureName);
+          prefs.setString("zipCode", first.postalCode);
+          prefs.setString(
+            "userAddress",
+            first.addressLine ??
+                (first.adminArea +
+                    ' ' +
+                    first.postalCode +
+                    ', ' +
+                    first.countryName),
+          );
         });
       } else {
         ReusableWidgets.showDialogBox(
@@ -389,11 +430,11 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
                             fontWeight: FontWeight.w600)),
                     onPressed: () async {
                       if (nameController.text.isEmpty) {
-                        ReusableWidgets.showDialogBox(context, 'error'.tr,
-                            Text("error_empty_name".tr));
+                        ReusableWidgets.showDialogBox(
+                            context, 'error'.tr, Text("error_empty_name".tr));
                       } else if (nameController.text.length < 3) {
-                        ReusableWidgets.showDialogBox(context, 'error'.tr,
-                            Text("error_length_name".tr));
+                        ReusableWidgets.showDialogBox(
+                            context, 'error'.tr, Text("error_length_name".tr));
                       } else if (_zipCodeTextField &&
                           zipCodeController.text.isEmpty) {
                         ReusableWidgets.showDialogBox(context, 'error'.tr,
@@ -404,7 +445,7 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
                             Text("error_length_zipcode".tr));
                       } else {
                         SharedPreferences prefs =
-                        await SharedPreferences.getInstance();
+                            await SharedPreferences.getInstance();
 
                         if (_zipCodeTextField &&
                             zipCodeController.text.isNotEmpty)
@@ -424,11 +465,13 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
                                       text: TextSpan(
                                         text: prefs.getInt('count') == 1
                                             ? 'location_error_supportive_exit'
-                                            .tr
+                                                .tr
                                             : 'location_error_supportive_again'
-                                            .tr,
-                                        style: DefaultTextStyle.of(context)
-                                            .style,
+                                                .tr,
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 16,
+                                        ),
                                       ),
                                     ),
                                     actions: <Widget>[
@@ -462,36 +505,30 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
                             pr.style(message: 'progress_dialog_message'.tr);
                             pr.show();
 
-                            bool status =
-                            await _authController.fetchAuthToken(
-                              token:
-                              '${_otpController.authorization.value}',
+                            bool status = await _authController.fetchAuthToken(
+                              token: '${_otpController.authorization.value}',
                               mobileInfo: mobileInfo,
                               name: nameController.text,
                               apkVersion: prefs
                                   .getStringList('currentVersion')
                                   .join('.'),
                               longitude:
-                              prefs.getDouble('longitude').toString(),
-                              latitude:
-                              prefs.getDouble('latitude').toString(),
-                              referredByCode:
-                              referralCodeController.text.isNotEmpty
-                                  ? referralCodeController.text
-                                  .toUpperCase()
+                                  prefs.getDouble('longitude').toString(),
+                              latitude: prefs.getDouble('latitude').toString(),
+                              referredByCode: referralCodeController
+                                      .text.isNotEmpty
+                                  ? referralCodeController.text.toUpperCase()
                                   : '',
                               number: widget.mobile,
-                              zipCode:
-                              prefs.getString("zipCode").toString(),
+                              zipCode: prefs.getString("zipCode").toString(),
                               userAddress:
-                              prefs.getString("userAddress").toString(),
-                              cityName:
-                              prefs.getString("district").toString(),
+                                  prefs.getString("userAddress").toString(),
+                              cityName: prefs.getString("district").toString(),
                             );
 
                             setState(() {
-                              prefs.setString('token',
-                                  _otpController.authorization.value);
+                              prefs.setString(
+                                  'token', _otpController.authorization.value);
                               prefs.setString('accessToken',
                                   _authController.accessToken.value);
                               prefs.setString('refreshToken',
@@ -500,15 +537,14 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
                                   'userId', _authController.userId.value);
                               prefs.setInt(
                                   'expires', _authController.expires.value);
-                              prefs.setString(
-                                  'userName', nameController.text);
+                              prefs.setString('userName', nameController.text);
                             });
 
                             pr.hide();
                             if (status) {
                               Get.off(() => HomeScreen(
-                                selectedIndex: 0,
-                              ));
+                                    selectedIndex: 0,
+                                  ));
                             }
                           } catch (err) {
                             print(
@@ -528,14 +564,3 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-

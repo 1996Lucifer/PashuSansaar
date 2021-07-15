@@ -55,7 +55,7 @@ class ProfileMainState extends State<ProfileMain>
   final MyCallListController myCallListController =
       Get.put(MyCallListController());
 
-  String userAddress = '',userName = '';
+  String userAddress = '', userName = '';
 
   @override
   void initState() {
@@ -63,11 +63,13 @@ class ProfileMainState extends State<ProfileMain>
     getMyLocationAndName();
     super.initState();
   }
+
   getMyLocationAndName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       userAddress = prefs.getString('userAddress');
       userName = prefs.getString('userName');
+      _currentVersion = prefs.getStringList('currentVersion').join('.');
     });
   }
 
