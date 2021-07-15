@@ -97,7 +97,7 @@ class ReusableWidgets {
   }
 
   static String dateTimeToEpoch(DateTime date) {
-    return (((date.millisecondsSinceEpoch) / 1000).round().toString());
+    return ((date.millisecondsSinceEpoch / 1000).round().toString());
   }
 
   static String epochToDateTime(String epoch) {
@@ -105,6 +105,13 @@ class ReusableWidgets {
         DateTime.fromMillisecondsSinceEpoch(int.parse(epoch) * 1000);
     var date = DateFormat('dd MMM yyyy').add_jm().format(dateObj);
     return date.toString();
+  }
+
+  static String utcToDateTime(dateUtc) {
+    var strToDateTime = DateTime.parse(dateUtc.toString());
+    final convertLocal = strToDateTime.toLocal();
+    var newFormat = DateFormat('dd MMM yyyy').add_jm().format(convertLocal);
+    return newFormat;
   }
 
   static String dateDifference(String date) {

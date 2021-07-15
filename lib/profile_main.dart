@@ -69,6 +69,7 @@ class ProfileMainState extends State<ProfileMain>
     setState(() {
       userAddress = prefs.getString('userAddress');
       userName = prefs.getString('userName');
+      _currentVersion = prefs.getStringList('currentVersion').join('.');
     });
   }
 

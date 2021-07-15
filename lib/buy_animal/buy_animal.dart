@@ -1213,10 +1213,11 @@ class _BuyAnimalState extends State<BuyAnimal>
   Padding _animalImageWidget(int index) {
     List _list = widget.animalInfo;
 
-    List<String> _images = ['assets/images/AppIcon.jpg'];
-    // _list[index]
-    //     .files
-    //     .forEach((elem) => _images.addIf(elem.fileName != null, elem.fileName));
+    // List<String> _images = ['assets/images/AppIcon.jpg'];
+    List<String> _images = [];
+    _list[index]
+        .files
+        .forEach((elem) => _images.addIf(elem.fileName != null, elem.fileName));
 
     return Padding(
       padding: EdgeInsets.only(left: 8.0, right: 8, bottom: 4),
@@ -1253,25 +1254,26 @@ class _BuyAnimalState extends State<BuyAnimal>
                               boundaryMargin: const EdgeInsets.all(20.0),
                               minScale: 0.1,
                               maxScale: 1.6,
-                              child: Image.asset('$i')
-                              // Image.network(
-                              //   '$i',
-                              //   loadingBuilder: (BuildContext context,
-                              //       Widget child,
-                              //       ImageChunkEvent loadingProgress) {
-                              //     if (loadingProgress == null) return child;
-                              //     return Center(
-                              //       child: CircularProgressIndicator(
-                              //         value: loadingProgress.expectedTotalBytes !=
-                              //                 null
-                              //             ? loadingProgress
-                              //                     .cumulativeBytesLoaded /
-                              //                 loadingProgress.expectedTotalBytes
-                              //             : null,
-                              //       ),
-                              //     );
-                              //   },
-                              // ),
+                              child: 
+                              // Image.asset('$i')
+                              Image.network(
+                                '$i',
+                                loadingBuilder: (BuildContext context,
+                                    Widget child,
+                                    ImageChunkEvent loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return Center(
+                                    child: CircularProgressIndicator(
+                                      value: loadingProgress.expectedTotalBytes !=
+                                              null
+                                          ? loadingProgress
+                                                  .cumulativeBytesLoaded /
+                                              loadingProgress.expectedTotalBytes
+                                          : null,
+                                    ),
+                                  );
+                                },
+                              ),
                               );
                         }).toList(),
                       ),
@@ -1303,8 +1305,9 @@ class _BuyAnimalState extends State<BuyAnimal>
               decoration: BoxDecoration(
                 image: DecorationImage(
                   fit: BoxFit.cover,
-                  image: AssetImage(_images[0]),
-                  // image: NetworkImage(_images[0]),
+                  // image: 
+                  // AssetImage(_images[0]),
+                  image: NetworkImage(_images[0]),
                 ),
                 borderRadius: BorderRadius.all(Radius.circular(8.0)),
                 color: Colors.redAccent,

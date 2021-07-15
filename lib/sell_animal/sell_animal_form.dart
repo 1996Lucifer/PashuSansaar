@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -28,9 +27,11 @@ import 'sell_animal_controller.dart';
 class SellAnimalForm extends StatefulWidget {
   String userName;
   String userMobileNumber;
-  SellAnimalForm(
-      {Key key, @required this.userName, @required this.userMobileNumber})
-      : super(key: key);
+  SellAnimalForm({
+    Key key,
+    @required this.userName,
+    @required this.userMobileNumber,
+  }) : super(key: key);
 
   @override
   _SellAnimalFormState createState() => _SellAnimalFormState();
