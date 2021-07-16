@@ -1,13 +1,18 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/rendering.dart';
+import 'package:pashusansaar/animal_description/animal_description_controller.dart';
+import 'package:pashusansaar/animal_description/animal_description_model.dart';
+import 'package:pashusansaar/refresh_token/refresh_token_controller.dart';
+import 'package:pashusansaar/utils/constants.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:progress_dialog/progress_dialog.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart' as UrlLauncher;
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart' as intl;
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -37,9 +42,10 @@ class AnimalDescription extends StatefulWidget {
 int _current = 0;
 String whatsappText = '', whatsappUrl = '', _userLocality = '';
 File fileUrl;
-Map<String, dynamic> _animalInfo = {}, _profileData = {};
+Animal animalDesc;
 ProgressDialog pr;
 bool _isLoading = false;
+double lat, long;
 
 class _AnimalDescriptionState extends State<AnimalDescription> {
   static GlobalKey previewContainer =
@@ -50,39 +56,50 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
     getAnimalInfo();
   }
 
+  var formatter = intl.NumberFormat('#,##,000');
+
+  final AnimalDescriptionController animalDescriptionController =
+      Get.put(AnimalDescriptionController());
+  final RefreshTokenController refreshTokenController =
+      Get.put(RefreshTokenController());
+
   getAnimalInfo() async {
-    setState(() {
-      _isLoading = true;
-    });
-    await FirebaseFirestore.instance
-        .collection('buyingAnimalList1')
-        .doc(widget.uniqueId + widget.userId)
-        .get()
-        .then((value) => setState(() {
-              _animalInfo = value.data();
-            }))
-        .catchError(
-          (error) => print(
-            'description===>' + error.toString(),
-          ),
-        );
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool status;
+    pr.show();
 
-    await FirebaseFirestore.instance
-        .collection('userInfo')
-        .doc(FirebaseAuth.instance.currentUser.uid)
-        .get()
-        .then((value) => setState(() {
-              _profileData = value.data();
-            }))
-        .catchError(
-          (error) => print(
-            'description-_profileData===>' + error.toString(),
-          ),
-        );
+    if (ReusableWidgets.isTokenExpired(prefs.getInt('expires') ?? 0)) {
+      status = await refreshTokenController.getRefreshToken(
+          refresh: prefs.getString('refreshToken') ?? '');
+      if (status) {
+        setState(() {
+          prefs.setString(
+              'accessToken', refreshTokenController.accessToken.value);
+          prefs.setString(
+              'refreshToken', refreshTokenController.refreshToken.value);
+          prefs.setInt('expires', refreshTokenController.expires.value);
+        });
+      } else {
+        print('Error getting token==' + status.toString());
+      }
+    }
+
+    lat = prefs.getDouble('latitude');
+    long = prefs.getDouble('longitude');
+
+    Animal data = await animalDescriptionController.animalDescription(
+      userId: widget.userId,
+      animalId: widget.uniqueId,
+      accessToken: prefs.getString('accessToken') ?? '',
+    );
+
+    print('animal info description is $data');
 
     setState(() {
-      _isLoading = false;
+      animalDesc = data;
     });
+
+    pr.hide();
   }
 
   @override
@@ -112,7 +129,7 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
                             SizedBox(
                               height: 10,
                             ),
-                            _infoText1(),
+                            _buildInfowidget(animalDesc),
                             SizedBox(
                               height: 5,
                             ),
@@ -120,11 +137,11 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
                             SizedBox(
                               height: 10,
                             ),
-                            _animalImage(),
+                            _animalImage(animalDesc),
                             SizedBox(
                               height: 10,
                             ),
-                            _infoText2(),
+                            _descriptionText(animalDesc),
                             SizedBox(
                               height: 10,
                             ),
@@ -150,7 +167,7 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
                                         width: 5,
                                       ),
                                       Text(
-                                        _animalInfo['userName'],
+                                        animalDesc.userName,
                                         style: TextStyle(
                                             fontSize: 15,
                                             fontWeight: FontWeight.bold,
@@ -165,7 +182,6 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
                       SizedBox(
                         height: 10,
                       ),
-                      // _getUserData()
                       _getButton(),
                       SizedBox(
                         height: 15,
@@ -194,63 +210,103 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
         ),
       );
 
-  Widget _infoText1() {
+  Row _buildInfowidget(_list) {
     return Row(
       children: [
         Padding(
           padding: const EdgeInsets.all(8),
           child: RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                  text: _animalInfo['userAnimalMilk'],
-                  style: TextStyle(
+            textAlign: TextAlign.center,
+            text: _list.animalType == 1 || _list.animalType == 2
+                ? TextSpan(
+                    text: _list.animalMilk.toString(),
+                    style: TextStyle(
                       color: Colors.grey[700],
                       fontWeight: FontWeight.bold,
-                      fontSize: 16),
-                  children: [
-                    TextSpan(
-                      text: ' ',
-                      style: TextStyle(
-                          color: Colors.grey[700],
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16),
+                      fontSize: 16,
                     ),
-                    TextSpan(
-                      text: "litre_milk".tr,
-                      style: TextStyle(
-                          color: Colors.grey[700],
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16),
-                    ),
-                    TextSpan(
-                      text: ', ',
-                      style: TextStyle(
-                          color: Colors.grey[700],
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16),
-                    ),
-                    TextSpan(
-                      text: bayaatMapping(_animalInfo['userAnimalPregnancy']),
-                      style: TextStyle(
-                          color: Colors.grey[700],
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16),
-                    ),
-                    TextSpan(
-                      text: ', ',
-                      style: TextStyle(
-                          color: Colors.grey[700],
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16),
-                    ),
-                    TextSpan(
-                      text: '₹ ' + _animalInfo['userAnimalPrice'],
-                      style: TextStyle(
-                          color: Colors.grey[700],
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16),
-                    ),
-                  ])),
+                    children: [
+                        TextSpan(
+                          text: ' ',
+                          style: TextStyle(
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                        ),
+                        TextSpan(
+                          text: "litre_milk".tr,
+                          style: TextStyle(
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                        ),
+                        TextSpan(
+                          text: ', ',
+                          style: TextStyle(
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                        ),
+                        TextSpan(
+                          text: bayaatMapping(
+                            intToAnimalBayaatMapping[_list.animalBayat],
+                          ),
+                          style: TextStyle(
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                        ),
+                        TextSpan(
+                          text: ', ',
+                          style: TextStyle(
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                        ),
+                        TextSpan(
+                          text: '₹ ' + formatter.format(_list.animalPrice) ?? 0,
+                          style: TextStyle(
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                        ),
+                      ])
+                : TextSpan(
+                    text: _list.animalBreed == 'not_known'.tr
+                        ? ""
+                        : ReusableWidgets.removeEnglishDataFromName(
+                            _list.animalBreed),
+                    style: TextStyle(
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16),
+                    children: [
+                        TextSpan(
+                          text: ' ',
+                          style: TextStyle(
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                        ),
+                        TextSpan(
+                          text: _list.animalType == 5
+                              ? intToAnimalTypeMapping[5]
+                              : intToAnimalTypeMapping[_list.animalType],
+                          style: TextStyle(
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                        ),
+                        TextSpan(
+                          text:
+                              ', ₹ ' + formatter.format(_list.animalPrice) ?? 0,
+                          style: TextStyle(
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                        ),
+                      ]),
+          ),
         ),
       ],
     );
@@ -268,8 +324,7 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
   }
 
   Widget _distanceTimeMethod() {
-    getPositionBasedOnLatLong(
-        _animalInfo['userLatitude'], _animalInfo['userLongitude']);
+    getPositionBasedOnLatLong(animalDesc.latitude, animalDesc.longitude);
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -283,10 +338,8 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
           RichText(
             textAlign: TextAlign.center,
             text: TextSpan(
-                text: ' ' +
-                    ReusableWidgets.dateDifference(
-                        ReusableWidgets.epochToDateTime(
-                            _animalInfo['dateOfSaving'])),
+                text:
+                    ' ' + ReusableWidgets.dateDifference(animalDesc.createdAt),
                 style: TextStyle(
                     color: Colors.grey[500],
                     fontWeight: FontWeight.bold,
@@ -306,13 +359,13 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
             color: Colors.grey[500],
             size: 13,
           ),
-          _userLocality.length > 20
+          _userLocality.toString().length > 20
               ? Container(
                   width: MediaQuery.of(context).size.width * 0.3,
                   child: RichText(
                     overflow: TextOverflow.ellipsis,
                     text: TextSpan(
-                      text: _userLocality,
+                      text: _userLocality.toString(),
                       style: TextStyle(
                           color: Colors.grey[500],
                           fontWeight: FontWeight.bold,
@@ -322,7 +375,7 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
                 )
               : RichText(
                   text: TextSpan(
-                    text: _userLocality,
+                    text: _userLocality.toString(),
                     style: TextStyle(
                         color: Colors.grey[500],
                         fontWeight: FontWeight.bold,
@@ -355,19 +408,48 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
 
   String _distanceBetweenTwoCoordinates() {
     return (Geodesy().distanceBetweenTwoGeoPoints(
-              LatLng(_animalInfo['userLatitude'], _animalInfo['userLongitude']),
-              LatLng(double.parse(_profileData['latitude']),
-                  double.parse(_profileData['longitude'])),
+              LatLng(animalDesc.latitude, animalDesc.longitude),
+              LatLng(lat, long),
+              //LatLng(animalDesc.location.coordinates[0], animalDesc.location.coordinates[1]),
             ) /
             1000)
         .toStringAsFixed(0);
   }
 
-  Widget _infoText2() {
+  Widget _descriptionText(_list) {
+    String animalBreedCheck =
+        (_list.animalBreed == 'not_known'.tr) ? "" : _list.animalBreed;
+    String animalTypeCheck = (_list.animalType == 5)
+        ? intToAnimalTypeMapping[5]
+        : intToAnimalTypeMapping[_list.animalType];
+
+    String desc = '';
+
+    if (_list.animalType == 3 ||
+        _list.animalType == 4 ||
+        _list.animalType == 5) {
+      desc =
+          'ये $animalBreedCheck $animalTypeCheck ${_list.animalAge} साल की है। ';
+    } else {
+      desc =
+          'ये ${_list.animalBreed} ${intToAnimalTypeMapping[_list.animalType]} ${_list.animalAge} साल का है। ';
+      if (_list.recentBayatTime != null) {
+        desc = desc +
+            'यह ${intToRecentBayaatTime[_list.recentBayatTime]} ब्यायी है। ';
+      }
+      if (_list.pregnantTime != null) {
+        desc = desc + 'यह अभी ${intToPregnantTime[_list.pregnantTime]} है। ';
+      }
+      if (_list.animalMilkCapacity != null) {
+        desc = desc +
+            'पिछले बार के हिसाब से दूध कैपेसिटी ${_list.animalMilkCapacity} लीटर है। ';
+      }
+    }
+    desc = desc + (animalDesc.moreInfo ?? "");
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Text(
-        _animalInfo['userAnimalDescription'] ?? "",
+        desc,
         maxLines: 4,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(color: Colors.grey[600], fontSize: 14.5),
@@ -378,7 +460,7 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
   _getCallButton() => RaisedButton.icon(
         color: Colors.blue,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        onPressed: () => launch("tel://${_animalInfo['userMobileNumber']}"),
+        onPressed: () => launch("tel://${animalDesc.mobile}"),
         label: Text(
           'call'.tr,
           style: TextStyle(
@@ -395,14 +477,14 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         onPressed: () async {
           whatsappText =
-              'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${_animalInfo['userName']}, $_userLocality \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
+              'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${animalDesc.userName}, $_userLocality \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
           whatsappUrl =
-              "https://api.whatsapp.com/send/?phone=+91 ${_animalInfo['userMobileNumber']}&text=$whatsappText";
+              "https://api.whatsapp.com/send/?phone=+91 ${animalDesc.mobile}&text=$whatsappText";
           await UrlLauncher.canLaunch(whatsappUrl) != null
               ? UrlLauncher.launch(Uri.encodeFull(whatsappUrl))
               : ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text(
-                      '${_animalInfo['userMobileNumber']} is not present in Whatsapp'),
+                  content:
+                      Text('${animalDesc.mobile} is not present in Whatsapp'),
                   duration: Duration(milliseconds: 300),
                   padding: EdgeInsets.symmetric(horizontal: 8),
                   behavior: SnackBarBehavior.floating,
@@ -453,11 +535,11 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
           final shortDynamicLink = await parameters.buildShortLink();
           final Uri shortUrl = shortDynamicLink.shortUrl;
 
-          await takeScreenShot(_animalInfo['uniqueId']);
+          await takeScreenShot(animalDesc.sId);
           Share.shareFiles([fileUrl.path],
               mimeTypes: ['images/png'],
               text:
-                  "नस्ल: ${_animalInfo['userAnimalBreed']}\nजानकारी: ${_animalInfo['userAnimalDescription']}\nदूध(प्रति दिन): ${_animalInfo['userAnimalMilk']} Litre\n\nपशु देखे: ${shortUrl.toString()}",
+                  "नस्ल: ${animalDesc.animalBreed}\nजानकारी: ${animalDesc.moreInfo}\nदूध(प्रति दिन): ${animalDesc.animalMilkCapacity.toString()} Litre\n\nपशु देखे: ${shortUrl.toString()}",
               subject: 'animal_info'.tr);
         },
         icon: Icon(Icons.share, color: Colors.white, size: 16),
@@ -505,15 +587,11 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
     pr.hide();
   }
 
-  Widget _animalImage() {
+  Widget _animalImage(_list) {
     List<String> _images = [];
-    [
-      _animalInfo['image1'],
-      _animalInfo['image2'],
-      _animalInfo['image3'],
-      _animalInfo['image4'],
-    ].forEach((element) =>
-        _images.addIf(element != null && element.isNotEmpty, element));
+    _list.files
+        .forEach((elem) => _images.addIf(elem.fileName != null, elem.fileName));
+
     return Padding(
         padding: EdgeInsets.only(left: 8.0, right: 8, bottom: 4),
         child: GestureDetector(

@@ -1,0 +1,39 @@
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
+import 'package:get/get.dart';
+import 'package:pashusansaar/animal_description/animal_description_model.dart';
+import 'package:pashusansaar/utils/urls.dart';
+
+class AnimalDescriptionController extends GetxController {
+  animalDescription({String animalId, String userId, String accessToken}) async {
+    Map<String, dynamic> payload = {
+      "animalId": animalId,
+      "userId": userId,
+    };
+
+    try {
+      var response = await Dio().post(
+        GlobalUrl.baseUrl + GlobalUrl.animalDescription,
+        data: json.encode(payload),
+        options: Options(
+          headers: {
+            "Authorization": accessToken,
+          },
+        ),
+      );
+
+      if (response.data != null) {
+        AnimalDescriptionModel animalDescriptionData;
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          animalDescriptionData =
+              AnimalDescriptionModel.fromJson(response.data);
+        }
+        return animalDescriptionData.animal;
+      }
+    } catch (e) {
+      print("Getting exception in getting animal description _______$e");
+      return {};
+    }
+  }
+}

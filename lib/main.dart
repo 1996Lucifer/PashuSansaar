@@ -8,7 +8,7 @@ import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
-import 'package:pashusansaar/buy_animal/animal_description_page.dart';
+import 'package:pashusansaar/animal_description/animal_description_page.dart';
 import 'package:pashusansaar/splash_screen.dart';
 import 'package:pashusansaar/translation/message.dart';
 import 'package:pashusansaar/utils/colors.dart';

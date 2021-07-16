@@ -40,8 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Map _referralWinnerData = {};
   final geo = Geoflutterfire();
   PageController _pageController;
-  String _referralUniqueValue = '',
-      _mobileNumber = '';
+  String _referralUniqueValue = '', _mobileNumber = '';
   bool _checkReferral = false;
   double lat = 0.0, long = 0.0;
   LocationData _locate;
@@ -51,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final RefreshTokenController refreshTokenController =
       Get.put(RefreshTokenController());
   final MyAnimalListController myAnimalListController =
-  Get.put(MyAnimalListController());
+      Get.put(MyAnimalListController());
 
   @override
   void initState() {
@@ -229,8 +228,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     BuyAnimalModel data = await buyAnimalController.getAnimal(
-      // latitude: 40.1,
-      // longitude: -97.1,
+      userId: prefs.getString('userId'),
       latitude: lat,
       longitude: long,
       animalType: null,
@@ -240,6 +238,10 @@ class _HomeScreenState extends State<HomeScreen> {
       accessToken: prefs.getString('accessToken') ?? '',
     );
 
+    print('userId is ${prefs.getString('userId')}');
+    print('latitude is $lat');
+    print('longitude is $long');
+    print('access token is ${prefs.getString('accessToken')}');
 
     setState(() {
       _animalInfo = data.result;
@@ -250,13 +252,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
     print('animalInfo===' + _animalInfo.length.toString());
 
-     getAnimalSellingInfo();
+    getAnimalSellingInfo();
   }
 
   getAnimalSellingInfo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool status;
-    //pr.show();
 
     if (ReusableWidgets.isTokenExpired(prefs.getInt('expires') ?? 0)) {
       status = await refreshTokenController.getRefreshToken(
@@ -283,9 +284,6 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _sellingAnimalInfo = dataSellingInfo;
     });
-
-    pr.hide();
-
   }
 
   getProfileInfo() async {

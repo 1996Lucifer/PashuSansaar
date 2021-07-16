@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dio/dio.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +11,9 @@ import 'package:intl/intl.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:get/get.dart';
+import 'package:pashusansaar/utils/urls.dart';
 import 'package:progress_dialog/progress_dialog.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../home_screen.dart';
 import '../utils/constants.dart' as constant;
 
@@ -376,6 +381,7 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
                     fontWeight: FontWeight.w600),
               ),
               onPressed: () async {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
                 String countryCode = '';
                 try {
                   var addresses = await Geocoder.local
@@ -441,69 +447,74 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
                   pr.style(message: 'progress_dialog_message'.tr);
                   pr.show();
 
+                  Map<String, dynamic> payload = {
+                    "userId": prefs.getString('userId'),
+                    "animalType": animalInfo['animalType'],
+                    "animalBreed": ReusableWidgets.removeEnglishDataFromName(
+                        animalInfo['animalBreed']),
+                    "animalMilk": animalInfo['animalMilk'],
+                    "zipCode": animalInfo['zipCode'],
+                    "animalPrice": animalInfo['animalBudget'],
+                    "district": "Hardoi",
+                  };
+
                   try {
-                    await FirebaseFirestore.instance
-                        .collection("buyerRequirementForm")
-                        .doc(ReusableWidgets.randomIDGenerator() +
-                            ReusableWidgets.randomCodeGenerator())
-                        .set(
-                      {
-                        "animalType": animalInfo['animalType'],
-                        "animalBreed":
-                            ReusableWidgets.removeEnglishDataFromName(
-                                animalInfo['animalBreed']),
-                        "animalMilk": animalInfo['animalMilk'],
-                        "animalBudget": animalInfo['animalBudget'],
-                        'mobile': widget.userMobileNumber,
-                        'userName': widget.userName,
-                        'userId': FirebaseAuth.instance.currentUser.uid,
-                        "zipCode": animalInfo['zipCode'],
-                        "dateOfSaving": DateFormat()
-                            .add_yMMMd()
-                            .add_jm()
-                            .format(DateTime.now())
-                      },
-                    ).then((value) {
-                      pr.hide();
-                      return showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                                title: Text('info'.tr),
-                                content: Text('animal_info_saved'.tr),
-                                actions: <Widget>[
-                                  TextButton(
-                                      child: Text(
-                                        'Ok'.tr,
-                                        style: TextStyle(color: appPrimaryColor),
-                                      ),
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                        Get.offAll(() => HomeScreen(
-                                              selectedIndex: 0,
-                                            ));
-                                      }),
-                                ]);
-                          });
-                    });
+                    var response = await Dio().post(
+                      GlobalUrl.baseUrl + GlobalUrl.postBuyerRequirement,
+                      data: json.encode(payload),
+                      options: Options(
+                        headers: {
+                          "Authorization": prefs.getString('accessToken'),
+                        },
+                      ),
+                    );
+
+                    if (response.data != null) {
+                      if (response.statusCode == 200 ||
+                          response.statusCode == 201) {
+                        pr.hide();
+                        return showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                  title: Text('info'.tr),
+                                  content: Text('animal_info_saved'.tr),
+                                  actions: <Widget>[
+                                    TextButton(
+                                        child: Text(
+                                          'Ok'.tr,
+                                          style:
+                                              TextStyle(color: appPrimaryColor),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                          Get.offAll(() => HomeScreen(
+                                                selectedIndex: 0,
+                                              ));
+                                        }),
+                                  ]);
+                            });
+                      }
+                    }
                   } catch (e) {
                     pr.hide();
-                    FirebaseFirestore.instance
-                        .collection('logger')
-                        .doc(widget.userMobileNumber)
-                        .collection('sell-profile')
-                        .doc()
-                        .set({
-                      'issue': e.toString(),
-                      'userId': FirebaseAuth.instance.currentUser == null
-                          ? ''
-                          : FirebaseAuth.instance.currentUser.uid,
-                      'mobile': widget.userMobileNumber,
-                      'date': DateFormat()
-                          .add_yMMMd()
-                          .add_jm()
-                          .format(DateTime.now()),
-                    });
+                    return showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                              title: Text('error'.tr),
+                              content: Text(e.toString()),
+                              actions: <Widget>[
+                                TextButton(
+                                    child: Text(
+                                      'Ok'.tr,
+                                      style: TextStyle(color: appPrimaryColor),
+                                    ),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    }),
+                              ]);
+                        });
                   }
                 }
               },
@@ -541,3 +552,163 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
     );
   }
 }
+
+//
+//
+
+//<<<<<<<<<<<<<< Save Button >>>>>>>>>>>>>>>>>>
+//
+//
+//
+// saveButton() => Padding(
+//   padding: EdgeInsets.all(15),
+//   child: SizedBox(
+//       width: double.infinity,
+//       child: RaisedButton(
+//         padding: EdgeInsets.all(10.0),
+//         shape: RoundedRectangleBorder(
+//           borderRadius: BorderRadius.circular(24),
+//         ),
+//         elevation: 5,
+//         child: Text(
+//           'save_button'.tr,
+//           style: TextStyle(
+//               fontSize: 20,
+//               color: Colors.white,
+//               fontStyle: FontStyle.normal,
+//               fontWeight: FontWeight.w600),
+//         ),
+//         onPressed: () async {
+//           String countryCode = '';
+//           try {
+//             var addresses = await Geocoder.local
+//                 .findAddressesFromQuery(animalInfo['zipCode']);
+//             var first = addresses.first;
+//             countryCode = first.countryCode;
+//           } catch (e) {
+//             countryCode = 'XYZ';
+//           }
+//
+//           if (animalInfo['animalType'] == null)
+//             ReusableWidgets.showDialogBox(
+//               context,
+//               'error'.tr,
+//               Text('animal_type_error'.tr),
+//             );
+//           else if (animalInfo['animalBreed'] == null)
+//             ReusableWidgets.showDialogBox(
+//               context,
+//               'error'.tr,
+//               Text('animal_breed_error'.tr),
+//             );
+//           else if ([0, 1].contains(
+//             constant.animalType.indexOf(animalInfo['animalType']),
+//           ) &&
+//               (animalInfo['animalMilk'] == null ||
+//                   animalInfo['animalMilk'].isEmpty))
+//             ReusableWidgets.showDialogBox(
+//               context,
+//               'error'.tr,
+//               Text('animal_milk_error'.tr),
+//             );
+//           else if ([0, 1].contains(constant.animalType
+//               .indexOf(animalInfo['animalType'])) &&
+//               (animalInfo['animalMilk'] != null ||
+//                   animalInfo['animalMilk'].isNotEmpty) &&
+//               (int.parse(animalInfo['animalMilk']) > 70))
+//             ReusableWidgets.showDialogBox(
+//               context,
+//               'error'.tr,
+//               Text('maximum_milk_length'.tr),
+//             );
+//           else if (animalInfo['animalBudget'] == null ||
+//               animalInfo['animalBudget'].isEmpty)
+//             ReusableWidgets.showDialogBox(
+//               context,
+//               'error'.tr,
+//               Text('animal_price_error'.tr),
+//             );
+//           else if (animalInfo['zipCode'] == null) {
+//             ReusableWidgets.showDialogBox(
+//                 context, 'error'.tr, Text("error_empty_zipcode".tr));
+//           } else if (int.parse(animalInfo['zipCode']) < 6) {
+//             ReusableWidgets.showDialogBox(
+//                 context, 'error'.tr, Text("error_length_zipcode".tr));
+//           } else if (countryCode != "IN" || countryCode == 'XYZ') {
+//             ReusableWidgets.showDialogBox(
+//                 context, 'error'.tr, Text("invalid_zipcode_error".tr));
+//           } else {
+//             print(animalInfo);
+//             pr = new ProgressDialog(context,
+//                 type: ProgressDialogType.Normal, isDismissible: false);
+//             pr.style(message: 'progress_dialog_message'.tr);
+//             pr.show();
+//
+//             try {
+//               await FirebaseFirestore.instance
+//                   .collection("buyerRequirementForm")
+//                   .doc(ReusableWidgets.randomIDGenerator() +
+//                   ReusableWidgets.randomCodeGenerator())
+//                   .set(
+//                 {
+//                   "animalType": animalInfo['animalType'],
+//                   "animalBreed":
+//                   ReusableWidgets.removeEnglishDataFromName(
+//                       animalInfo['animalBreed']),
+//                   "animalMilk": animalInfo['animalMilk'],
+//                   "animalBudget": animalInfo['animalBudget'],
+//                   'mobile': widget.userMobileNumber,
+//                   'userName': widget.userName,
+//                   'userId': FirebaseAuth.instance.currentUser.uid,
+//                   "zipCode": animalInfo['zipCode'],
+//                   "dateOfSaving": DateFormat()
+//                       .add_yMMMd()
+//                       .add_jm()
+//                       .format(DateTime.now())
+//                 },
+//               ).then((value) {
+//                 pr.hide();
+//                 return showDialog(
+//                     context: context,
+//                     builder: (context) {
+//                       return AlertDialog(
+//                           title: Text('info'.tr),
+//                           content: Text('animal_info_saved'.tr),
+//                           actions: <Widget>[
+//                             TextButton(
+//                                 child: Text(
+//                                   'Ok'.tr,
+//                                   style: TextStyle(color: appPrimaryColor),
+//                                 ),
+//                                 onPressed: () {
+//                                   Navigator.of(context).pop();
+//                                   Get.offAll(() => HomeScreen(
+//                                     selectedIndex: 0,
+//                                   ));
+//                                 }),
+//                           ]);
+//                     });
+//               });
+//             } catch (e) {
+//               pr.hide();
+//               FirebaseFirestore.instance
+//                   .collection('logger')
+//                   .doc(widget.userMobileNumber)
+//                   .collection('sell-profile')
+//                   .doc()
+//                   .set({
+//                 'issue': e.toString(),
+//                 'userId': FirebaseAuth.instance.currentUser == null
+//                     ? ''
+//                     : FirebaseAuth.instance.currentUser.uid,
+//                 'mobile': widget.userMobileNumber,
+//                 'date': DateFormat()
+//                     .add_yMMMd()
+//                     .add_jm()
+//                     .format(DateTime.now()),
+//               });
+//             }
+//           }
+//         },
+//       )),
+// );

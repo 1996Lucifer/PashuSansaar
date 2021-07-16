@@ -8,6 +8,7 @@ import 'buy_animal_model.dart';
 
 class BuyAnimalController extends GetxController {
   getAnimal({
+    String userId,
     double latitude,
     double longitude,
     int distance,
@@ -18,6 +19,7 @@ class BuyAnimalController extends GetxController {
     String accessToken,
   }) async {
     Map<String, dynamic> payload = {
+      "userId": userId,
       "latitude": latitude,
       "longitude": longitude,
       "animalType": animalType,
