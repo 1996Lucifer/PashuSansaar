@@ -37,6 +37,7 @@ class Result {
   int animalPrice;
   bool isRecentBayat;
   int recentBayatTime;
+  int animalHasBaby;
   bool isPregnant;
   int pregnantTime;
   String moreInfo;
@@ -61,6 +62,7 @@ class Result {
     this.animalPrice,
     this.isRecentBayat,
     this.recentBayatTime,
+    this.animalHasBaby,
     this.isPregnant,
     this.pregnantTime,
     this.moreInfo,
@@ -86,6 +88,7 @@ class Result {
     animalPrice = json['animalPrice'];
     isRecentBayat = json['isRecentBayat'];
     recentBayatTime = json['recentBayatTime'];
+    animalHasBaby = json['animalHasBaby'];
     isPregnant = json['isPregnant'];
     pregnantTime = json['pregnantTime'];
     moreInfo = json['moreInfo'];
@@ -117,6 +120,7 @@ class Result {
     data['animalPrice'] = this.animalPrice;
     data['isRecentBayat'] = this.isRecentBayat;
     data['recentBayatTime'] = this.recentBayatTime;
+    data['animalHasBaby'] = this.animalHasBaby;
     data['isPregnant'] = this.isPregnant;
     data['pregnantTime'] = this.pregnantTime;
     data['moreInfo'] = this.moreInfo;

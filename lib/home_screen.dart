@@ -2,14 +2,13 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import 'package:location/location.dart';
+import 'package:location/location.dart' as locate;
 import 'package:pashusansaar/buy_animal/buy_animal.dart';
 import 'package:pashusansaar/buy_animal/buy_animal_model.dart';
-import 'package:pashusansaar/seller_contact/seller_contact_controller.dart';
+import 'package:pashusansaar/my_animals/myAnimalModel.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:pashusansaar/utils/global.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -35,23 +34,22 @@ class _HomeScreenState extends State<HomeScreen> {
   ProgressDialog pr;
 
   List<Result> _animalInfo = [];
-  List _sellingAnimalInfo = [];
+  List<MyAnimals> _sellingAnimalInfo = [];
   Map _profileData = {};
   Map _referralWinnerData = {};
   final geo = Geoflutterfire();
   PageController _pageController;
-  String _referralUniqueValue = '',
-      _mobileNumber = '';
+  String _referralUniqueValue = '', _mobileNumber = '';
   bool _checkReferral = false;
   double lat = 0.0, long = 0.0;
-  LocationData _locate;
+  locate.LocationData _locate;
 
   final BuyAnimalController buyAnimalController =
       Get.put(BuyAnimalController());
   final RefreshTokenController refreshTokenController =
       Get.put(RefreshTokenController());
   final MyAnimalListController myAnimalListController =
-  Get.put(MyAnimalListController());
+      Get.put(MyAnimalListController());
 
   @override
   void initState() {
@@ -69,11 +67,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   getLocationLocate() async {
-    Location location = new Location();
+    locate.Location location = locate.Location();
 
     bool _serviceEnabled;
-    PermissionStatus _permissionGranted;
-    LocationData _locationData;
+    locate.PermissionStatus _permissionGranted;
+    locate.LocationData _locationData;
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -86,9 +84,9 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     _permissionGranted = await location.hasPermission();
-    if (_permissionGranted == PermissionStatus.denied) {
+    if (_permissionGranted == locate.PermissionStatus.denied) {
       _permissionGranted = await location.requestPermission();
-      if (_permissionGranted != PermissionStatus.granted) {
+      if (_permissionGranted != locate.PermissionStatus.granted) {
         return;
       }
     }
@@ -238,8 +236,8 @@ class _HomeScreenState extends State<HomeScreen> {
       maxMilk: null,
       page: 1,
       accessToken: prefs.getString('accessToken') ?? '',
+      userId: prefs.getString('userId'),
     );
-
 
     setState(() {
       _animalInfo = data.result;
@@ -250,7 +248,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     print('animalInfo===' + _animalInfo.length.toString());
 
-     getAnimalSellingInfo();
+    getAnimalSellingInfo();
   }
 
   getAnimalSellingInfo() async {
@@ -274,18 +272,15 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     }
 
-    List dataSellingInfo = await myAnimalListController.getAnimalList(
+    MyAnimalModel dataSellingInfo = await myAnimalListController.getAnimalList(
       userId: prefs.getString('userId'),
       token: prefs.getString('accessToken'),
       page: 1,
     );
 
     setState(() {
-      _sellingAnimalInfo = dataSellingInfo;
+      _sellingAnimalInfo = dataSellingInfo.myAnimals;
     });
-
-    pr.hide();
-
   }
 
   getProfileInfo() async {
@@ -414,9 +409,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 latitude: lat,
                 longitude: long),
             SellAnimalMain(
-                sellingAnimalInfo: _sellingAnimalInfo,
-                userName: _profileData['name'],
-                userMobileNumber: _profileData['mobile']),
+              sellingAnimalInfo: _sellingAnimalInfo,
+              userName: _profileData['name'],
+              userMobileNumber: _profileData['mobile'],
+            ),
             ProfileMain(
               profileData: _profileData,
               sellingAnimalInfo: _sellingAnimalInfo,

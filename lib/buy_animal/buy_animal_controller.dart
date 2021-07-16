@@ -16,6 +16,7 @@ class BuyAnimalController extends GetxController {
     int minMilk,
     int maxMilk,
     String accessToken,
+    String userId,
   }) async {
     Map<String, dynamic> payload = {
       "latitude": latitude,
@@ -23,7 +24,8 @@ class BuyAnimalController extends GetxController {
       "animalType": animalType,
       "minMilk": minMilk,
       "maxMilk": maxMilk,
-      "page": page
+      "page": page,
+      "userId": userId,
     };
 
     try {

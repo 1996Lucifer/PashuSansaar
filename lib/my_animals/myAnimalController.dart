@@ -6,7 +6,11 @@ import 'package:pashusansaar/my_animals/myAnimalModel.dart';
 import 'package:pashusansaar/utils/urls.dart';
 
 class MyAnimalListController extends GetxController {
-  getAnimalList({String userId, String token, int page}) async {
+  getAnimalList({
+    String userId,
+    String token,
+    int page,
+  }) async {
     Map<String, dynamic> payload = {
       "userId": userId,
       "page": page,
@@ -28,7 +32,7 @@ class MyAnimalListController extends GetxController {
         if (response.statusCode == 200 || response.statusCode == 201) {
           myAnimalData = MyAnimalModel.fromJson(response.data);
         }
-        return myAnimalData.myAnimals;
+        return myAnimalData;
       }
     } catch (e) {
       print("Getting my animal list exception _______$e");

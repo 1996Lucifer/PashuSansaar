@@ -1254,6 +1254,8 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                                 stringToYesNo[extraInfoData['isPregnantYesNo']],
                             pregnantTime: stringToPregnantTime[
                                 extraInfoData['animalIfPregnant']],
+                            animalHasBaby: stringToAnimalHasBaby[
+                                extraInfoData['animalHasBaby']],
                             userId: prefs.getString('userId'),
                             moreInfo: extraInfoData['moreInfo'],
                             files: _imageToBeUploaded,
@@ -1280,10 +1282,6 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                           );
                         }
 
-                        bool uploadStatus = _isImageUploaded
-                            .every((element) => element == true);
-
-                        // print('][]' + uploadStatus.toString());
                         print('][]==' + _imageToBeUploaded.toString());
 
                         if (saveAnimalData && _imageToBeUploaded.isNotEmpty) {
