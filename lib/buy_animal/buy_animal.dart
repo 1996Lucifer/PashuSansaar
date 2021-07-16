@@ -148,6 +148,7 @@ class _BuyAnimalState extends State<BuyAnimal>
         distance: _distance ?? 50000,
         page: _page,
         accessToken: prefs.getString('accessToken') ?? '',
+        userId: prefs.getString('userId'),
       );
 
       List<Result> _temp = widget.animalInfo;
@@ -1182,10 +1183,10 @@ class _BuyAnimalState extends State<BuyAnimal>
         desc =
             desc + 'यह अभी ${intToPregnantTime[animalInfo.pregnantTime]} है। ';
       }
-      // desc = desc +
-      //     (animalInfo.animalHasBaby == null || animalInfo.animalHasBaby == 0
-      //         ? 'इसके साथ में बच्चा नहीं है। '
-      //         : 'इसके साथ में ${intToAnimalHasBaby[animalInfo.animalHasBaby]}। ',);
+      desc = desc +
+          (animalInfo.animalHasBaby == null || animalInfo.animalHasBaby == 0
+              ? 'इसके साथ में बच्चा नहीं है। '
+              : 'इसके साथ में ${intToAnimalHasBaby[animalInfo.animalHasBaby]}। ');
       if (animalInfo.animalMilkCapacity != null) {
         desc = desc +
             'पिछले बार के हिसाब से दूध कैपेसिटी ${animalInfo.animalMilkCapacity} लीटर है। ';
@@ -1251,30 +1252,30 @@ class _BuyAnimalState extends State<BuyAnimal>
                         ),
                         items: _images.map((i) {
                           return InteractiveViewer(
-                              boundaryMargin: const EdgeInsets.all(20.0),
-                              minScale: 0.1,
-                              maxScale: 1.6,
-                              child: 
-                              // Image.asset('$i')
-                              Image.network(
-                                '$i',
-                                loadingBuilder: (BuildContext context,
-                                    Widget child,
-                                    ImageChunkEvent loadingProgress) {
-                                  if (loadingProgress == null) return child;
-                                  return Center(
-                                    child: CircularProgressIndicator(
-                                      value: loadingProgress.expectedTotalBytes !=
-                                              null
-                                          ? loadingProgress
-                                                  .cumulativeBytesLoaded /
-                                              loadingProgress.expectedTotalBytes
-                                          : null,
-                                    ),
-                                  );
-                                },
-                              ),
-                              );
+                            boundaryMargin: const EdgeInsets.all(20.0),
+                            minScale: 0.1,
+                            maxScale: 1.6,
+                            child:
+                                // Image.asset('$i')
+                                Image.network(
+                              '$i',
+                              loadingBuilder: (BuildContext context,
+                                  Widget child,
+                                  ImageChunkEvent loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    value: loadingProgress.expectedTotalBytes !=
+                                            null
+                                        ? loadingProgress
+                                                .cumulativeBytesLoaded /
+                                            loadingProgress.expectedTotalBytes
+                                        : null,
+                                  ),
+                                );
+                              },
+                            ),
+                          );
                         }).toList(),
                       ),
                       Row(
@@ -1305,7 +1306,7 @@ class _BuyAnimalState extends State<BuyAnimal>
               decoration: BoxDecoration(
                 image: DecorationImage(
                   fit: BoxFit.cover,
-                  // image: 
+                  // image:
                   // AssetImage(_images[0]),
                   image: NetworkImage(_images[0]),
                 ),
