@@ -1,9 +1,13 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get/get.dart';
 import 'package:pashusansaar/login/login_screen.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:splash_screen_view/SplashScreenView.dart';
 import 'home_screen.dart';
+import 'legacy_user/legacy_user_controller.dart';
+import 'legacy_user/legacy_user_model.dart';
 
 class SplashScreen extends StatefulWidget {
   SplashScreen({Key key}) : super(key: key);
@@ -15,34 +19,56 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   bool isLoggedIn = false;
   List<String> newVersion = [], currentVersion = [];
+  final LegacyUserController _legacyUserController =
+      Get.put(LegacyUserController());
 
   @override
   void initState() {
     super.initState();
-    getLoginCheck();
+    _checkLegacyUser();
   }
 
-  getLoginCheck() async {
+  _checkLegacyUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    String _userId = prefs.getString('userId') ?? '';
+    String _accessToken = prefs.getString('accessToken') ?? '';
 
+    if (_userId.isEmpty && _accessToken.isEmpty) {
+      _getLegacyUser(prefs);
+    } else {
+      setState(() {
+        isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+        newVersion = prefs.getStringList('newVersion') ?? [];
+        currentVersion = prefs.getStringList('currentVersion') ?? [];
+        prefs.setInt('count', 0);
+      });
+    }
+  }
+
+  _getLegacyUser(prefs) async {
+    LegacyUserModel legacyUserData = _legacyUserController.getLegacyUserData(
+      number: FirebaseAuth.instance.currentUser.phoneNumber,
+      legacyId: FirebaseAuth.instance.currentUser.uid,
+    );
     setState(() {
+      prefs.setString('accessToken', legacyUserData.accessToken);
+      prefs.setString('refreshToken', legacyUserData.refreshToken);
+      prefs.setInt('expires', legacyUserData.expires);
+      prefs.setString('userId', legacyUserData.userId);
       isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
       newVersion = prefs.getStringList('newVersion') ?? [];
       currentVersion = prefs.getStringList('currentVersion') ?? [];
       prefs.setInt('count', 0);
     });
-    print('isLoggedIn===' + isLoggedIn.toString());
-    print('newVersion===' + newVersion.toString());
-    print('currentVersion===' + currentVersion.toString());
   }
 
   @override
   Widget build(BuildContext context) {
     return SplashScreenView(
       home: isLoggedIn
-      //  &&
-      //         ([0, 1].contains(newVersion[0].compareTo(currentVersion[0]))) &&
-      //         ([0, 1].contains(newVersion[1].compareTo(currentVersion[1])))
+          //  &&
+          //         ([0, 1].contains(newVersion[0].compareTo(currentVersion[0]))) &&
+          //         ([0, 1].contains(newVersion[1].compareTo(currentVersion[1])))
           ? HomeScreen(selectedIndex: 0)
           : Login(),
       duration: 2000,

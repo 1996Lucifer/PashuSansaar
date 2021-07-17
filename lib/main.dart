@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-// import 'package:android_play_install_referrer/android_play_install_referrer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
@@ -101,30 +100,6 @@ class _MyAppState extends State<MyApp> {
   final playStoreUrl =
       'https://play.google.com/store/apps/details?id=dj.pashusansaar';
   List<String> newVersion, currentVersion;
-  bool _checkReferral = false;
-
-  isVpnActive() async {
-    if (await CheckVpnConnection.isVpnActive()) {
-      await FirebaseFirestore.instance
-          .collection('logger')
-          .doc(ReusableWidgets.randomCodeGenerator() +
-              ReusableWidgets.randomIDGenerator())
-          .collection('vpn')
-          .doc()
-          .set({
-        'issue': 'VPN is connected',
-        'userId': FirebaseAuth.instance.currentUser == null
-            ? ''
-            : FirebaseAuth.instance.currentUser.uid,
-        'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
-      });
-      return ReusableWidgets.showDialogBox(
-          context, 'error'.tr, Text('vpn_issue'.tr),
-          cta: true, barrierDismissible: false);
-    } else {
-      getReferralCheck();
-    }
-  }
 
   getMessageOpen() async =>
       await FirebaseMessaging.instance.getInitialMessage();
@@ -172,7 +147,6 @@ class _MyAppState extends State<MyApp> {
         .listen((RemoteMessage message) => _goToDeeplyNestedView(message.data));
 
     initDynamicLink();
-    isVpnActive();
   }
 
   initDynamicLink() async {
@@ -205,13 +179,6 @@ class _MyAppState extends State<MyApp> {
               userId: dynamicData['userId'],
               uniqueId: dynamicData['uniqueId'])));
     }
-  }
-
-  getReferralCheck() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _checkReferral = prefs.getBool('checkReferral') ?? false;
-    });
 
     await versionCheck(context);
   }
@@ -244,33 +211,6 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  Future<void> initReferrerDetails(String unique) async {
-    try {
-      // ReferrerDetails referrerDetails =
-      //     await AndroidPlayInstallReferrer.installReferrer;
-
-      // List<String> str = referrerDetails.installReferrer.split('&');
-
-      // Map<String, dynamic> _referralInfo1 = {
-      //   'installBeginTimestampSeconds':
-      //       referrerDetails.installBeginTimestampSeconds,
-      //   'installReferrer': {
-      //     'utmSource': str[0].substring(11),
-      //     'utmMedium': str[1].substring(11)
-      //   },
-      //   'installVersion': referrerDetails.installVersion,
-      //   'dateOfSaving': ReusableWidgets.dateTimeToEpoch(DateTime.now()),
-      // };
-
-      // await FirebaseFirestore.instance
-      //     .collection('referralData')
-      //     .doc(unique)
-      //     .set(_referralInfo1);
-    } catch (e) {
-      print('e-referral--->' + e.toString());
-    }
-  }
-
   _showVersionDialog(
       List<String> newVer, List<String> currentVer, bool forceUpdate) async {
     await Future.delayed(Duration(milliseconds: 50));
@@ -284,31 +224,32 @@ class _MyAppState extends State<MyApp> {
         String btnLabel = "अपडेट करे";
         String btnLabelCancel = "बाद में";
         return WillPopScope(
-            onWillPop: () async => false,
-            child: AlertDialog(
-              title: Text(title),
-              content: Text(message),
-              actions: <Widget>[
-                forceUpdate
-                    ? SizedBox.shrink()
-                    : RaisedButton(
-                        color: appPrimaryColor,
-                        child: Text(
-                          btnLabelCancel,
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        onPressed: () => Navigator.of(context).pop(),
-                      ),
+          onWillPop: () async => false,
+          child: AlertDialog(
+            title: Text(title),
+            content: Text(message),
+            actions: <Widget>[
+              if (!forceUpdate) ...[
                 RaisedButton(
                   color: appPrimaryColor,
                   child: Text(
-                    btnLabel,
+                    btnLabelCancel,
                     style: TextStyle(color: Colors.white),
                   ),
-                  onPressed: () async => await URLauncher.launch(playStoreUrl),
+                  onPressed: () => Navigator.of(context).pop(),
                 ),
               ],
-            ));
+              RaisedButton(
+                color: appPrimaryColor,
+                child: Text(
+                  btnLabel,
+                  style: TextStyle(color: Colors.white),
+                ),
+                onPressed: () async => await URLauncher.launch(playStoreUrl),
+              ),
+            ],
+          ),
+        );
       },
     );
   }
@@ -323,31 +264,32 @@ class _MyAppState extends State<MyApp> {
     ]);
 
     return GetMaterialApp(
-        title: 'PashuSansaar',
-        debugShowCheckedModeBanner: false,
-        translations: Messages(), // translations
-        locale: Locale('hn', 'IN'),
-        theme: ThemeData(
-          fontFamily: 'Mukta',
-          primaryColor: appPrimaryColor,
-          buttonColor: appPrimaryColor,
-          iconTheme: IconThemeData(color: appPrimaryColor),
-          accentColor: appPrimaryColor,
-          textSelectionTheme: TextSelectionThemeData(
-            cursorColor: appPrimaryColor,
-            selectionHandleColor: appPrimaryColor,
-          ),
-          indicatorColor: appPrimaryColor,
-          scaffoldBackgroundColor: Colors.white,
-          inputDecorationTheme: InputDecorationTheme(
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(
-                color: appPrimaryColor,
-              ),
-            ),
-            // labelStyle: TextStyle(color: appPrimaryColor),
-          ),
+      title: 'PashuSansaar',
+      debugShowCheckedModeBanner: false,
+      translations: Messages(), // translations
+      locale: Locale('hn', 'IN'),
+      theme: ThemeData(
+        fontFamily: 'Mukta',
+        primaryColor: appPrimaryColor,
+        buttonColor: appPrimaryColor,
+        iconTheme: IconThemeData(color: appPrimaryColor),
+        accentColor: appPrimaryColor,
+        textSelectionTheme: TextSelectionThemeData(
+          cursorColor: appPrimaryColor,
+          selectionHandleColor: appPrimaryColor,
         ),
-        home: SplashScreen());
+        indicatorColor: appPrimaryColor,
+        scaffoldBackgroundColor: Colors.white,
+        inputDecorationTheme: InputDecorationTheme(
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(
+              color: appPrimaryColor,
+            ),
+          ),
+          // labelStyle: TextStyle(color: appPrimaryColor),
+        ),
+      ),
+      home: SplashScreen(),
+    );
   }
 }
