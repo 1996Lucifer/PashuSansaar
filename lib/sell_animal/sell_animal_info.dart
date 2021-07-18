@@ -676,8 +676,6 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                                                 MaterialPageRoute(
                                                   builder: (context) =>
                                                       SellAnimalEditForm(
-                                                    animalInfo: widget
-                                                        .animalInfo[index],
                                                     index: index,
                                                     userName: widget.userName,
                                                     userMobileNumber:

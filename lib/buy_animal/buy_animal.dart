@@ -1352,9 +1352,9 @@ class _BuyAnimalState extends State<BuyAnimal>
 
                   // await takeScreenShot(_list[index]['uniqueId']);
 
-                  Share.share(
-                      "नस्ल: ${_list[index].animalBreed}\nजानकारी: description\nदूध(प्रति दिन): ${_list[index].animalMilk} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
-                      subject: 'animal_info'.tr);
+                  // Share.share(
+                  //     "नस्ल: ${_list[index].animalBreed}\nजानकारी: description\nदूध(प्रति दिन): ${_list[index].animalMilk} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
+                  //     subject: 'animal_info'.tr);
 
                   // Share.shareFiles([fileUrl.path],
                   //     mimeTypes: ['images/png'],
@@ -1363,7 +1363,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                   //         "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nपशु देखे: ${shortUrl.toString()}",
                   //     subject: 'पशु की जानकारी');
 
-                  // Share.share(shortUrl.toString());
+                  Share.share(shortUrl.toString());
                 },
                 icon: Icon(Icons.share, color: Colors.white, size: 14),
                 label: Text('share'.tr,
