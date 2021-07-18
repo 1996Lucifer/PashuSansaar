@@ -71,7 +71,7 @@ class _BuyAnimalState extends State<BuyAnimal>
       _distance;
   Map<String, dynamic> _filterDropDownMap = {};
   ProgressDialog pr;
-  double _latitude = 0.0, _longitude = 0.0;
+  double _latitude = 0.0, _longitude = 0.0, _filterLat, _filterLong;
   String _filterAnimalType,
       desc = '',
       _userLocality = '',
@@ -140,8 +140,8 @@ class _BuyAnimalState extends State<BuyAnimal>
       }
 
       BuyAnimalModel data = await buyAnimalController.getAnimal(
-        latitude: _latitude,
-        longitude: _longitude,
+        latitude: _filterLat ?? _latitude,
+        longitude: _filterLong ?? _longitude,
         animalType: animalType,
         minMilk: minMilk,
         maxMilk: maxMilk,
@@ -984,9 +984,9 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                       first.subAdminArea ??
                                                           first.locality ??
                                                           first.featureName;
-                                                  _latitude = first
+                                                  _filterLat = first
                                                       .coordinates.latitude;
-                                                  _longitude = first
+                                                  _filterLong = first
                                                       .coordinates.longitude;
                                                 });
                                                 _getLocationBasedList(
@@ -1135,24 +1135,25 @@ class _BuyAnimalState extends State<BuyAnimal>
       BuyAnimalModel data = await buyAnimalController.getAnimal(
         latitude: first.coordinates.latitude,
         longitude: first.coordinates.longitude,
-        distance: _radiusData * 1000,
+        distance: _radiusData * 1000000,
         animalType: animalType,
         minMilk: minMilk,
         maxMilk: maxMilk,
         page: 1,
         accessToken: prefs.getString('accessToken') ?? '',
+        userId: prefs.getString('userId') ?? '',
       );
 
       setState(() {
         widget.animalInfo = data.result;
         prefs.setInt('page', data.page);
-        _distance = _radiusData * 1000;
+        _distance = _radiusData * 1000000;
       });
 
       pr.hide();
       Navigator.of(context).pop();
     } catch (e) {
-      Navigator.pop(context);
+      Navigator.of(context).pop();
       print('=-=Error-=->>>' + e.toString());
     }
   }
@@ -1671,6 +1672,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                                     page: 1,
                                     accessToken:
                                         prefs.getString('accessToken') ?? '',
+                                    userId: prefs.getString('userId'),
                                   );
 
                                   setState(() {

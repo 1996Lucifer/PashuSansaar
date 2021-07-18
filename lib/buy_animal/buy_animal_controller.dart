@@ -50,7 +50,11 @@ class BuyAnimalController extends GetxController {
       }
     } catch (e) {
       print("Exceptions get animal _______$e");
-      return [];
+      return BuyAnimalModel.fromJson({
+        'success': false,
+        'result': [],
+        'page': null,
+      });
     }
   }
 }

@@ -59,7 +59,7 @@ class ProfileMainState extends State<ProfileMain>
 
   @override
   void initState() {
-    populateData();
+    // populateData();
     getMyLocationAndName();
     super.initState();
   }

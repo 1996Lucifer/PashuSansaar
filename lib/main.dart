@@ -146,7 +146,7 @@ class _MyAppState extends State<MyApp> {
     FirebaseMessaging.onMessageOpenedApp
         .listen((RemoteMessage message) => _goToDeeplyNestedView(message.data));
 
-    initDynamicLink();
+    versionCheck(context);
   }
 
   initDynamicLink() async {
@@ -179,8 +179,6 @@ class _MyAppState extends State<MyApp> {
               userId: dynamicData['userId'],
               uniqueId: dynamicData['uniqueId'])));
     }
-
-    await versionCheck(context);
   }
 
   versionCheck(context) async {
@@ -209,6 +207,8 @@ class _MyAppState extends State<MyApp> {
     } catch (exception) {
       print(exception);
     }
+
+    await initDynamicLink();
   }
 
   _showVersionDialog(
