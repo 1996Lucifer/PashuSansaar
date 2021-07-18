@@ -220,7 +220,13 @@ Map<String, int> animalTypeMapping = {
   'buffalo_female'.tr: 2,
   'buffalo_male'.tr: 3,
   'ox'.tr: 4,
-  'other_animal'.tr: 5,
+  'dog_male'.tr: 5,
+  'camel_female'.tr: 6,
+  'camel_male'.tr: 7,
+  'horse_female'.tr: 8,
+  'horse_male'.tr: 9,
+  'elephant_female'.tr: 10,
+  'elephant_male'.tr: 11,
 };
 
 Map<int, String> intToAnimalTypeMapping = {
@@ -228,7 +234,13 @@ Map<int, String> intToAnimalTypeMapping = {
   2: 'buffalo_female'.tr,
   3: 'buffalo_male'.tr,
   4: 'ox'.tr,
-  5: 'other_animal'.tr,
+  5: 'dog_male'.tr,
+  6: 'camel_female'.tr,
+  7: 'camel_male'.tr,
+  8: 'horse_female'.tr,
+  9: 'horse_male'.tr,
+  10: 'elephant_female'.tr,
+  11: 'elephant_male'.tr,
 };
 
 Map<String, int> animalBayaatMapping = {

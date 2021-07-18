@@ -92,14 +92,12 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
 
     String desc = '';
 
-    if (_list.animalType == 3 ||
-        _list.animalType == 4 ||
-        _list.animalType == 5) {
+    if (_list.animalType >= 3) {
       desc =
-          'ये $animalBreedCheck $animalTypeCheck ${_list.animalAge} साल की है। ';
+          'ये $animalBreedCheck $animalTypeCheck ${_list.animalAge} साल ${(_list.animalType == 6 || _list.animalType == 8 || _list.animalType == 10) ? " की" : "का"} है। ';
     } else {
       desc =
-          'ये ${_list.animalBreed} ${intToAnimalTypeMapping[_list.animalType]} ${_list.animalAge} साल का है। ';
+          'ये ${_list.animalBreed} ${intToAnimalTypeMapping[_list.animalType]} ${_list.animalAge} साल की है। ';
       if (_list.recentBayatTime != null) {
         desc = desc +
             'यह ${intToRecentBayaatTime[_list.recentBayatTime]} ब्यायी है। ';
@@ -112,7 +110,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
             'पिछले बार के हिसाब से दूध कैपेसिटी ${_list.animalMilkCapacity} लीटर है। ';
       }
     }
-    return desc;
+    return desc + (_list.moreInfo ?? "");
   }
 
   Padding _buildImageDescriptionWidget(double width, _list) => Padding(

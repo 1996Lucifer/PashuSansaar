@@ -1159,42 +1159,33 @@ class _BuyAnimalState extends State<BuyAnimal>
   }
 
   _descriptionText(animalInfo) {
-    String animalBreedCheck = (animalInfo.animalBreed == 'not_known'.tr)
-        ? ""
-        : animalInfo.animalBreed;
+    String animalBreedCheck =
+    (animalInfo.animalBreed == 'not_known'.tr) ? "" : animalInfo.animalBreed;
     String animalTypeCheck = (animalInfo.animalType == 5)
         ? intToAnimalTypeMapping[5]
         : intToAnimalTypeMapping[animalInfo.animalType];
 
     String desc = '';
 
-    if (animalInfo.animalType == 3 ||
-        animalInfo.animalType == 4 ||
-        animalInfo.animalType == 5) {
+    if (animalInfo.animalType >= 3) {
       desc =
-          'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल की है। ';
+      'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल ${(animalInfo.animalType == 6 || animalInfo.animalType == 8 || animalInfo.animalType == 10) ? " की" : "का"} है। ';
     } else {
       desc =
-          'ये ${animalInfo.animalBreed} ${intToAnimalTypeMapping[animalInfo.animalType]} ${animalInfo.animalAge} साल का है। ';
+      'ये ${animalInfo.animalBreed} ${intToAnimalTypeMapping[animalInfo.animalType]} ${animalInfo.animalAge} साल की है। ';
       if (animalInfo.recentBayatTime != null) {
         desc = desc +
             'यह ${intToRecentBayaatTime[animalInfo.recentBayatTime]} ब्यायी है। ';
       }
       if (animalInfo.pregnantTime != null) {
-        desc =
-            desc + 'यह अभी ${intToPregnantTime[animalInfo.pregnantTime]} है। ';
+        desc = desc + 'यह अभी ${intToPregnantTime[animalInfo.pregnantTime]} है। ';
       }
-      desc = desc +
-          (animalInfo.animalHasBaby == null || animalInfo.animalHasBaby == 0
-              ? 'इसके साथ में बच्चा नहीं है। '
-              : 'इसके साथ में ${intToAnimalHasBaby[animalInfo.animalHasBaby]}। ');
       if (animalInfo.animalMilkCapacity != null) {
         desc = desc +
             'पिछले बार के हिसाब से दूध कैपेसिटी ${animalInfo.animalMilkCapacity} लीटर है। ';
       }
     }
-
-    return desc;
+    return desc + (animalInfo.moreInfo ?? "");
   }
 
   Padding _animalDescriptionMethod(int index) {
