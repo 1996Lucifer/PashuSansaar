@@ -23,7 +23,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  # android_play_install_referrer: any
+  android_play_install_referrer: any
   animations: any
   another_flushbar: any
   carousel_slider: ^3.0.0

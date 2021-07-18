@@ -24,6 +24,9 @@ class AuthToken extends GetxController {
     String zipCode,
     String userAddress,
     String token,
+    String pushToken,
+    String utmSource,
+    String utmCampaign
   }) async {
     Map<String, dynamic> payload = {
       'mobile': number,
@@ -35,7 +38,10 @@ class AuthToken extends GetxController {
       'longitude': longitude,
       "district": cityName,
       "zipCode": zipCode,
-      "userAddress": userAddress
+      "userAddress": userAddress,
+      "pushToken": pushToken,
+      "utm_source": utmSource,
+      "utm_campaign": utmCampaign
     };
     SharedPreferences prefs = await SharedPreferences.getInstance();
 

@@ -6,7 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:pashusansaar/buy_animal/animal_description_page.dart';
+import 'package:pashusansaar/animal_description/animal_description_page.dart';
 import 'package:pashusansaar/my_calls/myCallsController.dart';
 import 'package:pashusansaar/refresh_token/refresh_token_controller.dart';
 import 'package:pashusansaar/utils/colors.dart';

@@ -8,6 +8,7 @@ import 'package:pashusansaar/utils/colors.dart' show appPrimaryColor;
 import 'package:pashusansaar/utils/constants.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart' show ReusableWidgets;
 import 'package:dropdown_search/dropdown_search.dart' show DropdownSearch, Mode;
+import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'
     show
@@ -27,6 +28,7 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:dio/dio.dart' as dio;
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'dart:math' as math;
 import 'package:mime/mime.dart';
 
@@ -49,7 +51,7 @@ class SellAnimalEditForm extends StatefulWidget {
 
 class _SellAnimalEditFormState extends State<SellAnimalEditForm>
     with AutomaticKeepAliveClientMixin {
-  var extraInfoData = {};
+  var extraInfoData = {}, animalUpdationData = {};
   ImagePicker _picker;
   ProgressDialog pr;
   Color backgroundColor = Colors.red[50];
@@ -103,25 +105,17 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
     prefs = await SharedPreferences.getInstance();
 
     // if (jsonData.length > 0) {
-
     setState(() {
       // widget.animalInfo = jsonData[widget.index]['widget.animalInfo'];
       uniqueId = widget.animalInfo.sId;
       userId = widget.animalInfo.userId;
-
-      for (int i = 0; i < widget.animalInfo?.files?.length; i++) {
-        editImagesUpload['Image${i + 1}'] =
-            widget.animalInfo?.files[i]?.fileName;
-        // _imageToBeUploaded.add({'fileName': key, 'fileType': fileType});
-      }
-
-      print(editImagesUpload);
-      // editImagesUpload = {
-      //   'Image1': widget.animalInfo?.files[0]?.fileName ?? '',
-      //   'Image2': widget.animalInfo?.files[1]?.fileName ?? '',
-      //   'Image3': widget.animalInfo?.files[2]?.fileName ?? '',
-      //   'Image4': widget.animalInfo?.files[3]?.fileName ?? ''
-      // };
+      animalUpdationData = widget.animalInfo;
+      editImagesUpload = {
+        'Image1': widget.animalInfo?.files[0]?.fileName ?? '',
+        'Image2': widget.animalInfo?.files[1]?.fileName ?? '',
+        'Image3': widget.animalInfo?.files[2]?.fileName ?? '',
+        'Image4': widget.animalInfo?.files[3]?.fileName ?? ''
+      };
 
       // isValidUser = jsonData[widget.index]['isValidUser'];
       // extraInfoData = jsonData[widget.index]['extraInfo'];
@@ -139,6 +133,26 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
       );
   String get _currency =>
       intl.NumberFormat.compactSimpleCurrency(locale: _locale).currencySymbol;
+
+  Future<void> uploadFile(File file, String index) async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    await firebase_storage.FirebaseStorage.instance
+        .ref('${FirebaseAuth.instance.currentUser.uid}/${uniqueId}_$index.jpg')
+        .putFile(file);
+
+    String downloadURL = await firebase_storage.FirebaseStorage.instance
+        .ref('${FirebaseAuth.instance.currentUser.uid}/${uniqueId}_$index.jpg')
+        .getDownloadURL();
+
+    setState(() {
+      imagesUpload['image$index'] = downloadURL;
+      imagesFileUpload['image$index'] = downloadURL;
+      _isLoading = false;
+    });
+  }
 
   Future<void> _choose(String index) async {
     try {
@@ -186,7 +200,6 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
             final mimeType = lookupMimeType(file.path);
 
             setState(() {
-              editImagesUpload['Image$index'] = '';
               imagesFileUpload['Image$index'] = compressedFile.path;
               imagesUpload['Image$index'] = {
                 "fileName": "Image$index",
@@ -258,7 +271,6 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
             final mimeType = lookupMimeType(file.path);
 
             setState(() {
-              editImagesUpload['Image$index'] = '';
               imagesFileUpload['Image$index'] = compressedFile.path;
               imagesUpload['Image$index'] = {
                 "fileName": "Image$index",
@@ -354,7 +366,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
             selectedItem: intToAnimalTypeMapping[widget.animalInfo.animalType],
             onChanged: (String type) {
               setState(() {
-                widget.animalInfo.animalType = animalTypeMapping[type];
+                animalUpdationData['animalType'] = animalTypeMapping[type];
               });
             },
             dropdownSearchDecoration: InputDecoration(
@@ -379,7 +391,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                   intToAnimalTypeMapping[widget.animalInfo.animalType],
               onChanged: (String otherType) {
                 setState(() {
-                  // widget.animalInfo.animalTypeOther = otherType;
+                  animalUpdationData['animalTypeOther'] = otherType;
                 });
               },
               dropdownSearchDecoration: InputDecoration(
@@ -439,7 +451,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
               showSearchBox: true,
               onChanged: (String breed) {
                 setState(() {
-                  widget.animalInfo.animalBreed = breed;
+                  animalUpdationData['animalBreed'] = breed;
                 });
               },
               dropdownSearchDecoration: InputDecoration(
@@ -491,7 +503,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
               hint: 'animal_age'.tr,
               onChanged: (String age) {
                 setState(() {
-                  widget.animalInfo.animalAge = int.parse(age);
+                  animalUpdationData['animalAge'] = age;
                 });
               },
               dropdownSearchDecoration: InputDecoration(
@@ -544,7 +556,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
               showSearchBox: true,
               onChanged: (String pregnant) {
                 setState(() {
-                  widget.animalInfo.animalBayat = animalBayaatMapping[pregnant];
+                  animalUpdationData['animalIsPregnant'] = pregnant;
                 });
               },
               dropdownSearchDecoration: InputDecoration(
@@ -597,9 +609,8 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                 keyboardType: TextInputType.number,
                 onChanged: (String milk) {
                   setState(() {
-                    widget.animalInfo.animalMilk = int.parse(milk.isEmpty
-                        ? '-1'
-                        : milk.replaceAll(new RegExp(r'^0+(?=.)'), ''));
+                    animalUpdationData['animalMilk'] =
+                        milk.replaceAll(new RegExp(r'^0+(?=.)'), '');
                   });
                 },
                 decoration: InputDecoration(
@@ -642,11 +653,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                 keyboardType: TextInputType.number,
                 onChanged: (String milkCapacity) {
                   setState(() {
-                    widget.animalInfo.animalMilkCapacity = int.parse(
-                        milkCapacity.isEmpty
-                            ? '-1'
-                            : milkCapacity.replaceAll(
-                                new RegExp(r'^0+(?=.)'), ''));
+                    widget.animalInfo['animalMilkCapacity'] = milkCapacity;
                   });
                 },
                 decoration: InputDecoration(
@@ -721,7 +728,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                       TextPosition(offset: _controller.text.length));
 
                   setState(() {
-                    widget.animalInfo.animalPrice = int.parse(price);
+                    animalUpdationData['animalPrice'] = price;
                   });
                 },
                 decoration: InputDecoration(
@@ -760,99 +767,54 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                   child: Container(
                     height: 150,
                     width: width * 0.3,
-                    child: editImagesUpload['Image1'].isNotEmpty
-                        ? Visibility(
-                            visible: editImagesUpload['Image1'] != null &&
-                                editImagesUpload['Image1'].isNotEmpty,
-                            child: Image.network(
-                              editImagesUpload['Image1'],
-                            ),
-                            replacement: Column(children: [
-                              Opacity(
-                                opacity: 0.5,
-                                child: Image.asset(
-                                  'assets/images/photouploadfront.png',
-                                  height: 100,
-                                ),
-                              ),
-                              RaisedButton(
-                                onPressed: () => chooseOption('1'),
-                                child: Text(
-                                  'choose_photo'.tr,
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 16),
-                                ),
-                              )
-                            ]),
-                          )
-                        : Visibility(
-                            visible: imagesFileUpload['Image1'] != null &&
-                                imagesFileUpload['Image1'].isNotEmpty,
-                            child: Image.file(
-                              File(imagesFileUpload['Image1']),
-                            ),
-                            replacement: Column(children: [
-                              Opacity(
-                                opacity: 0.5,
-                                child: Image.asset(
-                                  'assets/images/photouploadfront.png',
-                                  height: 100,
-                                ),
-                              ),
-                              RaisedButton(
-                                onPressed: () => chooseOption('1'),
-                                child: Text(
-                                  'choose_photo'.tr,
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 16),
-                                ),
-                              )
-                            ]),
+                    child: Visibility(
+                      visible: editImagesUpload['Image1'].isNotEmpty??
+                      
+                      imagesFileUpload['Image1'] != null &&
+                          imagesFileUpload['Image1'].isNotEmpty,
+                      child: Image.file(
+                        File(imagesFileUpload['Image1']),
+                      ),
+                      replacement: Column(children: [
+                        Opacity(
+                          opacity: 0.5,
+                          child: Image.asset(
+                            'assets/images/photouploadfront.png',
+                            height: 100,
                           ),
+                        ),
+                        RaisedButton(
+                          onPressed: () => chooseOption('1'),
+                          child: Text(
+                            'choose_photo'.tr,
+                            style: TextStyle(color: Colors.white, fontSize: 16),
+                          ),
+                        )
+                      ]),
+                    ),
                   ),
                 ),
               ),
-              editImagesUpload['Image1'].isNotEmpty
-                  ? Visibility(
-                      visible: editImagesUpload['Image1'] != null &&
-                          editImagesUpload['Image1'].isNotEmpty,
-                      child: Positioned(
-                        top: -1,
-                        right: -1,
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              editImagesUpload['Image1'] = '';
-                            });
-                          },
-                          child: Icon(
-                            Icons.cancel_rounded,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
-                      replacement: SizedBox.shrink(),
-                    )
-                  : Visibility(
-                      visible: imagesFileUpload['Image1'] != null &&
-                          imagesFileUpload['Image1'].isNotEmpty,
-                      child: Positioned(
-                        top: -1,
-                        right: -1,
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              imagesFileUpload['Image1'] = '';
-                            });
-                          },
-                          child: Icon(
-                            Icons.cancel_rounded,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
-                      replacement: SizedBox.shrink(),
-                    )
+              Visibility(
+                visible: imagesFileUpload['Image1'] != null &&
+                    imagesFileUpload['Image1'].isNotEmpty,
+                child: Positioned(
+                  top: -1,
+                  right: -1,
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        imagesFileUpload['Image1'] = '';
+                      });
+                    },
+                    child: Icon(
+                      Icons.cancel_rounded,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+                replacement: SizedBox.shrink(),
+              )
             ],
           ),
         ),
@@ -1136,53 +1098,57 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
               onPressed: _isLoading
                   ? null
                   : () async {
-                      if (widget.animalInfo.animalType == null)
+                      if (animalUpdationData['animalType'] == null)
                         ReusableWidgets.showDialogBox(
                           context,
                           'error'.tr,
                           Text('animal_type_error'.tr),
                         );
-                      else if (widget.animalInfo.animalBreed == null)
+                      else if (animalUpdationData['animalBreed'] == null)
                         ReusableWidgets.showDialogBox(
                           context,
                           'error'.tr,
                           Text('animal_breed_error'.tr),
                         );
-                      else if (widget.animalInfo.animalAge == null)
+                      else if (animalUpdationData['animalAge'] == null)
                         ReusableWidgets.showDialogBox(
                           context,
                           'error'.tr,
                           Text('animal_age_error'.tr),
                         );
-                      else if ((widget.animalInfo.animalType == 1 ||
-                              widget.animalInfo.animalType == 2) &&
-                          (widget.animalInfo.animalBayat == null))
+                      else if ([0, 1].contains(
+                            constant.animalType
+                                .indexOf(animalUpdationData['animalType']),
+                          ) &&
+                          (animalUpdationData['animalIsPregnant'] == null))
                         ReusableWidgets.showDialogBox(
                           context,
                           'error'.tr,
                           Text('animal_pregnancy_error'.tr),
                         );
-                      else if ((widget.animalInfo.animalType == 1 ||
-                              widget.animalInfo.animalType == 2) &&
-                          (widget.animalInfo.animalMilk == null ||
-                              widget.animalInfo.animalMilk.isEmpty))
+                      else if ([0, 1].contains(
+                            constant.animalType
+                                .indexOf(animalUpdationData['animalType']),
+                          ) &&
+                          (animalUpdationData['animalMilk'] == null ||
+                              animalUpdationData['animalMilk'].isEmpty))
                         ReusableWidgets.showDialogBox(
                           context,
                           'error'.tr,
                           Text('animal_milk_error'.tr),
                         );
-                      else if ((widget.animalInfo.animalType == 1 ||
-                              widget.animalInfo.animalType == 2) &&
-                          (widget.animalInfo.animalMilk != null ||
-                              widget.animalInfo.animalMilk.isNotEmpty) &&
-                          (int.parse(widget.animalInfo.animalMilk) > 70))
+                      else if ([0, 1].contains(constant.animalType
+                              .indexOf(animalUpdationData['animalType'])) &&
+                          (animalUpdationData['animalMilk'] != null ||
+                              animalUpdationData['animalMilk'].isNotEmpty) &&
+                          (int.parse(animalUpdationData['animalMilk']) > 70))
                         ReusableWidgets.showDialogBox(
                           context,
                           'error'.tr,
                           Text('maximum_milk_length'.tr),
                         );
-                      else if (widget.animalInfo.animalPrice == null ||
-                          widget.animalInfo.animalPrice.isEmpty)
+                      else if (animalUpdationData['animalPrice'] == null ||
+                          animalUpdationData['animalPrice'].isEmpty)
                         ReusableWidgets.showDialogBox(
                           context,
                           'error'.tr,
@@ -1197,35 +1163,39 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                           'error'.tr,
                           Text('animal_image_error'.tr),
                         );
-                      else if ((widget.animalInfo.animalType == 1 ||
-                              widget.animalInfo.animalType == 2) &&
-                          widget.animalInfo.isRecentBayat == null)
+                      else if (([0, 1].contains(constant.animalType
+                              .indexOf(animalUpdationData['animalType']))) &&
+                          animalUpdationData['alreadyPregnantYesNo'] == null)
                         ReusableWidgets.showDialogBox(
                           context,
                           'error'.tr,
                           Text('animal_pregnant_empty_error'.tr),
                         );
-                      else if ((widget.animalInfo.animalType == 1 ||
-                              widget.animalInfo.animalType == 2) &&
-                          widget.animalInfo.isRecentBayat == 0 &&
-                          widget.animalInfo.recentBayatTime == null)
+                      else if (([0, 1].contains(constant.animalType
+                              .indexOf(animalUpdationData['animalType']))) &&
+                          constant.yesNo.indexOf(
+                                  animalUpdationData['alreadyPregnantYesNo']) ==
+                              0 &&
+                          animalUpdationData['animalAlreadyGivenBirth'] == null)
                         ReusableWidgets.showDialogBox(
                           context,
                           'error'.tr,
                           Text('animal_pregnant_time_error'.tr),
                         );
-                      else if ((widget.animalInfo.animalType == 1 ||
-                              widget.animalInfo.animalType == 2) &&
-                          widget.animalInfo.isPregnant == null)
+                      else if (([0, 1].contains(constant.animalType
+                              .indexOf(animalUpdationData['animalType']))) &&
+                          animalUpdationData['isPregnantYesNo'] == null)
                         ReusableWidgets.showDialogBox(
                           context,
                           'error'.tr,
                           Text('animal_gayabhin_empty_error'.tr),
                         );
-                      else if ((widget.animalInfo.animalType == 1 ||
-                              widget.animalInfo.animalType == 2) &&
-                          widget.animalInfo.isPregnant == 0 &&
-                          widget.animalInfo.pregnantTime == null)
+                      else if (([0, 1].contains(constant.animalType
+                              .indexOf(animalUpdationData['animalType']))) &&
+                          constant.yesNo.indexOf(
+                                  animalUpdationData['isPregnantYesNo']) ==
+                              0 &&
+                          animalUpdationData['animalIfPregnant'] == null)
                         ReusableWidgets.showDialogBox(
                           context,
                           'error'.tr,
@@ -1320,32 +1290,31 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                         }
 
                         bool saveAnimalData = false;
-                        if (widget.animalInfo['animalType'] == 1 ||
-                            widget.animalInfo['animalType'] == 2) {
+                        if (animalUpdationData['animalType'] == 1 ||
+                            animalUpdationData['animalType'] == 2) {
                           saveAnimalData =
                               await sellAnimalController.saveAnimal(
                             animalType: animalTypeMapping[
-                                widget.animalInfo['animalType']],
+                                animalUpdationData['animalType']],
                             animalBreed:
                                 ReusableWidgets.removeEnglishDataFromName(
-                                    widget.animalInfo['animalBreed']),
+                                    animalUpdationData['animalBreed']),
                             animalAge: ReusableWidgets.convertStringToInt(
-                                widget.animalInfo['animalAge']),
+                                animalUpdationData['animalAge']),
                             animalBayat: animalBayaatMapping[
-                                widget.animalInfo['animalIsPregnant']],
+                                animalUpdationData['animalIsPregnant']],
                             animalPrice: ReusableWidgets.convertStringToInt(
-                                widget.animalInfo['animalPrice']),
+                                animalUpdationData['animalPrice']),
                             animalMilk: ReusableWidgets.convertStringToInt(
-                                widget.animalInfo['animalMilk']),
+                                animalUpdationData['animalMilk']),
                             animalMilkCapacity:
                                 ReusableWidgets.convertStringToInt(
-                                    widget.animalInfo['animalMilkCapacity']),
-                            isRecentBayat: stringToYesNo[
-                                extraInfoData['alreadyPregnantYesNo']],
+                                    animalUpdationData['animalMilkCapacity']),
+                            isRecentBayat:
+                                extraInfoData['alreadyPregnantYesNo'] == constant.yesNo.first,
                             recentBayatTime: stringToRecentBayaatTime[
                                 extraInfoData['animalAlreadyGivenBirth']],
-                            isPregnant:
-                                stringToYesNo[extraInfoData['isPregnantYesNo']],
+                            isPregnant:extraInfoData['isPregnantYesNo'] == constant.yesNo.first,
                             pregnantTime: stringToPregnantTime[
                                 extraInfoData['animalIfPregnant']],
                             animalHasBaby: stringToAnimalHasBaby[
@@ -1359,16 +1328,16 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                           saveAnimalData =
                               await sellAnimalController.saveAnimal(
                             animalType: animalTypeMapping[
-                                widget.animalInfo['animalType']],
+                                animalUpdationData['animalType']],
                             animalBreed:
                                 ReusableWidgets.removeEnglishDataFromName(
-                                    widget.animalInfo['animalBreed']),
+                                    animalUpdationData['animalBreed']),
                             animalAge: ReusableWidgets.convertStringToInt(
-                                widget.animalInfo['animalAge']),
+                                animalUpdationData['animalAge']),
                             animalBayat: animalBayaatMapping[
-                                widget.animalInfo['animalIsPregnant']],
+                                animalUpdationData['animalIsPregnant']],
                             animalPrice: ReusableWidgets.convertStringToInt(
-                                widget.animalInfo['animalPrice']),
+                                animalUpdationData['animalPrice']),
                             userId: prefs.getString('userId'),
                             moreInfo: extraInfoData['moreInfo'],
                             files: _imageToBeUploaded,
@@ -1496,17 +1465,11 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                     mode: Mode.BOTTOM_SHEET,
                     showSelectedItem: true,
                     items: constant.yesNo,
-                    selectedItem: widget.animalInfo.isRecentBayat
-                        ? constant.yesNo.first
-                        : constant.yesNo.last,
+                    selectedItem: intToYesNo[widget.animalInfo.isRecentBayat],
                     maxHeight: 120,
                     onChanged: (String yesOrNo) {
                       setState(() {
-                        widget.animalInfo.isRecentBayat =
-                            yesOrNo == constant.yesNo.first;
-
-                        if (yesOrNo == constant.yesNo.last)
-                          widget.animalInfo.recentBayatTime = null;
+                        animalUpdationData['alreadyPregnantYesNo'] = yesOrNo;
                       });
                     },
                     dropdownSearchDecoration: InputDecoration(
@@ -1517,10 +1480,18 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                         )),
                   ),
                 ),
-                widget.animalInfo.isRecentBayat
+                animalUpdationData['alreadyPregnantYesNo'] != null &&
+                        animalUpdationData['alreadyPregnantYesNo'].isNotEmpty &&
+                        constant.yesNo.indexOf(
+                                animalUpdationData['alreadyPregnantYesNo']) ==
+                            0
                     ? SizedBox(width: 5)
                     : SizedBox.shrink(),
-                widget.animalInfo.isRecentBayat
+                animalUpdationData['alreadyPregnantYesNo'] != null &&
+                        animalUpdationData['alreadyPregnantYesNo'].isNotEmpty &&
+                        constant.yesNo.indexOf(
+                                animalUpdationData['alreadyPregnantYesNo']) ==
+                            0
                     ? Expanded(
                         flex: 3,
                         child: DropdownSearch<String>(
@@ -1531,8 +1502,8 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                               widget.animalInfo.recentBayatTime],
                           onChanged: (String age) {
                             setState(() {
-                              widget.animalInfo.recentBayatTime =
-                                  stringToRecentBayaatTime[age];
+                              animalUpdationData['animalAlreadyGivenBirth'] =
+                                  age;
                             });
                           },
                           dropdownSearchDecoration: InputDecoration(
@@ -1592,16 +1563,13 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                     mode: Mode.BOTTOM_SHEET,
                     showSelectedItem: true,
                     items: constant.yesNo,
-                    selectedItem: widget.animalInfo.isPregnant
-                        ? constant.yesNo.first
-                        : constant.yesNo.last,
+                    selectedItem: intToYesNo[widget.animalInfo.isPregnant],
+                    // label: 'animal_age'.tr,
+                    // hint: 'animal_age'.tr,
                     maxHeight: 120,
                     onChanged: (String yesOrNo) {
                       setState(() {
-                        widget.animalInfo.isPregnant =
-                            yesOrNo == constant.yesNo.first;
-                        if (yesOrNo == constant.yesNo.last)
-                          widget.animalInfo.pregnantTime = null;
+                        animalUpdationData['isPregnantYesNo'] = yesOrNo;
                       });
                     },
                     dropdownSearchDecoration: InputDecoration(
@@ -1612,10 +1580,18 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                         )),
                   ),
                 ),
-                widget.animalInfo.isPregnant
+                animalUpdationData['isPregnantYesNo'] != null &&
+                        animalUpdationData['isPregnantYesNo'].isNotEmpty &&
+                        constant.yesNo.indexOf(
+                                animalUpdationData['isPregnantYesNo']) ==
+                            0
                     ? SizedBox(width: 5)
                     : SizedBox.shrink(),
-                widget.animalInfo.isPregnant
+                animalUpdationData['isPregnantYesNo'] != null &&
+                        animalUpdationData['isPregnantYesNo'].isNotEmpty &&
+                        constant.yesNo.indexOf(
+                                animalUpdationData['isPregnantYesNo']) ==
+                            0
                     ? Expanded(
                         flex: 3,
                         child: DropdownSearch<String>(
@@ -1624,10 +1600,11 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                           items: constant.isPregnant,
                           selectedItem:
                               intToPregnantTime[widget.animalInfo.pregnantTime],
+                          // label: 'animal_age'.tr,
+                          // hint: 'animal_age'.tr,
                           onChanged: (String time) {
                             setState(() {
-                              widget.animalInfo.pregnantTime =
-                                  stringToPregnantTime[time];
+                              animalUpdationData['animalIfPregnant'] = time;
                             });
                           },
                           dropdownSearchDecoration: InputDecoration(
@@ -1698,11 +1675,11 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
               mode: Mode.BOTTOM_SHEET,
               showSelectedItem: true,
               items: constant.isBaby,
-              selectedItem: intToAnimalHasBaby[widget.animalInfo.animalHasBaby],
+              selectedItem: extraInfoData['animalHasBaby'],
               maxHeight: 200,
               onChanged: (String baby) {
                 setState(() {
-                  widget.animalInfo.animalHasBaby = stringToAnimalHasBaby[baby];
+                  extraInfoData['animalHasBaby'] = baby;
                 });
               },
               dropdownSearchDecoration: InputDecoration(
@@ -1836,8 +1813,8 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
               extraInfo(),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                child: widget.animalInfo.animalType == 1 ||
-                        widget.animalInfo.animalType == 2
+                child: animalUpdationData['animalType'] == 1 ||
+                        animalUpdationData['animalType'] == 2
                     ? extraINfoData()
                     : moreInfoTextArea(),
               ),

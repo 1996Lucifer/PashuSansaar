@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:android_play_install_referrer/android_play_install_referrer.dart';
 import 'package:device_info/device_info.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:pashusansaar/auth_token/auth_token_controller.dart';
 import 'package:pashusansaar/home_screen.dart';
 import 'package:pashusansaar/otp/otp_controller.dart';
@@ -41,7 +43,7 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
   final AuthToken _authController = Get.put(AuthToken());
   final OtpController _otpController = Get.put(OtpController());
 
-  String currentText = "";
+  String currentText = "", pushToken = "", utmSource = "", utmCampaign = "";
 
   final formKey = GlobalKey<FormState>(debugLabel: 'userDetailsFetch');
 
@@ -165,45 +167,70 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
     }
   }
 
-  // storeFCMToken() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   String _token = await FirebaseMessaging.instance.getToken();
+  storeFCMToken() async {
+    //SharedPreferences prefs = await SharedPreferences.getInstance();
+    String _token = await FirebaseMessaging.instance.getToken();
 
-  //   var addresses = await Geocoder.local.findAddressesFromCoordinates(
-  //       Coordinates(prefs.getDouble('latitude'), prefs.getDouble('longitude')));
-  //   var first = addresses.first;
+    // var addresses = await Geocoder.local.findAddressesFromCoordinates(
+    //     Coordinates(prefs.getDouble('latitude'), prefs.getDouble('longitude')));
+    // var first = addresses.first;
 
-  //   print(_token);
+    //*****************************************
 
-  //   FirebaseFirestore.instance
-  //       .collection("fcmToken")
-  //       .doc(widget.currentUser)
-  //       .set({
-  //     "id": widget.currentUser,
-  //     'lat': prefs.getDouble('latitude').toString(),
-  //     'long': prefs.getDouble('longitude').toString(),
-  //     'userToken': _token,
-  //     'district': ReusableWidgets.mappingDistrict(
-  //       first.subAdminArea ?? first.locality ?? first.featureName,
-  //     ),
-  //   }).catchError((err) {
-  //     print(
-  //       "errToken->" + err.toString(),
-  //     );
-  //     FirebaseFirestore.instance
-  //         .collection('logger')
-  //         .doc(widget.mobile)
-  //         .collection('token')
-  //         .doc()
-  //         .set({
-  //       'issue': err.toString(),
-  //       'userId': FirebaseAuth.instance.currentUser == null
-  //           ? ''
-  //           : FirebaseAuth.instance.currentUser.uid,
-  //       'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
-  //     });
-  //   });
-  // }
+    try {
+      ReferrerDetails referrerDetails =
+          await AndroidPlayInstallReferrer.installReferrer;
+      print('referrer details $referrerDetails');
+
+      List<String> str = referrerDetails.installReferrer.split('&');
+      print('str is $str');
+
+      print('utm source data is: ${str[0].substring(11)}');
+      print('utm campaign data is: ${str[1].substring(11)}');
+
+      setState(() {
+        pushToken += _token;
+        utmSource += str[0].substring(11);
+        utmCampaign += str[1].substring(11);
+      });
+    } catch (e) {
+      print('Failed to get referrer details: $e');
+      setState(() {
+        pushToken += _token;
+      });
+    }
+
+    //*****************************************
+
+    //   FirebaseFirestore.instance
+    //       .collection("fcmToken")
+    //       .doc(widget.currentUser)
+    //       .set({
+    //     "id": widget.currentUser,
+    //     'lat': prefs.getDouble('latitude').toString(),
+    //     'long': prefs.getDouble('longitude').toString(),
+    //     'userToken': _token,
+    //     'district': ReusableWidgets.mappingDistrict(
+    //       first.subAdminArea ?? first.locality ?? first.featureName,
+    //     ),
+    //   }).catchError((err) {
+    //     print(
+    //       "errToken->" + err.toString(),
+    //     );
+    //     FirebaseFirestore.instance
+    //         .collection('logger')
+    //         .doc(widget.mobile)
+    //         .collection('token')
+    //         .doc()
+    //         .set({
+    //       'issue': err.toString(),
+    //       'userId': FirebaseAuth.instance.currentUser == null
+    //           ? ''
+    //           : FirebaseAuth.instance.currentUser.uid,
+    //       'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
+    //     });
+    //   });
+  }
 
   loadAsset() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -442,8 +469,6 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                                 zipCodeController.text.isNotEmpty)
                               await loadAsset();
 
-                            // await storeFCMToken();
-
                             if (prefs.getDouble('latitude') == null ||
                                 prefs.getDouble('longitude') == null) {
                               return showDialog(
@@ -486,6 +511,7 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                                         ]);
                                   });
                             } else {
+                              storeFCMToken();
                               try {
                                 pr = new ProgressDialog(context,
                                     type: ProgressDialogType.Normal,
@@ -494,32 +520,34 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                                 pr.style(message: 'progress_dialog_message'.tr);
                                 pr.show();
 
-                                bool status =
-                                    await _authController.fetchAuthToken(
-                                  token:
-                                      '${_otpController.authorization.value}',
-                                  mobileInfo: mobileInfo,
-                                  name: nameController.text,
-                                  apkVersion: prefs
-                                      .getStringList('currentVersion')
-                                      .join('.'),
-                                  longitude:
-                                      prefs.getDouble('longitude').toString(),
-                                  latitude:
-                                      prefs.getDouble('latitude').toString(),
-                                  referredByCode:
-                                      referralCodeController.text.isNotEmpty
-                                          ? referralCodeController.text
-                                              .toUpperCase()
-                                          : '',
-                                  number: widget.mobile,
-                                  zipCode:
-                                      prefs.getString("zipCode").toString(),
-                                  userAddress:
-                                      prefs.getString("userAddress").toString(),
-                                  cityName:
-                                      prefs.getString("district").toString(),
-                                );
+                                bool status = await _authController.fetchAuthToken(
+                                    token:
+                                        '${_otpController.authorization.value}',
+                                    mobileInfo: mobileInfo,
+                                    name: nameController.text,
+                                    apkVersion: prefs
+                                        .getStringList('currentVersion')
+                                        .join('.'),
+                                    longitude:
+                                        prefs.getDouble('longitude').toString(),
+                                    latitude:
+                                        prefs.getDouble('latitude').toString(),
+                                    referredByCode:
+                                        referralCodeController.text.isNotEmpty
+                                            ? referralCodeController.text
+                                                .toUpperCase()
+                                            : '',
+                                    number: widget.mobile,
+                                    zipCode:
+                                        prefs.getString("zipCode").toString(),
+                                    userAddress: prefs
+                                        .getString("userAddress")
+                                        .toString(),
+                                    cityName:
+                                        prefs.getString("district").toString(),
+                                    pushToken: pushToken,
+                                    utmSource: utmSource,
+                                    utmCampaign: utmCampaign);
 
                                 setState(() {
                                   prefs.setString('token',
