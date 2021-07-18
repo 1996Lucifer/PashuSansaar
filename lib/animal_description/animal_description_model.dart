@@ -31,7 +31,7 @@ class Animal {
   int animalMilkCapacity;
   int animalPrice;
   bool isRecentBayat;
-  Null recentBayatTime;
+  int recentBayatTime;
   bool isPregnant;
   int pregnantTime;
   int animalHasBaby;
@@ -43,9 +43,7 @@ class Animal {
   double longitude;
   double latitude;
   String userName;
-  String district;
   int zipCode;
-  String userAddress;
   int mobile;
   String createdAt;
   String updatedAt;
@@ -74,9 +72,7 @@ class Animal {
         this.longitude,
         this.latitude,
         this.userName,
-        this.district,
         this.zipCode,
-        this.userAddress,
         this.mobile,
         this.createdAt,
         this.updatedAt,
@@ -112,9 +108,7 @@ class Animal {
     longitude = json['longitude'];
     latitude = json['latitude'];
     userName = json['userName'];
-    district = json['district'];
     zipCode = json['zipCode'];
-    userAddress = json['userAddress'];
     mobile = json['mobile'];
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
@@ -149,9 +143,7 @@ class Animal {
     data['longitude'] = this.longitude;
     data['latitude'] = this.latitude;
     data['userName'] = this.userName;
-    data['district'] = this.district;
     data['zipCode'] = this.zipCode;
-    data['userAddress'] = this.userAddress;
     data['mobile'] = this.mobile;
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;

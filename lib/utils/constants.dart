@@ -299,23 +299,34 @@ Map<int, String> intToPregnantTime = {
   10: '10_months_pregnant'.tr,
 };
 Map<String, int> stringToPregnantTime = {
-  '1_months_pregnant'.tr:1,
-  '2_months_pregnant'.tr:2,
-  '3_months_pregnant'.tr:3,
-  '4_months_pregnant'.tr:4,
-  '5_months_pregnant'.tr:5,
-  '6_months_pregnant'.tr:6,
-  '7_months_pregnant'.tr:7,
-  '8_months_pregnant'.tr:8,
-  '9_months_pregnant'.tr:9,
-  '10_months_pregnant'.tr:10,
+  '1_months_pregnant'.tr: 1,
+  '2_months_pregnant'.tr: 2,
+  '3_months_pregnant'.tr: 3,
+  '4_months_pregnant'.tr: 4,
+  '5_months_pregnant'.tr: 5,
+  '6_months_pregnant'.tr: 6,
+  '7_months_pregnant'.tr: 7,
+  '8_months_pregnant'.tr: 8,
+  '9_months_pregnant'.tr: 9,
+  '10_months_pregnant'.tr: 10,
 };
 
 Map<int, String> intToAnimalHasBaby = {
   0: 'nothing'.tr,
-  1: 'bacchri'.tr,
-  2: 'bachhra'.tr,
+  1: 'bachhra'.tr,
+  2: 'bacchri'.tr,
+};
+Map<String, int> stringToAnimalHasBaby = {
+  'nothing'.tr: 0,
+  'bachhra'.tr: 1,
+  'bacchri'.tr: 2,
 };
 
-Map<String, int> stringToYesNo = {'yes'.tr: 0, 'no'.tr: 1};
-Map<int, String> intToYesNo = {0: 'yes'.tr, 1: 'no'.tr};
+Map<String, int> stringToYesNo = {
+  'yes'.tr: 0,
+  'no'.tr: 1,
+};
+Map<int, String> intToYesNo = {
+  0: 'yes'.tr,
+  1: 'no'.tr,
+};

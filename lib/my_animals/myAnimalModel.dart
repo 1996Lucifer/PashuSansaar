@@ -1,14 +1,14 @@
 class MyAnimalModel {
   bool success;
   List<MyAnimals> myAnimals;
-  Null page;
+  int page;
 
   MyAnimalModel({this.success, this.myAnimals, this.page});
 
   MyAnimalModel.fromJson(Map<String, dynamic> json) {
     success = json['success'];
     if (json['myAnimals'] != null) {
-      myAnimals = new List<MyAnimals>();
+      myAnimals = <MyAnimals>[];
       json['myAnimals'].forEach((v) {
         myAnimals.add(new MyAnimals.fromJson(v));
       });
@@ -38,7 +38,7 @@ class MyAnimals {
   int animalMilkCapacity;
   int animalPrice;
   bool isRecentBayat;
-  Null recentBayatTime;
+  int recentBayatTime;
   bool isPregnant;
   int pregnantTime;
   int animalHasBaby;
@@ -60,34 +60,34 @@ class MyAnimals {
 
   MyAnimals(
       {this.location,
-        this.sId,
-        this.animalType,
-        this.animalBreed,
-        this.animalAge,
-        this.animalBayat,
-        this.animalMilk,
-        this.animalMilkCapacity,
-        this.animalPrice,
-        this.isRecentBayat,
-        this.recentBayatTime,
-        this.isPregnant,
-        this.pregnantTime,
-        this.animalHasBaby,
-        this.moreInfo,
-        this.files,
-        this.userId,
-        this.animalStatus,
-        this.verificationStatus,
-        this.longitude,
-        this.latitude,
-        this.userName,
-        this.district,
-        this.zipCode,
-        this.userAddress,
-        this.mobile,
-        this.createdAt,
-        this.updatedAt,
-        this.iV});
+      this.sId,
+      this.animalType,
+      this.animalBreed,
+      this.animalAge,
+      this.animalBayat,
+      this.animalMilk,
+      this.animalMilkCapacity,
+      this.animalPrice,
+      this.isRecentBayat,
+      this.recentBayatTime,
+      this.isPregnant,
+      this.pregnantTime,
+      this.animalHasBaby,
+      this.moreInfo,
+      this.files,
+      this.userId,
+      this.animalStatus,
+      this.verificationStatus,
+      this.longitude,
+      this.latitude,
+      this.userName,
+      this.district,
+      this.zipCode,
+      this.userAddress,
+      this.mobile,
+      this.createdAt,
+      this.updatedAt,
+      this.iV});
 
   MyAnimals.fromJson(Map<String, dynamic> json) {
     location = json['location'] != null
@@ -105,10 +105,9 @@ class MyAnimals {
     recentBayatTime = json['recentBayatTime'];
     isPregnant = json['isPregnant'];
     pregnantTime = json['pregnantTime'];
-    animalHasBaby = json['animalHasBaby'];
     moreInfo = json['moreInfo'];
     if (json['files'] != null) {
-      files = new List<Files>();
+      files = <Files>[];
       json['files'].forEach((v) {
         files.add(new Files.fromJson(v));
       });

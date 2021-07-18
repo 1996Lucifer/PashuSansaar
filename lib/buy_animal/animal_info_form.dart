@@ -449,7 +449,7 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
 
                   Map<String, dynamic> payload = {
                     "userId": prefs.getString('userId'),
-                    "animalType": animalInfo['animalType'],
+                    "animalType": constant.animalTypeMapping[animalInfo['animalType']],
                     "animalBreed": ReusableWidgets.removeEnglishDataFromName(
                         animalInfo['animalBreed']),
                     "animalMilk": animalInfo['animalMilk'],
@@ -457,6 +457,8 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
                     "animalPrice": animalInfo['animalBudget'],
                     "district": "Hardoi",
                   };
+
+                  print('payload is $payload');
 
                   try {
                     var response = await Dio().post(

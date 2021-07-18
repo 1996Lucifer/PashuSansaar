@@ -25,7 +25,7 @@ class BuyAnimalController extends GetxController {
       "animalType": animalType,
       "minMilk": minMilk,
       "maxMilk": maxMilk,
-      "page": page
+      "page": page,
     };
 
     try {

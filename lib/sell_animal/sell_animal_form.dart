@@ -1246,14 +1246,16 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                             animalMilkCapacity:
                                 ReusableWidgets.convertStringToInt(
                                     animalInfo['animalMilkCapacity']),
-                            isRecentBayat: stringToYesNo[
-                                extraInfoData['alreadyPregnantYesNo']],
+                            isRecentBayat:
+                                extraInfoData['alreadyPregnantYesNo'] == constant.yesNo.first,
                             recentBayatTime: stringToRecentBayaatTime[
                                 extraInfoData['animalAlreadyGivenBirth']],
                             isPregnant:
-                                stringToYesNo[extraInfoData['isPregnantYesNo']],
+                                extraInfoData['isPregnantYesNo'] == constant.yesNo.first,
                             pregnantTime: stringToPregnantTime[
                                 extraInfoData['animalIfPregnant']],
+                            animalHasBaby: stringToAnimalHasBaby[
+                                extraInfoData['animalHasBaby']],
                             userId: prefs.getString('userId'),
                             moreInfo: extraInfoData['moreInfo'],
                             files: _imageToBeUploaded,
@@ -1280,10 +1282,6 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                           );
                         }
 
-                        bool uploadStatus = _isImageUploaded
-                            .every((element) => element == true);
-
-                        // print('][]' + uploadStatus.toString());
                         print('][]==' + _imageToBeUploaded.toString());
 
                         if (saveAnimalData && _imageToBeUploaded.isNotEmpty) {

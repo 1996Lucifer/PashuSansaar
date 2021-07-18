@@ -6,9 +6,10 @@ import 'package:pashusansaar/animal_description/animal_description_model.dart';
 import 'package:pashusansaar/utils/urls.dart';
 
 class AnimalDescriptionController extends GetxController {
-  animalDescription({String animalId, String userId, String accessToken}) async {
+  animalDescription({String animalId, String userId, String senderUserId, String accessToken}) async {
     Map<String, dynamic> payload = {
       "animalId": animalId,
+      "senderuserId": senderUserId,
       "userId": userId,
     };
 
@@ -33,7 +34,7 @@ class AnimalDescriptionController extends GetxController {
       }
     } catch (e) {
       print("Getting exception in getting animal description _______$e");
-      return {};
+      return Animal();
     }
   }
 }

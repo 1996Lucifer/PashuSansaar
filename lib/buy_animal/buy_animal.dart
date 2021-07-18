@@ -148,6 +148,7 @@ class _BuyAnimalState extends State<BuyAnimal>
         distance: _distance ?? 50000,
         page: _page,
         accessToken: prefs.getString('accessToken') ?? '',
+        userId: prefs.getString('userId'),
       );
 
       List<Result> _temp = widget.animalInfo;
@@ -1182,10 +1183,10 @@ class _BuyAnimalState extends State<BuyAnimal>
         desc =
             desc + 'यह अभी ${intToPregnantTime[animalInfo.pregnantTime]} है। ';
       }
-      // desc = desc +
-      //     (animalInfo.animalHasBaby == null || animalInfo.animalHasBaby == 0
-      //         ? 'इसके साथ में बच्चा नहीं है। '
-      //         : 'इसके साथ में ${intToAnimalHasBaby[animalInfo.animalHasBaby]}। ',);
+      desc = desc +
+          (animalInfo.animalHasBaby == null || animalInfo.animalHasBaby == 0
+              ? 'इसके साथ में बच्चा नहीं है। '
+              : 'इसके साथ में ${intToAnimalHasBaby[animalInfo.animalHasBaby]}। ');
       if (animalInfo.animalMilkCapacity != null) {
         desc = desc +
             'पिछले बार के हिसाब से दूध कैपेसिटी ${animalInfo.animalMilkCapacity} लीटर है। ';

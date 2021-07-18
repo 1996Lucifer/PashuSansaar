@@ -13,10 +13,11 @@ class SellAnimalController extends GetxController {
     int animalMilk,
     int animalMilkCapacity,
     int animalPrice,
-    int isRecentBayat,
+    bool isRecentBayat,
     int recentBayatTime,
-    int isPregnant,
+    bool isPregnant,
     int pregnantTime,
+    int animalHasBaby,
     String userId,
     String moreInfo,
     List files,
@@ -50,12 +51,51 @@ class SellAnimalController extends GetxController {
         },
       );
 
-
       print('payload is $payload');
-
 
       dio.Response res = await dio.Dio()
           .post(url, data: json.encode(payload), options: options);
+      print('response will be called');
+
+      if (res != null) {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          status = true;
+        } else {
+          status = false;
+        }
+      } else {
+        status = false;
+      }
+
+      return status;
+    } catch (e) {
+      print("Exceptions save animal data_______$e");
+      return status;
+    }
+  }
+
+  saveEditAnimal({
+    Map<String, dynamic> payload,
+    String token,
+  }) async {
+    bool status = false;
+
+    try {
+      String url = GlobalUrl.baseUrl + GlobalUrl.saveAnimals;
+
+      dio.Options options = new dio.Options(
+        headers: {
+          "Authorization": token ?? '',
+        },
+      );
+
+      print('payload is $payload');
+
+      dio.Response res = await dio.Dio().post(
+        url,
+        data: json.encode(payload),
+        options: options,
+      );
       print('response will be called');
 
       if (res != null) {

@@ -87,9 +87,16 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
     lat = prefs.getDouble('latitude');
     long = prefs.getDouble('longitude');
 
+
+    print('animalId coming through widget is ${widget.uniqueId}');
+    print('senderUserId coming through widget is ${prefs.getString('userId')}');
+    print('userId coming through widget is ${widget.userId}');
+    print('access Token coming through widget is ${prefs.getString('accessToken')}');
+
     Animal data = await animalDescriptionController.animalDescription(
-      userId: widget.userId,
       animalId: widget.uniqueId,
+      senderUserId: widget.userId,
+      userId: prefs.getString('userId'),
       accessToken: prefs.getString('accessToken') ?? '',
     );
 
@@ -141,7 +148,7 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
                             SizedBox(
                               height: 10,
                             ),
-                            _descriptionText(animalDesc),
+                            _animalDescriptionMethod(animalDesc),
                             SizedBox(
                               height: 10,
                             ),
@@ -416,46 +423,112 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
         .toStringAsFixed(0);
   }
 
-  Widget _descriptionText(_list) {
-    String animalBreedCheck =
-        (_list.animalBreed == 'not_known'.tr) ? "" : _list.animalBreed;
-    String animalTypeCheck = (_list.animalType == 5)
+  // Widget _descriptionText(_list) {
+  //   String animalBreedCheck =
+  //       (_list.animalBreed == 'not_known'.tr) ? "" : _list.animalBreed;
+  //   String animalTypeCheck = (_list.animalType == 5)
+  //       ? intToAnimalTypeMapping[5]
+  //       : intToAnimalTypeMapping[_list.animalType];
+  //
+  //   String desc = '';
+  //
+  //   if (_list.animalType == 3 ||
+  //       _list.animalType == 4 ||
+  //       _list.animalType == 5) {
+  //     desc =
+  //         'ये $animalBreedCheck $animalTypeCheck ${_list.animalAge} साल की है। ';
+  //   } else {
+  //     desc =
+  //         'ये ${_list.animalBreed} ${intToAnimalTypeMapping[_list.animalType]} ${_list.animalAge} साल का है। ';
+  //     if (_list.recentBayatTime != null) {
+  //       desc = desc +
+  //           'यह ${intToRecentBayaatTime[_list.recentBayatTime]} ब्यायी है। ';
+  //     }
+  //     if (_list.pregnantTime != null) {
+  //       desc = desc + 'यह अभी ${intToPregnantTime[_list.pregnantTime]} है। ';
+  //     }
+  //     if (_list.animalMilkCapacity != null) {
+  //       desc = desc +
+  //           'पिछले बार के हिसाब से दूध कैपेसिटी ${_list.animalMilkCapacity} लीटर है। ';
+  //     }
+  //   }
+  //   desc = desc + (animalDesc.moreInfo ?? "");
+  //   return Padding(
+  //     padding: const EdgeInsets.all(8.0),
+  //     child: Text(
+  //       desc,
+  //       maxLines: 4,
+  //       overflow: TextOverflow.ellipsis,
+  //       style: TextStyle(color: Colors.grey[600], fontSize: 14.5),
+  //     ),
+  //   );
+  // }
+
+
+
+
+
+
+  //*****************************************************************
+
+
+  _descriptionText(animalInfo) {
+    String animalBreedCheck = (animalInfo.animalBreed == 'not_known'.tr)
+        ? ""
+        : animalInfo.animalBreed;
+    String animalTypeCheck = (animalInfo.animalType == 5)
         ? intToAnimalTypeMapping[5]
-        : intToAnimalTypeMapping[_list.animalType];
+        : intToAnimalTypeMapping[animalInfo.animalType];
 
     String desc = '';
 
-    if (_list.animalType == 3 ||
-        _list.animalType == 4 ||
-        _list.animalType == 5) {
+    if (animalInfo.animalType == 3 ||
+        animalInfo.animalType == 4 ||
+        animalInfo.animalType == 5) {
       desc =
-          'ये $animalBreedCheck $animalTypeCheck ${_list.animalAge} साल की है। ';
+      'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल की है। ';
     } else {
       desc =
-          'ये ${_list.animalBreed} ${intToAnimalTypeMapping[_list.animalType]} ${_list.animalAge} साल का है। ';
-      if (_list.recentBayatTime != null) {
-        desc = desc +
-            'यह ${intToRecentBayaatTime[_list.recentBayatTime]} ब्यायी है। ';
+      'ये ${animalInfo.animalBreed} ${intToAnimalTypeMapping[animalInfo.animalType]} ${animalInfo.animalAge} साल का है। ';
+      // if (animalInfo.recentBayatTime != null) {
+      //   desc = desc +
+      //       'यह ${intToRecentBayaatTime[animalInfo.recentBayatTime]} ब्यायी है। ';
+      // }
+      if (animalInfo.pregnantTime != null) {
+        desc =
+            desc + 'यह अभी ${intToPregnantTime[animalInfo.pregnantTime]} है। ';
       }
-      if (_list.pregnantTime != null) {
-        desc = desc + 'यह अभी ${intToPregnantTime[_list.pregnantTime]} है। ';
-      }
-      if (_list.animalMilkCapacity != null) {
+      desc = desc +
+          (animalInfo.animalHasBaby == null || animalInfo.animalHasBaby == 0
+              ? 'इसके साथ में बच्चा नहीं है। '
+              : 'इसके साथ में ${intToAnimalHasBaby[animalInfo.animalHasBaby]}। ');
+      if (animalInfo.animalMilkCapacity != null) {
         desc = desc +
-            'पिछले बार के हिसाब से दूध कैपेसिटी ${_list.animalMilkCapacity} लीटर है। ';
+            'पिछले बार के हिसाब से दूध कैपेसिटी ${animalInfo.animalMilkCapacity} लीटर है। ';
       }
     }
-    desc = desc + (animalDesc.moreInfo ?? "");
+
+    return desc;
+  }
+
+  Padding _animalDescriptionMethod(_list) {
+
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Text(
-        desc,
+        // "description to be added",
+        _descriptionText(_list),
         maxLines: 4,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(color: Colors.grey[600], fontSize: 14.5),
       ),
     );
   }
+
+
+
+
+  //*****************************************************************
 
   _getCallButton() => RaisedButton.icon(
         color: Colors.blue,
