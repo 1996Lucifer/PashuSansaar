@@ -14,6 +14,4 @@ class GlobalUrl {
   static String getAnimalList = "/get-myAnimals";
   static String interestedBuyers = "/get-interestbuyers";
   static String animalSold = "/animalSold";
-  static String animalDescription = "/getA-animal";
-  static String postBuyerRequirement = "/postBuyerRequirement";
 }

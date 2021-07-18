@@ -1310,12 +1310,12 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                             animalMilkCapacity:
                                 ReusableWidgets.convertStringToInt(
                                     animalUpdationData['animalMilkCapacity']),
-                            isRecentBayat:
-                                extraInfoData['alreadyPregnantYesNo'] == constant.yesNo.first,
+                            isRecentBayat: stringToYesNo[
+                                extraInfoData['alreadyPregnantYesNo']],
                             recentBayatTime: stringToRecentBayaatTime[
                                 extraInfoData['animalAlreadyGivenBirth']],
                             isPregnant:
-                                extraInfoData['isPregnantYesNo'] == constant.yesNo.first,
+                                stringToYesNo[extraInfoData['isPregnantYesNo']],
                             pregnantTime: stringToPregnantTime[
                                 extraInfoData['animalIfPregnant']],
                             animalHasBaby: stringToAnimalHasBaby[
