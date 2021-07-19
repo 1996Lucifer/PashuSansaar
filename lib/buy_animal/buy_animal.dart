@@ -355,9 +355,9 @@ class _BuyAnimalState extends State<BuyAnimal>
                               fontSize: 16),
                         ),
                         TextSpan(
-                          text: _list[index].animalType == 5
-                              ? intToAnimalTypeMapping[5]
-                              : intToAnimalTypeMapping[_list[index].animalType],
+                          text: _list[index].animalType <= 4
+                              ? intToAnimalTypeMapping[_list[index].animalType]
+                              : intToAnimalOtherTypeMapping[_list[index].animalType],
                           style: TextStyle(
                               color: Colors.grey[700],
                               fontWeight: FontWeight.bold,
@@ -516,7 +516,7 @@ class _BuyAnimalState extends State<BuyAnimal>
           ),
           body: Stack(
             children: [
-              widget.animalInfo.length == 0
+               widget.animalInfo == null ||widget.animalInfo.length == 0
                   ? Center(
                       child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -647,10 +647,6 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                         }
                                                       ]);
 
-                                                  print(
-                                                      'userId is ${prefs.getString('userId')}');
-                                                  print(
-                                                      'token is ${prefs.getString('accessToken')}');
 
                                                   return UrlLauncher.launch(
                                                       'tel:+91 $myNum');
@@ -1160,26 +1156,28 @@ class _BuyAnimalState extends State<BuyAnimal>
   }
 
   _descriptionText(animalInfo) {
-    String animalBreedCheck =
-    (animalInfo.animalBreed == 'not_known'.tr) ? "" : animalInfo.animalBreed;
-    String animalTypeCheck = (animalInfo.animalType == 5)
-        ? intToAnimalTypeMapping[5]
+    String animalBreedCheck = (animalInfo.animalBreed == 'not_known'.tr)
+        ? ""
+        : animalInfo.animalBreed;
+    String animalTypeCheck = (animalInfo.animalType >= 5)
+        ? intToAnimalOtherTypeMapping[animalInfo.animalType]
         : intToAnimalTypeMapping[animalInfo.animalType];
 
     String desc = '';
 
     if (animalInfo.animalType >= 3) {
       desc =
-      'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल ${(animalInfo.animalType == 6 || animalInfo.animalType == 8 || animalInfo.animalType == 10) ? " की" : "का"} है। ';
+          'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल ${(animalInfo.animalType == 6 || animalInfo.animalType == 8 || animalInfo.animalType == 10) ? " की" : "का"} है। ';
     } else {
       desc =
-      'ये ${animalInfo.animalBreed} ${intToAnimalTypeMapping[animalInfo.animalType]} ${animalInfo.animalAge} साल की है। ';
+          'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल की है। ';
       if (animalInfo.recentBayatTime != null) {
         desc = desc +
             'यह ${intToRecentBayaatTime[animalInfo.recentBayatTime]} ब्यायी है। ';
       }
       if (animalInfo.pregnantTime != null) {
-        desc = desc + 'यह अभी ${intToPregnantTime[animalInfo.pregnantTime]} है। ';
+        desc =
+            desc + 'यह अभी ${intToPregnantTime[animalInfo.pregnantTime]} है। ';
       }
       if (animalInfo.animalMilkCapacity != null) {
         desc = desc +

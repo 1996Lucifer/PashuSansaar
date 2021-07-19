@@ -84,26 +84,28 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
   // }
 
   _descriptionText(_list) {
-    String animalBreedCheck =
-        (_list.animalBreed == 'not_known'.tr) ? "" : _list.animalBreed;
-    String animalTypeCheck = (_list.animalType == 5)
-        ? intToAnimalTypeMapping[5]
+    String animalBreedCheck = (_list.animalBreed == 'not_known'.tr)
+        ? ""
+        : _list.animalBreed;
+    String animalTypeCheck = (_list.animalType >= 5)
+        ? intToAnimalOtherTypeMapping[_list.animalType]
         : intToAnimalTypeMapping[_list.animalType];
 
     String desc = '';
 
     if (_list.animalType >= 3) {
       desc =
-          'ये $animalBreedCheck $animalTypeCheck ${_list.animalAge} साल ${(_list.animalType == 6 || _list.animalType == 8 || _list.animalType == 10) ? " की" : "का"} है। ';
+      'ये $animalBreedCheck $animalTypeCheck ${_list.animalAge} साल ${(_list.animalType == 6 || _list.animalType == 8 || _list.animalType == 10) ? " की" : "का"} है। ';
     } else {
       desc =
-          'ये ${_list.animalBreed} ${intToAnimalTypeMapping[_list.animalType]} ${_list.animalAge} साल की है। ';
+      'ये $animalBreedCheck $animalTypeCheck ${_list.animalAge} साल की है। ';
       if (_list.recentBayatTime != null) {
         desc = desc +
             'यह ${intToRecentBayaatTime[_list.recentBayatTime]} ब्यायी है। ';
       }
       if (_list.pregnantTime != null) {
-        desc = desc + 'यह अभी ${intToPregnantTime[_list.pregnantTime]} है। ';
+        desc =
+            desc + 'यह अभी ${intToPregnantTime[_list.pregnantTime]} है। ';
       }
       if (_list.animalMilkCapacity != null) {
         desc = desc +
@@ -195,7 +197,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                   TextSpan(
                     text: (_list.animalType.toString() == 'other_animal'.tr
                             ? "no type"
-                            : intToAnimalTypeMapping[_list.animalType]) +
+                            : (_list.animalType <= 4 ? intToAnimalTypeMapping[_list.animalType] : intToAnimalOtherTypeMapping[_list.animalType])) +
                         ', ',
                     style: TextStyle(
                         color: greyColor,
