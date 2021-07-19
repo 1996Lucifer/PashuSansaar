@@ -960,7 +960,11 @@ class _BuyAnimalState extends State<BuyAnimal>
                                         onPressed: () async {
                                           if (_locationController.text.length ==
                                               0)
-                                            Navigator.pop(context);
+                                            ReusableWidgets.showDialogBox(
+                                                context,
+                                                'error'.tr,
+                                                Text(
+                                                    'error_length_zipcode'.tr));
                                           else {
                                             if (_locationController
                                                     .text.length <
