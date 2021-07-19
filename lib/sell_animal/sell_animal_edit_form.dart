@@ -1512,7 +1512,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                           animalUpdationData['animalMilkCapacity'],
                       isRecentBayat: animalUpdationData['isRecentBayat'],
                       recentBayatTime: animalUpdationData['recentBayatTime'],
-                      isPregnant: animalUpdationData['isPregnant'] ,
+                      isPregnant: animalUpdationData['isPregnant'],
                       pregnantTime: animalUpdationData['pregnantTime'],
                       animalHasBaby: animalUpdationData['animalHasBaby'],
                       userId: prefs.getString('userId'),
@@ -1858,11 +1858,12 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
               mode: Mode.BOTTOM_SHEET,
               showSelectedItem: true,
               items: constant.isBaby,
-              selectedItem: extraInfoData['animalHasBaby'],
+              selectedItem: intToAnimalHasBaby[widget.animalInfo.animalHasBaby],
               maxHeight: 200,
               onChanged: (String baby) {
                 setState(() {
-                  extraInfoData['animalHasBaby'] = baby;
+                  animalUpdationData['animalHasBaby'] =
+                      stringToAnimalHasBaby[baby];
                 });
               },
               dropdownSearchDecoration: InputDecoration(

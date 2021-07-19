@@ -516,7 +516,7 @@ class _BuyAnimalState extends State<BuyAnimal>
           ),
           body: Stack(
             children: [
-              widget.animalInfo.length == 0
+              widget.animalInfo == null || widget.animalInfo.length == 0
                   ? Center(
                       child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),

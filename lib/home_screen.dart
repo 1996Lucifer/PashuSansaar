@@ -403,12 +403,13 @@ class _HomeScreenState extends State<HomeScreen> {
           physics: NeverScrollableScrollPhysics(),
           children: [
             BuyAnimal(
-                animalInfo: _animalInfo,
-                userName: _profileData['name'],
-                userMobileNumber: _profileData['mobile'],
-                userImage: _profileData['image'],
-                latitude: lat,
-                longitude: long),
+              animalInfo: _animalInfo,
+              userName: _profileData['name'],
+              userMobileNumber: _profileData['mobile'],
+              userImage: _profileData['image'],
+              latitude: lat,
+              longitude: long,
+            ),
             SellAnimalMain(
               sellingAnimalInfo: _sellingAnimalInfo,
               userName: _profileData['name'],
