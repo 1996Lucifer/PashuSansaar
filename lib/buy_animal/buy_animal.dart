@@ -1133,9 +1133,9 @@ class _BuyAnimalState extends State<BuyAnimal>
       }
 
       BuyAnimalModel data = await buyAnimalController.getAnimal(
-        latitude: first.coordinates.latitude,
-        longitude: first.coordinates.longitude,
-        distance: _radiusData * 1000000,
+        latitude: _filterLat,
+        longitude: _filterLong,
+        distance: _radiusData * 1000,
         animalType: animalType,
         minMilk: minMilk,
         maxMilk: maxMilk,
@@ -1145,9 +1145,10 @@ class _BuyAnimalState extends State<BuyAnimal>
       );
 
       setState(() {
+        widget.animalInfo.clear();
         widget.animalInfo = data.result;
         prefs.setInt('page', data.page);
-        _distance = _radiusData * 1000000;
+        _distance = _radiusData * 1000;
       });
 
       pr.hide();
@@ -1465,17 +1466,8 @@ class _BuyAnimalState extends State<BuyAnimal>
   }
 
   String _distanceBetweenTwoCoordinates(double lat, double long) {
-    double _latx, _longx;
-    if (widget.latitude == 0.0 || widget.longitude == 0.0) {
-      _latx = _latitude;
-      _longx = _longitude;
-    } else {
-      _latx = widget.latitude;
-      _longx = widget.longitude;
-    }
-
     return (Geodesy().distanceBetweenTwoGeoPoints(
-              LatLng(_latx, _longx),
+              LatLng(_filterLat ?? _latitude, _filterLong ?? _longitude),
               LatLng(lat, long),
             ) /
             1000)
@@ -1700,8 +1692,8 @@ class _BuyAnimalState extends State<BuyAnimal>
                                         _getMinMaxMilk = filterMilkValue[
                                                 _filterDropDownMap['filter2']]
                                             .split(' ');
-                                        _minMilk = 0;
-                                        _maxMilk = int.parse(_getMinMaxMilk[1]);
+                                        _minMilk = 21;
+                                        _maxMilk = 70;
                                       } else {
                                         _getMinMaxMilk = filterMilkValue[
                                                 _filterDropDownMap['filter2']]
@@ -1744,8 +1736,9 @@ class _BuyAnimalState extends State<BuyAnimal>
 
                                     BuyAnimalModel data =
                                         await buyAnimalController.getAnimal(
-                                      latitude: _latitude,
-                                      longitude: _longitude,
+                                      latitude: _filterLat ?? _latitude,
+                                      longitude: _filterLong ?? _longitude,
+                                      distance: _distance ?? 50000,
                                       animalType: animalTypeMapping[
                                           _filterDropDownMap['filter1']],
                                       minMilk: minMilk,
@@ -1753,6 +1746,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                                       page: 1,
                                       accessToken:
                                           prefs.getString('accessToken') ?? '',
+                                      userId: prefs.getString('userId'),
                                     );
 
                                     setState(() {

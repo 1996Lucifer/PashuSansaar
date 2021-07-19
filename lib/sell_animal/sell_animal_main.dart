@@ -1,9 +1,10 @@
+import 'package:pashusansaar/my_animals/myAnimalModel.dart';
 import 'package:pashusansaar/sell_animal/sell_animal_form.dart';
 import 'package:pashusansaar/sell_animal/sell_animal_info.dart';
 import 'package:flutter/material.dart';
 
 class SellAnimalMain extends StatelessWidget {
-  final List sellingAnimalInfo;
+  final List<MyAnimals> sellingAnimalInfo;
   final String userName;
   final String userMobileNumber;
 

@@ -229,6 +229,7 @@ class _HomeScreenState extends State<HomeScreen> {
     BuyAnimalModel data = await buyAnimalController.getAnimal(
       // latitude: 40.1,
       // longitude: -97.1,
+      distance: 50000,
       latitude: lat,
       longitude: long,
       animalType: null,
