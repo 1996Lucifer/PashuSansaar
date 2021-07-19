@@ -4,8 +4,8 @@ import 'package:dio/dio.dart' as dio;
 import 'package:get/get.dart';
 import 'package:pashusansaar/utils/urls.dart';
 
-class SellAnimalController extends GetxController {
-  saveAnimal({
+class UpdateAnimalController extends GetxController {
+  updateAnimal({
     int animalType,
     String animalBreed,
     int animalAge,
@@ -22,6 +22,7 @@ class SellAnimalController extends GetxController {
     String moreInfo,
     List files,
     String token,
+    String animalId,
   }) async {
     Map<String, dynamic> payload = {
       "animalType": animalType,
@@ -38,12 +39,14 @@ class SellAnimalController extends GetxController {
       "userId": userId,
       "moreInfo": moreInfo,
       "files": files,
+      "animalId": animalId,
+      "animalHasBaby": animalHasBaby,
     };
 
     bool status = false;
 
     try {
-      String url = GlobalUrl.baseUrl + GlobalUrl.saveAnimals;
+      String url = GlobalUrl.baseUrl + GlobalUrl.updateAnimal;
 
       dio.Options options = new dio.Options(
         headers: {
@@ -51,7 +54,7 @@ class SellAnimalController extends GetxController {
         },
       );
 
-      print('payload is $payload');
+      print('payload is=--$payload');
 
       dio.Response res = await dio.Dio()
           .post(url, data: json.encode(payload), options: options);
@@ -69,9 +72,8 @@ class SellAnimalController extends GetxController {
 
       return status;
     } catch (e) {
-      print("Exceptions save animal data_______$e");
+      print("Exceptions update animal data_______$e");
       return status;
     }
   }
 }
-

@@ -1232,9 +1232,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                               await sellAnimalController.saveAnimal(
                             animalType:
                                 animalTypeMapping[animalInfo['animalType']],
-                            animalBreed:
-                                ReusableWidgets.removeEnglishDataFromName(
-                                    animalInfo['animalBreed']),
+                            animalBreed: animalInfo['animalBreed'],
                             animalAge: ReusableWidgets.convertStringToInt(
                                 animalInfo['animalAge']),
                             animalBayat: animalBayaatMapping[
@@ -1247,11 +1245,12 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                                 ReusableWidgets.convertStringToInt(
                                     animalInfo['animalMilkCapacity']),
                             isRecentBayat:
-                                extraInfoData['alreadyPregnantYesNo'] == constant.yesNo.first,
+                                extraInfoData['alreadyPregnantYesNo'] ==
+                                    constant.yesNo.first,
                             recentBayatTime: stringToRecentBayaatTime[
                                 extraInfoData['animalAlreadyGivenBirth']],
-                            isPregnant:
-                                extraInfoData['isPregnantYesNo'] == constant.yesNo.first,
+                            isPregnant: extraInfoData['isPregnantYesNo'] ==
+                                constant.yesNo.first,
                             pregnantTime: stringToPregnantTime[
                                 extraInfoData['animalIfPregnant']],
                             animalHasBaby: stringToAnimalHasBaby[

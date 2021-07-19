@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
-import 'package:pashusansaar/buy_animal/buy_animal_controller.dart';
 import 'package:pashusansaar/my_animals/myAnimalController.dart';
+import 'package:pashusansaar/my_animals/myAnimalModel.dart';
 import 'package:pashusansaar/refresh_token/refresh_token_controller.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/constants.dart';
@@ -23,7 +23,7 @@ import 'sell_animal_edit_form.dart';
 import 'sell_animal_form.dart';
 
 class SellingAnimalInfo extends StatefulWidget {
-  final List animalInfo;
+  final List<MyAnimals> animalInfo;
   final String userName;
   final String userMobileNumber;
   final bool showExtraData;
@@ -413,12 +413,9 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                       _isErrorEmpty = true;
                     });
                   } else if ((int.parse(_price) <
-                          (int.parse(widget.animalInfo[index]['animalInfo']
-                                  ['animalPrice']) ~/
-                              2)) ||
+                          (widget.animalInfo[index].animalPrice ~/ 2)) ||
                       (int.parse(_price) >
-                          int.parse(widget.animalInfo[index]['animalInfo']
-                              ['animalPrice']))) {
+                          widget.animalInfo[index].animalPrice)) {
                     setState(() {
                       _isErrorEmpty = false;
                       _isError = true;
@@ -438,7 +435,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                         .collection("animalSellingInfo")
                         .doc(FirebaseAuth.instance.currentUser.uid)
                         .collection('sellingAnimalList')
-                        .doc(widget.animalInfo[index]['uniqueId'])
+                        .doc(widget.animalInfo[index].sId)
                         .update({
                           'animalRemove': {
                             'soldFromApp': false,
@@ -452,7 +449,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                         })
                         .then((value) => FirebaseFirestore.instance
                                 .collection('buyingAnimalList1')
-                                .doc(widget.animalInfo[index]['uniqueId'] +
+                                .doc(widget.animalInfo[index].sId +
                                     FirebaseAuth.instance.currentUser.uid)
                                 .update({
                               'animalRemove': {
@@ -676,6 +673,8 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                                                 MaterialPageRoute(
                                                   builder: (context) =>
                                                       SellAnimalEditForm(
+                                                    animalInfo: widget
+                                                        .animalInfo[index],
                                                     index: index,
                                                     userName: widget.userName,
                                                     userMobileNumber:
