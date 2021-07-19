@@ -38,6 +38,7 @@ class SellAnimalController extends GetxController {
       "userId": userId,
       "moreInfo": moreInfo,
       "files": files,
+      "animalHasBaby": animalHasBaby,
     };
 
     bool status = false;
@@ -74,4 +75,3 @@ class SellAnimalController extends GetxController {
     }
   }
 }
-

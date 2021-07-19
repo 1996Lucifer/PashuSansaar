@@ -355,9 +355,9 @@ class _BuyAnimalState extends State<BuyAnimal>
                               fontSize: 16),
                         ),
                         TextSpan(
-                          text: _list[index].animalType <= 4
-                              ? intToAnimalTypeMapping[_list[index].animalType]
-                              : intToAnimalOtherTypeMapping[_list[index].animalType],
+                          text: _list[index].animalType == 5
+                              ? intToAnimalTypeMapping[5]
+                              : intToAnimalTypeMapping[_list[index].animalType],
                           style: TextStyle(
                               color: Colors.grey[700],
                               fontWeight: FontWeight.bold,
@@ -516,7 +516,7 @@ class _BuyAnimalState extends State<BuyAnimal>
           ),
           body: Stack(
             children: [
-               widget.animalInfo == null ||widget.animalInfo.length == 0
+              widget.animalInfo == null || widget.animalInfo.length == 0
                   ? Center(
                       child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -647,6 +647,10 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                         }
                                                       ]);
 
+                                                  print(
+                                                      'userId is ${prefs.getString('userId')}');
+                                                  print(
+                                                      'token is ${prefs.getString('accessToken')}');
 
                                                   return UrlLauncher.launch(
                                                       'tel:+91 $myNum');
@@ -956,7 +960,11 @@ class _BuyAnimalState extends State<BuyAnimal>
                                         onPressed: () async {
                                           if (_locationController.text.length ==
                                               0)
-                                            Navigator.pop(context);
+                                            ReusableWidgets.showDialogBox(
+                                                context,
+                                                'error'.tr,
+                                                Text(
+                                                    'error_length_zipcode'.tr));
                                           else {
                                             if (_locationController
                                                     .text.length <
@@ -1159,18 +1167,20 @@ class _BuyAnimalState extends State<BuyAnimal>
     String animalBreedCheck = (animalInfo.animalBreed == 'not_known'.tr)
         ? ""
         : animalInfo.animalBreed;
-    String animalTypeCheck = (animalInfo.animalType >= 5)
-        ? intToAnimalOtherTypeMapping[animalInfo.animalType]
+    String animalTypeCheck = (animalInfo.animalType == 5)
+        ? intToAnimalTypeMapping[5]
         : intToAnimalTypeMapping[animalInfo.animalType];
 
     String desc = '';
 
-    if (animalInfo.animalType >= 3) {
-      desc =
-          'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल ${(animalInfo.animalType == 6 || animalInfo.animalType == 8 || animalInfo.animalType == 10) ? " की" : "का"} है। ';
-    } else {
+    if (animalInfo.animalType == 3 ||
+        animalInfo.animalType == 4 ||
+        animalInfo.animalType == 5) {
       desc =
           'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल की है। ';
+    } else {
+      desc =
+          'ये ${animalInfo.animalBreed} ${intToAnimalTypeMapping[animalInfo.animalType]} ${animalInfo.animalAge} साल का है। ';
       if (animalInfo.recentBayatTime != null) {
         desc = desc +
             'यह ${intToRecentBayaatTime[animalInfo.recentBayatTime]} ब्यायी है। ';
@@ -1179,12 +1189,17 @@ class _BuyAnimalState extends State<BuyAnimal>
         desc =
             desc + 'यह अभी ${intToPregnantTime[animalInfo.pregnantTime]} है। ';
       }
+      desc = desc +
+          (animalInfo.animalHasBaby == null || animalInfo.animalHasBaby == 0
+              ? 'इसके साथ में बच्चा नहीं है। '
+              : 'इसके साथ में ${intToAnimalHasBaby[animalInfo.animalHasBaby]}। ');
       if (animalInfo.animalMilkCapacity != null) {
         desc = desc +
             'पिछले बार के हिसाब से दूध कैपेसिटी ${animalInfo.animalMilkCapacity} लीटर है। ';
       }
     }
-    return desc + (animalInfo.moreInfo ?? "");
+
+    return desc;
   }
 
   Padding _animalDescriptionMethod(int index) {
