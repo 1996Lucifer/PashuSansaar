@@ -178,7 +178,9 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
       editImagesUpload = _editImagesUpload;
       imagesUpload = _imagesUpload;
       _imageToBeUploaded = imageToBeUploaded;
-
+      if (widget.animalInfo.animalType > 4) {
+        _animalOtherType = constant.animalType[4];
+      }
       _controller = TextEditingController(
           text: _currency +
               '${_formatNumber(widget.animalInfo.animalPrice.toString().replaceAll(',', ''))}');
