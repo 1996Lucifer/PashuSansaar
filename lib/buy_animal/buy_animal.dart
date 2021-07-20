@@ -85,10 +85,9 @@ class _BuyAnimalState extends State<BuyAnimal>
   ScrollController _scrollController =
       ScrollController(keepScrollOffset: false);
   bool _isCardVisible = false;
+  File fileUrl;
   final SellerContactController sellerContactController =
       Get.put(SellerContactController());
-
-  File fileUrl;
   final BuyAnimalController buyAnimalController =
       Get.put(BuyAnimalController());
   final RefreshTokenController refreshTokenController =
@@ -156,7 +155,7 @@ class _BuyAnimalState extends State<BuyAnimal>
 
       setState(() {
         widget.animalInfo = _temp;
-        _isCardVisible = widget.animalInfo.length % 5 == 0;
+        // _isCardVisible = widget.animalInfo.length % 5 == 0;
         prefs.setInt('page', data.page);
       });
     } catch (e) {
@@ -1149,7 +1148,6 @@ class _BuyAnimalState extends State<BuyAnimal>
       );
 
       setState(() {
-        widget.animalInfo.clear();
         widget.animalInfo = data.result;
         prefs.setInt('page', data.page);
         _distance = _radiusData * 1000;

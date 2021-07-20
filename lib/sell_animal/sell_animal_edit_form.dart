@@ -940,32 +940,59 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                     height: 150,
                     width: width * 0.3,
                     // color: Colors.amber,
-                    child: Visibility(
-                      visible: imagesFileUpload['Image2'] != null &&
-                          imagesFileUpload['Image2'].isNotEmpty,
-                      child: Image.file(
-                        File(imagesFileUpload['Image2']),
-                      ),
-                      replacement: Column(
-                        children: [
-                          Opacity(
-                            opacity: 0.5,
-                            child: Image.asset(
-                              'assets/images/photouploadback.png',
-                              height: 100,
+                    child: editImagesUpload['Image2'].isNotEmpty
+                        ? Visibility(
+                            visible: editImagesUpload['Image2'] != null &&
+                                editImagesUpload['Image2'].isNotEmpty,
+                            child: Image.network(
+                              editImagesUpload['Image2'],
+                            ),
+                            replacement: Column(
+                              children: [
+                                Opacity(
+                                  opacity: 0.5,
+                                  child: Image.asset(
+                                    'assets/images/photouploadback.png',
+                                    height: 100,
+                                  ),
+                                ),
+                                RaisedButton(
+                                  onPressed: () => chooseOption('2'),
+                                  child: Text(
+                                    'choose_photo'.tr,
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 16),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : Visibility(
+                            visible: imagesFileUpload['Image2'] != null &&
+                                imagesFileUpload['Image2'].isNotEmpty,
+                            child: Image.file(
+                              File(imagesFileUpload['Image2']),
+                            ),
+                            replacement: Column(
+                              children: [
+                                Opacity(
+                                  opacity: 0.5,
+                                  child: Image.asset(
+                                    'assets/images/photouploadback.png',
+                                    height: 100,
+                                  ),
+                                ),
+                                RaisedButton(
+                                  onPressed: () => chooseOption('2'),
+                                  child: Text(
+                                    'choose_photo'.tr,
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 16),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          RaisedButton(
-                            onPressed: () => chooseOption('2'),
-                            child: Text(
-                              'choose_photo'.tr,
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 16),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                   ),
                 ),
               ),
@@ -1018,7 +1045,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
   Padding imageStructure3(double width) => Padding(
         padding: EdgeInsets.symmetric(vertical: 5, horizontal: 30),
         child: GestureDetector(
-          onTap: () => chooseOption('1'),
+          onTap: () => chooseOption('3'),
           child: Stack(
             children: [
               DottedBorder(
@@ -1046,12 +1073,12 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                                 Opacity(
                                   opacity: 0.5,
                                   child: Image.asset(
-                                    'assets/images/photouploadfront.png',
+                                    'assets/images/photouploadside.png',
                                     height: 100,
                                   ),
                                 ),
                                 RaisedButton(
-                                  onPressed: () => chooseOption('1'),
+                                  onPressed: () => chooseOption('3'),
                                   child: Text(
                                     'choose_photo'.tr,
                                     style: TextStyle(
@@ -1071,12 +1098,12 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                               Opacity(
                                 opacity: 0.5,
                                 child: Image.asset(
-                                  'assets/images/photouploadfront.png',
+                                  'assets/images/photouploadside.png',
                                   height: 100,
                                 ),
                               ),
                               RaisedButton(
-                                onPressed: () => chooseOption('1'),
+                                onPressed: () => chooseOption('3'),
                                 child: Text(
                                   'choose_photo'.tr,
                                   style: TextStyle(
@@ -1137,7 +1164,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
   Padding imageStructure4(double width) => Padding(
         padding: EdgeInsets.symmetric(vertical: 5, horizontal: 30),
         child: GestureDetector(
-          onTap: () => chooseOption('1'),
+          onTap: () => chooseOption('4'),
           child: Stack(
             children: [
               DottedBorder(
@@ -1165,12 +1192,12 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                                 Opacity(
                                   opacity: 0.5,
                                   child: Image.asset(
-                                    'assets/images/photouploadfront.png',
+                                    'assets/images/photouploadside.png',
                                     height: 100,
                                   ),
                                 ),
                                 RaisedButton(
-                                  onPressed: () => chooseOption('1'),
+                                  onPressed: () => chooseOption('4'),
                                   child: Text(
                                     'choose_photo'.tr,
                                     style: TextStyle(
@@ -1190,7 +1217,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                               Opacity(
                                 opacity: 0.5,
                                 child: Image.asset(
-                                  'assets/images/photouploadfront.png',
+                                  'assets/images/photouploadside.png',
                                   height: 100,
                                 ),
                               ),
