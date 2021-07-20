@@ -189,15 +189,12 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
       print('utm campaign data is: ${str[1].substring(11)}');
 
       setState(() {
-        pushToken += _token;
-        utmSource += str[0].substring(11);
-        utmCampaign += str[1].substring(11);
+        pushToken = _token;
+        utmSource = str[0].substring(11);
+        utmCampaign = str[1].substring(11);
       });
     } catch (e) {
       print('Failed to get referrer details: $e');
-      setState(() {
-        pushToken += _token;
-      });
     }
 
     //*****************************************
@@ -479,6 +476,7 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                               if (_zipCodeTextField &&
                                   zipCodeController.text.isNotEmpty)
                                 await loadAsset();
+                              await storeFCMToken();
 
                               if (prefs.getDouble('latitude') == null ||
                                   prefs.getDouble('longitude') == null) {
@@ -525,51 +523,48 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                                           ]);
                                     });
                               } else {
-
                                 try {
-                                  pr = new ProgressDialog(context,
-                                      type: ProgressDialogType.Normal,
-                                      isDismissible: false);
+                                  pr = new ProgressDialog(
+                                    context,
+                                    type: ProgressDialogType.Normal,
+                                    isDismissible: false,
+                                  );
 
                                   pr.style(
-                                      message: 'progress_dialog_message'.tr);
+                                    message: 'progress_dialog_message'.tr,
+                                  );
                                   pr.show();
-
-                                  await storeFCMToken();
 
                                   bool status =
                                       await _authController.fetchAuthToken(
-                                          token:
-                                              '${_otpController.authorization.value}',
-                                          mobileInfo: mobileInfo,
-                                          name: nameController.text,
-                                          apkVersion: prefs
-                                              .getStringList('currentVersion')
-                                              .join('.'),
-                                          longitude: prefs
-                                              .getDouble('longitude')
-                                              .toString(),
-                                          latitude: prefs
-                                              .getDouble('latitude')
-                                              .toString(),
-                                          referredByCode: referralCodeController
-                                                  .text.isNotEmpty
-                                              ? referralCodeController.text
-                                                  .toUpperCase()
-                                              : '',
-                                          number: widget.mobile,
-                                          zipCode: prefs
-                                              .getString("zipCode")
-                                              .toString(),
-                                          userAddress: prefs
-                                              .getString("userAddress")
-                                              .toString(),
-                                          cityName: prefs
-                                              .getString("district")
-                                              .toString(),
-                                          pushToken: pushToken,
-                                          utmSource: utmSource,
-                                          utmCampaign: utmCampaign);
+                                    token:
+                                        '${_otpController.authorization.value}',
+                                    mobileInfo: mobileInfo,
+                                    name: nameController.text,
+                                    apkVersion: prefs
+                                        .getStringList('currentVersion')
+                                        .join('.'),
+                                    longitude:
+                                        prefs.getDouble('longitude').toString(),
+                                    latitude:
+                                        prefs.getDouble('latitude').toString(),
+                                    referredByCode:
+                                        referralCodeController.text.isNotEmpty
+                                            ? referralCodeController.text
+                                                .toUpperCase()
+                                            : '',
+                                    number: widget.mobile,
+                                    zipCode:
+                                        prefs.getString("zipCode").toString(),
+                                    userAddress: prefs
+                                        .getString("userAddress")
+                                        .toString(),
+                                    cityName:
+                                        prefs.getString("district").toString(),
+                                    pushToken: pushToken,
+                                    utmSource: utmSource,
+                                    utmCampaign: utmCampaign,
+                                  );
 
                                   setState(() {
                                     prefs.setString('token',

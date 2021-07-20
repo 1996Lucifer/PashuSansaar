@@ -49,9 +49,14 @@ RemoteConfig remoteConfig;
 
 Future _goToDeeplyNestedView(data) async {
   if (data != null && data['screen'] == 'DESCRIPTION_PAGE') {
-    await navigatorKey.currentState.push(MaterialPageRoute(
+    await navigatorKey.currentState.push(
+      MaterialPageRoute(
         builder: (_) => AnimalDescription(
-            userId: data['userId'], uniqueId: data['uniqueId'])));
+          userId: data['userId'],
+          uniqueId: data['uniqueId'],
+        ),
+      ),
+    );
   }
 }
 
@@ -137,8 +142,12 @@ class _MyAppState extends State<MyApp> {
             notification.body,
             NotificationDetails(
               android: AndroidNotificationDetails(
-                  channel.id, channel.name, channel.description,
-                  priority: Priority.max, importance: Importance.max),
+                channel.id,
+                channel.name,
+                channel.description,
+                priority: Priority.max,
+                importance: Importance.max,
+              ),
             ));
       }
     });
@@ -174,10 +183,14 @@ class _MyAppState extends State<MyApp> {
     print("link2===>" + dynamicData.toString());
 
     if (deepLink != null && dynamicData != {} && dynamicData != null) {
-      navigatorKey.currentState.push(MaterialPageRoute(
+      navigatorKey.currentState.push(
+        MaterialPageRoute(
           builder: (_) => AnimalDescription(
-              userId: dynamicData['userId'],
-              uniqueId: dynamicData['uniqueId'])));
+            userId: dynamicData['userId'],
+            uniqueId: dynamicData['uniqueId'],
+          ),
+        ),
+      );
     }
   }
 

@@ -52,7 +52,6 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
   LocationData _locate;
   String currentText = "", pushToken = "", utmSource = "", utmCampaign = "";
 
-
   final formKey = GlobalKey<FormState>(debugLabel: 'UserDetailsUpdate');
 
   @override
@@ -185,6 +184,7 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
   storeFCMToken() async {
     //SharedPreferences prefs = await SharedPreferences.getInstance();
     String _token = await FirebaseMessaging.instance.getToken();
+    print('_token==' + _token.toString());
 
     // var addresses = await Geocoder.local.findAddressesFromCoordinates(
     //     Coordinates(prefs.getDouble('latitude'), prefs.getDouble('longitude')));
@@ -194,7 +194,7 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
 
     try {
       ReferrerDetails referrerDetails =
-      await AndroidPlayInstallReferrer.installReferrer;
+          await AndroidPlayInstallReferrer.installReferrer;
       print('referrer details $referrerDetails');
 
       List<String> str = referrerDetails.installReferrer.split('&');
@@ -204,15 +204,12 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
       print('utm campaign data is: ${str[1].substring(11)}');
 
       setState(() {
-        pushToken += _token;
-        utmSource += str[0].substring(11);
-        utmCampaign += str[1].substring(11);
+        pushToken = _token;
+        utmSource = str[0].substring(11);
+        utmCampaign = str[1].substring(11);
       });
     } catch (e) {
       print('Failed to get referrer details: $e');
-      setState(() {
-        pushToken += _token;
-      });
     }
 
     //*****************************************
@@ -487,8 +484,7 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
                           if (_zipCodeTextField &&
                               zipCodeController.text.isNotEmpty)
                             await loadAsset();
-
-
+                          await storeFCMToken();
 
                           if (prefs.getDouble('latitude') == null ||
                               prefs.getDouble('longitude') == null) {
@@ -541,7 +537,6 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
 
                               pr.style(message: 'progress_dialog_message'.tr);
                               pr.show();
-                              await storeFCMToken();
 
                               bool status =
                                   await _authController.fetchAuthToken(
@@ -565,6 +560,9 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
                                     prefs.getString("userAddress").toString(),
                                 cityName:
                                     prefs.getString("district").toString(),
+                                pushToken: pushToken,
+                                utmSource: utmSource,
+                                utmCampaign: utmCampaign,
                               );
 
                               setState(() {

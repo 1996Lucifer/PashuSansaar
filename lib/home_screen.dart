@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:location/location.dart' as locate;
@@ -100,35 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
       prefs.setDouble("longitude", _locate.longitude);
     });
 
-    try {
-      FirebaseFirestore.instance
-          .collection('userInfo')
-          .doc(FirebaseAuth.instance.currentUser.uid)
-          .update({
-        'latitude': _locate.latitude,
-        'longitude': _locate.longitude,
-      }).then((value) async {
-        pr.hide();
-        await loginSetup();
-      });
-    } catch (e) {
-      FirebaseFirestore.instance
-          .collection('logger')
-          .doc(_mobileNumber)
-          .collection('home-location')
-          .doc()
-          .set({
-        'issue': e.toString(),
-        'userId': FirebaseAuth.instance.currentUser == null
-            ? ''
-            : FirebaseAuth.instance.currentUser.uid,
-        'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
-      });
-      pr.hide();
-      await loginSetup();
-    }
-
-    // await loginSetup();
+    await loginSetup();
   }
 
   Future<void> initReferrerDetails(mobile) async {

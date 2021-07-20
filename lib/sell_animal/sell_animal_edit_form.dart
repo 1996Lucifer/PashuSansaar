@@ -608,7 +608,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
               onChanged: (String pregnant) {
                 setState(() {
                   animalUpdationData['animalBayat'] =
-                      ReusableWidgets.convertStringToInt(pregnant);
+                      animalBayaatMapping[pregnant];
                 });
               },
               dropdownSearchDecoration: InputDecoration(
@@ -706,7 +706,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                 keyboardType: TextInputType.number,
                 onChanged: (String milkCapacity) {
                   setState(() {
-                    widget.animalInfo.animalMilkCapacity =
+                    animalUpdationData['animalMilkCapacity'] =
                         ReusableWidgets.convertStringToInt(milkCapacity);
                   });
                 },
