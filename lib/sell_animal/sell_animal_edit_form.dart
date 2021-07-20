@@ -885,6 +885,8 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                           onTap: () {
                             setState(() {
                               editImagesUpload['Image1'] = '';
+                              _imageToBeUploaded.removeWhere((element) =>
+                                  element['fileName'].contains('Image1'));
                             });
                           },
                           child: Icon(
@@ -905,6 +907,8 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                           onTap: () {
                             setState(() {
                               imagesFileUpload['Image1'] = '';
+                              _imageToBeUploaded.removeWhere((element) =>
+                                  element['fileName'].contains('Image1'));
                             });
                           },
                           child: Icon(
@@ -1007,6 +1011,8 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                           onTap: () {
                             setState(() {
                               editImagesUpload['Image2'] = '';
+                              _imageToBeUploaded.removeWhere((element) =>
+                                  element['fileName'].contains('Image2'));
                             });
                           },
                           child: Icon(
@@ -1027,6 +1033,8 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                           onTap: () {
                             setState(() {
                               imagesFileUpload['Image2'] = '';
+                              _imageToBeUploaded.removeWhere((element) =>
+                                  element['fileName'].contains('Image2'));
                             });
                           },
                           child: Icon(
@@ -1126,6 +1134,8 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                           onTap: () {
                             setState(() {
                               editImagesUpload['Image3'] = '';
+                              _imageToBeUploaded.removeWhere((element) =>
+                                  element['fileName'].contains('Image3'));
                             });
                           },
                           child: Icon(
@@ -1146,6 +1156,8 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                           onTap: () {
                             setState(() {
                               imagesFileUpload['Image3'] = '';
+                              _imageToBeUploaded.removeWhere((element) =>
+                                  element['fileName'].contains('Image3'));
                             });
                           },
                           child: Icon(
@@ -1245,6 +1257,8 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                           onTap: () {
                             setState(() {
                               editImagesUpload['Image4'] = '';
+                              _imageToBeUploaded.removeWhere((element) =>
+                                  element['fileName'].contains('Image4'));
                             });
                           },
                           child: Icon(
@@ -1265,6 +1279,8 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                           onTap: () {
                             setState(() {
                               imagesFileUpload['Image4'] = '';
+                              _imageToBeUploaded.removeWhere((element) =>
+                                  element['fileName'].contains('Image4'));
                             });
                           },
                           child: Icon(
@@ -1492,8 +1508,6 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                     token: prefs.getString('accessToken'),
                   );
 
-                  List<bool> _isImageUploaded = [];
-
                   if (imageUploadingStatus.isBlank) {
                     ReusableWidgets.showDialogBox(
                         context, 'error'.tr, Text('issue uploading image'));
@@ -1518,7 +1532,6 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                       );
 
                       print('][]' + uploadStatus.toString());
-                      _isImageUploaded.add(uploadStatus);
                     }
                   }
 
