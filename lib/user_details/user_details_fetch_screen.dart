@@ -465,117 +465,140 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                             SharedPreferences prefs =
                                 await SharedPreferences.getInstance();
 
-                            if (_zipCodeTextField &&
-                                zipCodeController.text.isNotEmpty)
-                              await loadAsset();
+                            pr = new ProgressDialog(context,
+                                type: ProgressDialogType.Normal,
+                                isDismissible: false);
 
-                            if (prefs.getDouble('latitude') == null ||
-                                prefs.getDouble('longitude') == null) {
-                              return showDialog(
-                                  context: context,
-                                  barrierDismissible: false,
-                                  builder: (context) {
-                                    return AlertDialog(
-                                        title: Text('warning'.tr),
-                                        content: RichText(
-                                          text: TextSpan(
-                                            text: prefs.getInt('count') == 1
-                                                ? 'location_error_supportive_exit'
-                                                    .tr
-                                                : 'location_error_supportive_again'
-                                                    .tr,
-                                            style: DefaultTextStyle.of(context)
-                                                .style,
+                            pr.style(message: 'progress_dialog_message'.tr);
+                            pr.show();
+
+                            Future.delayed(Duration(seconds: 2))
+                                .then((value) async {
+                              pr.hide();
+
+                              if (_zipCodeTextField &&
+                                  zipCodeController.text.isNotEmpty)
+                                await loadAsset();
+
+                              if (prefs.getDouble('latitude') == null ||
+                                  prefs.getDouble('longitude') == null) {
+                                return showDialog(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (context) {
+                                      return AlertDialog(
+                                          title: Text('warning'.tr),
+                                          content: RichText(
+                                            text: TextSpan(
+                                              text: prefs.getInt('count') == 1
+                                                  ? 'location_error_supportive_exit'
+                                                      .tr
+                                                  : 'location_error_supportive_again'
+                                                      .tr,
+                                              style:
+                                                  DefaultTextStyle.of(context)
+                                                      .style,
+                                            ),
                                           ),
-                                        ),
-                                        actions: <Widget>[
-                                          ElevatedButton(
-                                              child: Text(
-                                                'Ok'.tr,
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 16),
-                                              ),
-                                              onPressed: () {
-                                                if (prefs.getInt('count') == 1)
-                                                  exit(0);
-                                                else {
-                                                  setState(() {
-                                                    _zipCodeTextField = true;
-                                                    prefs.setInt('count', 1);
-                                                  });
-                                                  Navigator.pop(context);
-                                                }
-                                              }),
-                                        ]);
+                                          actions: <Widget>[
+                                            ElevatedButton(
+                                                child: Text(
+                                                  'Ok'.tr,
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 16),
+                                                ),
+                                                onPressed: () {
+                                                  if (prefs.getInt('count') ==
+                                                      1)
+                                                    exit(0);
+                                                  else {
+                                                    setState(() {
+                                                      _zipCodeTextField = true;
+                                                      prefs.setInt('count', 1);
+                                                    });
+                                                    Navigator.pop(context);
+                                                  }
+                                                }),
+                                          ]);
+                                    });
+                              } else {
+
+                                try {
+                                  pr = new ProgressDialog(context,
+                                      type: ProgressDialogType.Normal,
+                                      isDismissible: false);
+
+                                  pr.style(
+                                      message: 'progress_dialog_message'.tr);
+                                  pr.show();
+
+                                  await storeFCMToken();
+
+                                  bool status =
+                                      await _authController.fetchAuthToken(
+                                          token:
+                                              '${_otpController.authorization.value}',
+                                          mobileInfo: mobileInfo,
+                                          name: nameController.text,
+                                          apkVersion: prefs
+                                              .getStringList('currentVersion')
+                                              .join('.'),
+                                          longitude: prefs
+                                              .getDouble('longitude')
+                                              .toString(),
+                                          latitude: prefs
+                                              .getDouble('latitude')
+                                              .toString(),
+                                          referredByCode: referralCodeController
+                                                  .text.isNotEmpty
+                                              ? referralCodeController.text
+                                                  .toUpperCase()
+                                              : '',
+                                          number: widget.mobile,
+                                          zipCode: prefs
+                                              .getString("zipCode")
+                                              .toString(),
+                                          userAddress: prefs
+                                              .getString("userAddress")
+                                              .toString(),
+                                          cityName: prefs
+                                              .getString("district")
+                                              .toString(),
+                                          pushToken: pushToken,
+                                          utmSource: utmSource,
+                                          utmCampaign: utmCampaign);
+
+                                  setState(() {
+                                    prefs.setString('token',
+                                        _otpController.authorization.value);
+                                    prefs.setString('accessToken',
+                                        _authController.accessToken.value);
+                                    prefs.setString('refreshToken',
+                                        _authController.refreshToken.value);
+                                    prefs.setString(
+                                        'userId', _authController.userId.value);
+                                    prefs.setInt('expires',
+                                        _authController.expires.value);
+                                    prefs.setString(
+                                        'userName', nameController.text);
                                   });
-                            } else {
-                              storeFCMToken();
-                              try {
-                                pr = new ProgressDialog(context,
-                                    type: ProgressDialogType.Normal,
-                                    isDismissible: false);
 
-                                pr.style(message: 'progress_dialog_message'.tr);
-                                pr.show();
-
-                                bool status = await _authController.fetchAuthToken(
-                                    token:
-                                        '${_otpController.authorization.value}',
-                                    mobileInfo: mobileInfo,
-                                    name: nameController.text,
-                                    apkVersion: prefs
-                                        .getStringList('currentVersion')
-                                        .join('.'),
-                                    longitude:
-                                        prefs.getDouble('longitude').toString(),
-                                    latitude:
-                                        prefs.getDouble('latitude').toString(),
-                                    referredByCode:
-                                        referralCodeController.text.isNotEmpty
-                                            ? referralCodeController.text
-                                                .toUpperCase()
-                                            : '',
-                                    number: widget.mobile,
-                                    zipCode:
-                                        prefs.getString("zipCode").toString(),
-                                    userAddress: prefs
-                                        .getString("userAddress")
-                                        .toString(),
-                                    cityName:
-                                        prefs.getString("district").toString(),
-                                    pushToken: pushToken,
-                                    utmSource: utmSource,
-                                    utmCampaign: utmCampaign);
-
-                                setState(() {
-                                  prefs.setString('token',
-                                      _otpController.authorization.value);
-                                  prefs.setString('accessToken',
-                                      _authController.accessToken.value);
-                                  prefs.setString('refreshToken',
-                                      _authController.refreshToken.value);
-                                  prefs.setString(
-                                      'userId', _authController.userId.value);
-                                  prefs.setInt(
-                                      'expires', _authController.expires.value);
-                                  prefs.setString(
-                                      'userName', nameController.text);
-                                });
-
-                                pr.hide();
-                                if (status) {
-                                  Get.off(() => HomeScreen(
-                                        selectedIndex: 0,
-                                      ));
+                                  pr.hide();
+                                  if (status) {
+                                    Get.off(() => HomeScreen(
+                                          selectedIndex: 0,
+                                        ));
+                                  }
+                                } catch (err) {
+                                  print(
+                                    "err->" + err.toString(),
+                                  );
                                 }
-                              } catch (err) {
-                                print(
-                                  "err->" + err.toString(),
-                                );
                               }
-                            }
+                            });
                           }
                         },
                       ),

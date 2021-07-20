@@ -327,6 +327,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
               onChanged: (String otherType) {
                 setState(() {
                   animalInfo['animalTypeOther'] = otherType;
+                  animalInfo['animalType'] = otherType;
                 });
               },
               dropdownSearchDecoration: InputDecoration(
@@ -1230,8 +1231,10 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                             animalInfo['animalType'] == 'buffalo_female'.tr) {
                           saveAnimalData =
                               await sellAnimalController.saveAnimal(
-                            animalType:
-                                animalTypeMapping[animalInfo['animalType']],
+                            animalType: animalInfo['animalTypeOther'] == null
+                                ? animalTypeMapping[animalInfo['animalType']]
+                                : animalOtherTypeMapping[
+                                    animalInfo['animalType']],
                             animalBreed: animalInfo['animalBreed'],
                             animalAge: ReusableWidgets.convertStringToInt(
                                 animalInfo['animalAge']),
@@ -1263,8 +1266,10 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                         } else {
                           saveAnimalData =
                               await sellAnimalController.saveAnimal(
-                            animalType:
-                                animalTypeMapping[animalInfo['animalType']],
+                            animalType: animalInfo['animalTypeOther'] == null
+                                ? animalTypeMapping[animalInfo['animalType']]
+                                : animalOtherTypeMapping[
+                                    animalInfo['animalType']],
                             animalBreed:
                                 ReusableWidgets.removeEnglishDataFromName(
                                     animalInfo['animalBreed']),
