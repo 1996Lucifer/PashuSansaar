@@ -525,7 +525,7 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                                           ]);
                                     });
                               } else {
-                                storeFCMToken();
+
                                 try {
                                   pr = new ProgressDialog(context,
                                       type: ProgressDialogType.Normal,
@@ -534,6 +534,8 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                                   pr.style(
                                       message: 'progress_dialog_message'.tr);
                                   pr.show();
+
+                                  await storeFCMToken();
 
                                   bool status =
                                       await _authController.fetchAuthToken(

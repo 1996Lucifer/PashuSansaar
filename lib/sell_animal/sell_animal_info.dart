@@ -130,7 +130,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                       fit: BoxFit.cover,
                       image: _list.files[0].fileName.length > 1000
                           ? MemoryImage(base64Decode(_list.files[0].fileName))
-                          : NetworkImage(_list.files[0].fileName)),
+                          : NetworkImage(_list.files[_list.files.length - 1].fileName)),
                   borderRadius: BorderRadius.all(Radius.circular(8.0)),
                   color: Colors.redAccent,
                 ),

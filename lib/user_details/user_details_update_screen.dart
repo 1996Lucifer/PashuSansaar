@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:android_play_install_referrer/android_play_install_referrer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:device_info/device_info.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -49,8 +50,8 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
   final OtpController _otpController = Get.put(OtpController());
   Map<String, dynamic> mobileInfo = {};
   LocationData _locate;
+  String currentText = "", pushToken = "", utmSource = "", utmCampaign = "";
 
-  String currentText = "";
 
   final formKey = GlobalKey<FormState>(debugLabel: 'UserDetailsUpdate');
 
@@ -181,45 +182,70 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
     }
   }
 
-  // storeFCMToken() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   String _token = await FirebaseMessaging.instance.getToken();
+  storeFCMToken() async {
+    //SharedPreferences prefs = await SharedPreferences.getInstance();
+    String _token = await FirebaseMessaging.instance.getToken();
 
-  //   var addresses = await Geocoder.local.findAddressesFromCoordinates(
-  //       Coordinates(prefs.getDouble('latitude'), prefs.getDouble('longitude')));
-  //   var first = addresses.first;
+    // var addresses = await Geocoder.local.findAddressesFromCoordinates(
+    //     Coordinates(prefs.getDouble('latitude'), prefs.getDouble('longitude')));
+    // var first = addresses.first;
 
-  //   print(_token);
+    //*****************************************
 
-  //   FirebaseFirestore.instance
-  //       .collection("fcmToken")
-  //       .doc(widget.currentUser)
-  //       .set({
-  //     "id": widget.currentUser,
-  //     'lat': prefs.getDouble('latitude').toString(),
-  //     'long': prefs.getDouble('longitude').toString(),
-  //     'userToken': _token,
-  //     'district': ReusableWidgets.mappingDistrict(
-  //       first.subAdminArea ?? first.locality ?? first.featureName,
-  //     )
-  //   }).catchError((err) {
-  //     print(
-  //       "errToken->" + err.toString(),
-  //     );
-  //     FirebaseFirestore.instance
-  //         .collection('logger')
-  //         .doc(widget.mobile)
-  //         .collection('token')
-  //         .doc()
-  //         .set({
-  //       'issue': err.toString(),
-  //       'userId': FirebaseAuth.instance.currentUser == null
-  //           ? ''
-  //           : FirebaseAuth.instance.currentUser.uid,
-  //       'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
-  //     });
-  //   });
-  // }
+    try {
+      ReferrerDetails referrerDetails =
+      await AndroidPlayInstallReferrer.installReferrer;
+      print('referrer details $referrerDetails');
+
+      List<String> str = referrerDetails.installReferrer.split('&');
+      print('str is $str');
+
+      print('utm source data is: ${str[0].substring(11)}');
+      print('utm campaign data is: ${str[1].substring(11)}');
+
+      setState(() {
+        pushToken += _token;
+        utmSource += str[0].substring(11);
+        utmCampaign += str[1].substring(11);
+      });
+    } catch (e) {
+      print('Failed to get referrer details: $e');
+      setState(() {
+        pushToken += _token;
+      });
+    }
+
+    //*****************************************
+
+    //   FirebaseFirestore.instance
+    //       .collection("fcmToken")
+    //       .doc(widget.currentUser)
+    //       .set({
+    //     "id": widget.currentUser,
+    //     'lat': prefs.getDouble('latitude').toString(),
+    //     'long': prefs.getDouble('longitude').toString(),
+    //     'userToken': _token,
+    //     'district': ReusableWidgets.mappingDistrict(
+    //       first.subAdminArea ?? first.locality ?? first.featureName,
+    //     ),
+    //   }).catchError((err) {
+    //     print(
+    //       "errToken->" + err.toString(),
+    //     );
+    //     FirebaseFirestore.instance
+    //         .collection('logger')
+    //         .doc(widget.mobile)
+    //         .collection('token')
+    //         .doc()
+    //         .set({
+    //       'issue': err.toString(),
+    //       'userId': FirebaseAuth.instance.currentUser == null
+    //           ? ''
+    //           : FirebaseAuth.instance.currentUser.uid,
+    //       'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
+    //     });
+    //   });
+  }
 
   loadAsset() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -462,7 +488,7 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
                               zipCodeController.text.isNotEmpty)
                             await loadAsset();
 
-                          // await storeFCMToken();
+
 
                           if (prefs.getDouble('latitude') == null ||
                               prefs.getDouble('longitude') == null) {
@@ -515,6 +541,7 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
 
                               pr.style(message: 'progress_dialog_message'.tr);
                               pr.show();
+                              await storeFCMToken();
 
                               bool status =
                                   await _authController.fetchAuthToken(
