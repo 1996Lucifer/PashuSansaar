@@ -362,6 +362,15 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
         ],
       );
 
+
+  getPositionBasedOnZipcode(String zipcode) async {
+    var addresses =
+    await Geocoder.local.findAddressesFromQuery(zipcode);
+    var first = addresses.first;
+    return first.subAdminArea ?? first.locality ?? first.featureName;
+  }
+
+
   saveButton() => Padding(
         padding: EdgeInsets.all(15),
         child: SizedBox(
@@ -447,6 +456,8 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
                   pr.style(message: 'progress_dialog_message'.tr);
                   pr.show();
 
+                  var district = await getPositionBasedOnZipcode(animalInfo['zipCode']);
+
                   Map<String, dynamic> payload = {
                     "userId": prefs.getString('userId'),
                     "animalType": constant.animalTypeMapping[animalInfo['animalType']],
@@ -455,7 +466,7 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
                     "animalMilk": animalInfo['animalMilk'],
                     "zipCode": animalInfo['zipCode'],
                     "animalPrice": animalInfo['animalBudget'],
-                    "district": "Hardoi",
+                    "district": district,
                   };
 
                   print('payload is $payload');

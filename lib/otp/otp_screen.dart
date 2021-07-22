@@ -11,6 +11,7 @@ import 'package:pashusansaar/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../user_details/user_details_fetch_screen.dart';
@@ -51,20 +52,31 @@ class _OTPScreenState extends State<OTPScreen>
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback(
       (_) {
-        loginController.requestOTP(number: widget.phoneNumber);
+        try {
+          loginController.requestOTP(number: widget.phoneNumber);
 
-        countdownTimerController =
-            CountdownTimerController(endTime: endTime, onEnd: onEnd);
-        setState(() {
-          _startTimer = true;
-        });
-        return ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('OTP भेजा गया है')));
+          countdownTimerController =
+              CountdownTimerController(endTime: endTime, onEnd: onEnd);
+          setState(() {
+            _startTimer = true;
+          });
+          return ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text('OTP भेजा गया है')));
+        } catch (e) {
+          ReusableWidgets.showDialogBox(
+            context,
+            'warning'.tr,
+            Text(
+              'global_error'.tr,
+            ),
+          );
+        }
       },
     );
 
     onTapRecognizer = TapGestureRecognizer()
       ..onTap = () {
+      try{
         loginController.requestOTP(number: widget.phoneNumber);
         countdownTimerController = CountdownTimerController(
           endTime: DateTime.now().millisecondsSinceEpoch + 1000 * 60,
@@ -79,6 +91,15 @@ class _OTPScreenState extends State<OTPScreen>
             .showSnackBar(SnackBar(content: Text('OTP पुनः भेजा गया है')));
 
         // Navigator.pop(context);
+      } catch (e) {
+        ReusableWidgets.showDialogBox(
+          context,
+          'warning'.tr,
+          Text(
+            'global_error'.tr,
+          ),
+        );
+      }
       };
     errorController = StreamController<ErrorAnimationType>();
     checkUserLoginState();

@@ -41,35 +41,55 @@ class _MyCalledListState extends State<MyCalledList> {
     prefs = await SharedPreferences.getInstance();
     bool status;
 
-    if (ReusableWidgets.isTokenExpired(prefs.getInt('expires') ?? 0)) {
-      status = await refreshTokenController.getRefreshToken(
-          refresh: prefs.getString('refreshToken') ?? '');
-      if (status) {
-        setState(() {
-          prefs.setString(
-              'accessToken', refreshTokenController.accessToken.value);
-          prefs.setString(
-              'refreshToken', refreshTokenController.refreshToken.value);
-          prefs.setInt('expires', refreshTokenController.expires.value);
-        });
-      } else {
-        print('Error getting token==' + status.toString());
+    try {
+      if (ReusableWidgets.isTokenExpired(prefs.getInt('expires') ?? 0)) {
+        status = await refreshTokenController.getRefreshToken(
+            refresh: prefs.getString('refreshToken') ?? '');
+        if (status) {
+          setState(() {
+            prefs.setString(
+                'accessToken', refreshTokenController.accessToken.value);
+            prefs.setString(
+                'refreshToken', refreshTokenController.refreshToken.value);
+            prefs.setInt('expires', refreshTokenController.expires.value);
+          });
+        } else {
+          print('Error getting token==' + status.toString());
+        }
       }
+    } catch (e) {
+      ReusableWidgets.showDialogBox(
+        context,
+        'warning'.tr,
+        Text(
+          'global_error'.tr,
+        ),
+      );
     }
 
-    List data = await myCallListController.getCallList(
-      //userId: "60cb37f83ae6298e527a58e1",
-      userId: prefs.getString('userId'),
-      token: prefs.getString('accessToken'),
-      page: 1,
-    );
+    try {
+      List data = await myCallListController.getCallList(
+        //userId: "60cb37f83ae6298e527a58e1",
+        userId: prefs.getString('userId'),
+        token: prefs.getString('accessToken'),
+        page: 1,
+      );
 
-    print('user id is: ${prefs.getString('userId')}');
-    print('token id is: ${prefs.getString('accessToken')}');
+      print('user id is: ${prefs.getString('userId')}');
+      print('token id is: ${prefs.getString('accessToken')}');
 
-    setState(() {
-      myCallList = data;
-    });
+      setState(() {
+        myCallList = data;
+      });
+    } catch (e) {
+      ReusableWidgets.showDialogBox(
+        context,
+        'warning'.tr,
+        Text(
+          'global_error'.tr,
+        ),
+      );
+    }
   }
 
   Row _buildInfowidget(_list) {

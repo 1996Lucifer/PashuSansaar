@@ -180,45 +180,62 @@ class _HomeScreenState extends State<HomeScreen> {
     bool status;
     pr.show();
 
-    if (ReusableWidgets.isTokenExpired(prefs.getInt('expires') ?? 0)) {
-      status = await refreshTokenController.getRefreshToken(
-          refresh: prefs.getString('refreshToken') ?? '');
-      if (status) {
-        setState(() {
-          prefs.setString(
-              'accessToken', refreshTokenController.accessToken.value);
-          prefs.setString(
-              'refreshToken', refreshTokenController.refreshToken.value);
-          prefs.setInt('expires', refreshTokenController.expires.value);
-        });
-      } else {
-        print('Error getting token==' + status.toString());
+    try {
+      if (ReusableWidgets.isTokenExpired(prefs.getInt('expires') ?? 0)) {
+        status = await refreshTokenController.getRefreshToken(
+            refresh: prefs.getString('refreshToken') ?? '');
+        if (status) {
+          setState(() {
+            prefs.setString(
+                'accessToken', refreshTokenController.accessToken.value);
+            prefs.setString(
+                'refreshToken', refreshTokenController.refreshToken.value);
+            prefs.setInt('expires', refreshTokenController.expires.value);
+          });
+        } else {
+          print('Error getting token==' + status.toString());
+        }
       }
+    } catch (e) {
+      ReusableWidgets.showDialogBox(
+        context,
+        'warning'.tr,
+        Text(
+          'global_error'.tr,
+        ),
+      );
     }
 
-    BuyAnimalModel data = await buyAnimalController.getAnimal(
-      // latitude: 40.1,
-      // longitude: -97.1,
-      distance: 50000,
-      latitude: lat,
-      longitude: long,
-      animalType: null,
-      minMilk: null,
-      maxMilk: null,
-      page: 1,
-      accessToken: prefs.getString('accessToken') ?? '',
-      userId: prefs.getString('userId'),
-    );
+    try {
+      BuyAnimalModel data = await buyAnimalController.getAnimal(
+        // latitude: 40.1,
+        // longitude: -97.1,
+        distance: 50000,
+        latitude: lat,
+        longitude: long,
+        animalType: null,
+        minMilk: null,
+        maxMilk: null,
+        page: 1,
+        accessToken: prefs.getString('accessToken') ?? '',
+        userId: prefs.getString('userId'),
+      );
 
-    setState(() {
-      _animalInfo = data.result;
-      prefs.setInt('page', data.page);
-    });
+      setState(() {
+        _animalInfo = data.result;
+        prefs.setInt('page', data.page);
+      });
+    } catch (e) {
+      ReusableWidgets.showDialogBox(
+        context,
+        'warning'.tr,
+        Text(
+          'global_error'.tr,
+        ),
+      );
+    }
 
     pr.hide();
-
-    print('animalInfo===' + _animalInfo.length.toString());
-
     getAnimalSellingInfo();
   }
 
@@ -227,31 +244,52 @@ class _HomeScreenState extends State<HomeScreen> {
     bool status;
     //pr.show();
 
-    if (ReusableWidgets.isTokenExpired(prefs.getInt('expires') ?? 0)) {
-      status = await refreshTokenController.getRefreshToken(
-          refresh: prefs.getString('refreshToken') ?? '');
-      if (status) {
-        setState(() {
-          prefs.setString(
-              'accessToken', refreshTokenController.accessToken.value);
-          prefs.setString(
-              'refreshToken', refreshTokenController.refreshToken.value);
-          prefs.setInt('expires', refreshTokenController.expires.value);
-        });
-      } else {
-        print('Error getting token==' + status.toString());
+    try {
+      if (ReusableWidgets.isTokenExpired(prefs.getInt('expires') ?? 0)) {
+        status = await refreshTokenController.getRefreshToken(
+            refresh: prefs.getString('refreshToken') ?? '');
+        if (status) {
+          setState(() {
+            prefs.setString(
+                'accessToken', refreshTokenController.accessToken.value);
+            prefs.setString(
+                'refreshToken', refreshTokenController.refreshToken.value);
+            prefs.setInt('expires', refreshTokenController.expires.value);
+          });
+        } else {
+          print('Error getting token==' + status.toString());
+        }
       }
+    } catch (e) {
+      ReusableWidgets.showDialogBox(
+        context,
+        'warning'.tr,
+        Text(
+          'global_error'.tr,
+        ),
+      );
     }
 
-    MyAnimalModel dataSellingInfo = await myAnimalListController.getAnimalList(
-      userId: prefs.getString('userId'),
-      token: prefs.getString('accessToken'),
-      page: 1,
-    );
+    try {
+      MyAnimalModel dataSellingInfo =
+          await myAnimalListController.getAnimalList(
+        userId: prefs.getString('userId'),
+        token: prefs.getString('accessToken'),
+        page: 1,
+      );
 
-    setState(() {
-      _sellingAnimalInfo = dataSellingInfo.myAnimals;
-    });
+      setState(() {
+        _sellingAnimalInfo = dataSellingInfo.myAnimals;
+      });
+    } catch (e) {
+      ReusableWidgets.showDialogBox(
+        context,
+        'warning'.tr,
+        Text(
+          'global_error'.tr,
+        ),
+      );
+    }
   }
 
   getProfileInfo() async {

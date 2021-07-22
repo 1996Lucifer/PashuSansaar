@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:pashusansaar/animal_description/animal_description_controller.dart';
 import 'package:pashusansaar/animal_description/animal_description_model.dart';
 import 'package:pashusansaar/refresh_token/refresh_token_controller.dart';
+import 'package:pashusansaar/seller_contact/seller_contact_controller.dart';
 import 'package:pashusansaar/utils/constants.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:progress_dialog/progress_dialog.dart';
@@ -62,51 +63,69 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
       Get.put(AnimalDescriptionController());
   final RefreshTokenController refreshTokenController =
       Get.put(RefreshTokenController());
+  final SellerContactController sellerContactController =
+      Get.put(SellerContactController());
 
   getAnimalInfo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool status;
-    pr.show();
+    setState(() {
+      _isLoading = true;
+    });
 
-    if (ReusableWidgets.isTokenExpired(prefs.getInt('expires') ?? 0)) {
-      status = await refreshTokenController.getRefreshToken(
-          refresh: prefs.getString('refreshToken') ?? '');
-      if (status) {
-        setState(() {
-          prefs.setString(
-              'accessToken', refreshTokenController.accessToken.value);
-          prefs.setString(
-              'refreshToken', refreshTokenController.refreshToken.value);
-          prefs.setInt('expires', refreshTokenController.expires.value);
-        });
-      } else {
-        print('Error getting token==' + status.toString());
+    try {
+      if (ReusableWidgets.isTokenExpired(prefs.getInt('expires') ?? 0)) {
+        status = await refreshTokenController.getRefreshToken(
+            refresh: prefs.getString('refreshToken') ?? '');
+        if (status) {
+          setState(() {
+            prefs.setString(
+                'accessToken', refreshTokenController.accessToken.value);
+            prefs.setString(
+                'refreshToken', refreshTokenController.refreshToken.value);
+            prefs.setInt('expires', refreshTokenController.expires.value);
+          });
+        } else {
+          print('Error getting token==' + status.toString());
+        }
       }
+    } catch (e) {
+      ReusableWidgets.showDialogBox(
+        context,
+        'warning'.tr,
+        Text(
+          'global_error'.tr,
+        ),
+      );
     }
 
     lat = prefs.getDouble('latitude');
     long = prefs.getDouble('longitude');
 
+    try {
+      Animal data = await animalDescriptionController.animalDescription(
+        animalId: widget.uniqueId,
+        senderUserId: widget.userId,
+        userId: prefs.getString('userId'),
+        accessToken: prefs.getString('accessToken') ?? '',
+      );
 
-    print('animalId coming through widget is ${widget.uniqueId}');
-    print('senderUserId coming through widget is ${prefs.getString('userId')}');
-    print('userId coming through widget is ${widget.userId}');
-    print('access Token coming through widget is ${prefs.getString('accessToken')}');
-
-    Animal data = await animalDescriptionController.animalDescription(
-      animalId: widget.uniqueId,
-      senderUserId: widget.userId,
-      userId: prefs.getString('userId'),
-      accessToken: prefs.getString('accessToken') ?? '',
-    );
-
-    print('animal info description is $data');
+      setState(() {
+        animalDesc = data;
+      });
+    } catch (e) {
+      ReusableWidgets.showDialogBox(
+        context,
+        'warning'.tr,
+        Text(
+          'global_error'.tr,
+        ),
+      );
+    }
 
     setState(() {
-      animalDesc = data;
+      _isLoading = false;
     });
-
-    pr.hide();
   }
 
   @override
@@ -224,7 +243,7 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
           padding: const EdgeInsets.all(8),
           child: RichText(
             textAlign: TextAlign.center,
-            text: _list.animalType == 1 || _list.animalType == 2
+            text: _list?.animalType == 1 || _list?.animalType == 2
                 ? TextSpan(
                     text: _list.animalMilk.toString(),
                     style: TextStyle(
@@ -279,10 +298,10 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
                         ),
                       ])
                 : TextSpan(
-                    text: _list.animalBreed == 'not_known'.tr
+                    text: _list?.animalBreed == 'not_known'.tr
                         ? ""
                         : ReusableWidgets.removeEnglishDataFromName(
-                            _list.animalBreed),
+                            _list?.animalBreed),
                     style: TextStyle(
                         color: Colors.grey[700],
                         fontWeight: FontWeight.bold,
@@ -464,13 +483,7 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
   //   );
   // }
 
-
-
-
-
-
   //*****************************************************************
-
 
   _descriptionText(animalInfo) {
     String animalBreedCheck = (animalInfo.animalBreed == 'not_known'.tr)
@@ -486,10 +499,10 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
         animalInfo.animalType == 4 ||
         animalInfo.animalType == 5) {
       desc =
-      'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल की है। ';
+          'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल की है। ';
     } else {
       desc =
-      'ये ${animalInfo.animalBreed} ${intToAnimalTypeMapping[animalInfo.animalType]} ${animalInfo.animalAge} साल का है। ';
+          'ये ${animalInfo.animalBreed} ${intToAnimalTypeMapping[animalInfo.animalType]} ${animalInfo.animalAge} साल का है। ';
       // if (animalInfo.recentBayatTime != null) {
       //   desc = desc +
       //       'यह ${intToRecentBayaatTime[animalInfo.recentBayatTime]} ब्यायी है। ';
@@ -512,7 +525,6 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
   }
 
   Padding _animalDescriptionMethod(_list) {
-
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Text(
@@ -525,15 +537,36 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
     );
   }
 
-
-
-
   //*****************************************************************
 
   _getCallButton() => RaisedButton.icon(
         color: Colors.blue,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        onPressed: () => launch("tel://${animalDesc.mobile}"),
+        onPressed: () async {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          int myNum;
+          print(prefs.getString('accessToken'));
+          print(widget.uniqueId);
+          print(widget.userId);
+          try {
+            myNum = await sellerContactController.getSellerContact(
+                animalId: widget.uniqueId,
+                userId: widget.userId,
+                token: prefs.getString('accessToken'),
+                channel: [
+                  {"contactMedium": "Call"}
+                ]);
+          } catch (e) {
+            ReusableWidgets.showDialogBox(
+              context,
+              'warning'.tr,
+              Text(
+                'global_error'.tr,
+              ),
+            );
+          }
+          return UrlLauncher.launch('tel:+91 $myNum');
+        },
         label: Text(
           'call'.tr,
           style: TextStyle(
@@ -549,15 +582,34 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
         color: darkGreenColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         onPressed: () async {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          int myNum;
+          try {
+            myNum = await sellerContactController.getSellerContact(
+                animalId: widget.uniqueId,
+                userId: widget.userId,
+                token: prefs.getString('accessToken'),
+                channel: [
+                  {"contactMedium": "Whatsapp"}
+                ]);
+          } catch (e) {
+            ReusableWidgets.showDialogBox(
+              context,
+              'warning'.tr,
+              Text(
+                'global_error'.tr,
+              ),
+            );
+          }
+
           whatsappText =
               'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${animalDesc.userName}, $_userLocality \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
           whatsappUrl =
-              "https://api.whatsapp.com/send/?phone=+91 ${animalDesc.mobile}&text=$whatsappText";
+              "https://api.whatsapp.com/send/?phone=+91 $myNum&text=$whatsappText";
           await UrlLauncher.canLaunch(whatsappUrl) != null
               ? UrlLauncher.launch(Uri.encodeFull(whatsappUrl))
               : ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content:
-                      Text('${animalDesc.mobile} is not present in Whatsapp'),
+                  content: Text('$myNum is not present in Whatsapp'),
                   duration: Duration(milliseconds: 300),
                   padding: EdgeInsets.symmetric(horizontal: 8),
                   behavior: SnackBarBehavior.floating,

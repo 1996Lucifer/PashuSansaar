@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:get/get.dart';
+import 'package:pashusansaar/home_screen.dart';
 import 'package:pashusansaar/utils/colors.dart';
 
 import 'constants.dart';
@@ -75,6 +76,55 @@ class ReusableWidgets {
                     elevation: 5,
                     onPressed: () {
                       cta ? exit(0) : Navigator.pop(context);
+                    }),
+              ]);
+        });
+  }
+
+  static showDialogBoxWithNavigator(BuildContext context, String type, Widget content,
+      {bool cta = false, bool barrierDismissible = true}) {
+    return showDialog(
+        context: context,
+        barrierDismissible: barrierDismissible,
+        builder: (context) {
+          return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(10.0),
+                ),
+              ),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    type,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  CloseButton(),
+                ],
+              ),
+              content: content,
+              actions: <Widget>[
+                RaisedButton(
+                    child: Text(
+                      'Ok'.tr,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    padding: EdgeInsets.all(5.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    elevation: 5,
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> HomeScreen(selectedIndex: 0),),);
                     }),
               ]);
         });
