@@ -25,8 +25,8 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _getInitialData();
-    // _checkLegacyUser();
+    // _getInitialData();
+    _checkLegacyUser();
   }
 
   _getInitialData() async {
