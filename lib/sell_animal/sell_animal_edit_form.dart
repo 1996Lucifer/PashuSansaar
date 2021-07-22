@@ -59,8 +59,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
   Color backgroundColor = Colors.red[50];
   bool _showData = false;
   SharedPreferences prefs;
-  String uniqueId = '',
-      isValidUser = '',
+  String isValidUser = '',
       userId = '',
       desc = '',
       fileUrl = '',
@@ -159,9 +158,13 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
     };
 
     for (int i = 0; i < widget.animalInfo.files.length; i++) {
-      _editImagesUpload['Image${i + 1}'] =
+      String _imageName = widget.animalInfo.files[i].fileName
+          .split('.')[4]
+          .split('/')[2]
+          .split('_')[1];
+      _editImagesUpload[_imageName] =
           widget.animalInfo?.files[i]?.fileName ?? '';
-      _imagesUpload['Image${i + 1}'] = {
+      _imagesUpload[_imageName] = {
         "fileName": widget.animalInfo?.files[i]?.fileType?.split('^')[1],
         "fileType": widget.animalInfo?.files[i]?.fileType?.split('^')[0]
       };
@@ -171,9 +174,6 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
       });
     }
     setState(() {
-      uniqueId = widget.animalInfo.sId;
-      userId = widget.animalInfo.userId;
-
       animalUpdationData = _animalUpdationData;
       editImagesUpload = _editImagesUpload;
       imagesUpload = _imagesUpload;
