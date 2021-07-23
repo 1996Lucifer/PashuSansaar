@@ -12,7 +12,7 @@ class AuthToken extends GetxController {
   var accessToken = ''.obs, refreshToken = ''.obs, userId = ''.obs;
   var expires = 0.obs;
 
-  fetchAuthToken({
+    fetchAuthToken({
     String number,
     String apkVersion,
     Map<String, dynamic> mobileInfo,
