@@ -397,34 +397,38 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
             ],
           ),
         ),
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-          child: DropdownSearch<String>(
-            mode: Mode.BOTTOM_SHEET,
-            showSelectedItem: true,
-            items: constant.animalType,
-            label: 'animal_type'.tr,
-            hint: 'animal_type'.tr,
-            selectedItem: widget.animalInfo.animalType > 4
-                ? constant.animalType[4]
-                : intToAnimalTypeMapping[widget.animalInfo.animalType],
-            onChanged: (String type) {
-              setState(() {
-                animalUpdationData['animalType'] = animalTypeMapping[type];
 
-                if (animalUpdationData['animalType'] < 5) {
-                  _animalOtherType = '';
-                } else {
-                  _animalOtherType = type;
-                }
-              });
-            },
-            dropdownSearchDecoration: InputDecoration(
-                contentPadding:
-                    EdgeInsets.symmetric(vertical: 1, horizontal: 10),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(5),
-                )),
+        IgnorePointer(
+          ignoring: true,
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+            child: DropdownSearch<String>(
+              mode: Mode.BOTTOM_SHEET,
+              showSelectedItem: true,
+              items: constant.animalType,
+              label: 'animal_type'.tr,
+              hint: 'animal_type'.tr,
+              selectedItem: widget.animalInfo.animalType > 4
+                  ? constant.animalType[4]
+                  : intToAnimalTypeMapping[widget.animalInfo.animalType],
+              onChanged: (String type) {
+                setState(() {
+                  animalUpdationData['animalType'] = animalTypeMapping[type];
+
+                  if (animalUpdationData['animalType'] < 5) {
+                    _animalOtherType = '';
+                  } else {
+                    _animalOtherType = type;
+                  }
+                });
+              },
+              dropdownSearchDecoration: InputDecoration(
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 1, horizontal: 10),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5),
+                  )),
+            ),
           ),
         ),
         if (_animalOtherType.isNotEmpty) ...[

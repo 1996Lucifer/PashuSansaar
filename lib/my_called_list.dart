@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:pashusansaar/animal_description/animal_description_page.dart';
@@ -109,7 +111,8 @@ class _MyCalledListState extends State<MyCalledList> {
                       fontSize: 16),
                   children: [
                     TextSpan(
-                      text: ' की ',
+                      text:
+                          ' ${(_list.animalType == 1 || _list.animalType == 2 || _list.animalType == 6 || _list.animalType == 8 || _list.animalType == 10) ? " की" : "का"} ',
                       style: TextStyle(
                           color: Colors.grey[700],
                           fontWeight: FontWeight.bold,
@@ -134,14 +137,30 @@ class _MyCalledListState extends State<MyCalledList> {
                     TextSpan(
                       text: _list.animalType.toString() == 'other_animal'.tr
                           ? "no type"
-                          : intToAnimalTypeMapping[_list.animalType],
+                          : (_list.animalType <= 4
+                              ? intToAnimalTypeMapping[_list.animalType]
+                              : intToAnimalOtherTypeMapping[_list.animalType]),
                       style: TextStyle(
                           color: Colors.grey[700],
                           fontWeight: FontWeight.bold,
                           fontSize: 16),
                     ),
                     TextSpan(
-                      text: ', ₹ ',
+                      text: ', उम्र: ',
+                      style: TextStyle(
+                          color: Colors.grey[700],
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16),
+                    ),
+                    TextSpan(
+                      text: '${_list.animalAge} साल\n',
+                      style: TextStyle(
+                          color: Colors.grey[700],
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16),
+                    ),
+                    TextSpan(
+                      text: '₹ ',
                       style: TextStyle(
                           color: Colors.grey[700],
                           fontWeight: FontWeight.bold,
@@ -271,74 +290,146 @@ class _MyCalledListState extends State<MyCalledList> {
         ));
   }
 
+  _descriptionText(animalInfo) {
+    String animalBreedCheck = (animalInfo.animalBreed == 'not_known'.tr)
+        ? ""
+        : animalInfo.animalBreed;
+    String animalTypeCheck = (animalInfo.animalType >= 5)
+        ? intToAnimalOtherTypeMapping[animalInfo.animalType]
+        : intToAnimalTypeMapping[animalInfo.animalType];
+
+    String desc = '';
+
+    if (animalInfo.animalType >= 3) {
+      desc =
+          'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल ${(animalInfo.animalType == 6 || animalInfo.animalType == 8 || animalInfo.animalType == 10) ? " की" : "का"} है। ';
+    } else {
+      desc =
+          'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल की है। ';
+      if (animalInfo.recentBayatTime != null) {
+        desc = desc +
+            'यह ${intToRecentBayaatTime[animalInfo.recentBayatTime]} ब्यायी है। ';
+      }
+      if (animalInfo.pregnantTime != null) {
+        desc =
+            desc + 'यह अभी ${intToPregnantTime[animalInfo.pregnantTime]} है। ';
+      }
+      if (animalInfo.animalMilkCapacity != null) {
+        desc = desc +
+            'पिछले बार के हिसाब से दूध कैपेसिटी ${animalInfo.animalMilkCapacity} लीटर है। ';
+      }
+    }
+    return desc + (animalInfo.moreInfo ?? "");
+  }
+
   _extraInfoWidget(_list, width) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          GestureDetector(
-            onTap: () async {
-              String whatsappText =
-                  "नस्ल: ${_list.animalBreed}\nजानकारी: ${_list.moreInfo} \nदूध(प्रति दिन): ${_list.animalMilkCapacity} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar";
-              String whatsappUrl =
-                  "https://api.whatsapp.com/send/?text=$whatsappText";
-              await UrlLauncher.launch(Uri.encodeFull(whatsappUrl));
+          RaisedButton.icon(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+                side: BorderSide(color: darkGreenColor)),
+            color: darkGreenColor,
+            onPressed: () async {
+              String whatsappUrl = '';
+              String whatsappText = '';
+
+              whatsappText =
+                  'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${_list.userName}, ${_list.userAddress} \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
+              whatsappUrl =
+                  "https://api.whatsapp.com/send/?phone=+91 ${_list.mobile} &text=$whatsappText";
+              await UrlLauncher.canLaunch(whatsappUrl) != null
+                  ? UrlLauncher.launch(Uri.encodeFull(whatsappUrl))
+                  : ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content:
+                          Text('${_list.mobile} is not present in Whatsapp'),
+                      duration: Duration(milliseconds: 300),
+                      padding: EdgeInsets.symmetric(horizontal: 8),
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                    ));
             },
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: appPrimaryColor),
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey,
-                    blurRadius: 2.0,
-                  ),
-                ],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              width: width * 0.44,
-              height: 40,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  FaIcon(FontAwesomeIcons.whatsapp,
-                      size: 16, color: darkGreenColor),
-                  SizedBox(width: 5),
-                  Text("शेयर करे")
-                ],
-              ),
+            icon: FaIcon(FontAwesomeIcons.whatsapp,
+                color: Colors.white, size: 14),
+            label: Text(
+              'message'.tr,
+              style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14),
             ),
           ),
           SizedBox(width: 5),
-          GestureDetector(
-            onTap: () => UrlLauncher.launch('tel:+91 ${_list.mobile}'),
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: appPrimaryColor),
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey,
-                    blurRadius: 1.0,
-                  ),
-                ],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              width: width * 0.4,
-              height: 40,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  FaIcon(
-                    FontAwesomeIcons.phoneAlt,
-                    color: secondaryColor,
-                    size: 16,
-                  ),
-                  SizedBox(width: 5),
-                  Text('संपर्क करे')
-                ],
-              ),
+          RaisedButton.icon(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  side: BorderSide(color: violetColor)),
+              color: violetColor,
+              onPressed: () async {
+                String qParams = json.encode({
+                  "uniqueId": _list.sId,
+                  "userId": prefs.getString('userId'),
+                  "screen": "DESCRIPTION_PAGE",
+                });
+
+                final DynamicLinkParameters parameters =
+                DynamicLinkParameters(
+                    uriPrefix: "https://pashusansaar.page.link",
+                    link: Uri.parse(
+                        "https://www.pashu-sansaar.com/?data=$qParams"),
+                    androidParameters: AndroidParameters(
+                      packageName: 'dj.pashusansaar',
+                      minimumVersion: 21,
+                    ),
+                    dynamicLinkParametersOptions:
+                    DynamicLinkParametersOptions(
+                      shortDynamicLinkPathLength:
+                      ShortDynamicLinkPathLength.unguessable,
+                    ),
+                    navigationInfoParameters: NavigationInfoParameters(
+                        forcedRedirectEnabled: true));
+
+                final shortDynamicLink = await parameters.buildShortLink();
+                final Uri shortUrl = shortDynamicLink.shortUrl;
+
+                Share.share(
+                    _list.animalType <= 2 ?
+                "नस्ल: ${_list.animalBreed}\nजानकारी: ${_descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list)}\nदूध(प्रति दिन): ${_list.animalMilkCapacity} Litre\n\nपशु देखे: ${shortUrl.toString()}":
+                "नस्ल: ${_list.animalBreed}\nजानकारी: ${_descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list)}\n\nपशु देखे: ${shortUrl.toString()}",
+                    subject: 'पशु की जानकारी');
+
+              },
+              icon: Icon(Icons.share, color: Colors.white, size: 14),
+              label: Text('share'.tr,
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14))),
+          SizedBox(width: 5),
+          RaisedButton.icon(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+                side: BorderSide(color: darkSecondaryColor)),
+            color: secondaryColor,
+            onPressed: () async {
+              return UrlLauncher.launch('tel:+91 ${_list.mobile}');
+            },
+            icon: Icon(
+              Icons.call,
+              color: Colors.white,
+              size: 14,
+            ),
+            label: Text(
+              'call'.tr,
+              style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14),
             ),
           ),
         ],
@@ -390,161 +481,138 @@ class _MyCalledListState extends State<MyCalledList> {
 
   _extraInfoWidget1(_list, width) => Padding(
         padding: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey[500]),
-                    color: Colors.grey[300],
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey,
-                        blurRadius: 1.0,
+        child: _list.animalType > 2
+            ? null
+            : Column(
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey[500]),
+                          color: Colors.grey[300],
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey,
+                              blurRadius: 1.0,
+                            ),
+                          ],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        width: width * 0.425,
+                        height: 50,
+                        child: Column(
+                          children: [
+                            Text('दूध (प्रति दिन)',
+                                style: TextStyle(
+                                    fontSize: 15, fontWeight: FontWeight.bold)),
+                            Text('${_list.animalMilkCapacity} लीटर',
+                                style: TextStyle(
+                                    fontSize: 14, fontWeight: FontWeight.w500))
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: 5),
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey[500]),
+                          color: Colors.grey[300],
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey,
+                              blurRadius: 1.0,
+                            ),
+                          ],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        width: width * 0.425,
+                        height: 50,
+                        child: Column(
+                          children: [
+                            Text('ब्यात',
+                                style: TextStyle(
+                                    fontSize: 15, fontWeight: FontWeight.bold)),
+                            Text(
+                                intToAnimalBayaatMapping[_list.animalBayat]
+                                    .toString(),
+                                style: TextStyle(
+                                    fontSize: 14, fontWeight: FontWeight.w500))
+                          ],
+                        ),
                       ),
                     ],
-                    borderRadius: BorderRadius.circular(8),
                   ),
-                  width: width * 0.285,
-                  height: 50,
-                  child: Column(
+                  SizedBox(height: 5),
+                  Row(
                     children: [
-                      Text('उम्र',
-                          style: TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.bold)),
-                      Text('${_list.animalAge} साल',
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.w500))
-                    ],
-                  ),
-                ),
-                SizedBox(width: 5),
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey[500]),
-                    color: Colors.grey[300],
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey,
-                        blurRadius: 1.0,
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey[500]),
+                          color: Colors.grey[300],
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey,
+                              blurRadius: 1.0,
+                            ),
+                          ],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        width: width * 0.425,
+                        height: 50,
+                        child: Column(
+                          children: [
+                            Text('कब ब्यायी थी?',
+                                style: TextStyle(
+                                    fontSize: 15, fontWeight: FontWeight.bold)),
+                            Text(
+                              _list.isRecentBayat == false ||
+                                      _list.isRecentBayat == 'no'.tr
+                                  ? 'ब्यायी नहीं है'
+                                  : intToRecentBayaatTime[_list.recentBayatTime]
+                                      .toString(),
+                              style: TextStyle(
+                                  fontSize: 14, fontWeight: FontWeight.w500),
+                            )
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: 5),
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey[500]),
+                          color: Colors.grey[300],
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey,
+                              blurRadius: 1.0,
+                            ),
+                          ],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        width: width * 0.425,
+                        height: 50,
+                        child: Column(
+                          children: [
+                            Text('कब से गर्भवती है ?',
+                                style: TextStyle(
+                                    fontSize: 15, fontWeight: FontWeight.bold)),
+                            Text(
+                              _list.isPregnant == null ||
+                                      _list.isPregnant == 'no'.tr ||
+                                      _list.isPregnant == false
+                                  ? 'गर्भवती नहीं है'
+                                  : intToPregnantTime[_list.pregnantTime]
+                                      .toString(),
+                              style: TextStyle(
+                                  fontSize: 14, fontWeight: FontWeight.w500),
+                            )
+                          ],
+                        ),
                       ),
                     ],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  width: width * 0.285,
-                  height: 50,
-                  child: Column(
-                    children: [
-                      Text('दूध (प्रति दिन)',
-                          style: TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.bold)),
-                      Text('${_list.animalMilkCapacity} लीटर',
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.w500))
-                    ],
-                  ),
-                ),
-                SizedBox(width: 5),
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey[500]),
-                    color: Colors.grey[300],
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey,
-                        blurRadius: 1.0,
-                      ),
-                    ],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  width: width * 0.285,
-                  height: 50,
-                  child: Column(
-                    children: [
-                      Text('ब्यात',
-                          style: TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.bold)),
-                      Text(
-                          intToAnimalBayaatMapping[_list.animalBayat]
-                              .toString(),
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.w500))
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 5),
-            Row(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey[500]),
-                    color: Colors.grey[300],
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey,
-                        blurRadius: 1.0,
-                      ),
-                    ],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  width: width * 0.425,
-                  height: 50,
-                  child: Column(
-                    children: [
-                      Text('कब ब्यायी थी?',
-                          style: TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.bold)),
-                      Text(
-                        _list.isRecentBayat == false ||
-                                _list.isRecentBayat == 'no'.tr
-                            ? 'ब्यायी नहीं है'
-                            : intToRecentBayaatTime[_list.recentBayatTime]
-                                .toString(),
-                        style: TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.w500),
-                      )
-                    ],
-                  ),
-                ),
-                SizedBox(width: 5),
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey[500]),
-                    color: Colors.grey[300],
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey,
-                        blurRadius: 1.0,
-                      ),
-                    ],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  width: width * 0.425,
-                  height: 50,
-                  child: Column(
-                    children: [
-                      Text('कब से गर्भवती है ?',
-                          style: TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.bold)),
-                      Text(
-                        _list.isPregnant == null ||
-                                _list.isPregnant == 'no'.tr ||
-                                _list.isPregnant == false
-                            ? 'गर्भवती नहीं है'
-                            : intToPregnantTime[_list.pregnantTime].toString(),
-                        style: TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.w500),
-                      )
-                    ],
-                  ),
-                ),
-              ],
-            )
-          ],
-        ),
+                  )
+                ],
+              ),
       );
 
   @override
@@ -625,110 +693,3 @@ class _MyCalledListState extends State<MyCalledList> {
     );
   }
 }
-
-//<<<<<<<<<<<<<<<<< firebase build >>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-//   @override
-//   Widget build(BuildContext context) {
-//     double width = MediaQuery.of(context).size.width;
-//     double height = MediaQuery.of(context).size.height;
-//     return Scaffold(
-//         backgroundColor: Colors.grey[100],
-//         appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),
-//         body: SingleChildScrollView(
-//           child:
-//               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-//             Container(
-//               height: height - AppBar().preferredSize.height - 38,
-//               child: PaginateFirestore(
-//                   // physics: NeverScrollableScrollPhysics(),
-//                   itemsPerPage: 10,
-//                   initialLoader: Center(
-//                     child: CircularProgressIndicator(
-//                       backgroundColor: appPrimaryColor,
-//                     ),
-//                   ),
-//                   bottomLoader: Center(
-//                     child: CircularProgressIndicator(
-//                       backgroundColor: appPrimaryColor,
-//                     ),
-//                   ),
-//                   emptyDisplay: Center(
-//                     child: Text(
-//                       'किसी ग्राहक को अभी तक संपर्क नहीं किया है',
-//                       style:
-//                           TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-//                     ),
-//                   ),
-//                   itemBuilderType:
-//                       PaginateBuilderType.listView, // listview and gridview
-//                   itemBuilder: (index, context, documentSnapshot) =>
-//                       documentSnapshot.data() == null
-//                           ? Center(
-//                               child: Text(
-//                               'किसी ग्राहक को अभी तक संपर्क नहीं किया है',
-//                               style: TextStyle(
-//                                   fontSize: 20, fontWeight: FontWeight.bold),
-//                             ))
-//                           : Padding(
-//                               padding: const EdgeInsets.all(8.0),
-//                               child: Card(
-//                                   key: Key(documentSnapshot.data()['uniqueId']),
-//                                   shape: RoundedRectangleBorder(
-//                                     borderRadius: BorderRadius.circular(10.0),
-//                                   ),
-//                                   elevation: 5,
-//                                   child: Column(
-//                                       crossAxisAlignment:
-//                                           CrossAxisAlignment.start,
-//                                       mainAxisAlignment:
-//                                           MainAxisAlignment.start,
-//                                       mainAxisSize: MainAxisSize.min,
-//                                       children: [
-//                                         _buildInfowidget(
-//                                             documentSnapshot.data()),
-//                                         Padding(
-//                                           padding: const EdgeInsets.only(
-//                                               left: 8, bottom: 5.0),
-//                                           child: Row(
-//                                             children: [
-//                                               Icon(
-//                                                 Icons.location_on,
-//                                                 color: Colors.grey[500],
-//                                                 size: 13,
-//                                               ),
-//                                               SizedBox(
-//                                                 width: 5,
-//                                               ),
-//                                               Expanded(
-//                                                 child: Text(
-//                                                     documentSnapshot
-//                                                         .data()['userAddress'],
-//                                                     style: TextStyle(
-//                                                       fontSize: 15,
-//                                                       fontWeight:
-//                                                           FontWeight.w200,
-//                                                     )),
-//                                               ),
-//                                             ],
-//                                           ),
-//                                         ),
-//                                         _animalImageWidget(
-//                                             documentSnapshot.data()),
-//                                         _extraInfoWidget(
-//                                             documentSnapshot.data(), width),
-//                                         _extraInfoWidget1(
-//                                             documentSnapshot.data(), width),
-//                                       ]))),
-//                   query: FirebaseFirestore.instance
-//                       .collection('myCallingInfo')
-//                       .doc(FirebaseAuth.instance.currentUser.uid)
-//                       .collection('myCalls')
-//                       .orderBy('dateOfSaving', descending: true),
-//                   isLive: false // to fetch real-time data
-//                   ),
-//             )
-//           ]),
-//         ));
-//   }
-// }

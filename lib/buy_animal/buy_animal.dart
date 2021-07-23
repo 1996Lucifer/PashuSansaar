@@ -362,9 +362,9 @@ class _BuyAnimalState extends State<BuyAnimal>
                               fontSize: 16),
                         ),
                         TextSpan(
-                          text: _list[index].animalType == 5
-                              ? intToAnimalTypeMapping[5]
-                              : intToAnimalTypeMapping[_list[index].animalType],
+                          text: _list[index].animalType <= 4
+                              ? intToAnimalTypeMapping[_list[index].animalType]
+                              : intToAnimalOtherTypeMapping[_list[index].animalType],
                           style: TextStyle(
                               color: Colors.grey[700],
                               fontWeight: FontWeight.bold,

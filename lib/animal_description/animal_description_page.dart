@@ -262,100 +262,104 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
           padding: const EdgeInsets.all(8),
           child: RichText(
             textAlign: TextAlign.center,
-            text: _list?.animalType == 1 || _list?.animalType == 2
+            text: _list.animalType == 1 || _list.animalType == 2
                 ? TextSpan(
-                    text: _list.animalMilk.toString(),
-                    style: TextStyle(
-                      color: Colors.grey[700],
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                    children: [
-                        TextSpan(
-                          text: ' ',
-                          style: TextStyle(
-                              color: Colors.grey[700],
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16),
-                        ),
-                        TextSpan(
-                          text: "litre_milk".tr,
-                          style: TextStyle(
-                              color: Colors.grey[700],
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16),
-                        ),
-                        TextSpan(
-                          text: ', ',
-                          style: TextStyle(
-                              color: Colors.grey[700],
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16),
-                        ),
-                        TextSpan(
-                          text: bayaatMapping(
-                            intToAnimalBayaatMapping[_list.animalBayat],
-                          ),
-                          style: TextStyle(
-                              color: Colors.grey[700],
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16),
-                        ),
-                        TextSpan(
-                          text: ', ',
-                          style: TextStyle(
-                              color: Colors.grey[700],
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16),
-                        ),
-                        TextSpan(
-                          text: '₹ ' + formatter.format(_list.animalPrice) ?? 0,
-                          style: TextStyle(
-                              color: Colors.grey[700],
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16),
-                        ),
-                      ])
-                : TextSpan(
-                    text: _list?.animalBreed == 'not_known'.tr
-                        ? ""
-                        : ReusableWidgets.removeEnglishDataFromName(
-                            _list?.animalBreed),
+                text: _list.animalMilk.toString(),
+                style: TextStyle(
+                  color: Colors.grey[700],
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+                children: [
+                  TextSpan(
+                    text: ' ',
                     style: TextStyle(
                         color: Colors.grey[700],
                         fontWeight: FontWeight.bold,
                         fontSize: 16),
-                    children: [
-                        TextSpan(
-                          text: ' ',
-                          style: TextStyle(
-                              color: Colors.grey[700],
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16),
-                        ),
-                        TextSpan(
-                          text: _list.animalType == 5
-                              ? intToAnimalTypeMapping[5]
-                              : intToAnimalTypeMapping[_list.animalType],
-                          style: TextStyle(
-                              color: Colors.grey[700],
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16),
-                        ),
-                        TextSpan(
-                          text:
-                              ', ₹ ' + formatter.format(_list.animalPrice) ?? 0,
-                          style: TextStyle(
-                              color: Colors.grey[700],
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16),
-                        ),
-                      ]),
+                  ),
+                  TextSpan(
+                    text: "litre_milk".tr,
+                    style: TextStyle(
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16),
+                  ),
+                  TextSpan(
+                    text: ', ',
+                    style: TextStyle(
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16),
+                  ),
+                  TextSpan(
+                    text: bayaatMapping(
+                      intToAnimalBayaatMapping[_list.animalBayat],
+                    ),
+                    style: TextStyle(
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16),
+                  ),
+                  TextSpan(
+                    text: ', ',
+                    style: TextStyle(
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16),
+                  ),
+                  TextSpan(
+                    text: '₹ ' +
+                        formatter.format(_list.animalPrice) ??
+                        0,
+                    style: TextStyle(
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16),
+                  ),
+                ])
+                : TextSpan(
+                text: _list.animalBreed == 'not_known'.tr
+                    ? ""
+                    : ReusableWidgets.removeEnglishDataFromName(
+                    _list.animalBreed),
+                style: TextStyle(
+                    color: Colors.grey[700],
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16),
+                children: [
+                  TextSpan(
+                    text: ' ',
+                    style: TextStyle(
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16),
+                  ),
+                  TextSpan(
+                    text: _list.animalType <= 4
+                        ? intToAnimalTypeMapping[_list.animalType]
+                        : intToAnimalOtherTypeMapping[_list.animalType],
+                    style: TextStyle(
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16),
+                  ),
+                  TextSpan(
+                    text: ', ₹ ' +
+                        formatter.format(_list.animalPrice) ??
+                        0,
+                    style: TextStyle(
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16),
+                  ),
+                ]),
           ),
         ),
       ],
     );
   }
+
 
   getPositionBasedOnLatLong(double lat, double long) async {
     final coordinates = new Coordinates(lat, long);
@@ -461,86 +465,37 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
         .toStringAsFixed(0);
   }
 
-  // Widget _descriptionText(_list) {
-  //   String animalBreedCheck =
-  //       (_list.animalBreed == 'not_known'.tr) ? "" : _list.animalBreed;
-  //   String animalTypeCheck = (_list.animalType == 5)
-  //       ? intToAnimalTypeMapping[5]
-  //       : intToAnimalTypeMapping[_list.animalType];
-  //
-  //   String desc = '';
-  //
-  //   if (_list.animalType == 3 ||
-  //       _list.animalType == 4 ||
-  //       _list.animalType == 5) {
-  //     desc =
-  //         'ये $animalBreedCheck $animalTypeCheck ${_list.animalAge} साल की है। ';
-  //   } else {
-  //     desc =
-  //         'ये ${_list.animalBreed} ${intToAnimalTypeMapping[_list.animalType]} ${_list.animalAge} साल का है। ';
-  //     if (_list.recentBayatTime != null) {
-  //       desc = desc +
-  //           'यह ${intToRecentBayaatTime[_list.recentBayatTime]} ब्यायी है। ';
-  //     }
-  //     if (_list.pregnantTime != null) {
-  //       desc = desc + 'यह अभी ${intToPregnantTime[_list.pregnantTime]} है। ';
-  //     }
-  //     if (_list.animalMilkCapacity != null) {
-  //       desc = desc +
-  //           'पिछले बार के हिसाब से दूध कैपेसिटी ${_list.animalMilkCapacity} लीटर है। ';
-  //     }
-  //   }
-  //   desc = desc + (animalDesc.moreInfo ?? "");
-  //   return Padding(
-  //     padding: const EdgeInsets.all(8.0),
-  //     child: Text(
-  //       desc,
-  //       maxLines: 4,
-  //       overflow: TextOverflow.ellipsis,
-  //       style: TextStyle(color: Colors.grey[600], fontSize: 14.5),
-  //     ),
-  //   );
-  // }
-
-  //*****************************************************************
 
   _descriptionText(animalInfo) {
     String animalBreedCheck = (animalInfo.animalBreed == 'not_known'.tr)
         ? ""
         : animalInfo.animalBreed;
-    String animalTypeCheck = (animalInfo.animalType == 5)
-        ? intToAnimalTypeMapping[5]
+    String animalTypeCheck = (animalInfo.animalType >= 5)
+        ? intToAnimalOtherTypeMapping[animalInfo.animalType]
         : intToAnimalTypeMapping[animalInfo.animalType];
 
     String desc = '';
 
-    if (animalInfo.animalType == 3 ||
-        animalInfo.animalType == 4 ||
-        animalInfo.animalType == 5) {
+    if (animalInfo.animalType >= 3) {
       desc =
-          'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल की है। ';
+      'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल ${(animalInfo.animalType == 6 || animalInfo.animalType == 8 || animalInfo.animalType == 10) ? " की" : "का"} है। ';
     } else {
       desc =
-          'ये ${animalInfo.animalBreed} ${intToAnimalTypeMapping[animalInfo.animalType]} ${animalInfo.animalAge} साल का है। ';
-      // if (animalInfo.recentBayatTime != null) {
-      //   desc = desc +
-      //       'यह ${intToRecentBayaatTime[animalInfo.recentBayatTime]} ब्यायी है। ';
-      // }
+      'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल की है। ';
+      if (animalInfo.recentBayatTime != null) {
+        desc = desc +
+            'यह ${intToRecentBayaatTime[animalInfo.recentBayatTime]} ब्यायी है। ';
+      }
       if (animalInfo.pregnantTime != null) {
         desc =
             desc + 'यह अभी ${intToPregnantTime[animalInfo.pregnantTime]} है। ';
       }
-      desc = desc +
-          (animalInfo.animalHasBaby == null || animalInfo.animalHasBaby == 0
-              ? 'इसके साथ में बच्चा नहीं है। '
-              : 'इसके साथ में ${intToAnimalHasBaby[animalInfo.animalHasBaby]}। ');
       if (animalInfo.animalMilkCapacity != null) {
         desc = desc +
             'पिछले बार के हिसाब से दूध कैपेसिटी ${animalInfo.animalMilkCapacity} लीटर है। ';
       }
     }
-
-    return desc;
+    return desc + (animalInfo.moreInfo ?? "");
   }
 
   Padding _animalDescriptionMethod(_list) {
