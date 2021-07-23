@@ -845,6 +845,15 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                                   ),
                                 );
                               },
+                              errorBuilder: (BuildContext context,
+                                  Object exception, StackTrace stackTrace) {
+                                return Center(
+                                  child: Icon(
+                                    Icons.error,
+                                    size: 40,
+                                  ),
+                                );
+                              },
                             ),
                             replacement: Column(
                               children: [
@@ -981,6 +990,15 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                                                 .cumulativeBytesLoaded /
                                             loadingProgress.expectedTotalBytes
                                         : null,
+                                  ),
+                                );
+                              },
+                              errorBuilder: (BuildContext context,
+                                  Object exception, StackTrace stackTrace) {
+                                return Center(
+                                  child: Icon(
+                                    Icons.error,
+                                    size: 40,
                                   ),
                                 );
                               },
@@ -1124,6 +1142,15 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                                   ),
                                 );
                               },
+                              errorBuilder: (BuildContext context,
+                                  Object exception, StackTrace stackTrace) {
+                                return Center(
+                                  child: Icon(
+                                    Icons.error,
+                                    size: 40,
+                                  ),
+                                );
+                              },
                             ),
                             replacement: Column(
                               children: [
@@ -1259,6 +1286,15 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                                                 .cumulativeBytesLoaded /
                                             loadingProgress.expectedTotalBytes
                                         : null,
+                                  ),
+                                );
+                              },
+                              errorBuilder: (BuildContext context,
+                                  Object exception, StackTrace stackTrace) {
+                                return Center(
+                                  child: Icon(
+                                    Icons.error,
+                                    size: 40,
                                   ),
                                 );
                               },
@@ -1657,6 +1693,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                     pr.hide();
                     return showDialog(
                         context: context,
+                        barrierDismissible: false,
                         builder: (context) {
                           return AlertDialog(
                               shape: RoundedRectangleBorder(
@@ -1675,7 +1712,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                                       fontSize: 18,
                                     ),
                                   ),
-                                  CloseButton(),
+                                  // CloseButton(),
                                 ],
                               ),
                               content: Column(
