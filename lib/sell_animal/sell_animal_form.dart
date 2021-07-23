@@ -1334,6 +1334,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                           pr.hide();
                           return showDialog(
                               context: context,
+                              barrierDismissible: false,
                               builder: (context) {
                                 return AlertDialog(
                                     shape: RoundedRectangleBorder(
@@ -1352,7 +1353,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                                             fontSize: 18,
                                           ),
                                         ),
-                                        CloseButton(),
+                                        // CloseButton(),
                                       ],
                                     ),
                                     content: Column(
