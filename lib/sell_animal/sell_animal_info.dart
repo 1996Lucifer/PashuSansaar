@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
@@ -84,9 +82,8 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
   // }
 
   _descriptionText(_list) {
-    String animalBreedCheck = (_list.animalBreed == 'not_known'.tr)
-        ? ""
-        : _list.animalBreed;
+    String animalBreedCheck =
+        (_list.animalBreed == 'not_known'.tr) ? "" : _list.animalBreed;
     String animalTypeCheck = (_list.animalType >= 5)
         ? intToAnimalOtherTypeMapping[_list.animalType]
         : intToAnimalTypeMapping[_list.animalType];
@@ -95,17 +92,16 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
 
     if (_list.animalType >= 3) {
       desc =
-      'ये $animalBreedCheck $animalTypeCheck ${_list.animalAge} साल ${(_list.animalType == 6 || _list.animalType == 8 || _list.animalType == 10) ? " की" : "का"} है। ';
+          'ये $animalBreedCheck $animalTypeCheck ${_list.animalAge} साल ${(_list.animalType == 6 || _list.animalType == 8 || _list.animalType == 10) ? " की" : "का"} है। ';
     } else {
       desc =
-      'ये $animalBreedCheck $animalTypeCheck ${_list.animalAge} साल की है। ';
+          'ये $animalBreedCheck $animalTypeCheck ${_list.animalAge} साल की है। ';
       if (_list.recentBayatTime != null) {
         desc = desc +
             'यह ${intToRecentBayaatTime[_list.recentBayatTime]} ब्यायी है। ';
       }
       if (_list.pregnantTime != null) {
-        desc =
-            desc + 'यह अभी ${intToPregnantTime[_list.pregnantTime]} है। ';
+        desc = desc + 'यह अभी ${intToPregnantTime[_list.pregnantTime]} है। ';
       }
       if (_list.animalMilkCapacity != null) {
         desc = desc +
@@ -125,14 +121,37 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
               child: Container(
                 width: width * 0.3,
                 height: 130.0,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: _list.files[0].fileName.length > 1000
-                          ? MemoryImage(base64Decode(_list.files[0].fileName))
-                          : NetworkImage(_list.files[_list.files.length - 1].fileName)),
-                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                  color: Colors.redAccent,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: Image.network(
+                    _list.files[_list.files.length - 1].fileName,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    loadingBuilder: (
+                      BuildContext context,
+                      Widget child,
+                      ImageChunkEvent loadingProgress,
+                    ) {
+                      if (loadingProgress == null) return child;
+                      return Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes
+                              : null,
+                        ),
+                      );
+                    },
+                    errorBuilder: (BuildContext context, Object exception,
+                        StackTrace stackTrace) {
+                      return Center(
+                        child: Icon(
+                          Icons.error,
+                          size: 40,
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
@@ -197,7 +216,10 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                   TextSpan(
                     text: (_list.animalType.toString() == 'other_animal'.tr
                             ? "no type"
-                            : (_list.animalType <= 4 ? intToAnimalTypeMapping[_list.animalType] : intToAnimalOtherTypeMapping[_list.animalType])) +
+                            : (_list.animalType <= 4
+                                ? intToAnimalTypeMapping[_list.animalType]
+                                : intToAnimalOtherTypeMapping[
+                                    _list.animalType])) +
                         ', ',
                     style: TextStyle(
                         color: greyColor,

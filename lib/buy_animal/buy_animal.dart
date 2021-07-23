@@ -183,14 +183,6 @@ class _BuyAnimalState extends State<BuyAnimal>
     pr.hide();
   }
 
-  // dataDeleteion() async {
-  //   await FirebaseFirestore.instance
-  //       .collection('buyingAnimalList1')
-  //       .doc()
-  //       .get()
-  //       .then((value) => value.reference.delete());
-  // }
-
   _getInitialData() async {
     Future.delayed(Duration(seconds: 7)).then((value) => setState(() {
           _isCardVisible = widget.animalInfo.length % 5 == 0;
@@ -594,7 +586,8 @@ class _BuyAnimalState extends State<BuyAnimal>
                                               Expanded(
                                                 child: Text(
                                                   widget.animalInfo[index]
-                                                      .userName  ?? "",
+                                                          .userName ??
+                                                      "",
                                                   style: TextStyle(
                                                       fontSize: 15,
                                                       fontWeight:
@@ -1173,10 +1166,10 @@ class _BuyAnimalState extends State<BuyAnimal>
 
     if (animalInfo.animalType >= 3) {
       desc =
-      'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल ${(animalInfo.animalType == 6 || animalInfo.animalType == 8 || animalInfo.animalType == 10) ? " की" : "का"} है। ';
+          'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल ${(animalInfo.animalType == 6 || animalInfo.animalType == 8 || animalInfo.animalType == 10) ? " की" : "का"} है। ';
     } else {
       desc =
-      'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल की है। ';
+          'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल की है। ';
       if (animalInfo.recentBayatTime != null) {
         desc = desc +
             'यह ${intToRecentBayaatTime[animalInfo.recentBayatTime]} ब्यायी है। ';
@@ -1252,9 +1245,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                             boundaryMargin: const EdgeInsets.all(20.0),
                             minScale: 0.1,
                             maxScale: 1.6,
-                            child:
-                                // Image.asset('$i')
-                                Image.network(
+                            child: Image.network(
                               '$i',
                               loadingBuilder: (BuildContext context,
                                   Widget child,
@@ -1268,6 +1259,15 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                 .cumulativeBytesLoaded /
                                             loadingProgress.expectedTotalBytes
                                         : null,
+                                  ),
+                                );
+                              },
+                              errorBuilder: (BuildContext context,
+                                  Object exception, StackTrace stackTrace) {
+                                return Center(
+                                  child: Icon(
+                                    Icons.error,
+                                    size: 60,
                                   ),
                                 );
                               },
@@ -1300,15 +1300,28 @@ class _BuyAnimalState extends State<BuyAnimal>
             },
             child: Container(
               height: 200.0,
-              decoration: BoxDecoration(
-                image: DecorationImage(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8.0),
+                child: Image.network(
+                  _images[0],
                   fit: BoxFit.cover,
-                  // image:
-                  // AssetImage(_images[0]),
-                  image: NetworkImage(_images[0]),
+                  width: double.infinity,
+                  loadingBuilder: (
+                    BuildContext context,
+                    Widget child,
+                    ImageChunkEvent loadingProgress,
+                  ) {
+                    if (loadingProgress == null) return child;
+                    return Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes
+                            : null,
+                      ),
+                    );
+                  },
                 ),
-                borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                color: Colors.redAccent,
               ),
             ),
           ),

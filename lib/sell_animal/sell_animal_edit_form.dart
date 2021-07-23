@@ -241,6 +241,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
 
             setState(() {
               imagesFileUpload['Image$index'] = compressedFile.path;
+              editImagesUpload['Image$index'] = '';
               imagesUpload['Image$index'] = {
                 "fileName": "Image$index",
                 "fileType": mimeType
@@ -312,6 +313,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
 
             setState(() {
               imagesFileUpload['Image$index'] = compressedFile.path;
+              editImagesUpload['Image$index'] = '';
               imagesUpload['Image$index'] = {
                 "fileName": "Image$index",
                 "fileType": mimeType
@@ -828,6 +830,21 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                                 editImagesUpload['Image1'].isNotEmpty,
                             child: Image.network(
                               editImagesUpload['Image1'],
+                              loadingBuilder: (BuildContext context,
+                                  Widget child,
+                                  ImageChunkEvent loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    value: loadingProgress.expectedTotalBytes !=
+                                            null
+                                        ? loadingProgress
+                                                .cumulativeBytesLoaded /
+                                            loadingProgress.expectedTotalBytes
+                                        : null,
+                                  ),
+                                );
+                              },
                             ),
                             replacement: Column(
                               children: [
@@ -952,6 +969,21 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                                 editImagesUpload['Image2'].isNotEmpty,
                             child: Image.network(
                               editImagesUpload['Image2'],
+                              loadingBuilder: (BuildContext context,
+                                  Widget child,
+                                  ImageChunkEvent loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    value: loadingProgress.expectedTotalBytes !=
+                                            null
+                                        ? loadingProgress
+                                                .cumulativeBytesLoaded /
+                                            loadingProgress.expectedTotalBytes
+                                        : null,
+                                  ),
+                                );
+                              },
                             ),
                             replacement: Column(
                               children: [
@@ -1077,6 +1109,21 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                                 editImagesUpload['Image3'].isNotEmpty,
                             child: Image.network(
                               editImagesUpload['Image3'],
+                              loadingBuilder: (BuildContext context,
+                                  Widget child,
+                                  ImageChunkEvent loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    value: loadingProgress.expectedTotalBytes !=
+                                            null
+                                        ? loadingProgress
+                                                .cumulativeBytesLoaded /
+                                            loadingProgress.expectedTotalBytes
+                                        : null,
+                                  ),
+                                );
+                              },
                             ),
                             replacement: Column(
                               children: [
@@ -1200,6 +1247,21 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                                 editImagesUpload['Image4'].isNotEmpty,
                             child: Image.network(
                               editImagesUpload['Image4'],
+                              loadingBuilder: (BuildContext context,
+                                  Widget child,
+                                  ImageChunkEvent loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    value: loadingProgress.expectedTotalBytes !=
+                                            null
+                                        ? loadingProgress
+                                                .cumulativeBytesLoaded /
+                                            loadingProgress.expectedTotalBytes
+                                        : null,
+                                  ),
+                                );
+                              },
                             ),
                             replacement: Column(
                               children: [
@@ -1330,11 +1392,22 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
         data: data,
       );
 
-      print('-=-=-=>>' + resp.toString());
+      print('-Response=-=-=>>' + resp.toString());
+
+      // if (key.contains(_imageToBeUploaded[i]['fileName'].split('_')[1])) {
+      _imageToBeUploaded.removeWhere((element) {
+        print('element===>' + element.toString());
+        // return false;
+        return element['fileName'].contains(key.split('_')[1]);
+      });
+      // }
+
+      // print('-_imageToBeUploadedBefore=-=-=>>' + _imageToBeUploaded.toString());
 
       setState(() {
         _imageToBeUploaded.add({'fileName': key, 'fileType': fileType});
       });
+      // print('-_imageToBeUploadedAfter=-=-=>>' + _imageToBeUploaded.toString());
       return true;
     } catch (e) {
       print('=-=-==>>' + e.toString());
