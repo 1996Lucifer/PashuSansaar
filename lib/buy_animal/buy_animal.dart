@@ -1406,8 +1406,8 @@ class _BuyAnimalState extends State<BuyAnimal>
                       text:
                           // "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
                       _list[index].animalType <= 2 ?
-                          "नस्ल: ${_list[index].animalBreed}\nजानकारी: ${_descriptionText(_list[index]) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list[index])}\nदूध(प्रति दिन): ${_list[index].animalMilk} Litre\n\nपशु देखे: ${shortUrl.toString()}":
-                          "नस्ल: ${_list[index].animalBreed}\nजानकारी: ${_descriptionText(_list[index]) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list[index])}\nपशु देखे: ${shortUrl.toString()}",
+                          "नस्ल: ${_list[index].animalBreed}\nजानकारी: ${_descriptionText(_list[index]) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list[index])}\nदूध(प्रति दिन): ${_list[index].animalMilkCapacity} Litre\n\nपशु देखे: ${shortUrl.toString()}":
+                          "नस्ल: ${_list[index].animalBreed}\nजानकारी: ${_descriptionText(_list[index]) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list[index])}\n\nपशु देखे: ${shortUrl.toString()}",
                       subject: 'पशु की जानकारी');
 
                   // Share.share(shortUrl.toString());

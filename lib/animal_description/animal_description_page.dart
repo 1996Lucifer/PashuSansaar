@@ -47,6 +47,7 @@ Animal animalDesc;
 ProgressDialog pr;
 bool _isLoading = false;
 double lat, long;
+int myNum;
 
 class _AnimalDescriptionState extends State<AnimalDescription> {
   static GlobalKey previewContainer =
@@ -113,6 +114,24 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
       setState(() {
         animalDesc = data;
       });
+    } catch (e) {
+      ReusableWidgets.showDialogBox(
+        context,
+        'warning'.tr,
+        Text(
+          'global_error'.tr,
+        ),
+      );
+    }
+
+    try {
+      myNum = await sellerContactController.getSellerContact(
+          animalId: widget.uniqueId,
+          userId: prefs.getString('userId'),
+          token: prefs.getString('accessToken'),
+          channel: [
+            {"contactMedium": "Call"}
+          ]);
     } catch (e) {
       ReusableWidgets.showDialogBox(
         context,
@@ -543,28 +562,6 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
         color: Colors.blue,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         onPressed: () async {
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          int myNum;
-          print(prefs.getString('accessToken'));
-          print(widget.uniqueId);
-          print(widget.userId);
-          try {
-            myNum = await sellerContactController.getSellerContact(
-                animalId: widget.uniqueId,
-                userId: widget.userId,
-                token: prefs.getString('accessToken'),
-                channel: [
-                  {"contactMedium": "Call"}
-                ]);
-          } catch (e) {
-            ReusableWidgets.showDialogBox(
-              context,
-              'warning'.tr,
-              Text(
-                'global_error'.tr,
-              ),
-            );
-          }
           return UrlLauncher.launch('tel:+91 $myNum');
         },
         label: Text(
@@ -582,26 +579,6 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
         color: darkGreenColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         onPressed: () async {
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          int myNum;
-          try {
-            myNum = await sellerContactController.getSellerContact(
-                animalId: widget.uniqueId,
-                userId: widget.userId,
-                token: prefs.getString('accessToken'),
-                channel: [
-                  {"contactMedium": "Whatsapp"}
-                ]);
-          } catch (e) {
-            ReusableWidgets.showDialogBox(
-              context,
-              'warning'.tr,
-              Text(
-                'global_error'.tr,
-              ),
-            );
-          }
-
           whatsappText =
               'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${animalDesc.userName}, $_userLocality \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
           whatsappUrl =
@@ -664,8 +641,11 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
           Share.shareFiles([fileUrl.path],
               mimeTypes: ['images/png'],
               text:
-                  "नस्ल: ${animalDesc.animalBreed}\nजानकारी: ${animalDesc.moreInfo}\nदूध(प्रति दिन): ${animalDesc.animalMilkCapacity.toString()} Litre\n\nपशु देखे: ${shortUrl.toString()}",
-              subject: 'animal_info'.tr);
+              // "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
+              animalDesc.animalType <= 2 ?
+              "नस्ल: ${animalDesc.animalBreed}\nजानकारी: ${_descriptionText(animalDesc) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(animalDesc)}\nदूध(प्रति दिन): ${animalDesc.animalMilkCapacity} Litre\n\nपशु देखे: ${shortUrl.toString()}":
+              "नस्ल: ${animalDesc.animalBreed}\nजानकारी: ${_descriptionText(animalDesc) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(animalDesc)}\n\nपशु देखे: ${shortUrl.toString()}",
+              subject: 'पशु की जानकारी');
         },
         icon: Icon(Icons.share, color: Colors.white, size: 16),
         label: Text(
