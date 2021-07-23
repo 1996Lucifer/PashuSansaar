@@ -1223,7 +1223,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
       );
 
   Padding imageStructure4(double width) => Padding(
-        padding: EdgeInsets.symmetric(vertical: 5, horizontal: 30),
+        padding: EdgeInsets.symmetric(vertical: 5, horizontal: 15),
         child: GestureDetector(
           onTap: () => chooseOption('4'),
           child: Stack(
