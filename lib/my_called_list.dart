@@ -37,11 +37,15 @@ class _MyCalledListState extends State<MyCalledList> {
       Get.put(MyCallListController());
 
   List myCallList = [];
+  bool _isLoadingScreen = false;
   SharedPreferences prefs;
 
   getInitialInfo() async {
     prefs = await SharedPreferences.getInstance();
     bool status;
+    setState(() {
+      _isLoadingScreen = true;
+    });
 
     try {
       if (ReusableWidgets.isTokenExpired(prefs.getInt('expires') ?? 0)) {
@@ -91,6 +95,9 @@ class _MyCalledListState extends State<MyCalledList> {
         ),
       );
     }
+    setState(() {
+      _isLoadingScreen = false;
+    });
   }
 
   Row _buildInfowidget(_list) {
@@ -377,8 +384,7 @@ class _MyCalledListState extends State<MyCalledList> {
                   "screen": "DESCRIPTION_PAGE",
                 });
 
-                final DynamicLinkParameters parameters =
-                DynamicLinkParameters(
+                final DynamicLinkParameters parameters = DynamicLinkParameters(
                     uriPrefix: "https://pashusansaar.page.link",
                     link: Uri.parse(
                         "https://www.pashu-sansaar.com/?data=$qParams"),
@@ -386,23 +392,21 @@ class _MyCalledListState extends State<MyCalledList> {
                       packageName: 'dj.pashusansaar',
                       minimumVersion: 21,
                     ),
-                    dynamicLinkParametersOptions:
-                    DynamicLinkParametersOptions(
+                    dynamicLinkParametersOptions: DynamicLinkParametersOptions(
                       shortDynamicLinkPathLength:
-                      ShortDynamicLinkPathLength.unguessable,
+                          ShortDynamicLinkPathLength.unguessable,
                     ),
-                    navigationInfoParameters: NavigationInfoParameters(
-                        forcedRedirectEnabled: true));
+                    navigationInfoParameters:
+                        NavigationInfoParameters(forcedRedirectEnabled: true));
 
                 final shortDynamicLink = await parameters.buildShortLink();
                 final Uri shortUrl = shortDynamicLink.shortUrl;
 
                 Share.share(
-                    _list.animalType <= 2 ?
-                "नस्ल: ${_list.animalBreed}\nजानकारी: ${_descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list)}\nदूध(प्रति दिन): ${_list.animalMilkCapacity} Litre\n\nपशु देखे: ${shortUrl.toString()}":
-                "नस्ल: ${_list.animalBreed}\nजानकारी: ${_descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list)}\n\nपशु देखे: ${shortUrl.toString()}",
+                    _list.animalType <= 2
+                        ? "नस्ल: ${_list.animalBreed}\nजानकारी: ${_descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list)}\nदूध(प्रति दिन): ${_list.animalMilkCapacity} Litre\n\nपशु देखे: ${shortUrl.toString()}"
+                        : "नस्ल: ${_list.animalBreed}\nजानकारी: ${_descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list)}\n\nपशु देखे: ${shortUrl.toString()}",
                     subject: 'पशु की जानकारी');
-
               },
               icon: Icon(Icons.share, color: Colors.white, size: 14),
               label: Text('share'.tr,
@@ -506,7 +510,7 @@ class _MyCalledListState extends State<MyCalledList> {
                             Text('दूध (प्रति दिन)',
                                 style: TextStyle(
                                     fontSize: 15, fontWeight: FontWeight.bold)),
-                            Text('${_list.animalMilkCapacity} लीटर',
+                            _list.animalMilkCapacity==null?Text("-") :Text('${_list.animalMilkCapacity} लीटर',
                                 style: TextStyle(
                                     fontSize: 14, fontWeight: FontWeight.w500))
                           ],
@@ -532,7 +536,7 @@ class _MyCalledListState extends State<MyCalledList> {
                             Text('ब्यात',
                                 style: TextStyle(
                                     fontSize: 15, fontWeight: FontWeight.bold)),
-                            Text(
+                            _list.animalBayat==null?Text("-") : Text(
                                 intToAnimalBayaatMapping[_list.animalBayat]
                                     .toString(),
                                 style: TextStyle(
@@ -564,7 +568,7 @@ class _MyCalledListState extends State<MyCalledList> {
                             Text('कब ब्यायी थी?',
                                 style: TextStyle(
                                     fontSize: 15, fontWeight: FontWeight.bold)),
-                            Text(
+                            _list.recentBayatTime==null?Text("-") : Text(
                               _list.isRecentBayat == false ||
                                       _list.isRecentBayat == 'no'.tr
                                   ? 'ब्यायी नहीं है'
@@ -630,66 +634,79 @@ class _MyCalledListState extends State<MyCalledList> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),
-      body: myCallList == null || myCallList.isEmpty
+      body: (_isLoadingScreen)
           ? Center(
-              child: Text(
-                'किसी ग्राहक को अभी तक संपर्क नहीं किया है',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-            )
-          : Container(
-              margin: EdgeInsets.all(10),
-              child: ListView.separated(
-                itemCount: myCallList.length,
-                separatorBuilder: (context, index) => Divider(),
-                itemBuilder: (context, index) {
-                  return Card(
-                    shape: RoundedRectangleBorder(
+              child: Container(
+                  decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    elevation: 5.0,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        _buildInfowidget(myCallList[index].animalId),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 8, bottom: 5.0),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.location_on,
-                                color: Colors.grey[500],
-                                size: 13,
-                              ),
-                              SizedBox(
-                                width: 5,
-                              ),
-                              Expanded(
-                                child: Text(
-                                    myCallList[index].animalId.userAddress ==
-                                            null
-                                        ? 'पता मौजूद नहीं है'
-                                        : myCallList[index]
-                                            .animalId
-                                            .userAddress,
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w200,
-                                    )),
-                              ),
-                            ],
-                          ),
+                      color: Colors.white),
+                  height: 100,
+                  width: 100,
+                  child: Center(child: CircularProgressIndicator())))
+          : (myCallList == null || myCallList.isEmpty
+              ? Center(
+                  child: Text(
+                    'किसी ग्राहक को अभी तक संपर्क नहीं किया है',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                )
+              : Container(
+                  margin: EdgeInsets.all(10),
+                  child: ListView.separated(
+                    itemCount: myCallList.length,
+                    separatorBuilder: (context, index) => Divider(),
+                    itemBuilder: (context, index) {
+                      return Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
                         ),
-                        _animalImageWidget(myCallList[index]),
-                        _extraInfoWidget(myCallList[index].animalId, width),
-                        _extraInfoWidget1(myCallList[index].animalId, width),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
+                        elevation: 5.0,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            _buildInfowidget(myCallList[index].animalId),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.only(left: 8, bottom: 5.0),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.location_on,
+                                    color: Colors.grey[500],
+                                    size: 13,
+                                  ),
+                                  SizedBox(
+                                    width: 5,
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                        myCallList[index]
+                                                    .animalId
+                                                    .userAddress ==
+                                                null
+                                            ? 'पता मौजूद नहीं है'
+                                            : myCallList[index]
+                                                .animalId
+                                                .userAddress,
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w200,
+                                        )),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            _animalImageWidget(myCallList[index]),
+                            _extraInfoWidget(myCallList[index].animalId, width),
+                            _extraInfoWidget1(
+                                myCallList[index].animalId, width),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                )),
     );
   }
 }

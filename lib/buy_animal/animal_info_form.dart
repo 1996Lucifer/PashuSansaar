@@ -47,82 +47,82 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
   }
 
   Column animalType() => Column(children: [
-    Padding(
-      padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-      child: Row(
-        children: [
-          Text(
-            'animal_type'.tr,
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+          child: Row(
+            children: [
+              Text(
+                'animal_type'.tr,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(width: 5),
+              Text(
+                '*',
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red),
+              ),
+            ],
           ),
-          SizedBox(width: 5),
-          Text(
-            '*',
-            style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.red),
-          ),
-        ],
-      ),
-    ),
-    Padding(
-      padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-      child: DropdownSearch<String>(
-        mode: Mode.BOTTOM_SHEET,
-        showSelectedItem: true,
-        items: constant.animalType,
-        label: 'animal_type'.tr,
-        hint: 'animal_type'.tr,
-        selectedItem: animalInfo['animalType'],
-        onChanged: (String type) {
-          setState(() {
-            animalInfo['animalType'] = type;
-          });
-        },
-        dropdownSearchDecoration: InputDecoration(
-            contentPadding:
-            EdgeInsets.symmetric(vertical: 1, horizontal: 10),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(5),
-            )),
-      ),
-    ),
-    Visibility(
-      visible: (constant.animalType.indexOf(animalInfo['animalType']) ==
-          (constant.animalType.length - 1)),
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-        child: DropdownSearch<String>(
-          mode: Mode.BOTTOM_SHEET,
-          showSelectedItem: true,
-          items: constant.animalTypeOther,
-          label: 'other_animal'.tr,
-          hint: 'other_animal'.tr,
-          selectedItem: animalInfo['animalTypeOther'],
-          onChanged: (String otherType) {
-            setState(() {
-              animalInfo['animalTypeOther'] = otherType;
-              animalInfo['animalType'] = otherType;
-            });
-          },
-          dropdownSearchDecoration: InputDecoration(
-              contentPadding:
-              EdgeInsets.symmetric(vertical: 1, horizontal: 10),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(5),
-              )),
         ),
-      ),
-      replacement: SizedBox.shrink(),
-    ),
-    Padding(
-      padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-      child: Divider(
-        thickness: 1,
-      ),
-    ),
-  ]);
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+          child: DropdownSearch<String>(
+            mode: Mode.BOTTOM_SHEET,
+            showSelectedItem: true,
+            items: constant.animalType,
+            label: 'animal_type'.tr,
+            hint: 'animal_type'.tr,
+            selectedItem: animalInfo['animalType'],
+            onChanged: (String type) {
+              setState(() {
+                animalInfo['animalType'] = type;
+              });
+            },
+            dropdownSearchDecoration: InputDecoration(
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 1, horizontal: 10),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(5),
+                )),
+          ),
+        ),
+        Visibility(
+          visible: (constant.animalType.indexOf(animalInfo['animalType']) ==
+              (constant.animalType.length - 1)),
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+            child: DropdownSearch<String>(
+              mode: Mode.BOTTOM_SHEET,
+              showSelectedItem: true,
+              items: constant.animalTypeOther,
+              label: 'other_animal'.tr,
+              hint: 'other_animal'.tr,
+              selectedItem: animalInfo['animalTypeOther'],
+              onChanged: (String otherType) {
+                setState(() {
+                  animalInfo['animalTypeOther'] = otherType;
+                  animalInfo['animalType'] = otherType;
+                });
+              },
+              dropdownSearchDecoration: InputDecoration(
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 1, horizontal: 10),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5),
+                  )),
+            ),
+          ),
+          replacement: SizedBox.shrink(),
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+          child: Divider(
+            thickness: 1,
+          ),
+        ),
+      ]);
 
   Column animalBreed() => Column(
         children: [
@@ -364,14 +364,11 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
         ],
       );
 
-
   getPositionBasedOnZipcode(String zipcode) async {
-    var addresses =
-    await Geocoder.local.findAddressesFromQuery(zipcode);
+    var addresses = await Geocoder.local.findAddressesFromQuery(zipcode);
     var first = addresses.first;
     return first.subAdminArea ?? first.locality ?? first.featureName;
   }
-
 
   saveButton() => Padding(
         padding: EdgeInsets.all(15),
@@ -394,13 +391,12 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
               onPressed: () async {
                 SharedPreferences prefs = await SharedPreferences.getInstance();
                 String countryCode = '';
-                try {
+
+                if (animalInfo['zipCode'] != null) {
                   var addresses = await Geocoder.local
                       .findAddressesFromQuery(animalInfo['zipCode']);
                   var first = addresses.first;
                   countryCode = first.countryCode;
-                } catch (e) {
-                  countryCode = 'XYZ';
                 }
 
                 if (animalInfo['animalType'] == null)
@@ -442,13 +438,12 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
                     'error'.tr,
                     Text('animal_price_error'.tr),
                   );
-                else if (animalInfo['zipCode'] == null) {
-                  ReusableWidgets.showDialogBox(
-                      context, 'error'.tr, Text("error_empty_zipcode".tr));
-                } else if (int.parse(animalInfo['zipCode']) < 6) {
+                else if (animalInfo['zipCode'] != null &&
+                    int.parse(animalInfo['zipCode']) < 6) {
                   ReusableWidgets.showDialogBox(
                       context, 'error'.tr, Text("error_length_zipcode".tr));
-                } else if (countryCode != "IN" || countryCode == 'XYZ') {
+                } else if (animalInfo['zipCode'] != null &&
+                    countryCode != "IN") {
                   ReusableWidgets.showDialogBox(
                       context, 'error'.tr, Text("invalid_zipcode_error".tr));
                 } else {
@@ -457,21 +452,24 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
                       type: ProgressDialogType.Normal, isDismissible: false);
                   pr.style(message: 'progress_dialog_message'.tr);
                   pr.show();
-
-                  var district = await getPositionBasedOnZipcode(animalInfo['zipCode']);
+                  String district;
+                  if (animalInfo['zipCode'] != null) {
+                    district =
+                        await getPositionBasedOnZipcode(animalInfo['zipCode']);
+                  }
 
                   Map<String, dynamic> payload = {
                     "userId": prefs.getString('userId'),
                     "animalType": animalInfo['animalTypeOther'] == null
                         ? animalTypeMapping[animalInfo['animalType']]
-                        : animalOtherTypeMapping[
-                    animalInfo['animalType']],
+                        : animalOtherTypeMapping[animalInfo['animalType']],
                     "animalBreed": ReusableWidgets.removeEnglishDataFromName(
                         animalInfo['animalBreed']),
                     "animalMilk": animalInfo['animalMilk'],
-                    "zipCode": animalInfo['zipCode'],
+                    "zipCode":
+                        animalInfo['zipCode'] ?? prefs.getString('zipCode'),
                     "animalPrice": animalInfo['animalBudget'],
-                    "district": district,
+                    "district": district ?? prefs.getString('district'),
                   };
 
                   print('payload is $payload');

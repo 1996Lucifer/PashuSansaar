@@ -59,6 +59,7 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
   }
 
   var formatter = intl.NumberFormat('#,##,000');
+  bool _isLoadingScreen = false;
 
   final AnimalDescriptionController animalDescriptionController =
       Get.put(AnimalDescriptionController());
@@ -242,17 +243,26 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
 
   _getButton() => Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            _getWhatsAppButton(),
-            SizedBox(height: 4),
-            _getShareButton(),
-            SizedBox(height: 4),
-            _getCallButton(),
-            SizedBox(height: 4),
-          ],
-        ),
+        child: (_isLoadingScreen)
+            ? Center(
+                child: Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10.0),
+                        color: Colors.white),
+                    height: 100,
+                    width: 100,
+                    child: Center(child: CircularProgressIndicator())))
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  _getWhatsAppButton(),
+                  SizedBox(height: 4),
+                  _getShareButton(),
+                  SizedBox(height: 4),
+                  _getCallButton(),
+                  SizedBox(height: 4),
+                ],
+              ),
       );
 
   Row _buildInfowidget(_list) {
@@ -264,102 +274,98 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
             textAlign: TextAlign.center,
             text: _list.animalType == 1 || _list.animalType == 2
                 ? TextSpan(
-                text: _list.animalMilk.toString(),
-                style: TextStyle(
-                  color: Colors.grey[700],
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-                children: [
-                  TextSpan(
-                    text: ' ',
+                    text: _list.animalMilk.toString(),
                     style: TextStyle(
-                        color: Colors.grey[700],
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16),
-                  ),
-                  TextSpan(
-                    text: "litre_milk".tr,
-                    style: TextStyle(
-                        color: Colors.grey[700],
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16),
-                  ),
-                  TextSpan(
-                    text: ', ',
-                    style: TextStyle(
-                        color: Colors.grey[700],
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16),
-                  ),
-                  TextSpan(
-                    text: bayaatMapping(
-                      intToAnimalBayaatMapping[_list.animalBayat],
+                      color: Colors.grey[700],
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
                     ),
-                    style: TextStyle(
-                        color: Colors.grey[700],
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16),
-                  ),
-                  TextSpan(
-                    text: ', ',
-                    style: TextStyle(
-                        color: Colors.grey[700],
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16),
-                  ),
-                  TextSpan(
-                    text: '₹ ' +
-                        formatter.format(_list.animalPrice) ??
-                        0,
-                    style: TextStyle(
-                        color: Colors.grey[700],
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16),
-                  ),
-                ])
+                    children: [
+                        TextSpan(
+                          text: ' ',
+                          style: TextStyle(
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                        ),
+                        TextSpan(
+                          text: "litre_milk".tr,
+                          style: TextStyle(
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                        ),
+                        TextSpan(
+                          text: ', ',
+                          style: TextStyle(
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                        ),
+                        TextSpan(
+                          text: bayaatMapping(
+                            intToAnimalBayaatMapping[_list.animalBayat],
+                          ),
+                          style: TextStyle(
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                        ),
+                        TextSpan(
+                          text: ', ',
+                          style: TextStyle(
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                        ),
+                        TextSpan(
+                          text: '₹ ' + formatter.format(_list.animalPrice) ?? 0,
+                          style: TextStyle(
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                        ),
+                      ])
                 : TextSpan(
-                text: _list.animalBreed == 'not_known'.tr
-                    ? ""
-                    : ReusableWidgets.removeEnglishDataFromName(
-                    _list.animalBreed),
-                style: TextStyle(
-                    color: Colors.grey[700],
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16),
-                children: [
-                  TextSpan(
-                    text: ' ',
+                    text: _list.animalBreed == 'not_known'.tr
+                        ? ""
+                        : ReusableWidgets.removeEnglishDataFromName(
+                            _list.animalBreed),
                     style: TextStyle(
                         color: Colors.grey[700],
                         fontWeight: FontWeight.bold,
                         fontSize: 16),
-                  ),
-                  TextSpan(
-                    text: _list.animalType <= 4
-                        ? intToAnimalTypeMapping[_list.animalType]
-                        : intToAnimalOtherTypeMapping[_list.animalType],
-                    style: TextStyle(
-                        color: Colors.grey[700],
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16),
-                  ),
-                  TextSpan(
-                    text: ', ₹ ' +
-                        formatter.format(_list.animalPrice) ??
-                        0,
-                    style: TextStyle(
-                        color: Colors.grey[700],
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16),
-                  ),
-                ]),
+                    children: [
+                        TextSpan(
+                          text: ' ',
+                          style: TextStyle(
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                        ),
+                        TextSpan(
+                          text: _list.animalType <= 4
+                              ? intToAnimalTypeMapping[_list.animalType]
+                              : intToAnimalOtherTypeMapping[_list.animalType],
+                          style: TextStyle(
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                        ),
+                        TextSpan(
+                          text:
+                              ', ₹ ' + formatter.format(_list.animalPrice) ?? 0,
+                          style: TextStyle(
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                        ),
+                      ]),
           ),
         ),
       ],
     );
   }
-
 
   getPositionBasedOnLatLong(double lat, double long) async {
     final coordinates = new Coordinates(lat, long);
@@ -465,7 +471,6 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
         .toStringAsFixed(0);
   }
 
-
   _descriptionText(animalInfo) {
     String animalBreedCheck = (animalInfo.animalBreed == 'not_known'.tr)
         ? ""
@@ -478,10 +483,10 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
 
     if (animalInfo.animalType >= 3) {
       desc =
-      'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल ${(animalInfo.animalType == 6 || animalInfo.animalType == 8 || animalInfo.animalType == 10) ? " की" : "का"} है। ';
+          'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल ${(animalInfo.animalType == 6 || animalInfo.animalType == 8 || animalInfo.animalType == 10) ? " की" : "का"} है। ';
     } else {
       desc =
-      'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल की है। ';
+          'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल की है। ';
       if (animalInfo.recentBayatTime != null) {
         desc = desc +
             'यह ${intToRecentBayaatTime[animalInfo.recentBayatTime]} ब्यायी है। ';
@@ -595,10 +600,9 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
           await takeScreenShot(animalDesc.sId);
           Share.shareFiles([fileUrl.path],
               mimeTypes: ['images/png'],
-              text:
-              animalDesc.animalType <= 2 ?
-              "नस्ल: ${animalDesc.animalBreed}\nजानकारी: ${_descriptionText(animalDesc) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(animalDesc)}\nदूध(प्रति दिन): ${animalDesc.animalMilkCapacity} Litre\n\nपशु देखे: ${shortUrl.toString()}":
-              "नस्ल: ${animalDesc.animalBreed}\nजानकारी: ${_descriptionText(animalDesc) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(animalDesc)}\n\nपशु देखे: ${shortUrl.toString()}",
+              text: animalDesc.animalType <= 2
+                  ? "नस्ल: ${animalDesc.animalBreed}\nजानकारी: ${_descriptionText(animalDesc) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(animalDesc)}\nदूध(प्रति दिन): ${animalDesc.animalMilkCapacity} Litre\n\nपशु देखे: ${shortUrl.toString()}"
+                  : "नस्ल: ${animalDesc.animalBreed}\nजानकारी: ${_descriptionText(animalDesc) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(animalDesc)}\n\nपशु देखे: ${shortUrl.toString()}",
               subject: 'पशु की जानकारी');
         },
         icon: Icon(Icons.share, color: Colors.white, size: 16),
@@ -627,23 +631,22 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
       );
 
   takeScreenShot(String uniqueId) async {
-    pr.style(message: 'शेयर किया जा रहा है');
-    pr.show();
-
+    setState(() {
+      _isLoadingScreen = true;
+    });
     RenderRepaintBoundary boundary =
         previewContainer.currentContext.findRenderObject();
     ui.Image image = await boundary.toImage();
     final directory = (await getApplicationDocumentsDirectory()).path;
     ByteData byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     Uint8List pngBytes = byteData.buffer.asUint8List();
-    print(pngBytes);
-    File imgFile = new File('$directory/pashu_$uniqueId.png');
+    File imgFile = new File(
+        '$directory/pashu_${ReusableWidgets.dateTimeToEpoch(DateTime.now())}.png');
     await imgFile.writeAsBytes(pngBytes);
-
     setState(() {
+      _isLoadingScreen = false;
       fileUrl = imgFile;
     });
-    pr.hide();
   }
 
   Widget _animalImage(_list) {

@@ -84,7 +84,7 @@ class _BuyAnimalState extends State<BuyAnimal>
   TextEditingController _locationController = TextEditingController();
   ScrollController _scrollController =
       ScrollController(keepScrollOffset: false);
-  bool _isCardVisible = false;
+  bool _isCardVisible = false, _isLoadingScreen = false;
   File fileUrl;
   final SellerContactController sellerContactController =
       Get.put(SellerContactController());
@@ -180,23 +180,22 @@ class _BuyAnimalState extends State<BuyAnimal>
   }
 
   takeScreenShot(String uniqueId) async {
-    pr.style(message: 'शेयर किया जा रहा है');
-    pr.show();
+    setState(() {
+      _isLoadingScreen = true;
+    });
     RenderRepaintBoundary boundary =
         previewContainer.currentContext.findRenderObject();
     ui.Image image = await boundary.toImage();
     final directory = (await getApplicationDocumentsDirectory()).path;
     ByteData byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     Uint8List pngBytes = byteData.buffer.asUint8List();
-    print(pngBytes);
-    File imgFile = new File('$directory/pashu_$uniqueId.png');
+    File imgFile = new File(
+        '$directory/pashu_${ReusableWidgets.dateTimeToEpoch(DateTime.now())}.png');
     await imgFile.writeAsBytes(pngBytes);
-
     setState(() {
+      _isLoadingScreen = false;
       fileUrl = imgFile;
     });
-
-    pr.hide();
   }
 
   _getInitialData() async {
@@ -277,7 +276,9 @@ class _BuyAnimalState extends State<BuyAnimal>
         await Geocoder.local.findAddressesFromCoordinates(coordinates);
     var first = addresses.first;
 
-    return first.subAdminArea ?? first.locality ?? first.featureName;
+    return first.locality ??
+        first.subAdminArea ??
+        (first.adminArea ?? '' + ' ' + first.postalCode);
   }
 
   Row _buildInfowidget(int index) {
@@ -364,7 +365,8 @@ class _BuyAnimalState extends State<BuyAnimal>
                         TextSpan(
                           text: _list[index].animalType <= 4
                               ? intToAnimalTypeMapping[_list[index].animalType]
-                              : intToAnimalOtherTypeMapping[_list[index].animalType],
+                              : intToAnimalOtherTypeMapping[
+                                  _list[index].animalType],
                           style: TextStyle(
                               color: Colors.grey[700],
                               fontWeight: FontWeight.bold,
@@ -417,13 +419,52 @@ class _BuyAnimalState extends State<BuyAnimal>
                       borderRadius: BorderRadius.circular(5),
                     )),
               ),
-            )
+            ),
+
+            //**************************
+
+            Visibility(
+              visible: (constant.animalType.indexOf(_filterAnimalType) ==
+                  (constant.animalType.length - 1)),
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                child: DropdownSearch<String>(
+                  mode: Mode.BOTTOM_SHEET,
+                  showSelectedItem: true,
+                  items: constant.animalTypeOther,
+                  label: 'other_animal'.tr,
+                  hint: 'other_animal'.tr,
+                  selectedItem: _filterAnimalType,
+                  onChanged: (String otherType) {
+                    setState(() {
+                      _filterAnimalType = otherType;
+                      _filterDropDownMap['filter1'] = otherType;
+                    });
+                  },
+                  dropdownSearchDecoration: InputDecoration(
+                      contentPadding:
+                          EdgeInsets.symmetric(vertical: 1, horizontal: 10),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5),
+                      )),
+                ),
+              ),
+              replacement: SizedBox.shrink(),
+            ),
+
+            //**************************
           ]));
 
   _animalMilkSilder() => StatefulBuilder(
         builder: (context, setState) => Column(
           children: [
-            Text("Milk Quantity"),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+              child: Text(
+                'milk_quantity'.tr,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
             Wrap(
                 children: filterMilkValue
                     .map((e) => Padding(
@@ -1121,6 +1162,16 @@ class _BuyAnimalState extends State<BuyAnimal>
                   ),
                 ],
               ),
+              if (_isLoadingScreen) ...[
+                Center(
+                    child: Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10.0),
+                            color: Colors.white),
+                        height: 100,
+                        width: 100,
+                        child: Center(child: CircularProgressIndicator())))
+              ]
             ],
           ),
         ),
@@ -1417,9 +1468,9 @@ class _BuyAnimalState extends State<BuyAnimal>
                       mimeTypes: ['images/png'],
                       text:
                           // "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
-                      _list[index].animalType <= 2 ?
-                          "नस्ल: ${_list[index].animalBreed}\nजानकारी: ${_descriptionText(_list[index]) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list[index])}\nदूध(प्रति दिन): ${_list[index].animalMilkCapacity} Litre\n\nपशु देखे: ${shortUrl.toString()}":
-                          "नस्ल: ${_list[index].animalBreed}\nजानकारी: ${_descriptionText(_list[index]) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list[index])}\n\nपशु देखे: ${shortUrl.toString()}",
+                          _list[index].animalType <= 2
+                              ? "नस्ल: ${_list[index].animalBreed}\nजानकारी: ${_descriptionText(_list[index]) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list[index])}\nदूध(प्रति दिन): ${_list[index].animalMilkCapacity} Litre\n\nपशु देखे: ${shortUrl.toString()}"
+                              : "नस्ल: ${_list[index].animalBreed}\nजानकारी: ${_descriptionText(_list[index]) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list[index])}\n\nपशु देखे: ${shortUrl.toString()}",
                       subject: 'पशु की जानकारी');
 
                   // Share.share(shortUrl.toString());
@@ -1828,6 +1879,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                                         ),
                                       );
                                     }
+
                                     try {
                                       BuyAnimalModel data =
                                           await buyAnimalController.getAnimal(
@@ -1835,7 +1887,10 @@ class _BuyAnimalState extends State<BuyAnimal>
                                         longitude: _filterLong ?? _longitude,
                                         distance: _distance ?? 50000,
                                         animalType: animalTypeMapping[
-                                            _filterDropDownMap['filter1']],
+                                                _filterDropDownMap[
+                                                    'filter1']] ??
+                                            animalOtherTypeMapping[
+                                                _filterDropDownMap['filter1']],
                                         minMilk: minMilk,
                                         maxMilk: maxMilk,
                                         page: 1,
