@@ -510,7 +510,7 @@ class _MyCalledListState extends State<MyCalledList> {
                             Text('दूध (प्रति दिन)',
                                 style: TextStyle(
                                     fontSize: 15, fontWeight: FontWeight.bold)),
-                            _list.animalMilkCapacity==null?Text("-") :Text('${_list.animalMilkCapacity} लीटर',
+                            _list.animalMilkCapacity == null?Text("-") :Text('${_list.animalMilkCapacity} लीटर',
                                 style: TextStyle(
                                     fontSize: 14, fontWeight: FontWeight.w500))
                           ],
@@ -536,9 +536,9 @@ class _MyCalledListState extends State<MyCalledList> {
                             Text('ब्यात',
                                 style: TextStyle(
                                     fontSize: 15, fontWeight: FontWeight.bold)),
-                            _list.animalBayat==null?Text("-") : Text(
+                           Text(
                                 intToAnimalBayaatMapping[_list.animalBayat]
-                                    .toString(),
+                                    ?? "-",
                                 style: TextStyle(
                                     fontSize: 14, fontWeight: FontWeight.w500))
                           ],
@@ -568,12 +568,12 @@ class _MyCalledListState extends State<MyCalledList> {
                             Text('कब ब्यायी थी?',
                                 style: TextStyle(
                                     fontSize: 15, fontWeight: FontWeight.bold)),
-                            _list.recentBayatTime==null?Text("-") : Text(
+                            Text(
                               _list.isRecentBayat == false ||
                                       _list.isRecentBayat == 'no'.tr
                                   ? 'ब्यायी नहीं है'
                                   : intToRecentBayaatTime[_list.recentBayatTime]
-                                      .toString(),
+                                      ?? "-",
                               style: TextStyle(
                                   fontSize: 14, fontWeight: FontWeight.w500),
                             )
@@ -606,7 +606,7 @@ class _MyCalledListState extends State<MyCalledList> {
                                       _list.isPregnant == false
                                   ? 'गर्भवती नहीं है'
                                   : intToPregnantTime[_list.pregnantTime]
-                                      .toString(),
+                                      ?? "-",
                               style: TextStyle(
                                   fontSize: 14, fontWeight: FontWeight.w500),
                             )

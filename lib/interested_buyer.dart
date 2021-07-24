@@ -97,46 +97,77 @@ class _InterestedBuyerState extends State<InterestedBuyer> {
     getInitialInfo();
   }
 
-  Padding _buildBreedTypeWidget(_list) {
+   _buildBreedTypeWidget(_list) {
     var formatter = intl.NumberFormat('#,##,000');
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
+    return Expanded(
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        // mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Expanded(
-            child: RichText(
-              overflow: TextOverflow.ellipsis,
-              text: TextSpan(
-                  style: TextStyle(
-                      color: greyColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16),
-                  text: (_list.animalBreed == 'not_known'.tr
-                          ? ""
-                          : _list.animalBreed) +
-                      ' ',
-                  children: <InlineSpan>[
-                    TextSpan(
-                      text: (_list.animalType == 'other_animal'.tr
-                              ? ' '
-                              : intToAnimalTypeMapping[_list.animalType]) +
-                          ', ',
-                      style: TextStyle(
-                          color: greyColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16),
-                    ),
-                    TextSpan(
-                      text: '₹ ' +
-                          formatter
-                              .format(int.parse(_list.animalPrice.toString())),
-                      style: TextStyle(
-                          color: greyColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16),
-                    )
-                  ]),
+            child: Padding(
+              padding: const EdgeInsets.only(top: 8, left: 8, right: 8),
+              child: RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(
+                    text: _list.userName,
+                    style: TextStyle(
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16),
+                    children: [
+                      TextSpan(
+                        text:
+                        ' ${(_list.animalType == 1 || _list.animalType == 2 || _list.animalType == 6 || _list.animalType == 8 || _list.animalType == 10) ? " की" : "का"} ',
+                        style: TextStyle(
+                            color: Colors.grey[700],
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16),
+                      ),
+                      TextSpan(
+                        text: _list.animalBreed == 'not_known'.tr
+                            ? ""
+                            : _list.animalBreed,
+                        style: TextStyle(
+                            color: Colors.grey[700],
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16),
+                      ),
+                      TextSpan(
+                        text: ' ',
+                        style: TextStyle(
+                            color: Colors.grey[700],
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16),
+                      ),
+                      TextSpan(
+                        text: _list.animalType.toString() == 'other_animal'.tr
+                            ? "no type"
+                            : (_list.animalType <= 4
+                            ? intToAnimalTypeMapping[_list.animalType]
+                            : intToAnimalOtherTypeMapping[_list.animalType]),
+                        style: TextStyle(
+                            color: Colors.grey[700],
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16),
+                      ),
+                      TextSpan(
+                        text: ', ₹ ',
+                        style: TextStyle(
+                            color: Colors.grey[700],
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16),
+                      ),
+                      TextSpan(
+                        text: formatter.format(
+                            int.parse(_list.animalPrice.toString())) ??
+                            0,
+                        style: TextStyle(
+                            color: Colors.grey[700],
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16),
+                      ),
+                    ]),
+              ),
             ),
           ),
         ],
@@ -144,71 +175,39 @@ class _InterestedBuyerState extends State<InterestedBuyer> {
     );
   }
 
-  // _imageData(_list) {
-  //   var data = '';
-  //   if (widget.animalInfo[index]['animalImages'] == null) {
-  //     if (widget.animalInfo[index]['image1'].isNotEmpty) {
-  //       data = widget.animalInfo[index]['image1'];
-  //     } else if (widget.animalInfo[index]['image2'].isNotEmpty) {
-  //       data = widget.animalInfo[index]['image2'];
-  //     } else if (widget.animalInfo[index]['image3'].isNotEmpty) {
-  //       data = widget.animalInfo[index]['image3'];
-  //     } else if (widget.animalInfo[index]['image4'].isNotEmpty) {
-  //       data = widget.animalInfo[index]['image4'];
-  //     } else {
-  //       data = widget.animalInfo[index]['animalVideoThumbnail'];
-  //     }
-  //   } else {
-  //     if (widget.animalInfo[index]['animalImages']['image1'].isNotEmpty) {
-  //       data = widget.animalInfo[index]['animalImages']['image1'];
-  //     } else if (widget
-  //         .animalInfo[index]['animalImages']['image2'].isNotEmpty) {
-  //       data = widget.animalInfo[index]['animalImages']['image2'];
-  //     } else if (widget
-  //         .animalInfo[index]['animalImages']['image3'].isNotEmpty) {
-  //       data = widget.animalInfo[index]['animalImages']['image3'];
-  //     } else if (widget
-  //         .animalInfo[index]['animalImages']['image4'].isNotEmpty) {
-  //       data = widget.animalInfo[index]['animalImages']['image4'];
-  //     } else {
-  //       data = widget.animalInfo[index]['animalVideoThumbnail'];
-  //     }
-  //   }
-  //
-  //   return data;
-  // }
 
-  _descriptionText(_list) {
-    String animalBreedCheck =
-        (_list.animalBreed == 'not_known'.tr) ? "" : _list.animalBreed;
-    String animalTypeCheck = (_list.animalType == 5)
-        ? intToAnimalTypeMapping[5]
-        : intToAnimalTypeMapping[_list.animalType];
 
-    String desc = '';
+  _descriptionText(animalInfo){
+  String animalBreedCheck = (animalInfo.animalBreed == 'not_known'.tr)
+      ? ""
+      : animalInfo.animalBreed;
+  String animalTypeCheck = (animalInfo.animalType >= 5)
+      ? intToAnimalOtherTypeMapping[animalInfo.animalType]
+      : intToAnimalTypeMapping[animalInfo.animalType];
 
-    if (_list.animalType == 3 ||
-        _list.animalType == 4 ||
-        _list.animalType == 5) {
-      desc =
-          'ये $animalBreedCheck $animalTypeCheck ${_list.animalAge} साल की है। ';
-    } else {
-      desc =
-          'ये ${_list.animalBreed} ${intToAnimalTypeMapping[_list.animalType]} ${_list.animalAge} साल का है। ';
-      if (_list.recentBayatTime != null) {
-        desc = desc +
-            'यह ${intToRecentBayaatTime[_list.recentBayatTime]} ब्यायी है। ';
-      }
-      if (_list.pregnantTime != null) {
-        desc = desc + 'यह अभी ${intToPregnantTime[_list.pregnantTime]} है। ';
-      }
-      if (_list.animalMilkCapacity != null) {
-        desc = desc +
-            'पिछले बार के हिसाब से दूध कैपेसिटी ${_list.animalMilkCapacity} लीटर है। ';
-      }
-    }
-    return desc;
+  String desc = '';
+
+  if (animalInfo.animalType >= 3) {
+  desc =
+  'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल ${(animalInfo.animalType == 6 || animalInfo.animalType == 8 || animalInfo.animalType == 10) ? " की" : "का"} है। ';
+  } else {
+  desc =
+  'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल की है। ';
+  if (animalInfo.recentBayatTime != null) {
+  desc = desc +
+  'यह ${intToRecentBayaatTime[animalInfo.recentBayatTime]} ब्यायी है। ';
   }
+  if (animalInfo.pregnantTime != null) {
+  desc =
+  desc + 'यह अभी ${intToPregnantTime[animalInfo.pregnantTime]} है। ';
+  }
+  if (animalInfo.animalMilkCapacity != null) {
+  desc = desc +
+  'पिछले बार के हिसाब से दूध कैपेसिटी ${animalInfo.animalMilkCapacity} लीटर है। ';
+  }
+  }
+  return desc + (animalInfo.moreInfo ?? "");
+}
 
   Padding _buildImageDescriptionWidget(double width, _list) => Padding(
         padding: const EdgeInsets.all(8.0),

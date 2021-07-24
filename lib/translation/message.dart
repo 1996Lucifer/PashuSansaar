@@ -206,6 +206,8 @@ class Messages extends Translations {
           '5_month_before': '5 महीने पहले',
           '6_month_before': '6 महीने पहले',
           '1_year_ago': '1 साल पहले',
+          '2_year_ago': '2 साल पहले',
+          '3_year_ago': '3 साल पहले',
           '1.5_year_ago': '1.5 साल पहले',
           'more_than_2_year_ago': '2 से अधिक साल पहले',
           'litre_milk': 'लीटर दूध',
