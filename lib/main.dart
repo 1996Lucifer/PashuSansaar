@@ -211,12 +211,12 @@ class _MyAppState extends State<MyApp> {
         prefs.setStringList('currentVersion', currentVersion1);
         prefs.setString('referralUniqueValue', _unique);
       });
-      // if ((newVersion1[0].compareTo(currentVersion1[0]) == 1) ||
-      //     (newVersion1[1].compareTo(currentVersion1[1]) == 1)) {
-      //   await _showVersionDialog(newVersion1, currentVersion1, true);
-      // }
-      // if (newVersion1[2].compareTo(currentVersion1[2]) == 1)
-      //   await _showVersionDialog(newVersion1, currentVersion1, false);
+      if ((newVersion1[0].compareTo(currentVersion1[0]) == 1) ||
+          (newVersion1[1].compareTo(currentVersion1[1]) == 1)) {
+        await _showVersionDialog(newVersion1, currentVersion1, true);
+      }
+      if (newVersion1[2].compareTo(currentVersion1[2]) == 1)
+        await _showVersionDialog(newVersion1, currentVersion1, false);
     } catch (exception) {
       print(exception);
     }
