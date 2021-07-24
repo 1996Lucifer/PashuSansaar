@@ -586,9 +586,13 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
                                       selectedIndex: 0,
                                     ));
                               }
-                            } catch (err) {
-                              print(
-                                "err->" + err.toString(),
+                            } catch(e){
+                              ReusableWidgets.showDialogBox(
+                                context,
+                                'warning'.tr,
+                                Text(
+                                  'global_error'.tr,
+                                ),
                               );
                             }
                           }

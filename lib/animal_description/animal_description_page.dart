@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:pashusansaar/animal_description/animal_description_controller.dart';
 import 'package:pashusansaar/animal_description/animal_description_model.dart';
 import 'package:pashusansaar/refresh_token/refresh_token_controller.dart';
+import 'package:pashusansaar/seller_contact/seller_contact_controller.dart';
 import 'package:pashusansaar/utils/constants.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:progress_dialog/progress_dialog.dart';
@@ -46,6 +47,7 @@ Animal animalDesc;
 ProgressDialog pr;
 bool _isLoading = false;
 double lat, long;
+int myNum;
 
 class _AnimalDescriptionState extends State<AnimalDescription> {
   static GlobalKey previewContainer =
@@ -57,56 +59,93 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
   }
 
   var formatter = intl.NumberFormat('#,##,000');
+  bool _isLoadingScreen = false;
 
   final AnimalDescriptionController animalDescriptionController =
       Get.put(AnimalDescriptionController());
   final RefreshTokenController refreshTokenController =
       Get.put(RefreshTokenController());
+  final SellerContactController sellerContactController =
+      Get.put(SellerContactController());
 
   getAnimalInfo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool status;
-    pr.show();
+    setState(() {
+      _isLoading = true;
+    });
 
-    if (ReusableWidgets.isTokenExpired(prefs.getInt('expires') ?? 0)) {
-      status = await refreshTokenController.getRefreshToken(
-          refresh: prefs.getString('refreshToken') ?? '');
-      if (status) {
-        setState(() {
-          prefs.setString(
-              'accessToken', refreshTokenController.accessToken.value);
-          prefs.setString(
-              'refreshToken', refreshTokenController.refreshToken.value);
-          prefs.setInt('expires', refreshTokenController.expires.value);
-        });
-      } else {
-        print('Error getting token==' + status.toString());
+    try {
+      if (ReusableWidgets.isTokenExpired(prefs.getInt('expires') ?? 0)) {
+        status = await refreshTokenController.getRefreshToken(
+            refresh: prefs.getString('refreshToken') ?? '');
+        if (status) {
+          setState(() {
+            prefs.setString(
+                'accessToken', refreshTokenController.accessToken.value);
+            prefs.setString(
+                'refreshToken', refreshTokenController.refreshToken.value);
+            prefs.setInt('expires', refreshTokenController.expires.value);
+          });
+        } else {
+          print('Error getting token==' + status.toString());
+        }
       }
+    } catch (e) {
+      ReusableWidgets.showDialogBox(
+        context,
+        'warning'.tr,
+        Text(
+          'global_error'.tr,
+        ),
+      );
     }
 
     lat = prefs.getDouble('latitude');
     long = prefs.getDouble('longitude');
 
+    try {
+      Animal data = await animalDescriptionController.animalDescription(
+        animalId: widget.uniqueId,
+        senderUserId: widget.userId,
+        userId: prefs.getString('userId'),
+        accessToken: prefs.getString('accessToken') ?? '',
+      );
 
-    print('animalId coming through widget is ${widget.uniqueId}');
-    print('senderUserId coming through widget is ${prefs.getString('userId')}');
-    print('userId coming through widget is ${widget.userId}');
-    print('access Token coming through widget is ${prefs.getString('accessToken')}');
+      setState(() {
+        animalDesc = data;
+      });
+    } catch (e) {
+      ReusableWidgets.showDialogBox(
+        context,
+        'warning'.tr,
+        Text(
+          'global_error'.tr,
+        ),
+      );
+    }
 
-    Animal data = await animalDescriptionController.animalDescription(
-      animalId: widget.uniqueId,
-      senderUserId: widget.userId,
-      userId: prefs.getString('userId'),
-      accessToken: prefs.getString('accessToken') ?? '',
-    );
-
-    print('animal info description is $data');
+    try {
+      myNum = await sellerContactController.getSellerContact(
+          animalId: widget.uniqueId,
+          userId: prefs.getString('userId'),
+          token: prefs.getString('accessToken'),
+          channel: [
+            {"contactMedium": "Call"}
+          ]);
+    } catch (e) {
+      ReusableWidgets.showDialogBox(
+        context,
+        'warning'.tr,
+        Text(
+          'global_error'.tr,
+        ),
+      );
+    }
 
     setState(() {
-      animalDesc = data;
+      _isLoading = false;
     });
-
-    pr.hide();
   }
 
   @override
@@ -204,17 +243,26 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
 
   _getButton() => Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            _getWhatsAppButton(),
-            SizedBox(height: 4),
-            _getShareButton(),
-            SizedBox(height: 4),
-            _getCallButton(),
-            SizedBox(height: 4),
-          ],
-        ),
+        child: (_isLoadingScreen)
+            ? Center(
+                child: Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10.0),
+                        color: Colors.white),
+                    height: 100,
+                    width: 100,
+                    child: Center(child: CircularProgressIndicator())))
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  _getWhatsAppButton(),
+                  SizedBox(height: 4),
+                  _getShareButton(),
+                  SizedBox(height: 4),
+                  _getCallButton(),
+                  SizedBox(height: 4),
+                ],
+              ),
       );
 
   Row _buildInfowidget(_list) {
@@ -296,9 +344,9 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
                               fontSize: 16),
                         ),
                         TextSpan(
-                          text: _list.animalType == 5
-                              ? intToAnimalTypeMapping[5]
-                              : intToAnimalTypeMapping[_list.animalType],
+                          text: _list.animalType <= 4
+                              ? intToAnimalTypeMapping[_list.animalType]
+                              : intToAnimalOtherTypeMapping[_list.animalType],
                           style: TextStyle(
                               color: Colors.grey[700],
                               fontWeight: FontWeight.bold,
@@ -423,96 +471,39 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
         .toStringAsFixed(0);
   }
 
-  // Widget _descriptionText(_list) {
-  //   String animalBreedCheck =
-  //       (_list.animalBreed == 'not_known'.tr) ? "" : _list.animalBreed;
-  //   String animalTypeCheck = (_list.animalType == 5)
-  //       ? intToAnimalTypeMapping[5]
-  //       : intToAnimalTypeMapping[_list.animalType];
-  //
-  //   String desc = '';
-  //
-  //   if (_list.animalType == 3 ||
-  //       _list.animalType == 4 ||
-  //       _list.animalType == 5) {
-  //     desc =
-  //         'ये $animalBreedCheck $animalTypeCheck ${_list.animalAge} साल की है। ';
-  //   } else {
-  //     desc =
-  //         'ये ${_list.animalBreed} ${intToAnimalTypeMapping[_list.animalType]} ${_list.animalAge} साल का है। ';
-  //     if (_list.recentBayatTime != null) {
-  //       desc = desc +
-  //           'यह ${intToRecentBayaatTime[_list.recentBayatTime]} ब्यायी है। ';
-  //     }
-  //     if (_list.pregnantTime != null) {
-  //       desc = desc + 'यह अभी ${intToPregnantTime[_list.pregnantTime]} है। ';
-  //     }
-  //     if (_list.animalMilkCapacity != null) {
-  //       desc = desc +
-  //           'पिछले बार के हिसाब से दूध कैपेसिटी ${_list.animalMilkCapacity} लीटर है। ';
-  //     }
-  //   }
-  //   desc = desc + (animalDesc.moreInfo ?? "");
-  //   return Padding(
-  //     padding: const EdgeInsets.all(8.0),
-  //     child: Text(
-  //       desc,
-  //       maxLines: 4,
-  //       overflow: TextOverflow.ellipsis,
-  //       style: TextStyle(color: Colors.grey[600], fontSize: 14.5),
-  //     ),
-  //   );
-  // }
-
-
-
-
-
-
-  //*****************************************************************
-
-
   _descriptionText(animalInfo) {
     String animalBreedCheck = (animalInfo.animalBreed == 'not_known'.tr)
         ? ""
         : animalInfo.animalBreed;
-    String animalTypeCheck = (animalInfo.animalType == 5)
-        ? intToAnimalTypeMapping[5]
+    String animalTypeCheck = (animalInfo.animalType >= 5)
+        ? intToAnimalOtherTypeMapping[animalInfo.animalType]
         : intToAnimalTypeMapping[animalInfo.animalType];
 
     String desc = '';
 
-    if (animalInfo.animalType == 3 ||
-        animalInfo.animalType == 4 ||
-        animalInfo.animalType == 5) {
+    if (animalInfo.animalType >= 3) {
       desc =
-      'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल की है। ';
+          'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल ${(animalInfo.animalType == 6 || animalInfo.animalType == 8 || animalInfo.animalType == 10) ? " की" : "का"} है। ';
     } else {
       desc =
-      'ये ${animalInfo.animalBreed} ${intToAnimalTypeMapping[animalInfo.animalType]} ${animalInfo.animalAge} साल का है। ';
-      // if (animalInfo.recentBayatTime != null) {
-      //   desc = desc +
-      //       'यह ${intToRecentBayaatTime[animalInfo.recentBayatTime]} ब्यायी है। ';
-      // }
+          'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल की है। ';
+      if (animalInfo.recentBayatTime != null) {
+        desc = desc +
+            'यह ${intToRecentBayaatTime[animalInfo.recentBayatTime]} ब्यायी है। ';
+      }
       if (animalInfo.pregnantTime != null) {
         desc =
             desc + 'यह अभी ${intToPregnantTime[animalInfo.pregnantTime]} है। ';
       }
-      desc = desc +
-          (animalInfo.animalHasBaby == null || animalInfo.animalHasBaby == 0
-              ? 'इसके साथ में बच्चा नहीं है। '
-              : 'इसके साथ में ${intToAnimalHasBaby[animalInfo.animalHasBaby]}। ');
       if (animalInfo.animalMilkCapacity != null) {
         desc = desc +
             'पिछले बार के हिसाब से दूध कैपेसिटी ${animalInfo.animalMilkCapacity} लीटर है। ';
       }
     }
-
-    return desc;
+    return desc + (animalInfo.moreInfo ?? "");
   }
 
   Padding _animalDescriptionMethod(_list) {
-
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Text(
@@ -525,15 +516,14 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
     );
   }
 
-
-
-
   //*****************************************************************
 
   _getCallButton() => RaisedButton.icon(
         color: Colors.blue,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        onPressed: () => launch("tel://${animalDesc.mobile}"),
+        onPressed: () async {
+          return UrlLauncher.launch('tel:+91 $myNum');
+        },
         label: Text(
           'call'.tr,
           style: TextStyle(
@@ -552,12 +542,11 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
           whatsappText =
               'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${animalDesc.userName}, $_userLocality \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
           whatsappUrl =
-              "https://api.whatsapp.com/send/?phone=+91 ${animalDesc.mobile}&text=$whatsappText";
+              "https://api.whatsapp.com/send/?phone=+91 $myNum&text=$whatsappText";
           await UrlLauncher.canLaunch(whatsappUrl) != null
               ? UrlLauncher.launch(Uri.encodeFull(whatsappUrl))
               : ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content:
-                      Text('${animalDesc.mobile} is not present in Whatsapp'),
+                  content: Text('$myNum is not present in Whatsapp'),
                   duration: Duration(milliseconds: 300),
                   padding: EdgeInsets.symmetric(horizontal: 8),
                   behavior: SnackBarBehavior.floating,
@@ -611,9 +600,10 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
           await takeScreenShot(animalDesc.sId);
           Share.shareFiles([fileUrl.path],
               mimeTypes: ['images/png'],
-              text:
-                  "नस्ल: ${animalDesc.animalBreed}\nजानकारी: ${animalDesc.moreInfo}\nदूध(प्रति दिन): ${animalDesc.animalMilkCapacity.toString()} Litre\n\nपशु देखे: ${shortUrl.toString()}",
-              subject: 'animal_info'.tr);
+              text: animalDesc.animalType <= 2
+                  ? "नस्ल: ${animalDesc.animalBreed}\nजानकारी: ${_descriptionText(animalDesc) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(animalDesc)}\nदूध(प्रति दिन): ${animalDesc.animalMilkCapacity} Litre\n\nपशु देखे: ${shortUrl.toString()}"
+                  : "नस्ल: ${animalDesc.animalBreed}\nजानकारी: ${_descriptionText(animalDesc) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(animalDesc)}\n\nपशु देखे: ${shortUrl.toString()}",
+              subject: 'पशु की जानकारी');
         },
         icon: Icon(Icons.share, color: Colors.white, size: 16),
         label: Text(
@@ -641,23 +631,22 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
       );
 
   takeScreenShot(String uniqueId) async {
-    pr.style(message: 'शेयर किया जा रहा है');
-    pr.show();
-
+    setState(() {
+      _isLoadingScreen = true;
+    });
     RenderRepaintBoundary boundary =
         previewContainer.currentContext.findRenderObject();
     ui.Image image = await boundary.toImage();
     final directory = (await getApplicationDocumentsDirectory()).path;
     ByteData byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     Uint8List pngBytes = byteData.buffer.asUint8List();
-    print(pngBytes);
-    File imgFile = new File('$directory/pashu_$uniqueId.png');
+    File imgFile = new File(
+        '$directory/pashu_${ReusableWidgets.dateTimeToEpoch(DateTime.now())}.png');
     await imgFile.writeAsBytes(pngBytes);
-
     setState(() {
+      _isLoadingScreen = false;
       fileUrl = imgFile;
     });
-    pr.hide();
   }
 
   Widget _animalImage(_list) {

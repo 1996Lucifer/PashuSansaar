@@ -397,34 +397,38 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
             ],
           ),
         ),
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-          child: DropdownSearch<String>(
-            mode: Mode.BOTTOM_SHEET,
-            showSelectedItem: true,
-            items: constant.animalType,
-            label: 'animal_type'.tr,
-            hint: 'animal_type'.tr,
-            selectedItem: widget.animalInfo.animalType > 4
-                ? constant.animalType[4]
-                : intToAnimalTypeMapping[widget.animalInfo.animalType],
-            onChanged: (String type) {
-              setState(() {
-                animalUpdationData['animalType'] = animalTypeMapping[type];
 
-                if (animalUpdationData['animalType'] < 5) {
-                  _animalOtherType = '';
-                } else {
-                  _animalOtherType = type;
-                }
-              });
-            },
-            dropdownSearchDecoration: InputDecoration(
-                contentPadding:
-                    EdgeInsets.symmetric(vertical: 1, horizontal: 10),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(5),
-                )),
+        IgnorePointer(
+          ignoring: true,
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+            child: DropdownSearch<String>(
+              mode: Mode.BOTTOM_SHEET,
+              showSelectedItem: true,
+              items: constant.animalType,
+              label: 'animal_type'.tr,
+              hint: 'animal_type'.tr,
+              selectedItem: widget.animalInfo.animalType > 4
+                  ? constant.animalType[4]
+                  : intToAnimalTypeMapping[widget.animalInfo.animalType],
+              onChanged: (String type) {
+                setState(() {
+                  animalUpdationData['animalType'] = animalTypeMapping[type];
+
+                  if (animalUpdationData['animalType'] < 5) {
+                    _animalOtherType = '';
+                  } else {
+                    _animalOtherType = type;
+                  }
+                });
+              },
+              dropdownSearchDecoration: InputDecoration(
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 1, horizontal: 10),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5),
+                  )),
+            ),
           ),
         ),
         if (_animalOtherType.isNotEmpty) ...[
@@ -1581,22 +1585,33 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                       await SharedPreferences.getInstance();
                   List result = [];
 
-                  if (ReusableWidgets.isTokenExpired(
-                      prefs.getInt('expires') ?? 0)) {
-                    bool status = await refreshTokenController.getRefreshToken(
-                        refresh: prefs.getString('refreshToken') ?? '');
-                    if (status) {
-                      setState(() {
-                        prefs.setString('accessToken',
-                            refreshTokenController.accessToken.value);
-                        prefs.setString('refreshToken',
-                            refreshTokenController.refreshToken.value);
-                        prefs.setInt(
-                            'expires', refreshTokenController.expires.value);
-                      });
-                    } else {
-                      print('Error getting token==' + status.toString());
+                  try {
+                    if (ReusableWidgets.isTokenExpired(
+                        prefs.getInt('expires') ?? 0)) {
+                      bool status =
+                          await refreshTokenController.getRefreshToken(
+                              refresh: prefs.getString('refreshToken') ?? '');
+                      if (status) {
+                        setState(() {
+                          prefs.setString('accessToken',
+                              refreshTokenController.accessToken.value);
+                          prefs.setString('refreshToken',
+                              refreshTokenController.refreshToken.value);
+                          prefs.setInt(
+                              'expires', refreshTokenController.expires.value);
+                        });
+                      } else {
+                        print('Error getting token==' + status.toString());
+                      }
                     }
+                  } catch (e) {
+                    ReusableWidgets.showDialogBox(
+                      context,
+                      'warning'.tr,
+                      Text(
+                        'global_error'.tr,
+                      ),
+                    );
                   }
 
                   if (imagesUpload["Image1"].length != 0) {
@@ -1612,12 +1627,23 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                     result.add(imagesUpload["Image4"]);
                   }
 
-                  List imageUploadingStatus =
-                      await _uploadImageController.uploadImage(
-                    userId: prefs.getString('userId'),
-                    files: result,
-                    token: prefs.getString('accessToken'),
-                  );
+                  List imageUploadingStatus;
+                  try {
+                    imageUploadingStatus =
+                        await _uploadImageController.uploadImage(
+                      userId: prefs.getString('userId'),
+                      files: result,
+                      token: prefs.getString('accessToken'),
+                    );
+                  } catch (e) {
+                    ReusableWidgets.showDialogBox(
+                      context,
+                      'warning'.tr,
+                      Text(
+                        'global_error'.tr,
+                      ),
+                    );
+                  }
 
                   if (imageUploadingStatus.isBlank) {
                     ReusableWidgets.showDialogBox(
@@ -1652,39 +1678,61 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                   bool saveAnimalData = false;
                   if (animalUpdationData['animalType'] == 1 ||
                       animalUpdationData['animalType'] == 2) {
-                    saveAnimalData = await updateAnimalController.updateAnimal(
-                      animalType: animalUpdationData['animalType'],
-                      animalBreed: animalUpdationData['animalBreed'],
-                      animalAge: animalUpdationData['animalAge'],
-                      animalBayat: animalUpdationData['animalBayat'],
-                      animalPrice: animalUpdationData['animalPrice'],
-                      animalMilk: animalUpdationData['animalMilk'],
-                      animalMilkCapacity:
-                          animalUpdationData['animalMilkCapacity'],
-                      isRecentBayat: animalUpdationData['isRecentBayat'],
-                      recentBayatTime: animalUpdationData['recentBayatTime'],
-                      isPregnant: animalUpdationData['isPregnant'],
-                      pregnantTime: animalUpdationData['pregnantTime'],
-                      animalHasBaby: animalUpdationData['animalHasBaby'],
-                      userId: prefs.getString('userId'),
-                      animalId: widget.animalInfo.sId,
-                      moreInfo: animalUpdationData['moreInfo'],
-                      files: _imageToBeUploaded,
-                      token: prefs.getString("accessToken"),
-                    );
+                    try {
+                      saveAnimalData =
+                          await updateAnimalController.updateAnimal(
+                        animalType: animalUpdationData['animalType'],
+                        animalBreed: animalUpdationData['animalBreed'],
+                        animalAge: animalUpdationData['animalAge'],
+                        animalBayat: animalUpdationData['animalBayat'],
+                        animalPrice: animalUpdationData['animalPrice'],
+                        animalMilk: animalUpdationData['animalMilk'],
+                        animalMilkCapacity:
+                            animalUpdationData['animalMilkCapacity'],
+                        isRecentBayat: animalUpdationData['isRecentBayat'],
+                        recentBayatTime: animalUpdationData['recentBayatTime'],
+                        isPregnant: animalUpdationData['isPregnant'],
+                        pregnantTime: animalUpdationData['pregnantTime'],
+                        animalHasBaby: animalUpdationData['animalHasBaby'],
+                        userId: prefs.getString('userId'),
+                        animalId: widget.animalInfo.sId,
+                        moreInfo: animalUpdationData['moreInfo'],
+                        files: _imageToBeUploaded,
+                        token: prefs.getString("accessToken"),
+                      );
+                    } catch (e) {
+                      ReusableWidgets.showDialogBox(
+                        context,
+                        'warning'.tr,
+                        Text(
+                          'global_error'.tr,
+                        ),
+                      );
+                    }
                   } else {
-                    saveAnimalData = await updateAnimalController.updateAnimal(
-                      animalType: animalUpdationData['animalType'],
-                      animalBreed: animalUpdationData['animalBreed'],
-                      animalAge: animalUpdationData['animalAge'],
-                      animalBayat: animalUpdationData['animalBayat'],
-                      animalPrice: animalUpdationData['animalPrice'],
-                      userId: prefs.getString('userId'),
-                      animalId: widget.animalInfo.sId,
-                      moreInfo: animalUpdationData['moreInfo'],
-                      files: _imageToBeUploaded,
-                      token: prefs.getString("accessToken"),
-                    );
+                    try {
+                      saveAnimalData =
+                          await updateAnimalController.updateAnimal(
+                        animalType: animalUpdationData['animalType'],
+                        animalBreed: animalUpdationData['animalBreed'],
+                        animalAge: animalUpdationData['animalAge'],
+                        animalBayat: animalUpdationData['animalBayat'],
+                        animalPrice: animalUpdationData['animalPrice'],
+                        userId: prefs.getString('userId'),
+                        animalId: widget.animalInfo.sId,
+                        moreInfo: animalUpdationData['moreInfo'],
+                        files: _imageToBeUploaded,
+                        token: prefs.getString("accessToken"),
+                      );
+                    } catch (e) {
+                      ReusableWidgets.showDialogBox(
+                        context,
+                        'warning'.tr,
+                        Text(
+                          'global_error'.tr,
+                        ),
+                      );
+                    }
                   }
 
                   print('][]==' + _imageToBeUploaded.toString());

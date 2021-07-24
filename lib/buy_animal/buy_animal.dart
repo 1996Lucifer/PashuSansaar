@@ -84,7 +84,7 @@ class _BuyAnimalState extends State<BuyAnimal>
   TextEditingController _locationController = TextEditingController();
   ScrollController _scrollController =
       ScrollController(keepScrollOffset: false);
-  bool _isCardVisible = false;
+  bool _isCardVisible = false, _isLoadingScreen = false;
   File fileUrl;
   final SellerContactController sellerContactController =
       Get.put(SellerContactController());
@@ -137,7 +137,17 @@ class _BuyAnimalState extends State<BuyAnimal>
           print('Error getting token==' + status.toString());
         }
       }
+    } catch (e) {
+      ReusableWidgets.showDialogBox(
+        context,
+        'warning'.tr,
+        Text(
+          'global_error'.tr,
+        ),
+      );
+    }
 
+    try {
       BuyAnimalModel data = await buyAnimalController.getAnimal(
         latitude: _filterLat ?? _latitude,
         longitude: _filterLong ?? _longitude,
@@ -159,28 +169,33 @@ class _BuyAnimalState extends State<BuyAnimal>
         prefs.setInt('page', data.page);
       });
     } catch (e) {
-      print('=-=Error-Re-Buying-=->>>' + e.toString());
+      ReusableWidgets.showDialogBox(
+        context,
+        'warning'.tr,
+        Text(
+          'global_error'.tr,
+        ),
+      );
     }
   }
 
   takeScreenShot(String uniqueId) async {
-    pr.style(message: 'शेयर किया जा रहा है');
-    pr.show();
+    setState(() {
+      _isLoadingScreen = true;
+    });
     RenderRepaintBoundary boundary =
         previewContainer.currentContext.findRenderObject();
     ui.Image image = await boundary.toImage();
     final directory = (await getApplicationDocumentsDirectory()).path;
     ByteData byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     Uint8List pngBytes = byteData.buffer.asUint8List();
-    print(pngBytes);
-    File imgFile = new File('$directory/pashu_$uniqueId.png');
+    File imgFile = new File(
+        '$directory/pashu_${ReusableWidgets.dateTimeToEpoch(DateTime.now())}.png');
     await imgFile.writeAsBytes(pngBytes);
-
     setState(() {
+      _isLoadingScreen = false;
       fileUrl = imgFile;
     });
-
-    pr.hide();
   }
 
   _getInitialData() async {
@@ -261,7 +276,9 @@ class _BuyAnimalState extends State<BuyAnimal>
         await Geocoder.local.findAddressesFromCoordinates(coordinates);
     var first = addresses.first;
 
-    return first.subAdminArea ?? first.locality ?? first.featureName;
+    return first.locality ??
+        first.subAdminArea ??
+        (first.adminArea ?? '' + ' ' + first.postalCode);
   }
 
   Row _buildInfowidget(int index) {
@@ -346,9 +363,10 @@ class _BuyAnimalState extends State<BuyAnimal>
                               fontSize: 16),
                         ),
                         TextSpan(
-                          text: _list[index].animalType == 5
-                              ? intToAnimalTypeMapping[5]
-                              : intToAnimalTypeMapping[_list[index].animalType],
+                          text: _list[index].animalType <= 4
+                              ? intToAnimalTypeMapping[_list[index].animalType]
+                              : intToAnimalOtherTypeMapping[
+                                  _list[index].animalType],
                           style: TextStyle(
                               color: Colors.grey[700],
                               fontWeight: FontWeight.bold,
@@ -401,13 +419,52 @@ class _BuyAnimalState extends State<BuyAnimal>
                       borderRadius: BorderRadius.circular(5),
                     )),
               ),
-            )
+            ),
+
+            //**************************
+
+            Visibility(
+              visible: (constant.animalType.indexOf(_filterAnimalType) ==
+                  (constant.animalType.length - 1)),
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                child: DropdownSearch<String>(
+                  mode: Mode.BOTTOM_SHEET,
+                  showSelectedItem: true,
+                  items: constant.animalTypeOther,
+                  label: 'other_animal'.tr,
+                  hint: 'other_animal'.tr,
+                  selectedItem: _filterAnimalType,
+                  onChanged: (String otherType) {
+                    setState(() {
+                      _filterAnimalType = otherType;
+                      _filterDropDownMap['filter1'] = otherType;
+                    });
+                  },
+                  dropdownSearchDecoration: InputDecoration(
+                      contentPadding:
+                          EdgeInsets.symmetric(vertical: 1, horizontal: 10),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5),
+                      )),
+                ),
+              ),
+              replacement: SizedBox.shrink(),
+            ),
+
+            //**************************
           ]));
 
   _animalMilkSilder() => StatefulBuilder(
         builder: (context, setState) => Column(
           children: [
-            Text("Milk Quantity"),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+              child: Text(
+                'milk_quantity'.tr,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
             Wrap(
                 children: filterMilkValue
                     .map((e) => Padding(
@@ -618,31 +675,37 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                                   'longitude')));
                                                   var first = addresses.first;
 
-                                                  int
-                                                      myNum =
-                                                      await sellerContactController
-                                                          .getSellerContact(
-                                                              animalId: widget
-                                                                  .animalInfo[
-                                                                      index]
-                                                                  .sId,
-                                                              userId: prefs
-                                                                  .getString(
-                                                                      'userId'),
-                                                              token: prefs
-                                                                  .getString(
-                                                                      'accessToken'),
-                                                              channel: [
-                                                        {
-                                                          "contactMedium":
-                                                              "Call"
-                                                        }
-                                                      ]);
-
-                                                  print(
-                                                      'userId is ${prefs.getString('userId')}');
-                                                  print(
-                                                      'token is ${prefs.getString('accessToken')}');
+                                                  int myNum;
+                                                  try {
+                                                    myNum =
+                                                        await sellerContactController
+                                                            .getSellerContact(
+                                                                animalId: widget
+                                                                    .animalInfo[
+                                                                        index]
+                                                                    .sId,
+                                                                userId: prefs
+                                                                    .getString(
+                                                                        'userId'),
+                                                                token: prefs
+                                                                    .getString(
+                                                                        'accessToken'),
+                                                                channel: [
+                                                          {
+                                                            "contactMedium":
+                                                                "Call"
+                                                          }
+                                                        ]);
+                                                  } catch (e) {
+                                                    ReusableWidgets
+                                                        .showDialogBox(
+                                                      context,
+                                                      'warning'.tr,
+                                                      Text(
+                                                        'global_error'.tr,
+                                                      ),
+                                                    );
+                                                  }
 
                                                   return UrlLauncher.launch(
                                                       'tel:+91 $myNum');
@@ -687,26 +750,37 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                                   'longitude')));
                                                   var first = addresses.first;
 
-                                                  int
-                                                      myNum =
-                                                      await sellerContactController
-                                                          .getSellerContact(
-                                                              animalId: widget
-                                                                  .animalInfo[
-                                                                      index]
-                                                                  .sId,
-                                                              userId: prefs
-                                                                  .getString(
-                                                                      'userId'),
-                                                              token: prefs
-                                                                  .getString(
-                                                                      'accessToken'),
-                                                              channel: [
-                                                        {
-                                                          "contactMedium":
-                                                              "Whatsapp"
-                                                        }
-                                                      ]);
+                                                  int myNum;
+                                                  try {
+                                                    myNum =
+                                                        await sellerContactController
+                                                            .getSellerContact(
+                                                                animalId: widget
+                                                                    .animalInfo[
+                                                                        index]
+                                                                    .sId,
+                                                                userId: prefs
+                                                                    .getString(
+                                                                        'userId'),
+                                                                token: prefs
+                                                                    .getString(
+                                                                        'accessToken'),
+                                                                channel: [
+                                                          {
+                                                            "contactMedium":
+                                                                "Whatsapp"
+                                                          }
+                                                        ]);
+                                                  } catch (e) {
+                                                    ReusableWidgets
+                                                        .showDialogBox(
+                                                      context,
+                                                      'warning'.tr,
+                                                      Text(
+                                                        'global_error'.tr,
+                                                      ),
+                                                    );
+                                                  }
 
                                                   whatsappText =
                                                       'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${widget.userName}, ${prefs.getString('district')} \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
@@ -1088,6 +1162,16 @@ class _BuyAnimalState extends State<BuyAnimal>
                   ),
                 ],
               ),
+              if (_isLoadingScreen) ...[
+                Center(
+                    child: Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10.0),
+                            color: Colors.white),
+                        height: 100,
+                        width: 100,
+                        child: Center(child: CircularProgressIndicator())))
+              ]
             ],
           ),
         ),
@@ -1106,8 +1190,9 @@ class _BuyAnimalState extends State<BuyAnimal>
                     ? 75
                     : 50;
 
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
     try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
       bool status;
       pr.show();
 
@@ -1127,7 +1212,16 @@ class _BuyAnimalState extends State<BuyAnimal>
               context, 'warning'.tr, Text('Error getting token'));
         }
       }
-
+    } catch (e) {
+      ReusableWidgets.showDialogBox(
+        context,
+        'warning'.tr,
+        Text(
+          'global_error'.tr,
+        ),
+      );
+    }
+    try {
       BuyAnimalModel data = await buyAnimalController.getAnimal(
         latitude: _filterLat,
         longitude: _filterLong,
@@ -1145,13 +1239,18 @@ class _BuyAnimalState extends State<BuyAnimal>
         prefs.setInt('page', data.page);
         _distance = _radiusData * 1000;
       });
-
-      pr.hide();
-      Navigator.of(context).pop();
     } catch (e) {
-      Navigator.of(context).pop();
-      print('=-=Error-=->>>' + e.toString());
+      ReusableWidgets.showDialogBox(
+        context,
+        'warning'.tr,
+        Text(
+          'global_error'.tr,
+        ),
+      );
     }
+
+    pr.hide();
+    Navigator.of(context).pop();
   }
 
   _descriptionText(animalInfo) {
@@ -1359,20 +1458,22 @@ class _BuyAnimalState extends State<BuyAnimal>
                   final shortDynamicLink = await parameters.buildShortLink();
                   final Uri shortUrl = shortDynamicLink.shortUrl;
 
-                  // await takeScreenShot(_list[index]['uniqueId']);
+                  await takeScreenShot(_list[index].sId);
 
                   // Share.share(
                   //     "नस्ल: ${_list[index].animalBreed}\nजानकारी: description\nदूध(प्रति दिन): ${_list[index].animalMilk} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
                   //     subject: 'animal_info'.tr);
 
-                  // Share.shareFiles([fileUrl.path],
-                  //     mimeTypes: ['images/png'],
-                  //     text:
-                  //         // "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
-                  //         "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nपशु देखे: ${shortUrl.toString()}",
-                  //     subject: 'पशु की जानकारी');
+                  Share.shareFiles([fileUrl.path],
+                      mimeTypes: ['images/png'],
+                      text:
+                          // "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
+                          _list[index].animalType <= 2
+                              ? "नस्ल: ${_list[index].animalBreed}\nजानकारी: ${_descriptionText(_list[index]) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list[index])}\nदूध(प्रति दिन): ${_list[index].animalMilkCapacity} Litre\n\nपशु देखे: ${shortUrl.toString()}"
+                              : "नस्ल: ${_list[index].animalBreed}\nजानकारी: ${_descriptionText(_list[index]) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list[index])}\n\nपशु देखे: ${shortUrl.toString()}",
+                      subject: 'पशु की जानकारी');
 
-                  Share.share(shortUrl.toString());
+                  // Share.share(shortUrl.toString());
                 },
                 icon: Icon(Icons.share, color: Colors.white, size: 14),
                 label: Text('share'.tr,
@@ -1632,57 +1733,76 @@ class _BuyAnimalState extends State<BuyAnimal>
                                   bool status;
                                   pr.show();
 
-                                  if (ReusableWidgets.isTokenExpired(
-                                      prefs.getInt('expires') ?? 0)) {
-                                    status = await refreshTokenController
-                                        .getRefreshToken(
-                                            refresh: prefs.getString(
-                                                    'refreshToken') ??
-                                                '');
-                                    if (status) {
-                                      setState(() {
-                                        prefs.setString(
-                                            'accessToken',
-                                            refreshTokenController
-                                                .accessToken.value);
-                                        prefs.setString(
-                                            'refreshToken',
-                                            refreshTokenController
-                                                .refreshToken.value);
-                                        prefs.setInt(
-                                            'expires',
-                                            refreshTokenController
-                                                .expires.value);
-                                      });
-                                    } else {
-                                      ReusableWidgets.showDialogBox(
-                                          context,
-                                          'warning'.tr,
-                                          Text('Error getting token'));
+                                  try {
+                                    if (ReusableWidgets.isTokenExpired(
+                                        prefs.getInt('expires') ?? 0)) {
+                                      status = await refreshTokenController
+                                          .getRefreshToken(
+                                              refresh: prefs.getString(
+                                                      'refreshToken') ??
+                                                  '');
+                                      if (status) {
+                                        setState(() {
+                                          prefs.setString(
+                                              'accessToken',
+                                              refreshTokenController
+                                                  .accessToken.value);
+                                          prefs.setString(
+                                              'refreshToken',
+                                              refreshTokenController
+                                                  .refreshToken.value);
+                                          prefs.setInt(
+                                              'expires',
+                                              refreshTokenController
+                                                  .expires.value);
+                                        });
+                                      } else {
+                                        ReusableWidgets.showDialogBox(
+                                            context,
+                                            'warning'.tr,
+                                            Text('Error getting token'));
+                                      }
                                     }
+                                  } catch (e) {
+                                    ReusableWidgets.showDialogBox(
+                                      context,
+                                      'warning'.tr,
+                                      Text(
+                                        'global_error'.tr,
+                                      ),
+                                    );
                                   }
+                                  try {
+                                    BuyAnimalModel data =
+                                        await buyAnimalController.getAnimal(
+                                      latitude: _latitude,
+                                      longitude: _longitude,
+                                      animalType: null,
+                                      minMilk: null,
+                                      maxMilk: null,
+                                      page: 1,
+                                      accessToken:
+                                          prefs.getString('accessToken') ?? '',
+                                      userId: prefs.getString('userId'),
+                                    );
 
-                                  BuyAnimalModel data =
-                                      await buyAnimalController.getAnimal(
-                                    latitude: _latitude,
-                                    longitude: _longitude,
-                                    animalType: null,
-                                    minMilk: null,
-                                    maxMilk: null,
-                                    page: 1,
-                                    accessToken:
-                                        prefs.getString('accessToken') ?? '',
-                                    userId: prefs.getString('userId'),
-                                  );
-
-                                  setState(() {
-                                    _filterDropDownMap.remove('filter1');
-                                    _filterDropDownMap.remove('filter2');
-                                    _value = _filterAnimalType =
-                                        animalType = minMilk = maxMilk = null;
-                                    widget.animalInfo = data.result;
-                                    prefs.setInt('page', data.page);
-                                  });
+                                    setState(() {
+                                      _filterDropDownMap.remove('filter1');
+                                      _filterDropDownMap.remove('filter2');
+                                      _value = _filterAnimalType =
+                                          animalType = minMilk = maxMilk = null;
+                                      widget.animalInfo = data.result;
+                                      prefs.setInt('page', data.page);
+                                    });
+                                  } catch (e) {
+                                    ReusableWidgets.showDialogBox(
+                                      context,
+                                      'warning'.tr,
+                                      Text(
+                                        'global_error'.tr,
+                                      ),
+                                    );
+                                  }
 
                                   pr.hide().then(
                                         (value) => Navigator.of(context).pop(),
@@ -1720,60 +1840,83 @@ class _BuyAnimalState extends State<BuyAnimal>
                                             _getMinMaxMilk[1].split(' ')[0]);
                                       }
                                     }
-
-                                    if (ReusableWidgets.isTokenExpired(
-                                        prefs.getInt('expires') ?? 0)) {
-                                      status = await refreshTokenController
-                                          .getRefreshToken(
-                                              refresh: prefs.getString(
-                                                      'refreshToken') ??
-                                                  '');
-                                      if (status) {
-                                        setState(() {
-                                          prefs.setString(
-                                              'accessToken',
-                                              refreshTokenController
-                                                  .accessToken.value);
-                                          prefs.setString(
-                                              'refreshToken',
-                                              refreshTokenController
-                                                  .refreshToken.value);
-                                          prefs.setInt(
-                                              'expires',
-                                              refreshTokenController
-                                                  .expires.value);
-                                        });
-                                      } else {
-                                        ReusableWidgets.showDialogBox(
-                                            context,
-                                            'warning'.tr,
-                                            Text('Error getting token'));
+                                    try {
+                                      if (ReusableWidgets.isTokenExpired(
+                                          prefs.getInt('expires') ?? 0)) {
+                                        status = await refreshTokenController
+                                            .getRefreshToken(
+                                                refresh: prefs.getString(
+                                                        'refreshToken') ??
+                                                    '');
+                                        if (status) {
+                                          setState(() {
+                                            prefs.setString(
+                                                'accessToken',
+                                                refreshTokenController
+                                                    .accessToken.value);
+                                            prefs.setString(
+                                                'refreshToken',
+                                                refreshTokenController
+                                                    .refreshToken.value);
+                                            prefs.setInt(
+                                                'expires',
+                                                refreshTokenController
+                                                    .expires.value);
+                                          });
+                                        } else {
+                                          ReusableWidgets.showDialogBox(
+                                              context,
+                                              'warning'.tr,
+                                              Text('Error getting token'));
+                                        }
                                       }
+                                    } catch (e) {
+                                      ReusableWidgets.showDialogBox(
+                                        context,
+                                        'warning'.tr,
+                                        Text(
+                                          'global_error'.tr,
+                                        ),
+                                      );
                                     }
 
-                                    BuyAnimalModel data =
-                                        await buyAnimalController.getAnimal(
-                                      latitude: _filterLat ?? _latitude,
-                                      longitude: _filterLong ?? _longitude,
-                                      distance: _distance ?? 50000,
-                                      animalType: animalTypeMapping[
-                                          _filterDropDownMap['filter1']],
-                                      minMilk: minMilk,
-                                      maxMilk: maxMilk,
-                                      page: 1,
-                                      accessToken:
-                                          prefs.getString('accessToken') ?? '',
-                                      userId: prefs.getString('userId'),
-                                    );
+                                    try {
+                                      BuyAnimalModel data =
+                                          await buyAnimalController.getAnimal(
+                                        latitude: _filterLat ?? _latitude,
+                                        longitude: _filterLong ?? _longitude,
+                                        distance: _distance ?? 50000,
+                                        animalType: animalTypeMapping[
+                                                _filterDropDownMap[
+                                                    'filter1']] ??
+                                            animalOtherTypeMapping[
+                                                _filterDropDownMap['filter1']],
+                                        minMilk: minMilk,
+                                        maxMilk: maxMilk,
+                                        page: 1,
+                                        accessToken:
+                                            prefs.getString('accessToken') ??
+                                                '',
+                                        userId: prefs.getString('userId'),
+                                      );
 
-                                    setState(() {
-                                      widget.animalInfo = data.result;
-                                      prefs.setInt('page', data.page);
-                                      minMilk = _minMilk;
-                                      maxMilk = _maxMilk;
-                                      animalType = animalTypeMapping[
-                                          _filterDropDownMap['filter1']];
-                                    });
+                                      setState(() {
+                                        widget.animalInfo = data.result;
+                                        prefs.setInt('page', data.page);
+                                        minMilk = _minMilk;
+                                        maxMilk = _maxMilk;
+                                        animalType = animalTypeMapping[
+                                            _filterDropDownMap['filter1']];
+                                      });
+                                    } catch (e) {
+                                      ReusableWidgets.showDialogBox(
+                                        context,
+                                        'warning'.tr,
+                                        Text(
+                                          'global_error'.tr,
+                                        ),
+                                      );
+                                    }
                                     pr.hide().then(
                                           (value) =>
                                               Navigator.of(context).pop(),

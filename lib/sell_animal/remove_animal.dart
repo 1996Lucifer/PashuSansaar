@@ -52,32 +52,52 @@ class _RemoveAnimalState extends State<RemoveAnimal> {
     prefs = await SharedPreferences.getInstance();
     bool status;
 
-    if (ReusableWidgets.isTokenExpired(prefs.getInt('expires') ?? 0)) {
-      status = await refreshTokenController.getRefreshToken(
-          refresh: prefs.getString('refreshToken') ?? '');
-      if (status) {
-        setState(() {
-          prefs.setString(
-              'accessToken', refreshTokenController.accessToken.value);
-          prefs.setString(
-              'refreshToken', refreshTokenController.refreshToken.value);
-          prefs.setInt('expires', refreshTokenController.expires.value);
-        });
-      } else {
-        print('Error getting token==' + status.toString());
+    try {
+      if (ReusableWidgets.isTokenExpired(prefs.getInt('expires') ?? 0)) {
+        status = await refreshTokenController.getRefreshToken(
+            refresh: prefs.getString('refreshToken') ?? '');
+        if (status) {
+          setState(() {
+            prefs.setString(
+                'accessToken', refreshTokenController.accessToken.value);
+            prefs.setString(
+                'refreshToken', refreshTokenController.refreshToken.value);
+            prefs.setInt('expires', refreshTokenController.expires.value);
+          });
+        } else {
+          print('Error getting token==' + status.toString());
+        }
       }
+    } catch (e) {
+      ReusableWidgets.showDialogBox(
+        context,
+        'warning'.tr,
+        Text(
+          'global_error'.tr,
+        ),
+      );
     }
 
-    List data = await interestedBuyerController.interstedBuyers(
-      animalId: widget.listId,
-      userId: prefs.getString('userId'),
-      token: prefs.getString('accessToken'),
-      page: 1,
-    );
+    try {
+      List data = await interestedBuyerController.interstedBuyers(
+        animalId: widget.listId,
+        userId: prefs.getString('userId'),
+        token: prefs.getString('accessToken'),
+        page: 1,
+      );
 
-    setState(() {
-      interestedBuyers = data;
-    });
+      setState(() {
+        interestedBuyers = data;
+      });
+    } catch (e) {
+      ReusableWidgets.showDialogBox(
+        context,
+        'warning'.tr,
+        Text(
+          'global_error'.tr,
+        ),
+      );
+    }
   }
 
   @override
