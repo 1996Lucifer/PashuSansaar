@@ -1,10 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:get/get.dart';
 
-import 'reusable_widgets.dart';
+import 'connectivity/connectivity.dart';
 
-var dataSnapshotValue;
 AppLifecycleState appLifecycleState;
 Map<String, dynamic> callingInfo = {};
 int count = 0;
@@ -17,3 +16,4 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 String token;
 String lastDocument = '';
 List districtList = [];
+final GetXNetworkManager networkManager = Get.find<GetXNetworkManager>();

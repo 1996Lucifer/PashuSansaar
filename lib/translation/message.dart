@@ -278,6 +278,7 @@ class Messages extends Translations {
               'कृपया पशु की गयाभिन जानकारी दर्ज़ करे ।',
           'animal_gayabhin_time_error':
               'पशु कितने महीने की गयाभिन है, वो चुने ।',
+          'no_internet': 'इंटरनेट कनेक्शन प्राप्त करने में दिक्कत हो रही हैं'
         }
       };
 }

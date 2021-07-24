@@ -49,7 +49,7 @@ class BuyAnimalController extends GetxController {
         }
         return buyAnimalData;
       }
-    } catch (e) {
+    } on Exception catch (e) {
       print("Exceptions get animal _______$e");
       return BuyAnimalModel.fromJson({
         'success': false,

@@ -22,6 +22,7 @@ import 'package:package_info/package_info.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:check_vpn_connection/check_vpn_connection.dart';
 
+import 'utils/connectivity/NetworkBinding.dart';
 import 'utils/reusable_widgets.dart';
 
 final GlobalKey<NavigatorState> navigatorKey =
@@ -278,6 +279,7 @@ class _MyAppState extends State<MyApp> {
 
     return GetMaterialApp(
       title: 'PashuSansaar',
+      initialBinding: NetworkBinding(),
       debugShowCheckedModeBanner: false,
       translations: Messages(), // translations
       locale: Locale('hn', 'IN'),

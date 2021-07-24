@@ -29,6 +29,7 @@ dependencies:
   carousel_slider: ^3.0.0
   check_vpn_connection: ^0.0.1
   cloud_firestore: ^0.16.0+1
+  connectivity_plus: any
   cupertino_icons: ^1.0.0
   date_format: ^1.0.9
   device_info: ^1.0.0

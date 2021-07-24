@@ -5,10 +5,13 @@ import 'dart:core';
 import 'package:another_flushbar/flushbar.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:pashusansaar/buy_animal/buy_animal_model.dart';
+import 'package:pashusansaar/home_screen.dart';
 import 'package:pashusansaar/refresh_token/refresh_token_controller.dart';
 import 'package:pashusansaar/seller_contact/seller_contact_controller.dart';
 import 'package:pashusansaar/utils/colors.dart';
+import 'package:pashusansaar/utils/connectivity/connectivity.dart';
 import 'package:pashusansaar/utils/constants.dart';
+import 'package:pashusansaar/utils/global.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
@@ -494,602 +497,696 @@ class _BuyAnimalState extends State<BuyAnimal>
     return SafeArea(
       child: RepaintBoundary(
         key: previewContainer,
-        child: Scaffold(
-          backgroundColor: Colors.grey[100],
-          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-          floatingActionButton: AnimatedOpacity(
-            opacity: !_isCardVisible ? 1.0 : 0.0,
-            duration: Duration(seconds: 3),
-            child: CustomFABWidget(
-              userMobileNumber: widget.userMobileNumber,
-              userName: widget.userName,
-            ),
-          ),
-          body: Stack(
-            children: [
-              widget.animalInfo == null || widget.animalInfo.length == 0
-                  ? Center(
-                      child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text(
-                          'जानकारी उपलब्ध नहीं है| कोई और चुनाव करके कोशिश करे |',
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                          )),
-                    ))
-                  : Padding(
-                      padding: const EdgeInsets.only(top: 50.0),
-                      child: Stack(
-                        alignment: Alignment.bottomCenter,
-                        children: [
-                          ListView.builder(
-                            key: ObjectKey(widget.animalInfo[0]),
-                            padding: EdgeInsets.only(bottom: 60),
-                            controller: _scrollController,
-                            physics: BouncingScrollPhysics(),
-                            itemCount: _page == null
-                                ? widget.animalInfo.length
-                                : widget.animalInfo.length + 1,
-                            itemBuilder: (context, index) {
-                              if (index >= widget.animalInfo.length) {
-                                return Column(
-                                  children: [
-                                    SizedBox(height: 10),
-                                    Center(
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                  ],
-                                );
-                              }
+        child: GetBuilder<GetXNetworkManager>(
+          builder: (builder) => networkManager.connectionType == 0
+              ? Center(
+                  child: Column(
+                    children: [
+                      Image.asset(
+                        'assets/images/no_internet.gif',
+                        width: 500,
+                        height: 500,
+                      ),
+                      Text(
+                        'no_internet'.tr,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      // if (networkManager.connectionType != 0) ...[
+                      ElevatedButton.icon(
+                        onPressed: () =>
+                            Get.off(() => HomeScreen(selectedIndex: 0)),
+                        icon: Icon(Icons.refresh),
+                        label: Text('try again'),
+                      )
+                      // ],
+                    ],
+                  ),
+                )
+              : Scaffold(
+                  backgroundColor: Colors.grey[100],
+                  floatingActionButtonLocation:
+                      FloatingActionButtonLocation.endFloat,
+                  floatingActionButton: AnimatedOpacity(
+                    opacity: !_isCardVisible ? 1.0 : 0.0,
+                    duration: Duration(seconds: 3),
+                    child: CustomFABWidget(
+                      userMobileNumber: widget.userMobileNumber,
+                      userName: widget.userName,
+                    ),
+                  ),
+                  body: Stack(
+                    children: [
+                      widget.animalInfo == null || widget.animalInfo.length == 0
+                          ? Center(
+                              child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Text(
+                                  'जानकारी उपलब्ध नहीं है| कोई और चुनाव करके कोशिश करे |',
+                                  style: TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                  )),
+                            ))
+                          : Padding(
+                              padding: const EdgeInsets.only(top: 50.0),
+                              child: Stack(
+                                alignment: Alignment.bottomCenter,
+                                children: [
+                                  ListView.builder(
+                                    key: ObjectKey(widget.animalInfo[0]),
+                                    padding: EdgeInsets.only(bottom: 60),
+                                    controller: _scrollController,
+                                    physics: BouncingScrollPhysics(),
+                                    itemCount: _page == null
+                                        ? widget.animalInfo.length
+                                        : widget.animalInfo.length + 1,
+                                    itemBuilder: (context, index) {
+                                      if (index >= widget.animalInfo.length) {
+                                        return Column(
+                                          children: [
+                                            SizedBox(height: 10),
+                                            Center(
+                                              child:
+                                                  CircularProgressIndicator(),
+                                            ),
+                                          ],
+                                        );
+                                      }
 
-                              return Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 8.0, right: 8, top: 8),
-                                child: Card(
-                                  key: Key(index.toString()),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                  ),
-                                  elevation: 5,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      _buildInfowidget(index),
-                                      _distanceTimeMethod(index),
-                                      _animalImageWidget(index),
-                                      _animalDescriptionMethod(index),
-                                      Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.grey[100],
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.grey,
-                                                blurRadius: 1.0,
-                                              ),
-                                            ],
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                          ),
-                                          height: 80,
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Row(children: [
-                                              Image.asset(
-                                                  'assets/images/profile.jpg',
-                                                  width: 40,
-                                                  height: 40),
-                                              SizedBox(
-                                                width: 5,
-                                              ),
-                                              Expanded(
-                                                child: Text(
-                                                  widget.animalInfo[index]
-                                                          .userName ??
-                                                      "",
-                                                  style: TextStyle(
-                                                      fontSize: 15,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      color: Colors.black),
-                                                ),
-                                              ),
-                                              RaisedButton.icon(
-                                                shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            18.0),
-                                                    side: BorderSide(
-                                                        color:
-                                                            darkSecondaryColor)),
-                                                color: secondaryColor,
-                                                onPressed: () async {
-                                                  SharedPreferences prefs =
-                                                      await SharedPreferences
-                                                          .getInstance();
-                                                  var addresses = await Geocoder
-                                                      .local
-                                                      .findAddressesFromCoordinates(
-                                                          Coordinates(
-                                                              prefs.getDouble(
-                                                                  'latitude'),
-                                                              prefs.getDouble(
-                                                                  'longitude')));
-                                                  var first = addresses.first;
-
-                                                  int
-                                                      myNum =
-                                                      await sellerContactController
-                                                          .getSellerContact(
-                                                              animalId: widget
-                                                                  .animalInfo[
-                                                                      index]
-                                                                  .sId,
-                                                              userId: prefs
-                                                                  .getString(
-                                                                      'userId'),
-                                                              token: prefs
-                                                                  .getString(
-                                                                      'accessToken'),
-                                                              channel: [
-                                                        {
-                                                          "contactMedium":
-                                                              "Call"
-                                                        }
-                                                      ]);
-
-                                                  print(
-                                                      'userId is ${prefs.getString('userId')}');
-                                                  print(
-                                                      'token is ${prefs.getString('accessToken')}');
-
-                                                  return UrlLauncher.launch(
-                                                      'tel:+91 $myNum');
-                                                },
-                                                icon: Icon(
-                                                  Icons.call,
-                                                  color: Colors.white,
-                                                  size: 14,
-                                                ),
-                                                label: Text(
-                                                  'call'.tr,
-                                                  style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 14),
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                width: 5,
-                                              ),
-                                              RaisedButton.icon(
-                                                shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            18.0),
-                                                    side: BorderSide(
-                                                        color: darkGreenColor)),
-                                                color: darkGreenColor,
-                                                onPressed: () async {
-                                                  String whatsappUrl = '';
-                                                  SharedPreferences prefs =
-                                                      await SharedPreferences
-                                                          .getInstance();
-                                                  var addresses = await Geocoder
-                                                      .local
-                                                      .findAddressesFromCoordinates(
-                                                          Coordinates(
-                                                              prefs.getDouble(
-                                                                  'latitude'),
-                                                              prefs.getDouble(
-                                                                  'longitude')));
-                                                  var first = addresses.first;
-
-                                                  int
-                                                      myNum =
-                                                      await sellerContactController
-                                                          .getSellerContact(
-                                                              animalId: widget
-                                                                  .animalInfo[
-                                                                      index]
-                                                                  .sId,
-                                                              userId: prefs
-                                                                  .getString(
-                                                                      'userId'),
-                                                              token: prefs
-                                                                  .getString(
-                                                                      'accessToken'),
-                                                              channel: [
-                                                        {
-                                                          "contactMedium":
-                                                              "Whatsapp"
-                                                        }
-                                                      ]);
-
-                                                  whatsappText =
-                                                      'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${widget.userName}, ${prefs.getString('district')} \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
-                                                  whatsappUrl =
-                                                      "https://api.whatsapp.com/send/?phone=+91 $myNum &text=$whatsappText";
-                                                  await UrlLauncher.canLaunch(
-                                                              whatsappUrl) !=
-                                                          null
-                                                      ? UrlLauncher.launch(
-                                                          Uri.encodeFull(
-                                                              whatsappUrl))
-                                                      : ScaffoldMessenger.of(
-                                                              context)
-                                                          .showSnackBar(
-                                                              SnackBar(
-                                                          content: Text(
-                                                              '$myNum is not present in Whatsapp'),
-                                                          duration: Duration(
-                                                              milliseconds:
-                                                                  300),
-                                                          padding: EdgeInsets
-                                                              .symmetric(
-                                                                  horizontal:
-                                                                      8),
-                                                          behavior:
-                                                              SnackBarBehavior
-                                                                  .floating,
-                                                          shape:
-                                                              RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        10.0),
-                                                          ),
-                                                        ));
-                                                },
-                                                icon: FaIcon(
-                                                    FontAwesomeIcons.whatsapp,
-                                                    color: Colors.white,
-                                                    size: 14),
-                                                label: Text(
-                                                  'message'.tr,
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 14,
-                                                  ),
-                                                ),
-                                              ),
-                                            ]),
-                                          )),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                          Positioned(
-                            bottom: 0,
-                            right: 0,
-                            child: AnimatedOpacity(
-                              opacity: _isCardVisible ? 1.0 : 0.0,
-                              duration: Duration(seconds: 3),
-                              child: Visibility(
-                                visible: _isCardVisible,
-                                child: Padding(
-                                  padding: EdgeInsets.all(10),
-                                  child: OpenContainer(
-                                    closedElevation: 0,
-                                    transitionDuration: Duration(seconds: 2),
-                                    openBuilder: (context, _) => AnimalInfoForm(
-                                      userMobileNumber: widget.userMobileNumber,
-                                      userName: widget.userName,
-                                    ),
-                                    closedShape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.all(
-                                        Radius.circular(10.0),
-                                      ),
-                                    ),
-                                    closedColor: Theme.of(context).primaryColor,
-                                    closedBuilder: (context, openContainer) =>
-                                        Container(
-                                      height: 220,
-                                      width: 150,
-                                      child: Padding(
+                                      return Padding(
                                         padding: const EdgeInsets.only(
-                                          left: 8.0,
-                                          right: 8,
-                                        ),
-                                        child: SingleChildScrollView(
+                                            left: 8.0, right: 8, top: 8),
+                                        child: Card(
+                                          key: Key(index.toString()),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10.0),
+                                          ),
+                                          elevation: 5,
                                           child: Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              Align(
-                                                alignment:
-                                                    Alignment.bottomRight,
-                                                child: RawMaterialButton(
-                                                  onPressed: () => setState(() {
-                                                    _isCardVisible = false;
-                                                  }),
-                                                  elevation: 2.0,
-                                                  fillColor: Colors.white,
-                                                  child: Icon(
-                                                    Icons.close,
-                                                    size: 20.0,
-                                                    color: appPrimaryColor,
+                                              _buildInfowidget(index),
+                                              _distanceTimeMethod(index),
+                                              _animalImageWidget(index),
+                                              _animalDescriptionMethod(index),
+                                              Container(
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.grey[100],
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Colors.grey,
+                                                        blurRadius: 1.0,
+                                                      ),
+                                                    ],
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
                                                   ),
-                                                  shape: CircleBorder(),
-                                                  constraints: BoxConstraints(
-                                                      minWidth: 30,
-                                                      minHeight: 30),
-                                                ),
-                                              ),
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                    left: 12.0),
-                                                child: Text(
-                                                  'कौन सा पशु खरीदना चाहते है ?',
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 22,
-                                                  ),
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                  width: double.infinity,
-                                                  child: RaisedButton(
-                                                    shape: OutlineInputBorder(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(10)),
-                                                    color: Colors.white,
-                                                    onPressed: null,
-                                                    disabledColor: Colors.white,
-                                                    disabledTextColor:
-                                                        appPrimaryColor,
-                                                    child: Row(
-                                                        textDirection:
-                                                            TextDirection.rtl,
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                        children: [
-                                                          Icon(
-                                                            Icons
-                                                                .arrow_forward_ios_sharp,
-                                                            color:
-                                                                appPrimaryColor,
-                                                          ),
-                                                          Text(
-                                                            'हमें बताये',
-                                                            style: TextStyle(
-                                                              color:
-                                                                  appPrimaryColor,
-                                                              fontSize: 20,
+                                                  height: 80,
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            8.0),
+                                                    child: Row(children: [
+                                                      Image.asset(
+                                                          'assets/images/profile.jpg',
+                                                          width: 40,
+                                                          height: 40),
+                                                      SizedBox(
+                                                        width: 5,
+                                                      ),
+                                                      Expanded(
+                                                        child: Text(
+                                                          widget
+                                                                  .animalInfo[
+                                                                      index]
+                                                                  .userName ??
+                                                              "",
+                                                          style: TextStyle(
+                                                              fontSize: 15,
                                                               fontWeight:
                                                                   FontWeight
                                                                       .bold,
-                                                            ),
+                                                              color:
+                                                                  Colors.black),
+                                                        ),
+                                                      ),
+                                                      RaisedButton.icon(
+                                                        shape: RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        18.0),
+                                                            side: BorderSide(
+                                                                color:
+                                                                    darkSecondaryColor)),
+                                                        color: secondaryColor,
+                                                        onPressed: () async {
+                                                          SharedPreferences
+                                                              prefs =
+                                                              await SharedPreferences
+                                                                  .getInstance();
+                                                          var addresses = await Geocoder
+                                                              .local
+                                                              .findAddressesFromCoordinates(Coordinates(
+                                                                  prefs.getDouble(
+                                                                      'latitude'),
+                                                                  prefs.getDouble(
+                                                                      'longitude')));
+                                                          var first =
+                                                              addresses.first;
+
+                                                          int myNum = await sellerContactController
+                                                              .getSellerContact(
+                                                                  animalId: widget
+                                                                      .animalInfo[
+                                                                          index]
+                                                                      .sId,
+                                                                  userId: prefs
+                                                                      .getString(
+                                                                          'userId'),
+                                                                  token: prefs
+                                                                      .getString(
+                                                                          'accessToken'),
+                                                                  channel: [
+                                                                {
+                                                                  "contactMedium":
+                                                                      "Call"
+                                                                }
+                                                              ]);
+
+                                                          print(
+                                                              'userId is ${prefs.getString('userId')}');
+                                                          print(
+                                                              'token is ${prefs.getString('accessToken')}');
+
+                                                          return UrlLauncher.launch(
+                                                              'tel:+91 $myNum');
+                                                        },
+                                                        icon: Icon(
+                                                          Icons.call,
+                                                          color: Colors.white,
+                                                          size: 14,
+                                                        ),
+                                                        label: Text(
+                                                          'call'.tr,
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.white,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              fontSize: 14),
+                                                        ),
+                                                      ),
+                                                      SizedBox(
+                                                        width: 5,
+                                                      ),
+                                                      RaisedButton.icon(
+                                                        shape: RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        18.0),
+                                                            side: BorderSide(
+                                                                color:
+                                                                    darkGreenColor)),
+                                                        color: darkGreenColor,
+                                                        onPressed: () async {
+                                                          String whatsappUrl =
+                                                              '';
+                                                          SharedPreferences
+                                                              prefs =
+                                                              await SharedPreferences
+                                                                  .getInstance();
+                                                          var addresses = await Geocoder
+                                                              .local
+                                                              .findAddressesFromCoordinates(Coordinates(
+                                                                  prefs.getDouble(
+                                                                      'latitude'),
+                                                                  prefs.getDouble(
+                                                                      'longitude')));
+                                                          var first =
+                                                              addresses.first;
+
+                                                          int myNum = await sellerContactController
+                                                              .getSellerContact(
+                                                                  animalId: widget
+                                                                      .animalInfo[
+                                                                          index]
+                                                                      .sId,
+                                                                  userId: prefs
+                                                                      .getString(
+                                                                          'userId'),
+                                                                  token: prefs
+                                                                      .getString(
+                                                                          'accessToken'),
+                                                                  channel: [
+                                                                {
+                                                                  "contactMedium":
+                                                                      "Whatsapp"
+                                                                }
+                                                              ]);
+
+                                                          whatsappText =
+                                                              'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${widget.userName}, ${prefs.getString('district')} \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
+                                                          whatsappUrl =
+                                                              "https://api.whatsapp.com/send/?phone=+91 $myNum &text=$whatsappText";
+                                                          await UrlLauncher
+                                                                      .canLaunch(
+                                                                          whatsappUrl) !=
+                                                                  null
+                                                              ? UrlLauncher.launch(
+                                                                  Uri.encodeFull(
+                                                                      whatsappUrl))
+                                                              : ScaffoldMessenger
+                                                                      .of(
+                                                                          context)
+                                                                  .showSnackBar(
+                                                                      SnackBar(
+                                                                  content: Text(
+                                                                      '$myNum is not present in Whatsapp'),
+                                                                  duration: Duration(
+                                                                      milliseconds:
+                                                                          300),
+                                                                  padding: EdgeInsets
+                                                                      .symmetric(
+                                                                          horizontal:
+                                                                              8),
+                                                                  behavior:
+                                                                      SnackBarBehavior
+                                                                          .floating,
+                                                                  shape:
+                                                                      RoundedRectangleBorder(
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            10.0),
+                                                                  ),
+                                                                ));
+                                                        },
+                                                        icon: FaIcon(
+                                                            FontAwesomeIcons
+                                                                .whatsapp,
+                                                            color: Colors.white,
+                                                            size: 14),
+                                                        label: Text(
+                                                          'message'.tr,
+                                                          style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontSize: 14,
                                                           ),
-                                                        ]),
+                                                        ),
+                                                      ),
+                                                    ]),
                                                   )),
                                             ],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  Positioned(
+                                    bottom: 0,
+                                    right: 0,
+                                    child: AnimatedOpacity(
+                                      opacity: _isCardVisible ? 1.0 : 0.0,
+                                      duration: Duration(seconds: 3),
+                                      child: Visibility(
+                                        visible: _isCardVisible,
+                                        child: Padding(
+                                          padding: EdgeInsets.all(10),
+                                          child: OpenContainer(
+                                            closedElevation: 0,
+                                            transitionDuration:
+                                                Duration(seconds: 2),
+                                            openBuilder: (context, _) =>
+                                                AnimalInfoForm(
+                                              userMobileNumber:
+                                                  widget.userMobileNumber,
+                                              userName: widget.userName,
+                                            ),
+                                            closedShape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.all(
+                                                Radius.circular(10.0),
+                                              ),
+                                            ),
+                                            closedColor:
+                                                Theme.of(context).primaryColor,
+                                            closedBuilder:
+                                                (context, openContainer) =>
+                                                    Container(
+                                              height: 220,
+                                              width: 150,
+                                              child: Padding(
+                                                padding: const EdgeInsets.only(
+                                                  left: 8.0,
+                                                  right: 8,
+                                                ),
+                                                child: SingleChildScrollView(
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Align(
+                                                        alignment: Alignment
+                                                            .bottomRight,
+                                                        child:
+                                                            RawMaterialButton(
+                                                          onPressed: () =>
+                                                              setState(() {
+                                                            _isCardVisible =
+                                                                false;
+                                                          }),
+                                                          elevation: 2.0,
+                                                          fillColor:
+                                                              Colors.white,
+                                                          child: Icon(
+                                                            Icons.close,
+                                                            size: 20.0,
+                                                            color:
+                                                                appPrimaryColor,
+                                                          ),
+                                                          shape: CircleBorder(),
+                                                          constraints:
+                                                              BoxConstraints(
+                                                                  minWidth: 30,
+                                                                  minHeight:
+                                                                      30),
+                                                        ),
+                                                      ),
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                    .only(
+                                                                left: 12.0),
+                                                        child: Text(
+                                                          'कौन सा पशु खरीदना चाहते है ?',
+                                                          style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontSize: 22,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      SizedBox(
+                                                          width:
+                                                              double.infinity,
+                                                          child: RaisedButton(
+                                                            shape: OutlineInputBorder(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            10)),
+                                                            color: Colors.white,
+                                                            onPressed: null,
+                                                            disabledColor:
+                                                                Colors.white,
+                                                            disabledTextColor:
+                                                                appPrimaryColor,
+                                                            child: Row(
+                                                                textDirection:
+                                                                    TextDirection
+                                                                        .rtl,
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .spaceBetween,
+                                                                children: [
+                                                                  Icon(
+                                                                    Icons
+                                                                        .arrow_forward_ios_sharp,
+                                                                    color:
+                                                                        appPrimaryColor,
+                                                                  ),
+                                                                  Text(
+                                                                    'हमें बताये',
+                                                                    style:
+                                                                        TextStyle(
+                                                                      color:
+                                                                          appPrimaryColor,
+                                                                      fontSize:
+                                                                          20,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold,
+                                                                    ),
+                                                                  ),
+                                                                ]),
+                                                          )),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
                                   ),
+                                ],
+                              ),
+                            ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: GestureDetector(
+                              onTap: () {
+                                return showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return AlertDialog(
+                                          title: Text("जगह बदले"),
+                                          content: StatefulBuilder(
+                                              builder: (context, setState) {
+                                            return Container(
+                                              height: 200,
+                                              child: SingleChildScrollView(
+                                                child: Column(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: <Widget>[
+                                                    TextField(
+                                                      maxLength: 6,
+                                                      controller:
+                                                          _locationController,
+                                                      inputFormatters: <
+                                                          TextInputFormatter>[
+                                                        FilteringTextInputFormatter
+                                                            .digitsOnly
+                                                      ],
+                                                      keyboardType:
+                                                          TextInputType.number,
+                                                      decoration:
+                                                          InputDecoration(
+                                                        counterText: '',
+                                                        border:
+                                                            OutlineInputBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(5),
+                                                        ),
+                                                        icon: Container(
+                                                          margin:
+                                                              EdgeInsets.only(
+                                                                  left: 20),
+                                                          width: 10,
+                                                          height: 10,
+                                                          child: Icon(
+                                                            Icons.location_on,
+                                                            color: Colors.black,
+                                                          ),
+                                                        ),
+                                                        hintText: "ज़िपकोड डाले",
+                                                        contentPadding:
+                                                            EdgeInsets.only(
+                                                                left: 8.0,
+                                                                top: 16.0),
+                                                      ),
+                                                    ),
+                                                    _radiusLocation()
+                                                  ],
+                                                ),
+                                              ),
+                                            );
+                                          }),
+                                          actions: <Widget>[
+                                            TextButton(
+                                                child: Text(
+                                                  'Ok'.tr,
+                                                  style: TextStyle(
+                                                      color: appPrimaryColor),
+                                                ),
+                                                onPressed: () async {
+                                                  if (_locationController
+                                                          .text.length ==
+                                                      0)
+                                                    ReusableWidgets.showDialogBox(
+                                                        context,
+                                                        'error'.tr,
+                                                        Text(
+                                                            'error_length_zipcode'
+                                                                .tr));
+                                                  else {
+                                                    if (_locationController
+                                                            .text.length <
+                                                        6)
+                                                      ReusableWidgets.showDialogBox(
+                                                          context,
+                                                          'error'.tr,
+                                                          Text(
+                                                              'error_length_zipcode'
+                                                                  .tr));
+                                                    else {
+                                                      try {
+                                                        var address = await Geocoder
+                                                            .local
+                                                            .findAddressesFromQuery(
+                                                                _locationController
+                                                                    .text);
+
+                                                        var first =
+                                                            address.first;
+                                                        setState(() {
+                                                          _userLocality = first
+                                                                  .subAdminArea ??
+                                                              first.locality ??
+                                                              first.featureName;
+                                                          _filterLat = first
+                                                              .coordinates
+                                                              .latitude;
+                                                          _filterLong = first
+                                                              .coordinates
+                                                              .longitude;
+                                                        });
+                                                        _getLocationBasedList(
+                                                            context, first);
+                                                      } catch (e) {
+                                                        print(
+                                                            'locationerro==> ' +
+                                                                e.toString());
+                                                        Navigator.of(context)
+                                                            .pop();
+                                                        Flushbar(
+                                                          message:
+                                                              "no_animal_present"
+                                                                  .tr,
+                                                          duration: Duration(
+                                                              seconds: 2),
+                                                        )..show(context);
+                                                      }
+                                                    }
+                                                  }
+                                                }),
+                                          ]);
+                                    });
+                              },
+                              child: Container(
+                                height: 50,
+                                decoration: BoxDecoration(
+                                    color: Colors.grey[100],
+                                    border:
+                                        Border.all(color: Colors.grey[400])),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(top: 7.0),
+                                  child: Center(
+                                      child: RichText(
+                                    text: TextSpan(
+                                      children: [
+                                        WidgetSpan(
+                                          child: Icon(Icons.location_on,
+                                              size: 14, color: Colors.black),
+                                        ),
+                                        TextSpan(
+                                            text: " $_userLocality",
+                                            style:
+                                                TextStyle(color: Colors.black)),
+                                      ],
+                                    ),
+                                  )),
                                 ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: GestureDetector(
+                              onTap: () => showModalBottomSheet(
+                                  context: context,
+                                  builder: (context) => Container(
+                                      child: _filterBottomSheet(), height: 250),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(10),
+                                      topRight: Radius.circular(10),
+                                    ),
+                                  )).then((value) => setState(() {})),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    color: Colors.grey[100],
+                                    border:
+                                        Border.all(color: Colors.grey[400])),
+                                height: 50,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(top: 7.0),
+                                  child: Center(
+                                      child: RichText(
+                                    text: TextSpan(
+                                      children: [
+                                        WidgetSpan(
+                                          child: FaIcon(FontAwesomeIcons.dog,
+                                              size: 14, color: Colors.black),
+                                        ),
+                                        TextSpan(
+                                            text:
+                                                " " + "animal_filter".tr + "  ",
+                                            style:
+                                                TextStyle(color: Colors.black)),
+                                        WidgetSpan(
+                                          child: CircleAvatar(
+                                            backgroundColor: appPrimaryColor,
+                                            radius: 10,
+                                            child: Center(
+                                              child: Text(
+                                                  _filterDropDownMap == null ||
+                                                          _filterDropDownMap ==
+                                                              {}
+                                                      ? '0'
+                                                      : _filterDropDownMap
+                                                          .length
+                                                          .toString(),
+                                                  style: TextStyle(
+                                                      fontSize: 13,
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold)),
+                                            ),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  )),
+                                ),
+                                // color: Colors.grey[100],
                               ),
                             ),
                           ),
                         ],
                       ),
-                    ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: GestureDetector(
-                      onTap: () {
-                        return showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                  title: Text("जगह बदले"),
-                                  content: StatefulBuilder(
-                                      builder: (context, setState) {
-                                    return Container(
-                                      height: 200,
-                                      child: SingleChildScrollView(
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: <Widget>[
-                                            TextField(
-                                              maxLength: 6,
-                                              controller: _locationController,
-                                              inputFormatters: <
-                                                  TextInputFormatter>[
-                                                FilteringTextInputFormatter
-                                                    .digitsOnly
-                                              ],
-                                              keyboardType:
-                                                  TextInputType.number,
-                                              decoration: InputDecoration(
-                                                counterText: '',
-                                                border: OutlineInputBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(5),
-                                                ),
-                                                icon: Container(
-                                                  margin:
-                                                      EdgeInsets.only(left: 20),
-                                                  width: 10,
-                                                  height: 10,
-                                                  child: Icon(
-                                                    Icons.location_on,
-                                                    color: Colors.black,
-                                                  ),
-                                                ),
-                                                hintText: "ज़िपकोड डाले",
-                                                contentPadding: EdgeInsets.only(
-                                                    left: 8.0, top: 16.0),
-                                              ),
-                                            ),
-                                            _radiusLocation()
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  }),
-                                  actions: <Widget>[
-                                    TextButton(
-                                        child: Text(
-                                          'Ok'.tr,
-                                          style:
-                                              TextStyle(color: appPrimaryColor),
-                                        ),
-                                        onPressed: () async {
-                                          if (_locationController.text.length ==
-                                              0)
-                                            ReusableWidgets.showDialogBox(
-                                                context,
-                                                'error'.tr,
-                                                Text(
-                                                    'error_length_zipcode'.tr));
-                                          else {
-                                            if (_locationController
-                                                    .text.length <
-                                                6)
-                                              ReusableWidgets.showDialogBox(
-                                                  context,
-                                                  'error'.tr,
-                                                  Text('error_length_zipcode'
-                                                      .tr));
-                                            else {
-                                              try {
-                                                var address = await Geocoder
-                                                    .local
-                                                    .findAddressesFromQuery(
-                                                        _locationController
-                                                            .text);
-
-                                                var first = address.first;
-                                                setState(() {
-                                                  _userLocality =
-                                                      first.subAdminArea ??
-                                                          first.locality ??
-                                                          first.featureName;
-                                                  _filterLat = first
-                                                      .coordinates.latitude;
-                                                  _filterLong = first
-                                                      .coordinates.longitude;
-                                                });
-                                                _getLocationBasedList(
-                                                    context, first);
-                                              } catch (e) {
-                                                print('locationerro==> ' +
-                                                    e.toString());
-                                                Navigator.of(context).pop();
-                                                Flushbar(
-                                                  message:
-                                                      "no_animal_present".tr,
-                                                  duration:
-                                                      Duration(seconds: 2),
-                                                )..show(context);
-                                              }
-                                            }
-                                          }
-                                        }),
-                                  ]);
-                            });
-                      },
-                      child: Container(
-                        height: 50,
-                        decoration: BoxDecoration(
-                            color: Colors.grey[100],
-                            border: Border.all(color: Colors.grey[400])),
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 7.0),
-                          child: Center(
-                              child: RichText(
-                            text: TextSpan(
-                              children: [
-                                WidgetSpan(
-                                  child: Icon(Icons.location_on,
-                                      size: 14, color: Colors.black),
-                                ),
-                                TextSpan(
-                                    text: " $_userLocality",
-                                    style: TextStyle(color: Colors.black)),
-                              ],
-                            ),
-                          )),
-                        ),
-                      ),
-                    ),
+                    ],
                   ),
-                  Expanded(
-                    flex: 2,
-                    child: GestureDetector(
-                      onTap: () => showModalBottomSheet(
-                          context: context,
-                          builder: (context) => Container(
-                              child: _filterBottomSheet(), height: 250),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(10),
-                              topRight: Radius.circular(10),
-                            ),
-                          )).then((value) => setState(() {})),
-                      child: Container(
-                        decoration: BoxDecoration(
-                            color: Colors.grey[100],
-                            border: Border.all(color: Colors.grey[400])),
-                        height: 50,
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 7.0),
-                          child: Center(
-                              child: RichText(
-                            text: TextSpan(
-                              children: [
-                                WidgetSpan(
-                                  child: FaIcon(FontAwesomeIcons.dog,
-                                      size: 14, color: Colors.black),
-                                ),
-                                TextSpan(
-                                    text: " " + "animal_filter".tr + "  ",
-                                    style: TextStyle(color: Colors.black)),
-                                WidgetSpan(
-                                  child: CircleAvatar(
-                                    backgroundColor: appPrimaryColor,
-                                    radius: 10,
-                                    child: Center(
-                                      child: Text(
-                                          _filterDropDownMap == null ||
-                                                  _filterDropDownMap == {}
-                                              ? '0'
-                                              : _filterDropDownMap.length
-                                                  .toString(),
-                                          style: TextStyle(
-                                              fontSize: 13,
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold)),
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                          )),
-                        ),
-                        // color: Colors.grey[100],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+                ),
         ),
       ),
     );
@@ -1318,6 +1415,15 @@ class _BuyAnimalState extends State<BuyAnimal>
                             ? loadingProgress.cumulativeBytesLoaded /
                                 loadingProgress.expectedTotalBytes
                             : null,
+                      ),
+                    );
+                  },
+                  errorBuilder: (BuildContext context, Object exception,
+                      StackTrace stackTrace) {
+                    return Center(
+                      child: Icon(
+                        Icons.error,
+                        size: 60,
                       ),
                     );
                   },
