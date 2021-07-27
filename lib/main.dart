@@ -204,8 +204,9 @@ class _MyAppState extends State<MyApp> {
 
     try {
       List<String> currentVersion1 = info.version.split('.');
-      if (int.parse(currentVersion1[0]) == 1) {
-        prefs.clear();
+      if (int.parse(currentVersion1[0]) == 1 ||
+          (prefs.getString('accessToken') ?? '').isEmpty) {
+        await prefs.clear();
       }
       List<String> newVersion1 =
           remoteConfig.getString('force_update_current_version').split('.');
