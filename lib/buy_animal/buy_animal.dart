@@ -1427,61 +1427,63 @@ class _BuyAnimalState extends State<BuyAnimal>
           Positioned(
             right: 0,
             child: RaisedButton.icon(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18.0),
-                    side: BorderSide(color: violetColor)),
-                color: violetColor,
-                onPressed: () async {
-                  String qParams = json.encode({
-                    "uniqueId": _list[index].sId,
-                    "userId": _list[index].userId,
-                    "screen": "DESCRIPTION_PAGE",
-                  });
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18.0),
+                  side: BorderSide(color: violetColor)),
+              color: violetColor,
+              onPressed: () async {
+                String qParams = json.encode({
+                  "uniqueId": _list[index].sId,
+                  "userId": _list[index].userId,
+                  "screen": "DESCRIPTION_PAGE",
+                });
 
-                  final DynamicLinkParameters parameters =
-                      DynamicLinkParameters(
-                          uriPrefix: "https://pashusansaar.page.link",
-                          link: Uri.parse(
-                              "https://www.pashu-sansaar.com/?data=$qParams"),
-                          androidParameters: AndroidParameters(
-                            packageName: 'dj.pashusansaar',
-                            minimumVersion: 21,
-                          ),
-                          dynamicLinkParametersOptions:
-                              DynamicLinkParametersOptions(
-                            shortDynamicLinkPathLength:
-                                ShortDynamicLinkPathLength.unguessable,
-                          ),
-                          navigationInfoParameters: NavigationInfoParameters(
-                              forcedRedirectEnabled: true));
+                final DynamicLinkParameters parameters = DynamicLinkParameters(
+                    uriPrefix: "https://pashusansaar.page.link",
+                    link: Uri.parse(
+                        "https://www.pashu-sansaar.com/?data=$qParams"),
+                    androidParameters: AndroidParameters(
+                      packageName: 'dj.pashusansaar',
+                      minimumVersion: 21,
+                    ),
+                    dynamicLinkParametersOptions: DynamicLinkParametersOptions(
+                      shortDynamicLinkPathLength:
+                          ShortDynamicLinkPathLength.unguessable,
+                    ),
+                    navigationInfoParameters:
+                        NavigationInfoParameters(forcedRedirectEnabled: true));
 
-                  final shortDynamicLink = await parameters.buildShortLink();
-                  final Uri shortUrl = shortDynamicLink.shortUrl;
+                final shortDynamicLink = await parameters.buildShortLink();
+                final Uri shortUrl = shortDynamicLink.shortUrl;
 
-                  await takeScreenShot(_list[index].sId);
+                await takeScreenShot(_list[index].sId);
 
-                  // Share.share(
-                  //     "नस्ल: ${_list[index].animalBreed}\nजानकारी: description\nदूध(प्रति दिन): ${_list[index].animalMilk} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
-                  //     subject: 'animal_info'.tr);
+                // Share.share(
+                //     "नस्ल: ${_list[index].animalBreed}\nजानकारी: description\nदूध(प्रति दिन): ${_list[index].animalMilk} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
+                //     subject: 'animal_info'.tr);
 
-                  Share.shareFiles([fileUrl.path],
-                      mimeTypes: ['images/png'],
-                      text:
-                          // "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
-                          _list[index].animalType <= 2
-                              ? "नस्ल: ${_list[index].animalBreed}\nजानकारी: ${_descriptionText(_list[index]) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list[index])}\nदूध(प्रति दिन): ${_list[index].animalMilkCapacity} Litre\n\nपशु देखे: ${shortUrl.toString()}"
-                              : "नस्ल: ${_list[index].animalBreed}\nजानकारी: ${_descriptionText(_list[index]) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list[index])}\n\nपशु देखे: ${shortUrl.toString()}",
-                      subject: 'पशु की जानकारी');
+                Share.shareFiles([fileUrl.path],
+                    mimeTypes: ['images/png'],
+                    text:
+                        // "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
+                        _list[index].animalType <= 2
+                            ? "नस्ल: ${_list[index].animalBreed}\nजानकारी: ${_descriptionText(_list[index]) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list[index])}\nदूध(प्रति दिन): ${_list[index].animalMilkCapacity} Litre\n\nपशु देखे: ${shortUrl.toString()}"
+                            : "नस्ल: ${_list[index].animalBreed}\nजानकारी: ${_descriptionText(_list[index]) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list[index])}\n\nपशु देखे: ${shortUrl.toString()}",
+                    subject: 'पशु की जानकारी');
 
-                  // Share.share(shortUrl.toString());
-                },
-                icon: Icon(Icons.share, color: Colors.white, size: 14),
-                label: Text('share'.tr,
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14))),
-          )
+                // Share.share(shortUrl.toString());
+              },
+              icon: Icon(Icons.share, color: Colors.white, size: 14),
+              label: Text(
+                'share'.tr,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );

@@ -397,7 +397,6 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
             ],
           ),
         ),
-
         IgnorePointer(
           ignoring: true,
           child: Padding(
@@ -1676,68 +1675,74 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                       animalUpdationData.toString());
 
                   bool saveAnimalData = false;
-                  if (animalUpdationData['animalType'] == 1 ||
-                      animalUpdationData['animalType'] == 2) {
-                    try {
-                      saveAnimalData =
-                          await updateAnimalController.updateAnimal(
-                        animalType: animalUpdationData['animalType'],
-                        animalBreed: animalUpdationData['animalBreed'],
-                        animalAge: animalUpdationData['animalAge'],
-                        animalBayat: animalUpdationData['animalBayat'],
-                        animalPrice: animalUpdationData['animalPrice'],
-                        animalMilk: animalUpdationData['animalMilk'],
-                        animalMilkCapacity:
-                            animalUpdationData['animalMilkCapacity'],
-                        isRecentBayat: animalUpdationData['isRecentBayat'],
-                        recentBayatTime: animalUpdationData['recentBayatTime'],
-                        isPregnant: animalUpdationData['isPregnant'],
-                        pregnantTime: animalUpdationData['pregnantTime'],
-                        animalHasBaby: animalUpdationData['animalHasBaby'],
-                        userId: prefs.getString('userId'),
-                        animalId: widget.animalInfo.sId,
-                        moreInfo: animalUpdationData['moreInfo'],
-                        files: _imageToBeUploaded,
-                        token: prefs.getString("accessToken"),
-                      );
-                    } catch (e) {
-                      ReusableWidgets.showDialogBox(
-                        context,
-                        'warning'.tr,
-                        Text(
-                          'global_error'.tr,
-                        ),
-                      );
+                  if (_imageToBeUploaded.isNotEmpty) {
+                    if (animalUpdationData['animalType'] == 1 ||
+                        animalUpdationData['animalType'] == 2) {
+                      try {
+                        saveAnimalData =
+                            await updateAnimalController.updateAnimal(
+                          animalType: animalUpdationData['animalType'],
+                          animalBreed: animalUpdationData['animalBreed'],
+                          animalAge: animalUpdationData['animalAge'],
+                          animalBayat: animalUpdationData['animalBayat'],
+                          animalPrice: animalUpdationData['animalPrice'],
+                          animalMilk: animalUpdationData['animalMilk'],
+                          animalMilkCapacity:
+                              animalUpdationData['animalMilkCapacity'],
+                          isRecentBayat: animalUpdationData['isRecentBayat'],
+                          recentBayatTime:
+                              animalUpdationData['recentBayatTime'],
+                          isPregnant: animalUpdationData['isPregnant'],
+                          pregnantTime: animalUpdationData['pregnantTime'],
+                          animalHasBaby: animalUpdationData['animalHasBaby'],
+                          userId: prefs.getString('userId'),
+                          animalId: widget.animalInfo.sId,
+                          moreInfo: animalUpdationData['moreInfo'],
+                          files: _imageToBeUploaded,
+                          token: prefs.getString("accessToken"),
+                        );
+                      } catch (e) {
+                        ReusableWidgets.showDialogBox(
+                          context,
+                          'warning'.tr,
+                          Text(
+                            'global_error'.tr,
+                          ),
+                        );
+                      }
+                    } else {
+                      try {
+                        saveAnimalData =
+                            await updateAnimalController.updateAnimal(
+                          animalType: animalUpdationData['animalType'],
+                          animalBreed: animalUpdationData['animalBreed'],
+                          animalAge: animalUpdationData['animalAge'],
+                          animalBayat: animalUpdationData['animalBayat'],
+                          animalPrice: animalUpdationData['animalPrice'],
+                          userId: prefs.getString('userId'),
+                          animalId: widget.animalInfo.sId,
+                          moreInfo: animalUpdationData['moreInfo'],
+                          files: _imageToBeUploaded,
+                          token: prefs.getString("accessToken"),
+                        );
+                      } catch (e) {
+                        ReusableWidgets.showDialogBox(
+                          context,
+                          'warning'.tr,
+                          Text(
+                            'global_error'.tr,
+                          ),
+                        );
+                      }
                     }
                   } else {
-                    try {
-                      saveAnimalData =
-                          await updateAnimalController.updateAnimal(
-                        animalType: animalUpdationData['animalType'],
-                        animalBreed: animalUpdationData['animalBreed'],
-                        animalAge: animalUpdationData['animalAge'],
-                        animalBayat: animalUpdationData['animalBayat'],
-                        animalPrice: animalUpdationData['animalPrice'],
-                        userId: prefs.getString('userId'),
-                        animalId: widget.animalInfo.sId,
-                        moreInfo: animalUpdationData['moreInfo'],
-                        files: _imageToBeUploaded,
-                        token: prefs.getString("accessToken"),
-                      );
-                    } catch (e) {
-                      ReusableWidgets.showDialogBox(
-                        context,
-                        'warning'.tr,
-                        Text(
-                          'global_error'.tr,
-                        ),
-                      );
-                    }
+                    ReusableWidgets.showDialogBox(
+                        context, 'warning'.tr, Text('upload_image_error'.tr));
                   }
 
                   print('][]==' + _imageToBeUploaded.toString());
 
-                  if (saveAnimalData && _imageToBeUploaded.isNotEmpty) {
+                  if (saveAnimalData) {
                     pr.hide();
                     return showDialog(
                         context: context,

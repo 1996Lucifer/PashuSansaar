@@ -25,19 +25,8 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _getInitialData();
-    // _checkLegacyUser();
-  }
-
-  _getInitialData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    setState(() {
-      isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
-      newVersion = prefs.getStringList('newVersion') ?? [];
-      currentVersion = prefs.getStringList('currentVersion') ?? [];
-      prefs.setInt('count', 0);
-    });
+    // _getInitialData();
+    _checkLegacyUser();
   }
 
   _checkLegacyUser() async {
