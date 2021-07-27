@@ -1,26 +1,18 @@
 import 'dart:convert';
 
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:intl/intl.dart';
-import 'package:pashusansaar/animal_description/animal_description_page.dart';
 import 'package:pashusansaar/my_calls/myCallsController.dart';
 import 'package:pashusansaar/refresh_token/refresh_token_controller.dart';
 import 'package:pashusansaar/utils/colors.dart';
-import 'package:progress_dialog/progress_dialog.dart';
 import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pashusansaar/utils/constants.dart';
-import 'buy_animal/buy_animal_controller.dart';
-import 'my_calls/myCallsModel.dart';
 import 'utils/reusable_widgets.dart';
 import 'package:get/get.dart';
-import 'package:paginate_firestore/paginate_firestore.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:url_launcher/url_launcher.dart' as UrlLauncher;
 
@@ -144,23 +136,24 @@ class _MyCalledListState extends State<MyCalledList> {
                     TextSpan(
                       text: _list.animalType.toString() == 'other_animal'.tr
                           ? "no type"
-                          : (_list.animalType <= 4
-                              ? intToAnimalTypeMapping[_list.animalType]
-                              : intToAnimalOtherTypeMapping[_list.animalType]),
+                          : ((_list.animalType <= 4
+                              ? intToAnimalTypeMapping[_list.animalType] + ', '
+                              : intToAnimalOtherTypeMapping[_list.animalType].toString()) +
+                                  ', '),
                       style: TextStyle(
                           color: Colors.grey[700],
                           fontWeight: FontWeight.bold,
                           fontSize: 16),
                     ),
                     TextSpan(
-                      text: ', उम्र: ',
+                      text: 'age'.tr,
                       style: TextStyle(
                           color: Colors.grey[700],
                           fontWeight: FontWeight.bold,
                           fontSize: 16),
                     ),
                     TextSpan(
-                      text: '${_list.animalAge} साल\n',
+                      text: ': ${_list.animalAge} ${'year'.tr}\n',
                       style: TextStyle(
                           color: Colors.grey[700],
                           fontWeight: FontWeight.bold,
@@ -308,22 +301,33 @@ class _MyCalledListState extends State<MyCalledList> {
     String desc = '';
 
     if (animalInfo.animalType >= 3) {
-      desc =
-          'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल ${(animalInfo.animalType == 6 || animalInfo.animalType == 8 || animalInfo.animalType == 10) ? " की" : "का"} है। ';
+      desc = 'animalTypeAge'.trParams({
+        'animalBreed': animalBreedCheck,
+        'animalTypeCheck': animalTypeCheck,
+        'animalAge': animalInfo.animalAge.toString()
+      });
     } else {
-      desc =
-          'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल की है। ';
+      desc = 'animalTypeAge'.trParams({
+        'animalBreed': animalBreedCheck,
+        'animalTypeCheck': animalTypeCheck,
+        'animalAge': animalInfo.animalAge.toString()
+      });
       if (animalInfo.recentBayatTime != null) {
         desc = desc +
-            'यह ${intToRecentBayaatTime[animalInfo.recentBayatTime]} ब्यायी है। ';
+            'animalRecentBayatTime'.trParams({
+              'recentBayatTime':
+              intToRecentBayaatTime[animalInfo.recentBayatTime],
+            });
       }
       if (animalInfo.pregnantTime != null) {
-        desc =
-            desc + 'यह अभी ${intToPregnantTime[animalInfo.pregnantTime]} है। ';
+        desc = desc +
+            'animalPregnantTime'.trParams(
+                {'pregnantTime': intToPregnantTime[animalInfo.pregnantTime]});
       }
       if (animalInfo.animalMilkCapacity != null) {
         desc = desc +
-            'पिछले बार के हिसाब से दूध कैपेसिटी ${animalInfo.animalMilkCapacity} लीटर है। ';
+            'animalMilkCapacity'.trParams(
+                {'milkCapacity': animalInfo.animalMilkCapacity.toString()});
       }
     }
     return desc + (animalInfo.moreInfo ?? "");
@@ -344,8 +348,10 @@ class _MyCalledListState extends State<MyCalledList> {
               String whatsappUrl = '';
               String whatsappText = '';
 
-              whatsappText =
-                  'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${_list.userName}, ${_list.userAddress} \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
+              whatsappText = 'whatsAppText'.trParams({
+                'userName': _list.userName,
+                'district': _list.userAddress,
+              });
               whatsappUrl =
                   "https://api.whatsapp.com/send/?phone=+91 ${_list.mobile} &text=$whatsappText";
               await UrlLauncher.canLaunch(whatsappUrl) != null
@@ -402,11 +408,24 @@ class _MyCalledListState extends State<MyCalledList> {
                 final shortDynamicLink = await parameters.buildShortLink();
                 final Uri shortUrl = shortDynamicLink.shortUrl;
 
-                Share.share(
-                    _list.animalType <= 2
-                        ? "नस्ल: ${_list.animalBreed}\nजानकारी: ${_descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list)}\nदूध(प्रति दिन): ${_list.animalMilkCapacity} Litre\n\nपशु देखे: ${shortUrl.toString()}"
-                        : "नस्ल: ${_list.animalBreed}\nजानकारी: ${_descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list)}\n\nपशु देखे: ${shortUrl.toString()}",
-                    subject: 'पशु की जानकारी');
+                Share.share(_list.animalType == 1 ||
+                    _list.animalType == 2
+                    ? 'shareTextFemale'.trParams({
+                  'animalBreed': _list.animalBreed,
+                  'description': _descriptionText(_list) ??
+                      'infoNotAvailable'.tr,
+                  'milkCapacity':
+                  _list.animalMilkCapacity.toString(),
+                  'url': shortUrl.toString()
+                })
+                    : 'shareTextMale'.trParams({
+                  'animalBreed': _list.animalBreed,
+                  'description': _descriptionText(_list) ??
+                      'infoNotAvailable'.tr,
+                  'url': shortUrl.toString()
+                }),
+                    subject: 'animalInfo'.tr);
+
               },
               icon: Icon(Icons.share, color: Colors.white, size: 14),
               label: Text('share'.tr,
@@ -507,12 +526,15 @@ class _MyCalledListState extends State<MyCalledList> {
                         height: 50,
                         child: Column(
                           children: [
-                            Text('दूध (प्रति दिन)',
+                            Text('milkPerDay'.tr,
                                 style: TextStyle(
                                     fontSize: 15, fontWeight: FontWeight.bold)),
-                            _list.animalMilkCapacity == null?Text("-") :Text('${_list.animalMilkCapacity} लीटर',
-                                style: TextStyle(
-                                    fontSize: 14, fontWeight: FontWeight.w500))
+                            _list.animalMilkCapacity == null
+                                ? Text("-")
+                                : Text('${_list.animalMilkCapacity} ${'litre'.tr}',
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500))
                           ],
                         ),
                       ),
@@ -533,12 +555,12 @@ class _MyCalledListState extends State<MyCalledList> {
                         height: 50,
                         child: Column(
                           children: [
-                            Text('ब्यात',
+                            Text('animal_is_pregnant'.tr,
                                 style: TextStyle(
                                     fontSize: 15, fontWeight: FontWeight.bold)),
-                           Text(
-                                intToAnimalBayaatMapping[_list.animalBayat]
-                                    ?? "-",
+                            Text(
+                                intToAnimalBayaatMapping[_list.animalBayat] ??
+                                    "-",
                                 style: TextStyle(
                                     fontSize: 14, fontWeight: FontWeight.w500))
                           ],
@@ -565,15 +587,16 @@ class _MyCalledListState extends State<MyCalledList> {
                         height: 50,
                         child: Column(
                           children: [
-                            Text('कब ब्यायी थी?',
+                            Text('when_Bayat'.tr,
                                 style: TextStyle(
                                     fontSize: 15, fontWeight: FontWeight.bold)),
                             Text(
                               _list.isRecentBayat == false ||
                                       _list.isRecentBayat == 'no'.tr
-                                  ? 'ब्यायी नहीं है'
-                                  : intToRecentBayaatTime[_list.recentBayatTime]
-                                      ?? "-",
+                                  ? 'noBayat'.tr
+                                  : intToRecentBayaatTime[
+                                          _list.recentBayatTime] ??
+                                      "-",
                               style: TextStyle(
                                   fontSize: 14, fontWeight: FontWeight.w500),
                             )
@@ -597,16 +620,16 @@ class _MyCalledListState extends State<MyCalledList> {
                         height: 50,
                         child: Column(
                           children: [
-                            Text('कब से गर्भवती है ?',
+                            Text('when_Pregnant'.tr,
                                 style: TextStyle(
                                     fontSize: 15, fontWeight: FontWeight.bold)),
                             Text(
                               _list.isPregnant == null ||
                                       _list.isPregnant == 'no'.tr ||
                                       _list.isPregnant == false
-                                  ? 'गर्भवती नहीं है'
-                                  : intToPregnantTime[_list.pregnantTime]
-                                      ?? "-",
+                                  ? 'noPregnant'.tr
+                                  : intToPregnantTime[_list.pregnantTime] ??
+                                      "-",
                               style: TextStyle(
                                   fontSize: 14, fontWeight: FontWeight.w500),
                             )
@@ -645,8 +668,7 @@ class _MyCalledListState extends State<MyCalledList> {
                   child: Center(child: CircularProgressIndicator())))
           : (myCallList == null || myCallList.isEmpty
               ? Center(
-                  child: Text(
-                    'किसी ग्राहक को अभी तक संपर्क नहीं किया है',
+                  child: Text('notContactedYet'.tr,
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 )
@@ -685,7 +707,7 @@ class _MyCalledListState extends State<MyCalledList> {
                                                     .animalId
                                                     .userAddress ==
                                                 null
-                                            ? 'पता मौजूद नहीं है'
+                                            ? 'addressNotAvailable'.tr
                                             : myCallList[index]
                                                 .animalId
                                                 .userAddress,

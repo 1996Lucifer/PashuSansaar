@@ -102,6 +102,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  String languageCode = '', languageCountryCode = '';
   final playStoreUrl =
       'https://play.google.com/store/apps/details?id=dj.pashusansaar';
   List<String> newVersion, currentVersion;
@@ -114,7 +115,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-
+    getLanguageDetail();
     getMessageOpen();
 
     var initialiseAndroidSettings =
@@ -268,6 +269,15 @@ class _MyAppState extends State<MyApp> {
   }
 
   bool logInBasedOnVersion;
+  getLanguageDetail() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      languageCode = prefs.getString('languageCode') ?? 'hn';
+      languageCountryCode = prefs.getString('languageCountryCode') ?? 'IN';
+    });
+    print(languageCode);
+    print(languageCountryCode);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -280,7 +290,8 @@ class _MyAppState extends State<MyApp> {
       title: 'PashuSansaar',
       debugShowCheckedModeBanner: false,
       translations: Messages(), // translations
-      locale: Locale('hn', 'IN'),
+      locale: Locale(languageCode ?? 'hn', languageCountryCode ?? 'IN'),
+      fallbackLocale: Locale('hn', 'IN'),
       theme: ThemeData(
         fontFamily: 'Mukta',
         primaryColor: appPrimaryColor,

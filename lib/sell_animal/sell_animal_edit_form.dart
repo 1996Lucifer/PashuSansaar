@@ -331,7 +331,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
       builder: (context) {
         return AlertDialog(
           title: Text(
-            'Choose From..',
+            'chooseFrom'.tr,
           ),
           content: Column(
               mainAxisSize: MainAxisSize.min,
@@ -347,7 +347,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                           Navigator.of(context).pop();
                         },
                       ),
-                      Text(" Capture from camera")
+                      Text('chooseFromCamera'.tr)
                     ],
                   ),
                   onTap: () {
@@ -365,7 +365,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                           Navigator.of(context).pop();
                         },
                       ),
-                      Text(" Choose from gallery")
+                      Text('chooseFromGallery'.tr)
                     ],
                   ),
                   onTap: () {
@@ -397,7 +397,6 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
             ],
           ),
         ),
-
         IgnorePointer(
           ignoring: true,
           child: Padding(
@@ -407,22 +406,12 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
               showSelectedItem: true,
               items: constant.animalType,
               label: 'animal_type'.tr,
-              hint: 'animal_type'.tr,
               selectedItem: widget.animalInfo.animalType > 4
-                  ? constant.animalType[4]
+                  ? intToAnimalOtherTypeMapping[widget.animalInfo.animalType]
                   : intToAnimalTypeMapping[widget.animalInfo.animalType],
-              onChanged: (String type) {
-                setState(() {
-                  animalUpdationData['animalType'] = animalTypeMapping[type];
-
-                  if (animalUpdationData['animalType'] < 5) {
-                    _animalOtherType = '';
-                  } else {
-                    _animalOtherType = type;
-                  }
-                });
-              },
               dropdownSearchDecoration: InputDecoration(
+                  fillColor: Colors.grey,
+                  filled: true,
                   contentPadding:
                       EdgeInsets.symmetric(vertical: 1, horizontal: 10),
                   border: OutlineInputBorder(
@@ -431,35 +420,6 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
             ),
           ),
         ),
-        if (_animalOtherType.isNotEmpty) ...[
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-            child: DropdownSearch<String>(
-              mode: Mode.BOTTOM_SHEET,
-              showSelectedItem: true,
-              items: constant.animalTypeOther,
-              label: 'other_animal'.tr,
-              hint: 'other_animal'.tr,
-              selectedItem:
-                  intToAnimalOtherTypeMapping[widget.animalInfo.animalType],
-              onChanged: (String otherType) {
-                setState(() {
-                  animalUpdationData['animalType'] =
-                      animalOtherTypeMapping[otherType];
-                  if (animalUpdationData['animalType'] < 5) {
-                    _animalOtherType = '';
-                  }
-                });
-              },
-              dropdownSearchDecoration: InputDecoration(
-                  contentPadding:
-                      EdgeInsets.symmetric(vertical: 1, horizontal: 10),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(5),
-                  )),
-            ),
-          ),
-        ],
         Padding(
           padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
           child: Divider(
@@ -1776,15 +1736,13 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'सूचना -',
+                                        'information'.tr + ' -',
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
                                       Expanded(
-                                        child: Text(
-                                          ' ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें, खासकर कि गूगल पे, फ़ोन पे, वरना नुकसान हो सकता है |',
-                                        ),
+                                        child: Text('marqueeText'.tr),
                                       ),
                                     ],
                                   )

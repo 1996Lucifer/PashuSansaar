@@ -81,34 +81,47 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
   //   return data;
   // }
 
-  _descriptionText(_list) {
-    String animalBreedCheck =
-        (_list.animalBreed == 'not_known'.tr) ? "" : _list.animalBreed;
-    String animalTypeCheck = (_list.animalType >= 5)
-        ? intToAnimalOtherTypeMapping[_list.animalType]
-        : intToAnimalTypeMapping[_list.animalType];
+  _descriptionText(animalInfo) {
+    String animalBreedCheck = (animalInfo.animalBreed == 'not_known'.tr)
+        ? ""
+        : animalInfo.animalBreed;
+    String animalTypeCheck = (animalInfo.animalType >= 5)
+        ? intToAnimalOtherTypeMapping[animalInfo.animalType]
+        : intToAnimalTypeMapping[animalInfo.animalType];
 
     String desc = '';
 
-    if (_list.animalType >= 3) {
-      desc =
-          'ये $animalBreedCheck $animalTypeCheck ${_list.animalAge} साल ${(_list.animalType == 6 || _list.animalType == 8 || _list.animalType == 10) ? " की" : "का"} है। ';
+    if (animalInfo.animalType >= 3) {
+      desc = 'animalTypeAge'.trParams({
+        'animalBreed': animalBreedCheck,
+        'animalTypeCheck': animalTypeCheck,
+        'animalAge': animalInfo.animalAge.toString()
+      });
     } else {
-      desc =
-          'ये $animalBreedCheck $animalTypeCheck ${_list.animalAge} साल की है। ';
-      if (_list.recentBayatTime != null) {
+      desc = 'animalTypeAge'.trParams({
+        'animalBreed': animalBreedCheck,
+        'animalTypeCheck': animalTypeCheck,
+        'animalAge': animalInfo.animalAge.toString()
+      });
+      if (animalInfo.recentBayatTime != null) {
         desc = desc +
-            'यह ${intToRecentBayaatTime[_list.recentBayatTime]} ब्यायी है। ';
+            'animalRecentBayatTime'.trParams({
+              'recentBayatTime':
+              intToRecentBayaatTime[animalInfo.recentBayatTime],
+            });
       }
-      if (_list.pregnantTime != null) {
-        desc = desc + 'यह अभी ${intToPregnantTime[_list.pregnantTime]} है। ';
-      }
-      if (_list.animalMilkCapacity != null) {
+      if (animalInfo.pregnantTime != null) {
         desc = desc +
-            'पिछले बार के हिसाब से दूध कैपेसिटी ${_list.animalMilkCapacity} लीटर है। ';
+            'animalPregnantTime'.trParams(
+                {'pregnantTime': intToPregnantTime[animalInfo.pregnantTime]});
+      }
+      if (animalInfo.animalMilkCapacity != null) {
+        desc = desc +
+            'animalMilkCapacity'.trParams(
+                {'milkCapacity': animalInfo.animalMilkCapacity.toString()});
       }
     }
-    return desc + (_list.moreInfo ?? "");
+    return desc + (animalInfo.moreInfo ?? "");
   }
 
   Padding _buildImageDescriptionWidget(double width, _list) => Padding(
@@ -563,66 +576,6 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
     );
   }
 
-/////<<<<<<<<<<<< previous dialog box >>>>>>>>>>>>>>>
-
-//   showRemoveAnimalDialog(index) {
-//     return showDialog(
-//       context: context,
-//       builder: (context) {
-//         return AlertDialog(
-//           title: Text('warning'.tr),
-//           content: Text('remove_animal_warning_text'.tr),
-//           actions: <Widget>[
-//             RaisedButton(
-//                 child: Text(
-//                   'no'.tr,
-//                   style: TextStyle(
-//                       color: Colors.white,
-//                       fontWeight: FontWeight.bold,
-//                       fontSize: 16),
-//                 ),
-//                 onPressed: () => Navigator.of(context).pop()),
-//             RaisedButton(
-//               child: Text(
-//                 'yes'.tr,
-//                 style: TextStyle(
-//                     color: Colors.white,
-//                     fontWeight: FontWeight.bold,
-//                     fontSize: 16),
-//               ),
-//               onPressed: () {
-//                 Navigator.of(context).pop();
-//                 FirebaseFirestore.instance
-//                     .collection('callingInfo')
-//                     .doc(widget.animalInfo[index]['uniqueId'])
-//                     .collection('interestedBuyers')
-//                     .orderBy('dateOfSaving')
-//                     .limit(1)
-//                     .get()
-//                     .then(
-//                   (value) {
-//                     if (value.docs.length == 0) {
-//                       _showPriceDialog(index);
-//                     } else {
-//                       _openAddEntryDialog(index);
-//                     }
-//                   },
-//                 );
-//               },
-//             ),
-//           ],
-//         );
-//       },
-//     );
-//   }
-// }
-
-//
-//
-//
-//
-//<<<<<<<<<<<<<<< new build >>>>>>>>>>>>>>>>>>>
-
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -635,7 +588,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
               child: Column(
                 children: [
                   Text(
-                    'आपका कोई पशु दर्ज़ नहीं है| कृपया पशु दर्ज़ करे',
+                    'addAnimal'.tr,
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -740,7 +693,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                                           child: Row(
                                             children: [
                                               Text(
-                                                'इच्छुक खरीदार की सूचि',
+                                                'interestedBuyer'.tr,
                                                 style: TextStyle(
                                                     color: appPrimaryColor,
                                                     fontSize: 15),
@@ -791,7 +744,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
                                           children: [
-                                            Text("इच्छुक खरीदार की सूचि देखे",
+                                            Text('seeInterestedBuyer'.tr,
                                                 style: TextStyle(
                                                     fontSize: 16,
                                                     fontWeight:
@@ -813,194 +766,3 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
     );
   }
 }
-
-//////////////////// Previous Build ???????????????
-
-// @override
-// Widget build(BuildContext context) {
-//   super.build(context);
-//   final double width = MediaQuery.of(context).size.width;
-//   return Scaffold(
-//     backgroundColor: Colors.grey[100],
-//     appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),
-//     body: myAnimalList == null || myAnimalList.isEmpty
-//         ? Center(
-//       child: Column(
-//         children: [
-//           Text(
-//             'आपका कोई पशु दर्ज़ नहीं है| कृपया पशु दर्ज़ करे',
-//             style:
-//             TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-//           ),
-//           _buildSellingFormButton(context)
-//         ],
-//       ),
-//     )
-//         : Column(
-//       mainAxisAlignment: MainAxisAlignment.start,
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       children: [
-//         widget.showExtraData
-//             ? _buildSellingFormButton(context)
-//             : SizedBox.shrink(),
-//         widget.showExtraData
-//             ? Padding(
-//           padding: const EdgeInsets.all(8.0),
-//           child: Container(
-//             height: 30,
-//             child: Text('your_selling_animal_info'.tr,
-//                 style: TextStyle(
-//                     fontSize: 20,
-//                     fontWeight: FontWeight.bold,
-//                     color: Colors.black)),
-//           ),
-//         )
-//             : SizedBox.shrink(),
-//         ListView.builder(
-//           shrinkWrap: true,
-//           physics: NeverScrollableScrollPhysics(),
-//           itemCount: widget.animalInfo.length,
-//           itemBuilder: (context, index) {
-//             return Padding(
-//               padding: const EdgeInsets.all(8.0),
-//               child: Card(
-//                 key: Key(widget.animalInfo[index]['uniqueId']),
-//                 shape: RoundedRectangleBorder(
-//                   borderRadius: BorderRadius.circular(10.0),
-//                 ),
-//                 elevation: 5,
-//                 child: Column(
-//                   crossAxisAlignment: CrossAxisAlignment.start,
-//                   children: [
-//                     _buildBreedTypeWidget(index),
-//                     _buildDateWidget(index),
-//                     _buildImageDescriptionWidget(width, index),
-//                     widget.showExtraData
-//                         ? Row(
-//                       textDirection: TextDirection.rtl,
-//                       mainAxisAlignment:
-//                       MainAxisAlignment.spaceBetween,
-//                       children: [
-//                         TextButton(
-//                             onPressed: () => Navigator.push(
-//                               context,
-//                               MaterialPageRoute(
-//                                 builder: (context) =>
-//                                     SellAnimalEditForm(
-//                                       index: index,
-//                                       userName: widget.userName,
-//                                       userMobileNumber: widget
-//                                           .userMobileNumber,
-//                                     ),
-//                               ),
-//                             ),
-//                             child: Row(
-//                               children: [
-//                                 Text(
-//                                   'change_info'.tr,
-//                                   style: TextStyle(
-//                                       color: appPrimaryColor,
-//                                       fontSize: 15),
-//                                 ),
-//                                 SizedBox(
-//                                   width: 5,
-//                                 ),
-//                                 FaIcon(
-//                                   FontAwesomeIcons.edit,
-//                                   color: appPrimaryColor,
-//                                   size: 16,
-//                                 )
-//                               ],
-//                             )),
-//                         TextButton(
-//                             onPressed: () => Navigator.push(
-//                                 context,
-//                                 MaterialPageRoute(
-//                                     builder: (context) =>
-//                                         InterestedBuyer(
-//                                           listId: widget.animalInfo[
-//                                           index][
-//                                           'uniqueId'] ??
-//                                               '',
-//                                           index: index,
-//                                           animalInfo:
-//                                           widget.animalInfo,
-//                                         ))),
-//                             child: Row(
-//                               children: [
-//                                 Text(
-//                                   'इच्छुक खरीदार की सूचि',
-//                                   style: TextStyle(
-//                                       color: appPrimaryColor,
-//                                       fontSize: 15),
-//                                 ),
-//                                 SizedBox(
-//                                   width: 5,
-//                                 ),
-//                                 FaIcon(
-//                                   FontAwesomeIcons.arrowRight,
-//                                   color: appPrimaryColor,
-//                                   size: 16,
-//                                 )
-//                               ],
-//                             )),
-//                       ],
-//                     )
-//                         : GestureDetector(
-//                       onTap: () => Navigator.push(
-//                           context,
-//                           MaterialPageRoute(
-//                               builder: (context) =>
-//                                   InterestedBuyer(
-//                                     // key:
-//                                     //     Key(widget.animalInfo[index]
-//                                     //         ['uniqueId']),
-//                                     listId:
-//                                     widget.animalInfo[index]
-//                                     ['uniqueId'] ??
-//                                         '',
-//                                     index: index,
-//                                     animalInfo:
-//                                     widget.animalInfo,
-//                                   ))),
-//                       child: Container(
-//                         decoration: BoxDecoration(
-//                           color: Colors.grey[100],
-//                           boxShadow: [
-//                             BoxShadow(
-//                               color: Colors.grey,
-//                               blurRadius: 1.0,
-//                             ),
-//                           ],
-//                           borderRadius:
-//                           BorderRadius.circular(8),
-//                         ),
-//                         height: 50,
-//                         child: Padding(
-//                           padding: const EdgeInsets.all(8.0),
-//                           child: Row(
-//                             mainAxisAlignment:
-//                             MainAxisAlignment.spaceBetween,
-//                             children: [
-//                               Text("इच्छुक खरीदार की सूचि देखे",
-//                                   style: TextStyle(
-//                                       fontSize: 16,
-//                                       fontWeight:
-//                                       FontWeight.bold)),
-//                               Icon(Icons.arrow_forward_ios)
-//                             ],
-//                           ),
-//                         ),
-//                       ),
-//                     )
-//                   ],
-//                 ),
-//               ),
-//             );
-//           },
-//         ),
-//         // ))
-//       ],
-//     ),
-//   );
-// }

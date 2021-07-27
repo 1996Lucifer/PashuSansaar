@@ -368,8 +368,8 @@ class _HomeScreenState extends State<HomeScreen> {
       return showDialog(
         context: context,
         builder: (context) => new AlertDialog(
-          title: new Text('एप बंद करे ?'),
-          content: new Text('क्या आप एप बंद करना चाहते हैं'),
+          title: new Text('closeApp'.tr),
+          content: new Text('wantToCloseApp'.tr),
           actions: <Widget>[
             new TextButton(
               onPressed: () => Navigator.of(context).pop(false),

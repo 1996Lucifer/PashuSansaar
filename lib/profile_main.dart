@@ -130,7 +130,7 @@ class ProfileMainState extends State<ProfileMain>
                 builder: (context) {
                   return AlertDialog(
                       title: Text('Success'.tr),
-                      content: Text('प्रोफाइल फोटो अपलोड कर दिया गया है |'),
+                      content: Text('photoUploaded'.tr),
                       actions: <Widget>[
                         TextButton(
                             child: Text(
@@ -189,7 +189,7 @@ class ProfileMainState extends State<ProfileMain>
                 builder: (context) {
                   return AlertDialog(
                       title: Text('Success'.tr),
-                      content: Text('प्रोफाइल फोटो अपलोड कर दिया गया है |'),
+                      content: Text('photoUploaded'.tr),
                       actions: <Widget>[
                         TextButton(
                             child: Text(
@@ -210,7 +210,7 @@ class ProfileMainState extends State<ProfileMain>
       builder: (context) {
         return AlertDialog(
           title: Text(
-            'Choose From..',
+            'chooseFrom'.tr,
           ),
           content: Column(
               mainAxisSize: MainAxisSize.min,
@@ -226,7 +226,7 @@ class ProfileMainState extends State<ProfileMain>
                           Navigator.of(context).pop();
                         },
                       ),
-                      Text(" Capture from camera")
+                      Text('chooseFromCamera'.tr)
                     ],
                   ),
                   onTap: () {
@@ -244,7 +244,7 @@ class ProfileMainState extends State<ProfileMain>
                           Navigator.of(context).pop();
                         },
                       ),
-                      Text(" Choose from gallery")
+                      Text('chooseFromGallery'.tr)
                     ],
                   ),
                   onTap: () {
@@ -297,7 +297,7 @@ class ProfileMainState extends State<ProfileMain>
                           return AlertDialog(
                               title: Text('Success'.tr),
                               content:
-                                  Text('प्रोफाइल फोटो अपलोड कर दिया गया है |'),
+                                  Text('photoUploaded'.tr),
                               actions: <Widget>[
                                 TextButton(
                                     child: Text(
@@ -342,7 +342,7 @@ class ProfileMainState extends State<ProfileMain>
           ),
           GestureDetector(
             onTap: () => Share.share(
-                'पशुसंसार (पशु बेचने वाली फ्री ऐप) पर मेरे साथ जुड़ें। मेरा कोड ADFTR6 दर्ज करें और ₹50,000 जीतने का मौका पाएं। \n\n ऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar'),
+                'appShareText'.tr),
             child: Padding(
               padding: const EdgeInsets.only(right: 8.0),
               child: Icon(Icons.share),
@@ -360,7 +360,7 @@ class ProfileMainState extends State<ProfileMain>
                     Expanded(
                         flex: 1,
                         child: Text(
-                          'सूचना -',
+                          'information'.tr + ' -',
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 15),
                         )),
@@ -368,7 +368,7 @@ class ProfileMainState extends State<ProfileMain>
                       flex: 7,
                       child: Marquee(
                         text:
-                            ' ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है',
+                            'marqueeText'.tr,
                         pauseAfterRound: Duration(seconds: 1),
                         blankSpace: 20,
                       ),
@@ -520,7 +520,7 @@ class ProfileMainState extends State<ProfileMain>
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text("मेरे पशु",
+                                      Text('myAnimals'.tr,
                                           style: TextStyle(
                                               fontSize: 16,
                                               fontWeight: FontWeight.bold)),
@@ -563,7 +563,7 @@ class ProfileMainState extends State<ProfileMain>
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text("मेरे कॉल्स",
+                                      Text('myCalls'.tr,
                                           style: TextStyle(
                                               fontSize: 16,
                                               fontWeight: FontWeight.bold)),
@@ -610,7 +610,7 @@ class ProfileMainState extends State<ProfileMain>
                                           fontWeight: FontWeight.bold,
                                           fontSize: 16),
                                       text:
-                                          'अगर कोई भी शिकायत या सुझाव हो तो व्हाट्सप्प पर हमसे संपर्क करें',
+                                          'whatsAppUs'.tr,
                                     ),
                                   ),
                                 ),
@@ -632,7 +632,7 @@ class ProfileMainState extends State<ProfileMain>
                     padding: const EdgeInsets.all(12.0),
                     child: GestureDetector(
                       onTap: () => Share.share(
-                          'पशुसंसार (पशु बेचने वाली फ्री ऐप) पर मेरे साथ जुड़ें। मेरा कोड ADFTR6 दर्ज करें और ₹10,000 जीतने का मौका पाएं। \n\n ऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar'),
+                          'appShareText'.tr),
                       child: DottedBorder(
                         strokeWidth: 2,
                         borderType: BorderType.RRect,
@@ -658,7 +658,7 @@ class ProfileMainState extends State<ProfileMain>
                                           fontWeight: FontWeight.bold,
                                           fontSize: 16),
                                       text:
-                                          'पशुसंसार एप को अपने पशुपालक दोस्तों से शेयर करे और हर हफ्ते ₹10000 जीतने का मौका पाए',
+                                      'shareWhatsAppText'.tr,
                                     ),
                                   ),
                                 ),

@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pashusansaar/intersted_buyers/interestedBuyerController.dart';
@@ -12,7 +11,6 @@ import 'utils/colors.dart';
 import 'utils/reusable_widgets.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart' as intl;
-import 'package:paginate_firestore/paginate_firestore.dart';
 import 'package:url_launcher/url_launcher.dart' as UrlLauncher;
 
 class InterestedBuyer extends StatefulWidget {
@@ -177,37 +175,48 @@ class _InterestedBuyerState extends State<InterestedBuyer> {
 
 
 
-  _descriptionText(animalInfo){
-  String animalBreedCheck = (animalInfo.animalBreed == 'not_known'.tr)
-      ? ""
-      : animalInfo.animalBreed;
-  String animalTypeCheck = (animalInfo.animalType >= 5)
-      ? intToAnimalOtherTypeMapping[animalInfo.animalType]
-      : intToAnimalTypeMapping[animalInfo.animalType];
+  _descriptionText(animalInfo) {
+    String animalBreedCheck = (animalInfo.animalBreed == 'not_known'.tr)
+        ? ""
+        : animalInfo.animalBreed;
+    String animalTypeCheck = (animalInfo.animalType >= 5)
+        ? intToAnimalOtherTypeMapping[animalInfo.animalType]
+        : intToAnimalTypeMapping[animalInfo.animalType];
 
-  String desc = '';
+    String desc = '';
 
-  if (animalInfo.animalType >= 3) {
-  desc =
-  'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल ${(animalInfo.animalType == 6 || animalInfo.animalType == 8 || animalInfo.animalType == 10) ? " की" : "का"} है। ';
-  } else {
-  desc =
-  'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल की है। ';
-  if (animalInfo.recentBayatTime != null) {
-  desc = desc +
-  'यह ${intToRecentBayaatTime[animalInfo.recentBayatTime]} ब्यायी है। ';
+    if (animalInfo.animalType >= 3) {
+      desc = 'animalTypeAge'.trParams({
+        'animalBreed': animalBreedCheck,
+        'animalTypeCheck': animalTypeCheck,
+        'animalAge': animalInfo.animalAge.toString()
+      });
+    } else {
+      desc = 'animalTypeAge'.trParams({
+        'animalBreed': animalBreedCheck,
+        'animalTypeCheck': animalTypeCheck,
+        'animalAge': animalInfo.animalAge.toString()
+      });
+      if (animalInfo.recentBayatTime != null) {
+        desc = desc +
+            'animalRecentBayatTime'.trParams({
+              'recentBayatTime':
+              intToRecentBayaatTime[animalInfo.recentBayatTime],
+            });
+      }
+      if (animalInfo.pregnantTime != null) {
+        desc = desc +
+            'animalPregnantTime'.trParams(
+                {'pregnantTime': intToPregnantTime[animalInfo.pregnantTime]});
+      }
+      if (animalInfo.animalMilkCapacity != null) {
+        desc = desc +
+            'animalMilkCapacity'.trParams(
+                {'milkCapacity': animalInfo.animalMilkCapacity.toString()});
+      }
+    }
+    return desc + (animalInfo.moreInfo ?? "");
   }
-  if (animalInfo.pregnantTime != null) {
-  desc =
-  desc + 'यह अभी ${intToPregnantTime[animalInfo.pregnantTime]} है। ';
-  }
-  if (animalInfo.animalMilkCapacity != null) {
-  desc = desc +
-  'पिछले बार के हिसाब से दूध कैपेसिटी ${animalInfo.animalMilkCapacity} लीटर है। ';
-  }
-  }
-  return desc + (animalInfo.moreInfo ?? "");
-}
 
   Padding _buildImageDescriptionWidget(double width, _list) => Padding(
         padding: const EdgeInsets.all(8.0),
@@ -256,8 +265,7 @@ class _InterestedBuyerState extends State<InterestedBuyer> {
       body: SingleChildScrollView(
         child: widget.animalInfo == []
             ? Center(
-                child: Text(
-                  'आपका कोई पशु दर्ज़ नहीं है',
+                child: Text('noAnimalPresent'.tr,
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
               )
@@ -287,7 +295,7 @@ class _InterestedBuyerState extends State<InterestedBuyer> {
                       ),
                     ),
                   ),
-                  Text('इच्छुक खरीदार की सूचि',
+                  Text('interestedBuyer'.tr,
                       style:
                           TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   Container(
@@ -296,7 +304,7 @@ class _InterestedBuyerState extends State<InterestedBuyer> {
                             interestedBuyers.isEmpty
                         ? Center(
                             child: Text(
-                              'किसी ग्राहक ने अभी तक संपर्क नहीं किया है',
+                              'notContactedYet'.tr,
                               style: TextStyle(
                                   fontSize: 20, fontWeight: FontWeight.bold),
                             ),
@@ -407,7 +415,7 @@ class _InterestedBuyerState extends State<InterestedBuyer> {
                                             child: GestureDetector(
                                               onTap: () async {
                                                 String whatsappText =
-                                                    'नमस्कार ${interestedBuyers[index].userId.name}, आपको मेरा पशु अगर पसंद आया हो तो फ़ोन पे बात करें?';
+                                                    'interestedBuyerWhatsAppText'.trParams({'name':interestedBuyers[index].userId.name});
                                                 String whatsappUrl =
                                                     "https://api.whatsapp.com/send/?phone=+91 ${interestedBuyers[index].userId.mobile}&text=$whatsappText";
                                                 await UrlLauncher.canLaunch(
@@ -464,372 +472,3 @@ class _InterestedBuyerState extends State<InterestedBuyer> {
     );
   }
 }
-
-//<<<<<<<<<<<<<<<<<<< Old firebase build >>>>>>>>>>>>>>>>>>>>>>>
-
-//               documentSnapshot
-//                       .data()[
-//                   'userName'],
-//               style: TextStyle(
-//                   fontSize: 15,
-//                   fontWeight:
-//                       FontWeight
-//                           .w400),
-//             ),
-//           ],
-//         ),
-//         Row(
-//           children: [
-//             FaIcon(
-//               FontAwesomeIcons
-//                   .clock,
-//               color:
-//                   Colors.grey[500],
-//               size: 13,
-//             ),
-//             SizedBox(
-//               width: 5,
-//             ),
-//             Text(
-//                 ReusableWidgets.epochToDateTime(
-//                     documentSnapshot
-//                             .data()[
-//                         'dateOfSaving']),
-//                 style: TextStyle(
-//                     fontSize: 15,
-//                     fontWeight:
-//                         FontWeight
-//                             .w400)),
-//           ],
-//         ),
-//         Row(
-//           children: [
-//             Icon(
-//               Icons.location_on,
-//               color:
-//                   Colors.grey[500],
-//               size: 13,
-//             ),
-//             SizedBox(
-//               width: 5,
-//             ),
-//             Expanded(
-//               child: Text(
-//                   documentSnapshot
-//                           .data()[
-//                       'userAddress'],
-//                   style: TextStyle(
-//                       fontSize: 15,
-//                       fontWeight:
-//                           FontWeight
-//                               .w400)),
-//             ),
-//           ],
-//         ),
-//       ],
-//     )),
-// Expanded(
-//   flex: 1,
-//   child: Row(
-//     children: [
-//       Expanded(
-//           child: GestureDetector(
-//         onTap: () {
-//           return UrlLauncher.launch(
-//               'tel:+91 ${documentSnapshot.data()['userMobileNumber']}');
-//         },
-//         child: FaIcon(
-//           FontAwesomeIcons.phoneAlt,
-//           color: secondaryColor,
-//           size: 30,
-//         ),
-//       )),
-//       SizedBox(width: 12),
-//       Expanded(
-//           child: GestureDetector(
-//         onTap: () async {
-//           String whatsappText =
-//               'नमस्कार ${documentSnapshot.data()['userName']}, आपको मेरा पशु अगर पसंद आया हो तो फ़ोन पे बात करें?';
-//           String whatsappUrl =
-//               "https://api.whatsapp.com/send/?phone=+91 ${documentSnapshot.data()['userMobileNumber']}&text=$whatsappText";
-//           await UrlLauncher.canLaunch(
-//                       whatsappUrl) !=
-//                   null
-//               ? UrlLauncher.launch(
-//                   Uri.encodeFull(
-//                       whatsappUrl))
-//               : ScaffoldMessenger
-//                       .of(context)
-//                   .showSnackBar(
-//                       SnackBar(
-//                   content: Text(
-//                       '${documentSnapshot.data()['userMobileNumber']} is not present in Whatsapp'),
-//                   duration: Duration(
-//                       milliseconds:
-//                           300),
-//                   padding: EdgeInsets
-//                       .symmetric(
-//                           horizontal:
-//                               8),
-//                   behavior:
-//                       SnackBarBehavior
-//                           .floating,
-//                   shape:
-//                       RoundedRectangleBorder(
-//                     borderRadius:
-//                         BorderRadius
-//                             .circular(
-//                                 10.0),
-//                   ),
-//                 ));
-//         },
-//         child: FaIcon(
-//           FontAwesomeIcons.whatsapp,
-//           color: greenColor,
-//           size: 30,
-//         ),
-//       )),
-
-//   @override
-//   Widget build(BuildContext context) {
-//     double width = MediaQuery.of(context).size.width;
-//     return Scaffold(
-//         backgroundColor: Colors.grey[100],
-//         appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),
-//         body: SingleChildScrollView(
-//           child: widget.animalInfo == []
-//               ? Center(
-//                   child: Text(
-//                     'आपका कोई पशु दर्ज़ नहीं है',
-//                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-//                   ),
-//                 )
-//               : Column(
-//                   children: [
-//                     Container(
-//                       height: 210,
-//                       child: Padding(
-//                           padding: const EdgeInsets.all(8.0),
-//                           child: Card(
-//                               // key: Key(
-//                               //     widget.animalInfo[widget.index]['uniqueId']),
-//                               shape: RoundedRectangleBorder(
-//                                 borderRadius: BorderRadius.circular(10.0),
-//                               ),
-//                               elevation: 5,
-//                               child: Column(
-//                                   crossAxisAlignment: CrossAxisAlignment.start,
-//                                   mainAxisSize: MainAxisSize.min,
-//                                   children: [
-//                                     Text(widget.animalInfo.toString()),
-//                                    //_buildBreedTypeWidget(),
-//                                    // _buildImageDescriptionWidget(
-//                                     //   width, widget.index),
-//                                   ]))),
-//                     ),
-//                     Text('इच्छुक खरीदार की सूचि',
-//                         style: TextStyle(
-//                             fontSize: 16, fontWeight: FontWeight.bold)),
-//                     Container(
-//                       height: MediaQuery.of(context).size.height - 300,
-//                       child: PaginateFirestore(
-//                           physics: NeverScrollableScrollPhysics(),
-//                           itemsPerPage: 10,
-//                           initialLoader: Center(
-//                             child: CircularProgressIndicator(
-//                               backgroundColor: appPrimaryColor,
-//                             ),
-//                           ),
-//                           bottomLoader: Center(
-//                             child: CircularProgressIndicator(
-//                               backgroundColor: appPrimaryColor,
-//                             ),
-//                           ),
-//                           emptyDisplay: Center(
-//                             child: Text(
-//                               'किसी ग्राहक ने अभी तक संपर्क नहीं किया है',
-//                               style: TextStyle(
-//                                   fontSize: 20, fontWeight: FontWeight.bold),
-//                             ),
-//                           ),
-//                           itemBuilderType: PaginateBuilderType
-//                               .listView, // listview and gridview
-//                           itemBuilder: (index, context, documentSnapshot) =>
-//                               documentSnapshot.data() == null
-//                                   ? Center(
-//                                       child: Text(
-//                                       'किसी ग्राहक ने अभी तक संपर्क नहीं किया है',
-//                                       style: TextStyle(
-//                                           fontSize: 20,
-//                                           fontWeight: FontWeight.bold),
-//                                     ))
-//                                   : Card(
-//                                       child: Padding(
-//                                         padding: const EdgeInsets.all(8.0),
-//                                         child: Row(
-//                                           mainAxisAlignment:
-//                                               MainAxisAlignment.spaceBetween,
-//                                           children: [
-//                                             Expanded(
-//                                                 flex: 3,
-//                                                 child: Column(
-//                                                   crossAxisAlignment:
-//                                                       CrossAxisAlignment.start,
-//                                                   children: [
-//                                                     Row(
-//                                                       children: [
-//                                                         FaIcon(
-//                                                           FontAwesomeIcons
-//                                                               .userAlt,
-//                                                           color:
-//                                                               Colors.grey[500],
-//                                                           size: 13,
-//                                                         ),
-//                                                         SizedBox(
-//                                                           width: 5,
-//                                                         ),
-//                                                         Text(
-//                                                           documentSnapshot
-//                                                                   .data()[
-//                                                               'userName'],
-//                                                           style: TextStyle(
-//                                                               fontSize: 15,
-//                                                               fontWeight:
-//                                                                   FontWeight
-//                                                                       .w400),
-//                                                         ),
-//                                                       ],
-//                                                     ),
-//                                                     Row(
-//                                                       children: [
-//                                                         FaIcon(
-//                                                           FontAwesomeIcons
-//                                                               .clock,
-//                                                           color:
-//                                                               Colors.grey[500],
-//                                                           size: 13,
-//                                                         ),
-//                                                         SizedBox(
-//                                                           width: 5,
-//                                                         ),
-//                                                         Text(
-//                                                             ReusableWidgets.epochToDateTime(
-//                                                                 documentSnapshot
-//                                                                         .data()[
-//                                                                     'dateOfSaving']),
-//                                                             style: TextStyle(
-//                                                                 fontSize: 15,
-//                                                                 fontWeight:
-//                                                                     FontWeight
-//                                                                         .w400)),
-//                                                       ],
-//                                                     ),
-//                                                     Row(
-//                                                       children: [
-//                                                         Icon(
-//                                                           Icons.location_on,
-//                                                           color:
-//                                                               Colors.grey[500],
-//                                                           size: 13,
-//                                                         ),
-//                                                         SizedBox(
-//                                                           width: 5,
-//                                                         ),
-//                                                         Expanded(
-//                                                           child: Text(
-//                                                               documentSnapshot
-//                                                                       .data()[
-//                                                                   'userAddress'],
-//                                                               style: TextStyle(
-//                                                                   fontSize: 15,
-//                                                                   fontWeight:
-//                                                                       FontWeight
-//                                                                           .w400)),
-//                                                         ),
-//                                                       ],
-//                                                     ),
-//                                                   ],
-//                                                 )),
-//                                             Expanded(
-//                                               flex: 1,
-//                                               child: Row(
-//                                                 children: [
-//                                                   Expanded(
-//                                                       child: GestureDetector(
-//                                                     onTap: () {
-//                                                       return UrlLauncher.launch(
-//                                                           'tel:+91 ${documentSnapshot.data()['userMobileNumber']}');
-//                                                     },
-//                                                     child: FaIcon(
-//                                                       FontAwesomeIcons.phoneAlt,
-//                                                       color: secondaryColor,
-//                                                       size: 30,
-//                                                     ),
-//                                                   )),
-//                                                   SizedBox(width: 12),
-//                                                   Expanded(
-//                                                       child: GestureDetector(
-//                                                     onTap: () async {
-//                                                       String whatsappText =
-//                                                           'नमस्कार ${documentSnapshot.data()['userName']}, आपको मेरा पशु अगर पसंद आया हो तो फ़ोन पे बात करें?';
-//                                                       String whatsappUrl =
-//                                                           "https://api.whatsapp.com/send/?phone=+91 ${documentSnapshot.data()['userMobileNumber']}&text=$whatsappText";
-//                                                       await UrlLauncher.canLaunch(
-//                                                                   whatsappUrl) !=
-//                                                               null
-//                                                           ? UrlLauncher.launch(
-//                                                               Uri.encodeFull(
-//                                                                   whatsappUrl))
-//                                                           : ScaffoldMessenger
-//                                                                   .of(context)
-//                                                               .showSnackBar(
-//                                                                   SnackBar(
-//                                                               content: Text(
-//                                                                   '${documentSnapshot.data()['userMobileNumber']} is not present in Whatsapp'),
-//                                                               duration: Duration(
-//                                                                   milliseconds:
-//                                                                       300),
-//                                                               padding: EdgeInsets
-//                                                                   .symmetric(
-//                                                                       horizontal:
-//                                                                           8),
-//                                                               behavior:
-//                                                                   SnackBarBehavior
-//                                                                       .floating,
-//                                                               shape:
-//                                                                   RoundedRectangleBorder(
-//                                                                 borderRadius:
-//                                                                     BorderRadius
-//                                                                         .circular(
-//                                                                             10.0),
-//                                                               ),
-//                                                             ));
-//                                                     },
-//                                                     child: FaIcon(
-//                                                       FontAwesomeIcons.whatsapp,
-//                                                       color: greenColor,
-//                                                       size: 30,
-//                                                     ),
-//                                                   )),
-//                                                 ],
-//                                               ),
-//                                             ),
-//                                           ],
-//                                         ),
-//                                       ),
-//                                     ),
-//                           // orderBy is compulsary to enable pagination
-//                           query: FirebaseFirestore.instance
-//                               .collection('callingInfo')
-//                               // .doc('08303159')
-//                               .doc(widget.listId)
-//                               .collection('interestedBuyers')
-//                               .orderBy('dateOfSaving'),
-//                           isLive: false // to fetch real-time data
-//                           ),
-//                     )
-//                   ],
-//                 ),
-//         ));
-//   }
-// }

@@ -507,7 +507,7 @@ class _BuyAnimalState extends State<BuyAnimal>
           children: [
             Padding(
               padding: const EdgeInsets.only(top: 16.0, bottom: 8),
-              child: Text("कितनी दुरी तक के पशु दिखाए"),
+              child: Text('animalDistance'.tr),
             ),
             Wrap(
                 children: radius
@@ -568,8 +568,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                   ? Center(
                       child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text(
-                          'जानकारी उपलब्ध नहीं है| कोई और चुनाव करके कोशिश करे |',
+                      child: Text('infoNotAvailableChooseOther'.tr,
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
@@ -783,7 +782,11 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                   }
 
                                                   whatsappText =
-                                                      'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${widget.userName}, ${prefs.getString('district')} \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
+                                                      'whatsAppText'.trParams({
+                                                    'userName': widget.userName,
+                                                    'district': prefs
+                                                        .getString('district'),
+                                                  });
                                                   whatsappUrl =
                                                       "https://api.whatsapp.com/send/?phone=+91 $myNum &text=$whatsappText";
                                                   await UrlLauncher.canLaunch(
@@ -899,7 +902,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                 padding: const EdgeInsets.only(
                                                     left: 12.0),
                                                 child: Text(
-                                                  'कौन सा पशु खरीदना चाहते है ?',
+                                                  'whichAnimal'.tr,
                                                   style: TextStyle(
                                                     color: Colors.white,
                                                     fontWeight: FontWeight.bold,
@@ -933,7 +936,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                                 appPrimaryColor,
                                                           ),
                                                           Text(
-                                                            'हमें बताये',
+                                                            'tellUs'.tr,
                                                             style: TextStyle(
                                                               color:
                                                                   appPrimaryColor,
@@ -970,7 +973,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                             context: context,
                             builder: (context) {
                               return AlertDialog(
-                                  title: Text("जगह बदले"),
+                                  title: Text('changeLocation'.tr),
                                   content: StatefulBuilder(
                                       builder: (context, setState) {
                                     return Container(
@@ -1005,7 +1008,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                     color: Colors.black,
                                                   ),
                                                 ),
-                                                hintText: "ज़िपकोड डाले",
+                                                hintText: 'putZipCode'.tr,
                                                 contentPadding: EdgeInsets.only(
                                                     left: 8.0, top: 16.0),
                                               ),
@@ -1062,8 +1065,6 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                 _getLocationBasedList(
                                                     context, first);
                                               } catch (e) {
-                                                print('locationerro==> ' +
-                                                    e.toString());
                                                 Navigator.of(context).pop();
                                                 Flushbar(
                                                   message:
@@ -1264,22 +1265,33 @@ class _BuyAnimalState extends State<BuyAnimal>
     String desc = '';
 
     if (animalInfo.animalType >= 3) {
-      desc =
-          'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल ${(animalInfo.animalType == 6 || animalInfo.animalType == 8 || animalInfo.animalType == 10) ? " की" : "का"} है। ';
+      desc = 'animalTypeAge'.trParams({
+        'animalBreed': animalBreedCheck,
+        'animalTypeCheck': animalTypeCheck.toString(),
+        'animalAge': animalInfo.animalAge.toString()
+      });
     } else {
-      desc =
-          'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल की है। ';
+      desc = 'animalTypeAge'.trParams({
+        'animalBreed': animalBreedCheck,
+        'animalTypeCheck': animalTypeCheck,
+        'animalAge': animalInfo.animalAge.toString()
+      });
       if (animalInfo.recentBayatTime != null) {
         desc = desc +
-            'यह ${intToRecentBayaatTime[animalInfo.recentBayatTime]} ब्यायी है। ';
+            'animalRecentBayatTime'.trParams({
+              'recentBayatTime':
+                  intToRecentBayaatTime[animalInfo.recentBayatTime],
+            });
       }
       if (animalInfo.pregnantTime != null) {
-        desc =
-            desc + 'यह अभी ${intToPregnantTime[animalInfo.pregnantTime]} है। ';
+        desc = desc +
+            'animalPregnantTime'.trParams(
+                {'pregnantTime': intToPregnantTime[animalInfo.pregnantTime]});
       }
       if (animalInfo.animalMilkCapacity != null) {
         desc = desc +
-            'पिछले बार के हिसाब से दूध कैपेसिटी ${animalInfo.animalMilkCapacity} लीटर है। ';
+            'animalMilkCapacity'.trParams(
+                {'milkCapacity': animalInfo.animalMilkCapacity.toString()});
       }
     }
     return desc + (animalInfo.moreInfo ?? "");
@@ -1466,12 +1478,23 @@ class _BuyAnimalState extends State<BuyAnimal>
 
                   Share.shareFiles([fileUrl.path],
                       mimeTypes: ['images/png'],
-                      text:
-                          // "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
-                          _list[index].animalType <= 2
-                              ? "नस्ल: ${_list[index].animalBreed}\nजानकारी: ${_descriptionText(_list[index]) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list[index])}\nदूध(प्रति दिन): ${_list[index].animalMilkCapacity} Litre\n\nपशु देखे: ${shortUrl.toString()}"
-                              : "नस्ल: ${_list[index].animalBreed}\nजानकारी: ${_descriptionText(_list[index]) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list[index])}\n\nपशु देखे: ${shortUrl.toString()}",
-                      subject: 'पशु की जानकारी');
+                      text: _list[index].animalType == 1 ||
+                              _list[index].animalType == 2
+                          ? 'shareTextFemale'.trParams({
+                              'animalBreed': _list[index].animalBreed,
+                              'description': _descriptionText(_list[index]) ??
+                                  'infoNotAvailable'.tr,
+                              'milkCapacity':
+                                  _list[index].animalMilkCapacity.toString(),
+                              'url': shortUrl.toString()
+                            })
+                          : 'shareTextMale'.trParams({
+                              'animalBreed': _list[index].animalBreed,
+                              'description': _descriptionText(_list[index]) ??
+                                  'infoNotAvailable'.tr,
+                              'url': shortUrl.toString()
+                            }),
+                      subject: 'animalInfo'.tr);
 
                   // Share.share(shortUrl.toString());
                 },
@@ -1809,7 +1832,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                                       );
                                 },
                                 child: Text(
-                                  'कैंसिल',
+                                  'doCancel'.tr,
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold),
@@ -1922,7 +1945,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                                               Navigator.of(context).pop(),
                                         );
                                   },
-                                  child: Text('ओके',
+                                  child: Text('Ok'.tr,
                                       style: TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold))),

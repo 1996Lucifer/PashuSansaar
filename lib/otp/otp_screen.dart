@@ -61,7 +61,7 @@ class _OTPScreenState extends State<OTPScreen>
             _startTimer = true;
           });
           return ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text('OTP भेजा गया है')));
+              .showSnackBar(SnackBar(content: Text('otpSended'.tr)));
         } catch (e) {
           ReusableWidgets.showDialogBox(
             context,
@@ -88,7 +88,7 @@ class _OTPScreenState extends State<OTPScreen>
         });
 
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('OTP पुनः भेजा गया है')));
+            .showSnackBar(SnackBar(content: Text('otpReSended'.tr)));
 
         // Navigator.pop(context);
       } catch (e) {

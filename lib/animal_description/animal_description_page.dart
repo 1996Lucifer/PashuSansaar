@@ -482,22 +482,33 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
     String desc = '';
 
     if (animalInfo.animalType >= 3) {
-      desc =
-          'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल ${(animalInfo.animalType == 6 || animalInfo.animalType == 8 || animalInfo.animalType == 10) ? " की" : "का"} है। ';
+      desc = 'animalTypeAge'.trParams({
+        'animalBreed': animalBreedCheck,
+        'animalTypeCheck': animalTypeCheck,
+        'animalAge': animalInfo.animalAge.toString()
+      });
     } else {
-      desc =
-          'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल की है। ';
+      desc = 'animalTypeAge'.trParams({
+        'animalBreed': animalBreedCheck,
+        'animalTypeCheck': animalTypeCheck,
+        'animalAge': animalInfo.animalAge.toString()
+      });
       if (animalInfo.recentBayatTime != null) {
         desc = desc +
-            'यह ${intToRecentBayaatTime[animalInfo.recentBayatTime]} ब्यायी है। ';
+            'animalRecentBayatTime'.trParams({
+              'recentBayatTime':
+              intToRecentBayaatTime[animalInfo.recentBayatTime],
+            });
       }
       if (animalInfo.pregnantTime != null) {
-        desc =
-            desc + 'यह अभी ${intToPregnantTime[animalInfo.pregnantTime]} है। ';
+        desc = desc +
+            'animalPregnantTime'.trParams(
+                {'pregnantTime': intToPregnantTime[animalInfo.pregnantTime]});
       }
       if (animalInfo.animalMilkCapacity != null) {
         desc = desc +
-            'पिछले बार के हिसाब से दूध कैपेसिटी ${animalInfo.animalMilkCapacity} लीटर है। ';
+            'animalMilkCapacity'.trParams(
+                {'milkCapacity': animalInfo.animalMilkCapacity.toString()});
       }
     }
     return desc + (animalInfo.moreInfo ?? "");
@@ -539,8 +550,10 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
         color: darkGreenColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         onPressed: () async {
-          whatsappText =
-              'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${animalDesc.userName}, $_userLocality \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
+          whatsappText ='whatsAppText'.trParams({
+            'userName': animalDesc.userName,
+            'district': _userLocality,
+          });
           whatsappUrl =
               "https://api.whatsapp.com/send/?phone=+91 $myNum&text=$whatsappText";
           await UrlLauncher.canLaunch(whatsappUrl) != null
@@ -600,10 +613,14 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
           await takeScreenShot(animalDesc.sId);
           Share.shareFiles([fileUrl.path],
               mimeTypes: ['images/png'],
-              text: animalDesc.animalType <= 2
-                  ? "नस्ल: ${animalDesc.animalBreed}\nजानकारी: ${_descriptionText(animalDesc) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(animalDesc)}\nदूध(प्रति दिन): ${animalDesc.animalMilkCapacity} Litre\n\nपशु देखे: ${shortUrl.toString()}"
-                  : "नस्ल: ${animalDesc.animalBreed}\nजानकारी: ${_descriptionText(animalDesc) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(animalDesc)}\n\nपशु देखे: ${shortUrl.toString()}",
-              subject: 'पशु की जानकारी');
+              text: 'shareText'.trParams({
+                'animalBreed': animalDesc.animalBreed,
+                'description': _descriptionText(animalDesc) ??
+                    'infoNotAvailable'.tr,
+                'milkCapacity': animalDesc.animalMilkCapacity.toString(),
+                'url': shortUrl.toString()
+              }),
+              subject: 'animalInfo'.tr);
         },
         icon: Icon(Icons.share, color: Colors.white, size: 16),
         label: Text(

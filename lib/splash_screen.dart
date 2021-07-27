@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
+import 'package:pashusansaar/choose_language.dart';
 import 'package:pashusansaar/login/login_screen.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,7 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   bool isLoggedIn = false;
+  bool isLanguageSelected = false;
   List<String> newVersion = [], currentVersion = [];
   final LegacyUserController _legacyUserController =
       Get.put(LegacyUserController());
@@ -34,6 +36,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
     setState(() {
       isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+      isLanguageSelected = prefs.getBool('isLanguageSelected') ?? false;
       newVersion = prefs.getStringList('newVersion') ?? [];
       currentVersion = prefs.getStringList('currentVersion') ?? [];
       prefs.setInt('count', 0);
@@ -50,6 +53,7 @@ class _SplashScreenState extends State<SplashScreen> {
     } else {
       setState(() {
         isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+        isLanguageSelected = prefs.getBool('isLanguageSelected') ?? false;
         newVersion = prefs.getStringList('newVersion') ?? [];
         currentVersion = prefs.getStringList('currentVersion') ?? [];
         prefs.setInt('count', 0);
@@ -68,6 +72,7 @@ class _SplashScreenState extends State<SplashScreen> {
       prefs.setInt('expires', legacyUserData.expires);
       prefs.setString('userId', legacyUserData.userId);
       isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+      isLanguageSelected = prefs.getBool('isLanguageSelected') ?? false;
       newVersion = prefs.getStringList('newVersion') ?? [];
       currentVersion = prefs.getStringList('currentVersion') ?? [];
       prefs.setInt('count', 0);
@@ -82,7 +87,7 @@ class _SplashScreenState extends State<SplashScreen> {
           //         ([0, 1].contains(newVersion[0].compareTo(currentVersion[0]))) &&
           //         ([0, 1].contains(newVersion[1].compareTo(currentVersion[1])))
           ? HomeScreen(selectedIndex: 0)
-          : Login(),
+          : (isLanguageSelected ? Login() : ChooseLanguage()),
       duration: 2000,
       imageSize: 200,
       imageSrc: "assets/images/cow.png",

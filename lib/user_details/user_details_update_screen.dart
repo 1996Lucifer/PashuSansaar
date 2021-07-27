@@ -2,11 +2,8 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:android_play_install_referrer/android_play_install_referrer.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:device_info/device_info.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:intl/intl.dart';
 import 'package:pashusansaar/auth_token/auth_token_controller.dart';
 import 'package:pashusansaar/home_screen.dart';
 import 'package:pashusansaar/otp/otp_controller.dart';

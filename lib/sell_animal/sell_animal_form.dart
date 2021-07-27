@@ -224,7 +224,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
       builder: (context) {
         return AlertDialog(
           title: Text(
-            'Choose From..',
+            'chooseFrom'.tr,
           ),
           content: Column(
               mainAxisSize: MainAxisSize.min,
@@ -240,7 +240,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                           Navigator.of(context).pop();
                         },
                       ),
-                      Text(" Capture from camera")
+                      Text('chooseFromCamera'.tr)
                     ],
                   ),
                   onTap: () {
@@ -258,7 +258,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                           Navigator.of(context).pop();
                         },
                       ),
-                      Text(" Choose from gallery")
+                      Text('chooseFromGallery'.tr)
                     ],
                   ),
                   onTap: () {
@@ -1370,14 +1370,14 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              'सूचना -',
+                                              'information'.tr +' -',
                                               style: TextStyle(
                                                 fontWeight: FontWeight.bold,
                                               ),
                                             ),
                                             Expanded(
                                               child: Text(
-                                                ' ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें, खासकर कि गूगल पे, फ़ोन पे, वरना नुकसान हो सकता है |',
+                                                'marqueeText'.tr
                                               ),
                                             ),
                                           ],
