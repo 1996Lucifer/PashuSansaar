@@ -198,11 +198,16 @@ class _MyAppState extends State<MyApp> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     String _unique = ReusableWidgets.randomIDGenerator();
+
     // if (!_checkReferral) await initReferrerDetails(_unique);
     final PackageInfo info = await PackageInfo.fromPlatform();
 
     try {
       List<String> currentVersion1 = info.version.split('.');
+      if (int.parse(currentVersion1[0]) == 1 ||
+          (prefs.getString('accessToken') ?? '').isEmpty) {
+        await prefs.clear();
+      }
       List<String> newVersion1 =
           remoteConfig.getString('force_update_current_version').split('.');
 
@@ -211,6 +216,7 @@ class _MyAppState extends State<MyApp> {
         prefs.setStringList('currentVersion', currentVersion1);
         prefs.setString('referralUniqueValue', _unique);
       });
+
       if ((newVersion1[0].compareTo(currentVersion1[0]) == 1) ||
           (newVersion1[1].compareTo(currentVersion1[1]) == 1)) {
         await _showVersionDialog(newVersion1, currentVersion1, true);

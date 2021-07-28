@@ -1249,88 +1249,96 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                         }
 
                         bool saveAnimalData = false;
-                        if (animalInfo['animalType'] == 'cow'.tr ||
-                            animalInfo['animalType'] == 'buffalo_female'.tr) {
-                          try {
-                            saveAnimalData =
-                                await sellAnimalController.saveAnimal(
-                              animalType: animalInfo['animalTypeOther'] == null
-                                  ? animalTypeMapping[animalInfo['animalType']]
-                                  : animalOtherTypeMapping[
-                                      animalInfo['animalType']],
-                              animalBreed: animalInfo['animalBreed'],
-                              animalAge: ReusableWidgets.convertStringToInt(
-                                  animalInfo['animalAge']),
-                              animalBayat: animalBayaatMapping[
-                                  animalInfo['animalIsPregnant']],
-                              animalPrice: ReusableWidgets.convertStringToInt(
-                                  animalInfo['animalPrice']),
-                              animalMilk: ReusableWidgets.convertStringToInt(
-                                  animalInfo['animalMilk']),
-                              animalMilkCapacity:
-                                  ReusableWidgets.convertStringToInt(
-                                      animalInfo['animalMilkCapacity']),
-                              isRecentBayat:
-                                  extraInfoData['alreadyPregnantYesNo'] ==
-                                      constant.yesNo.first,
-                              recentBayatTime: stringToRecentBayaatTime[
-                                  extraInfoData['animalAlreadyGivenBirth']],
-                              isPregnant: extraInfoData['isPregnantYesNo'] ==
-                                  constant.yesNo.first,
-                              pregnantTime: stringToPregnantTime[
-                                  extraInfoData['animalIfPregnant']],
-                              animalHasBaby: stringToAnimalHasBaby[
-                                  extraInfoData['animalHasBaby']],
-                              userId: prefs.getString('userId'),
-                              moreInfo: extraInfoData['moreInfo'],
-                              files: _imageToBeUploaded,
-                              token: prefs.getString("accessToken"),
-                            );
-                          } catch (e) {
-                            ReusableWidgets.showDialogBox(
-                              context,
-                              'warning'.tr,
-                              Text(
-                                'global_error'.tr,
-                              ),
-                            );
+                        if (_imageToBeUploaded.isNotEmpty) {
+                          if (animalInfo['animalType'] == 'cow'.tr ||
+                              animalInfo['animalType'] == 'buffalo_female'.tr) {
+                            try {
+                              saveAnimalData =
+                                  await sellAnimalController.saveAnimal(
+                                animalType:
+                                    animalInfo['animalTypeOther'] == null
+                                        ? animalTypeMapping[
+                                            animalInfo['animalType']]
+                                        : animalOtherTypeMapping[
+                                            animalInfo['animalType']],
+                                animalBreed: animalInfo['animalBreed'],
+                                animalAge: ReusableWidgets.convertStringToInt(
+                                    animalInfo['animalAge']),
+                                animalBayat: animalBayaatMapping[
+                                    animalInfo['animalIsPregnant']],
+                                animalPrice: ReusableWidgets.convertStringToInt(
+                                    animalInfo['animalPrice']),
+                                animalMilk: ReusableWidgets.convertStringToInt(
+                                    animalInfo['animalMilk']),
+                                animalMilkCapacity:
+                                    ReusableWidgets.convertStringToInt(
+                                        animalInfo['animalMilkCapacity']),
+                                isRecentBayat:
+                                    extraInfoData['alreadyPregnantYesNo'] ==
+                                        constant.yesNo.first,
+                                recentBayatTime: stringToRecentBayaatTime[
+                                    extraInfoData['animalAlreadyGivenBirth']],
+                                isPregnant: extraInfoData['isPregnantYesNo'] ==
+                                    constant.yesNo.first,
+                                pregnantTime: stringToPregnantTime[
+                                    extraInfoData['animalIfPregnant']],
+                                animalHasBaby: stringToAnimalHasBaby[
+                                    extraInfoData['animalHasBaby']],
+                                userId: prefs.getString('userId'),
+                                moreInfo: extraInfoData['moreInfo'],
+                                files: _imageToBeUploaded,
+                                token: prefs.getString("accessToken"),
+                              );
+                            } catch (e) {
+                              ReusableWidgets.showDialogBox(
+                                context,
+                                'warning'.tr,
+                                Text(
+                                  'global_error'.tr,
+                                ),
+                              );
+                            }
+                          } else {
+                            try {
+                              saveAnimalData =
+                                  await sellAnimalController.saveAnimal(
+                                animalType:
+                                    animalInfo['animalTypeOther'] == null
+                                        ? animalTypeMapping[
+                                            animalInfo['animalType']]
+                                        : animalOtherTypeMapping[
+                                            animalInfo['animalType']],
+                                animalBreed:
+                                    ReusableWidgets.removeEnglishDataFromName(
+                                        animalInfo['animalBreed']),
+                                animalAge: ReusableWidgets.convertStringToInt(
+                                    animalInfo['animalAge']),
+                                animalBayat: animalBayaatMapping[
+                                    animalInfo['animalIsPregnant']],
+                                animalPrice: ReusableWidgets.convertStringToInt(
+                                    animalInfo['animalPrice']),
+                                userId: prefs.getString('userId'),
+                                moreInfo: extraInfoData['moreInfo'],
+                                files: _imageToBeUploaded,
+                                token: prefs.getString("accessToken"),
+                              );
+                            } catch (e) {
+                              ReusableWidgets.showDialogBox(
+                                context,
+                                'warning'.tr,
+                                Text(
+                                  'global_error'.tr,
+                                ),
+                              );
+                            }
                           }
                         } else {
-                          try {
-                            saveAnimalData =
-                                await sellAnimalController.saveAnimal(
-                              animalType: animalInfo['animalTypeOther'] == null
-                                  ? animalTypeMapping[animalInfo['animalType']]
-                                  : animalOtherTypeMapping[
-                                      animalInfo['animalType']],
-                              animalBreed:
-                                  ReusableWidgets.removeEnglishDataFromName(
-                                      animalInfo['animalBreed']),
-                              animalAge: ReusableWidgets.convertStringToInt(
-                                  animalInfo['animalAge']),
-                              animalBayat: animalBayaatMapping[
-                                  animalInfo['animalIsPregnant']],
-                              animalPrice: ReusableWidgets.convertStringToInt(
-                                  animalInfo['animalPrice']),
-                              userId: prefs.getString('userId'),
-                              moreInfo: extraInfoData['moreInfo'],
-                              files: _imageToBeUploaded,
-                              token: prefs.getString("accessToken"),
-                            );
-                          } catch (e) {
-                            ReusableWidgets.showDialogBox(
-                              context,
-                              'warning'.tr,
-                              Text(
-                                'global_error'.tr,
-                              ),
-                            );
-                          }
+                          ReusableWidgets.showDialogBox(context, 'warning'.tr, Text('upload_image_error'.tr));
                         }
 
                         print('][]==' + _imageToBeUploaded.toString());
 
-                        if (saveAnimalData && _imageToBeUploaded.isNotEmpty) {
+                        if (saveAnimalData) {
                           pr.hide();
                           return showDialog(
                               context: context,
