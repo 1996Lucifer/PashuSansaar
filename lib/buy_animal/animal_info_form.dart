@@ -320,14 +320,6 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(width: 5),
-                Text(
-                  '*',
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.red),
-                ),
               ],
             ),
           ),

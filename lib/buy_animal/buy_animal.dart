@@ -581,6 +581,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                         alignment: Alignment.bottomCenter,
                         children: [
                           ListView.builder(
+                            cacheExtent: 9999,
                             key: ObjectKey(widget.animalInfo[0]),
                             padding: EdgeInsets.only(bottom: 60),
                             controller: _scrollController,
@@ -594,7 +595,14 @@ class _BuyAnimalState extends State<BuyAnimal>
                                   children: [
                                     SizedBox(height: 10),
                                     Center(
-                                      child: CircularProgressIndicator(),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          CircularProgressIndicator(),
+                                          SizedBox(width: 8.0,),
+                                          Text('loading'),
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 );
@@ -1265,7 +1273,7 @@ class _BuyAnimalState extends State<BuyAnimal>
 
     if (animalInfo.animalType >= 3) {
       desc =
-          'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल ${(animalInfo.animalType == 6 || animalInfo.animalType == 8 || animalInfo.animalType == 10) ? " की" : "का"} है। ';
+          'ये ${animalBreedCheck ?? ''} ${animalTypeCheck ?? ''} ${animalInfo.animalAge} साल ${(animalInfo.animalType == 6 || animalInfo.animalType == 8 || animalInfo.animalType == 10) ? " की" : "का"} है। ';
     } else {
       desc =
           'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल की है। ';
@@ -1303,7 +1311,7 @@ class _BuyAnimalState extends State<BuyAnimal>
   Padding _animalImageWidget(int index) {
     List _list = widget.animalInfo;
 
-    // List<String> _images = ['assets/images/AppIcon.jpg'];
+
     List<String> _images = [];
     _list[index]
         .files
@@ -1468,7 +1476,9 @@ class _BuyAnimalState extends State<BuyAnimal>
                         // "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
                         _list[index].animalType <= 2
                             ? "नस्ल: ${_list[index].animalBreed}\nजानकारी: ${_descriptionText(_list[index]) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list[index])}\nदूध(प्रति दिन): ${_list[index].animalMilkCapacity} Litre\n\nपशु देखे: ${shortUrl.toString()}"
-                            : "नस्ल: ${_list[index].animalBreed}\nजानकारी: ${_descriptionText(_list[index]) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list[index])}\n\nपशु देखे: ${shortUrl.toString()}",
+                            : (_list[index].animalType <= 4
+                                ? ("नस्ल: ${_list[index].animalBreed}\nजानकारी: ${_descriptionText(_list[index]) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list[index])}\n\nपशु देखे: ${shortUrl.toString()}")
+                                : ("जानकारी: ${_descriptionText(_list[index]) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list[index])}\n\nपशु देखे: ${shortUrl.toString()}")),
                     subject: 'पशु की जानकारी');
 
                 // Share.share(shortUrl.toString());

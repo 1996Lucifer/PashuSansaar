@@ -77,7 +77,6 @@ void main() async {
   remoteConfig = await RemoteConfig.instance;
   await remoteConfig.fetch(expiration: const Duration(seconds: 0));
   await remoteConfig.activateFetched();
-  remoteConfig.getString('force_update_current_version');
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   await flutterLocalNotificationsPlugin

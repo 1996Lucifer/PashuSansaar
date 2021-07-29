@@ -1413,7 +1413,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                               context,
                               'error'.tr,
                               Text(
-                                  'Save animal error+${_imageToBeUploaded.isNotEmpty.toString()}'));
+                                  'animalSaveError'.tr));
                         }
                       }
                     }),

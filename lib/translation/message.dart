@@ -284,6 +284,70 @@ class Messages extends Translations {
               'आपकी जानकारी प्राप्त करने में दिक्कत हो रही है|\nकृपया दोबारा कोशिश करे',
           'milk_quantity': 'दूध की मात्रा',
           'upload_image_error': 'चित्र प्राप्त करने में दिक्कत हो रही हैं',
+
+          //Description text
+          'animalTypeAge':
+          'ये @animalBreed @animalTypeCheck @animalAge साल की है। ',
+          'animalRecentBayatTime': 'यह @recentBayatTime ब्यायी है। ',
+          'animalPregnantTime': 'यह अभी @pregnantTime है। ',
+          'animalMilkCapacity':
+          'पिछले बार के हिसाब से दूध कैपेसिटी @milkCapacity लीटर है। ',
+
+          //
+          //
+          'animalDistance': 'कितनी दुरी तक के पशु दिखाए',
+          'infoNotAvailableChooseOther':
+          'जानकारी उपलब्ध नहीं है| कोई और चुनाव करके कोशिश करे |',
+          'infoNotAvailable': 'जानकारी उपलब्ध नहीं है| ',
+          'whatsAppText':
+          'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? @userName, @district \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है',
+          'whichAnimal': 'कौन सा पशु खरीदना चाहते है ?',
+          'tellUs': 'हमें बताये',
+          'changeLocation': 'जगह बदले',
+          'putZipCode': "ज़िपकोड डाले",
+          'shareText':
+          "नस्ल: @animalBreed\nजानकारी: @description\nदूध(प्रति दिन): @milkCapacity लीटर\n\nपशु देखे: @url",
+          'animalInfo': 'पशु की जानकारी',
+          'doCancel': 'कैंसिल',
+          'photoUploaded': 'प्रोफाइल फोटो अपलोड कर दिया गया है |',
+          'chooseFrom': 'इनमें से चुनें...',
+          'chooseFromCamera': ' कैमरे से कैद करो',
+          'chooseFromGallery': ' गैलरी से चयन करो',
+          'appShareText':
+          'पशुसंसार (पशु बेचने वाली फ्री ऐप) पर मेरे साथ जुड़ें। मेरा कोड ADFTR6 दर्ज करें और ₹10,000 जीतने का मौका पाएं। \n\n ऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar',
+          'information': 'सूचना',
+          'marqueeText':
+          ' ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है',
+          'myAnimals': "मेरे पशु",
+          'myCalls': "मेरे कॉल्स",
+          'whatsAppUs':
+          'अगर कोई भी शिकायत या सुझाव हो तो व्हाट्सप्प पर हमसे संपर्क करें',
+          'shareWhatsAppText':
+          'पशुसंसार एप को अपने पशुपालक दोस्तों से शेयर करे और हर हफ्ते ₹10000 जीतने का मौका पाए',
+          'age': 'उम्र',
+          'milk': 'दूध',
+          'milkPerDay': 'दूध (प्रति दिन)',
+          'litre': 'लीटर',
+          'when_Bayat': 'कब ब्यायी थी?',
+          'when_Pregnant': 'कब से गर्भवती है ?',
+          'noBayat': 'ब्यायी नहीं है',
+          'noPregnant': 'गर्भवती नहीं है',
+          'notContactedYet': 'किसी ग्राहक को अभी तक संपर्क नहीं किया है',
+          'noOneContactedYet': 'किसी ग्राहक ने अभी तक संपर्क नहीं किया है',
+          'addressNotAvailable': 'पता मौजूद नहीं है',
+          'addAnimal': 'आपका कोई पशु दर्ज़ नहीं है| कृपया पशु दर्ज़ करे',
+          'noAnimalPresent': 'आपका कोई पशु दर्ज़ नहीं है',
+          'interestedBuyer': 'इच्छुक खरीदार की सूचि',
+          'seeInterestedBuyer': 'इच्छुक खरीदार की सूचि देखे',
+          'interestedBuyerWhatsAppText':
+          'नमस्कार @name, आपको मेरा पशु अगर पसंद आया हो तो फ़ोन पे बात करें?',
+          'closeApp': 'एप बंद करे ?',
+          'wantToCloseApp': 'क्या आप एप बंद करना चाहते हैं',
+          'otpSended': 'OTP भेजा गया है',
+          'otpReSended': 'OTP पुनः भेजा गया है',
+          'what_budget': 'आपका बजट क्या हैं (₹)',
+          'animalSoldOut': 'यह पशु बिक चुका है|',
+          'animalSaveError': 'आपका पशु दर्ज़ करने में दिक्कत हो रही है|\nकृपया दोबारा कोशिश करे'
         }
       };
 }

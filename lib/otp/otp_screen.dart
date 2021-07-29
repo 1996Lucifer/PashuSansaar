@@ -240,7 +240,7 @@ class _OTPScreenState extends State<OTPScreen>
                       print("Completed");
                     },
                     // onTap: () {
-                    //   print("Pressed");
+                    //logger   print("Pressed");
                     // },
                     onChanged: (value) {
                       print(value);
