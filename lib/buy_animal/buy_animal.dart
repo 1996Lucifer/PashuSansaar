@@ -9,6 +9,7 @@ import 'package:pashusansaar/refresh_token/refresh_token_controller.dart';
 import 'package:pashusansaar/seller_contact/seller_contact_controller.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/constants.dart';
+import 'package:pashusansaar/utils/custom_fab/custom_floating_button_location.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +30,7 @@ import 'package:geoflutterfire/geoflutterfire.dart' as geoFire;
 import 'package:path_provider/path_provider.dart';
 import 'dart:ui' as ui;
 import 'package:animations/animations.dart';
-import 'package:pashusansaar/utils/custom_fab.dart';
+import 'package:pashusansaar/utils/custom_fab/custom_fab.dart';
 
 import 'animal_info_form.dart';
 import 'buy_animal_controller.dart';
@@ -553,7 +554,11 @@ class _BuyAnimalState extends State<BuyAnimal>
         key: previewContainer,
         child: Scaffold(
           backgroundColor: Colors.grey[100],
-          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+          floatingActionButtonLocation: CustomFloatingActionButtonLocation(
+            FloatingActionButtonLocation.endDocked,
+            25,
+            -(MediaQuery.of(context).size.width/2),
+          ),
           floatingActionButton: AnimatedOpacity(
             opacity: !_isCardVisible ? 1.0 : 0.0,
             duration: Duration(seconds: 3),
