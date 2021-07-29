@@ -405,7 +405,9 @@ class _MyCalledListState extends State<MyCalledList> {
                 Share.share(
                     _list.animalType <= 2
                         ? "नस्ल: ${_list.animalBreed}\nजानकारी: ${_descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list)}\nदूध(प्रति दिन): ${_list.animalMilkCapacity} Litre\n\nपशु देखे: ${shortUrl.toString()}"
-                        : "नस्ल: ${_list.animalBreed}\nजानकारी: ${_descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list)}\n\nपशु देखे: ${shortUrl.toString()}",
+                        : (_list.animalType <= 4
+                            ? ("नस्ल: ${_list.animalBreed}\nजानकारी: ${_descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list)}\n\nपशु देखे: ${shortUrl.toString()}")
+                            : ("जानकारी: ${_descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list)}\n\nपशु देखे: ${shortUrl.toString()}")),
                     subject: 'पशु की जानकारी');
               },
               icon: Icon(Icons.share, color: Colors.white, size: 14),
@@ -510,9 +512,12 @@ class _MyCalledListState extends State<MyCalledList> {
                             Text('दूध (प्रति दिन)',
                                 style: TextStyle(
                                     fontSize: 15, fontWeight: FontWeight.bold)),
-                            _list.animalMilkCapacity == null?Text("-") :Text('${_list.animalMilkCapacity} लीटर',
-                                style: TextStyle(
-                                    fontSize: 14, fontWeight: FontWeight.w500))
+                            _list.animalMilkCapacity == null
+                                ? Text("-")
+                                : Text('${_list.animalMilkCapacity} लीटर',
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500))
                           ],
                         ),
                       ),
@@ -536,9 +541,9 @@ class _MyCalledListState extends State<MyCalledList> {
                             Text('ब्यात',
                                 style: TextStyle(
                                     fontSize: 15, fontWeight: FontWeight.bold)),
-                           Text(
-                                intToAnimalBayaatMapping[_list.animalBayat]
-                                    ?? "-",
+                            Text(
+                                intToAnimalBayaatMapping[_list.animalBayat] ??
+                                    "-",
                                 style: TextStyle(
                                     fontSize: 14, fontWeight: FontWeight.w500))
                           ],
@@ -572,8 +577,9 @@ class _MyCalledListState extends State<MyCalledList> {
                               _list.isRecentBayat == false ||
                                       _list.isRecentBayat == 'no'.tr
                                   ? 'ब्यायी नहीं है'
-                                  : intToRecentBayaatTime[_list.recentBayatTime]
-                                      ?? "-",
+                                  : intToRecentBayaatTime[
+                                          _list.recentBayatTime] ??
+                                      "-",
                               style: TextStyle(
                                   fontSize: 14, fontWeight: FontWeight.w500),
                             )
@@ -605,8 +611,8 @@ class _MyCalledListState extends State<MyCalledList> {
                                       _list.isPregnant == 'no'.tr ||
                                       _list.isPregnant == false
                                   ? 'गर्भवती नहीं है'
-                                  : intToPregnantTime[_list.pregnantTime]
-                                      ?? "-",
+                                  : intToPregnantTime[_list.pregnantTime] ??
+                                      "-",
                               style: TextStyle(
                                   fontSize: 14, fontWeight: FontWeight.w500),
                             )

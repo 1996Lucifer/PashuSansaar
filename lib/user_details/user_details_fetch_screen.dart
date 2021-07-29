@@ -128,6 +128,7 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
         );
       },
     );
+
     await assignDeviceID();
   }
 
