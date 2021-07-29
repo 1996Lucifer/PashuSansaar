@@ -30,16 +30,15 @@ class AnimalDescriptionController extends GetxController {
         ),
       );
 
-      if (response.data != null) {
         animalDescriptionData = AnimalDescriptionModel.fromJson(response.data);
         print('animal description is $animalDescriptionData');
         if (response.statusCode == 200 || response.statusCode == 201) {
           return animalDescriptionData.animal;
         }
-      }
+
     } catch (e) {
       print("Getting exception in getting animal description _______$e");
-      return animalDescriptionData.success;
+      return null;
     }
   }
 }

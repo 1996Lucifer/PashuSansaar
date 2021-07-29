@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:get/get.dart';
@@ -81,7 +82,21 @@ class ReusableWidgets {
         });
   }
 
-  static showDialogBoxWithNavigator(BuildContext context, String type, Widget content,
+ static loggerFunction(String fileName, String error, String myNum, String userId) {
+    FirebaseFirestore.instance
+        .collection('logger')
+        .doc(myNum)
+        .collection(fileName)
+        .doc()
+        .set({
+      'issue': error,
+      'userId': userId,
+      'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
+    });
+  }
+
+  static showDialogBoxWithNavigator(
+      BuildContext context, String type, Widget content,
       {bool cta = false, bool barrierDismissible = true}) {
     return showDialog(
         context: context,
@@ -124,7 +139,12 @@ class ReusableWidgets {
                     elevation: 5,
                     onPressed: () {
                       Navigator.of(context).pop();
-                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> HomeScreen(selectedIndex: 0),),);
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => HomeScreen(selectedIndex: 0),
+                        ),
+                      );
                     }),
               ]);
         });
