@@ -82,7 +82,7 @@ class ReusableWidgets {
         });
   }
 
- static loggerFunction(String fileName, String error, String myNum, String userId) {
+ static loggerFunction({String fileName, String error, String myNum, String userId}) {
     FirebaseFirestore.instance
         .collection('logger')
         .doc(myNum)

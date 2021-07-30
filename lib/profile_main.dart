@@ -704,9 +704,9 @@ class ProfileMainState extends State<ProfileMain>
                                                   fontSize: 16),
                                               text: 'referral_winner'.trParams({
                                                 'name':
-                                                    '${widget.refData['name']}',
+                                                    '${widget.refData['name']??'Sumit Gupta'}',
                                                 'place':
-                                                    '${widget.refData['address']}'
+                                                    '${widget.refData['address'] ?? 'Jaipur'}'
                                               })),
                                         ),
                                       ),

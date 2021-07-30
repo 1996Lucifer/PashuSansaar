@@ -193,6 +193,12 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  double versionToDouble(_list) {
+    return (((int.parse(_list[0])) * 100) +
+        (int.parse(_list[1])) +
+        ((int.parse(_list[2])) * 0.1));
+  }
+
   versionCheck(context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -202,26 +208,35 @@ class _MyAppState extends State<MyApp> {
     final PackageInfo info = await PackageInfo.fromPlatform();
 
     try {
-      List<String> currentVersion1 = info.version.split('.');
-      if (int.parse(currentVersion1[0]) == 1 ||
+      List<String> currentVersion = info.version.split('.');
+      if (int.parse(currentVersion[0]) == 1 ||
           (prefs.getString('accessToken') ?? '').isEmpty) {
         await prefs.clear();
       }
-      List<String> newVersion1 =
-          remoteConfig.getString('force_update_current_version').split('.');
+      String minimumVersion = remoteConfig.getString('minimum_version');
+      String nudgeVersion = remoteConfig.getString('nudge_version');
 
-      setState(() {
-        prefs.setStringList('newVersion', newVersion1);
-        prefs.setStringList('currentVersion', currentVersion1);
-        prefs.setString('referralUniqueValue', _unique);
-      });
+      if (minimumVersion.isNotEmpty && nudgeVersion.isNotEmpty) {
+        double currentVersionDouble = versionToDouble(currentVersion);
+        double minimumVersionDouble =
+            versionToDouble(minimumVersion.split('.'));
+        double nudgeVersionDouble = versionToDouble(nudgeVersion.split('.'));
 
-      if ((newVersion1[0].compareTo(currentVersion1[0]) == 1) ||
-          (newVersion1[1].compareTo(currentVersion1[1]) == 1)) {
-        await _showVersionDialog(newVersion1, currentVersion1, true);
+        setState(() {
+          prefs.setStringList('currentVersion', currentVersion);
+          prefs.setStringList('minimumVersion', minimumVersion.split('.'));
+          prefs.setStringList('nudgeVersion', nudgeVersion.split('.'));
+          prefs.setString('referralUniqueValue', _unique);
+        });
+
+        if (currentVersionDouble < minimumVersionDouble) {
+          await _showVersionDialog(
+              minimumVersion.split('.'), currentVersion, true);
+        } else if (currentVersionDouble < nudgeVersionDouble) {
+          await _showVersionDialog(
+              nudgeVersion.split('.'), currentVersion, false);
+        }
       }
-      if (newVersion1[2].compareTo(currentVersion1[2]) == 1)
-        await _showVersionDialog(newVersion1, currentVersion1, false);
     } catch (exception) {
       print(exception);
     }

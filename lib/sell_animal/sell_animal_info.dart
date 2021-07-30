@@ -350,6 +350,11 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
         }
       }
     } catch (e) {
+      ReusableWidgets.loggerFunction(
+          fileName: 'sell_animal_info_refreshToken',
+          error: e.toString(),
+          myNum: widget.userMobileNumber,
+          userId: prefs.getString('userId'));
       ReusableWidgets.showDialogBox(
         context,
         'warning'.tr,
@@ -371,6 +376,11 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
         interestedBuyers = data;
       });
     } catch (e) {
+      ReusableWidgets.loggerFunction(
+          fileName: 'sell_animal_info_gettingInterestedBuyers',
+          error: e.toString(),
+          myNum: widget.userMobileNumber,
+          userId: prefs.getString('userId'));
       ReusableWidgets.showDialogBox(
         context,
         'warning'.tr,

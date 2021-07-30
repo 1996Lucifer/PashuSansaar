@@ -197,6 +197,11 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       }
     } catch (e) {
+      ReusableWidgets.loggerFunction(
+          fileName: 'home_screen_refreshToken',
+          error: e.toString(),
+          myNum: _mobileNumber,
+          userId: prefs.getString('userId'));
       ReusableWidgets.showDialogBox(
         context,
         'warning'.tr,
@@ -224,6 +229,11 @@ class _HomeScreenState extends State<HomeScreen> {
         prefs.setInt('page', data.page);
       });
     } catch (e) {
+      ReusableWidgets.loggerFunction(
+          fileName: 'home_screen_getAnimal',
+          error: e.toString(),
+          myNum: _mobileNumber,
+          userId: prefs.getString('userId'));
       ReusableWidgets.showDialogBox(
         context,
         'warning'.tr,
@@ -259,6 +269,11 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       }
     } catch (e) {
+      ReusableWidgets.loggerFunction(
+          fileName: 'home_screen_refreshToken',
+          error: e.toString(),
+          myNum: _mobileNumber,
+          userId: prefs.getString('userId'));
       ReusableWidgets.showDialogBox(
         context,
         'warning'.tr,
@@ -280,6 +295,11 @@ class _HomeScreenState extends State<HomeScreen> {
         _sellingAnimalInfo = dataSellingInfo.myAnimals;
       });
     } catch (e) {
+      ReusableWidgets.loggerFunction(
+          fileName: 'home_screen_getAnimalList',
+          error: e.toString(),
+          myNum: _mobileNumber,
+          userId: prefs.getString('userId'));
       ReusableWidgets.showDialogBox(
         context,
         'warning'.tr,

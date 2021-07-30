@@ -1174,6 +1174,11 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                             }
                           }
                         } catch (e) {
+                          ReusableWidgets.loggerFunction(
+                              fileName: 'sell_animal_form_refreshToken',
+                              error: e.toString(),
+                              myNum: widget.userMobileNumber,
+                              userId: prefs.getString('userId'));
                           ReusableWidgets.showDialogBox(
                             context,
                             'warning'.tr,
@@ -1205,6 +1210,11 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                             token: prefs.getString('accessToken'),
                           );
                         } catch (e) {
+                          ReusableWidgets.loggerFunction(
+                              fileName: 'sell_animal_form_imageUpload',
+                              error: e.toString(),
+                              myNum: widget.userMobileNumber,
+                              userId: prefs.getString('userId'));
                           ReusableWidgets.showDialogBox(
                             context,
                             'warning'.tr,
@@ -1290,6 +1300,11 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                                 token: prefs.getString("accessToken"),
                               );
                             } catch (e) {
+                              ReusableWidgets.loggerFunction(
+                                  fileName: 'sell_animal_form_saveAnimal1',
+                                  error: e.toString(),
+                                  myNum: widget.userMobileNumber,
+                                  userId: prefs.getString('userId'));
                               ReusableWidgets.showDialogBox(
                                 context,
                                 'warning'.tr,
@@ -1323,6 +1338,11 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                                 token: prefs.getString("accessToken"),
                               );
                             } catch (e) {
+                              ReusableWidgets.loggerFunction(
+                                  fileName: 'sell_animal_form_saveAnimal2',
+                                  error: e.toString(),
+                                  myNum: widget.userMobileNumber,
+                                  userId: prefs.getString('userId'));
                               ReusableWidgets.showDialogBox(
                                 context,
                                 'warning'.tr,
@@ -1333,7 +1353,8 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                             }
                           }
                         } else {
-                          ReusableWidgets.showDialogBox(context, 'warning'.tr, Text('upload_image_error'.tr));
+                          ReusableWidgets.showDialogBox(context, 'warning'.tr,
+                              Text('upload_image_error'.tr));
                         }
 
                         print('][]==' + _imageToBeUploaded.toString());
@@ -1410,10 +1431,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                         } else {
                           pr.hide();
                           ReusableWidgets.showDialogBox(
-                              context,
-                              'error'.tr,
-                              Text(
-                                  'animalSaveError'.tr));
+                              context, 'error'.tr, Text('animalSaveError'.tr));
                         }
                       }
                     }),

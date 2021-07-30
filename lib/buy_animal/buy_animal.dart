@@ -139,6 +139,11 @@ class _BuyAnimalState extends State<BuyAnimal>
         }
       }
     } catch (e) {
+      ReusableWidgets.loggerFunction(
+          fileName: 'buy_animal_refreshToken',
+          error: e.toString(),
+          myNum: widget.userMobileNumber,
+          userId: prefs.getString('userId'));
       ReusableWidgets.showDialogBox(
         context,
         'warning'.tr,
@@ -170,6 +175,11 @@ class _BuyAnimalState extends State<BuyAnimal>
         prefs.setInt('page', data.page);
       });
     } catch (e) {
+      ReusableWidgets.loggerFunction(
+          fileName: 'buy_animal',
+          error: e.toString(),
+          myNum: widget.userMobileNumber,
+          userId: prefs.getString('userId'));
       ReusableWidgets.showDialogBox(
         context,
         'warning'.tr,
@@ -555,9 +565,9 @@ class _BuyAnimalState extends State<BuyAnimal>
         child: Scaffold(
           backgroundColor: Colors.grey[100],
           floatingActionButtonLocation: CustomFloatingActionButtonLocation(
-            FloatingActionButtonLocation.endDocked,
-            25,
-            -(MediaQuery.of(context).size.width/2),
+            FloatingActionButtonLocation.startDocked,
+            8,
+            -8,
           ),
           floatingActionButton: AnimatedOpacity(
             opacity: !_isCardVisible ? 1.0 : 0.0,
@@ -601,11 +611,14 @@ class _BuyAnimalState extends State<BuyAnimal>
                                     SizedBox(height: 10),
                                     Center(
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         children: [
                                           CircularProgressIndicator(),
-                                          SizedBox(width: 8.0,),
-                                          Text('loading'),
+                                          SizedBox(
+                                            width: 14.0,
+                                          ),
+                                          Text('loading'.tr),
                                         ],
                                       ),
                                     ),
@@ -1315,7 +1328,6 @@ class _BuyAnimalState extends State<BuyAnimal>
 
   Padding _animalImageWidget(int index) {
     List _list = widget.animalInfo;
-
 
     List<String> _images = [];
     _list[index]

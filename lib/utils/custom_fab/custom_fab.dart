@@ -25,7 +25,7 @@ class CustomFABWidget extends StatelessWidget {
         ),
         closedShape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18.0),
-            side: BorderSide(color: Colors.red)),
+            side: BorderSide(color: Colors.transparent)),
         closedColor: appPrimaryColor,
         closedBuilder: (context, openContainer) => Container(
             padding: EdgeInsets.all(8),
@@ -33,16 +33,34 @@ class CustomFABWidget extends StatelessWidget {
               shape: BoxShape.rectangle,
               color: appPrimaryColor,
             ),
-            height: 100,
-            width: 56,
-            child: RotatedBox(
-              quarterTurns: 1,
-              child: Text(
-                'Kaisa Pashu Chahiye',
-                style: TextStyle(
-                  color: Colors.white,
+            height: 50,
+            width: 140,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  'कैसा ',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18.0
+                  ),
                 ),
-              ),
+                Text(
+                  '🐄',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 36.0
+                  ),
+                ),
+                Text(
+                  ' चाहिये',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18.0
+                  ),
+                ),
+              ],
             )
 
             // child: Icon(

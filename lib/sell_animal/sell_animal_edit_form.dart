@@ -1589,6 +1589,11 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                       token: prefs.getString('accessToken'),
                     );
                   } catch (e) {
+                    ReusableWidgets.loggerFunction(
+                        fileName: 'sell_animal_edit_form_uploadImage',
+                        error: e.toString(),
+                        myNum: widget.userMobileNumber,
+                        userId: prefs.getString('userId'));
                     ReusableWidgets.showDialogBox(
                       context,
                       'warning'.tr,
@@ -1656,6 +1661,11 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                           token: prefs.getString("accessToken"),
                         );
                       } catch (e) {
+                        ReusableWidgets.loggerFunction(
+                            fileName: 'sell_animal_edit_form_updateAnimal1',
+                            error: e.toString(),
+                            myNum: widget.userMobileNumber,
+                            userId: prefs.getString('userId'));
                         ReusableWidgets.showDialogBox(
                           context,
                           'warning'.tr,
@@ -1680,6 +1690,11 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                           token: prefs.getString("accessToken"),
                         );
                       } catch (e) {
+                        ReusableWidgets.loggerFunction(
+                            fileName: 'sell_animal_edit_form_updateAnimal2',
+                            error: e.toString(),
+                            myNum: widget.userMobileNumber,
+                            userId: prefs.getString('userId'));
                         ReusableWidgets.showDialogBox(
                           context,
                           'warning'.tr,
