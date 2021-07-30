@@ -230,6 +230,8 @@ Map<String, int> animalOtherTypeMapping = {
   'horse_male'.tr: 9,
   'elephant_female'.tr: 10,
   'elephant_male'.tr: 11,
+  'notKnown'.tr: 12,
+  'notKnown'.tr: 13,
 };
 
 Map<int, String> intToAnimalTypeMapping = {
@@ -246,6 +248,8 @@ Map<int, String> intToAnimalOtherTypeMapping = {
   9: 'horse_male'.tr,
   10: 'elephant_female'.tr,
   11: 'elephant_male'.tr,
+  12: 'notKnown'.tr,
+  13: 'notKnown'.tr,
 };
 
 Map<String, int> animalBayaatMapping = {

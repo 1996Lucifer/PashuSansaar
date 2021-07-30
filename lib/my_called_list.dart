@@ -297,38 +297,6 @@ class _MyCalledListState extends State<MyCalledList> {
         ));
   }
 
-  _descriptionText(animalInfo) {
-    String animalBreedCheck = (animalInfo.animalBreed == 'not_known'.tr)
-        ? ""
-        : animalInfo.animalBreed;
-    String animalTypeCheck = (animalInfo.animalType >= 5)
-        ? intToAnimalOtherTypeMapping[animalInfo.animalType]
-        : intToAnimalTypeMapping[animalInfo.animalType];
-
-    String desc = '';
-
-    if (animalInfo.animalType >= 3) {
-      desc =
-          'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल ${(animalInfo.animalType == 6 || animalInfo.animalType == 8 || animalInfo.animalType == 10) ? " की" : "का"} है। ';
-    } else {
-      desc =
-          'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल की है। ';
-      if (animalInfo.recentBayatTime != null) {
-        desc = desc +
-            'यह ${intToRecentBayaatTime[animalInfo.recentBayatTime]} ब्यायी है। ';
-      }
-      if (animalInfo.pregnantTime != null) {
-        desc =
-            desc + 'यह अभी ${intToPregnantTime[animalInfo.pregnantTime]} है। ';
-      }
-      if (animalInfo.animalMilkCapacity != null) {
-        desc = desc +
-            'पिछले बार के हिसाब से दूध कैपेसिटी ${animalInfo.animalMilkCapacity} लीटर है। ';
-      }
-    }
-    return desc + (animalInfo.moreInfo ?? "");
-  }
-
   _extraInfoWidget(_list, width) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
@@ -404,10 +372,10 @@ class _MyCalledListState extends State<MyCalledList> {
 
                 Share.share(
                     _list.animalType <= 2
-                        ? "नस्ल: ${_list.animalBreed}\nजानकारी: ${_descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list)}\n ${_list.animalMilkCapacity != null || _list.animalMilk != null ? 'दूध(प्रति दिन): ${_list.animalMilkCapacity ?? _list.animalMilk} Litre' : ''}\n\nपशु देखे: ${shortUrl.toString()}"
+                        ? "नस्ल: ${_list.animalBreed}\nजानकारी: ${ReusableWidgets.descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : ReusableWidgets.descriptionText(_list)}\n ${_list.animalMilkCapacity != null || _list.animalMilk != null ? 'दूध(प्रति दिन): ${_list.animalMilkCapacity ?? _list.animalMilk} Litre' : ''}\n\nपशु देखे: ${shortUrl.toString()}"
                         : (_list.animalType <= 4
-                            ? ("नस्ल: ${_list.animalBreed}\nजानकारी: ${_descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list)}\n\nपशु देखे: ${shortUrl.toString()}")
-                            : ("जानकारी: ${_descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list)}\n\nपशु देखे: ${shortUrl.toString()}")),
+                            ? ("नस्ल: ${_list.animalBreed}\nजानकारी: ${ReusableWidgets.descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : ReusableWidgets.descriptionText(_list)}\n\nपशु देखे: ${shortUrl.toString()}")
+                            : ("जानकारी: ${ReusableWidgets.descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : ReusableWidgets.descriptionText(_list)}\n\nपशु देखे: ${shortUrl.toString()}")),
                     subject: 'पशु की जानकारी');
               },
               icon: Icon(Icons.share, color: Colors.white, size: 14),

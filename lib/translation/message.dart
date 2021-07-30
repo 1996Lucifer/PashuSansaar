@@ -350,7 +350,8 @@ class Messages extends Translations {
           'animalSaveError':
               'आपका पशु दर्ज़ करने में दिक्कत हो रही है|\nकृपया दोबारा कोशिश करे',
           'location_fetch': 'लोकेशन प्राप्त किया जा रहा हैं',
-          'loading': 'लोड हो रहा है...'
+          'loading': 'लोड हो रहा है...',
+          'notKnown': 'पता नहीं'
         }
       };
 }
