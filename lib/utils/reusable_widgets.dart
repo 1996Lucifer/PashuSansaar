@@ -82,7 +82,8 @@ class ReusableWidgets {
         });
   }
 
- static loggerFunction({String fileName, String error, String myNum, String userId}) {
+  static loggerFunction(
+      {String fileName, String error, String myNum, String userId}) {
     FirebaseFirestore.instance
         .collection('logger')
         .doc(myNum)
@@ -278,6 +279,28 @@ class ReusableWidgets {
 
   static int convertStringToInt(String value) {
     return int.parse(value);
+  }
+
+  static Center tinyLoader() {
+    return Center(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(),
+          SizedBox(
+            width: 14.0,
+          ),
+          Text(
+            'loading'.tr,
+            style: TextStyle(
+              color: appPrimaryColor,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

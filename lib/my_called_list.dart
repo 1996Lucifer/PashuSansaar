@@ -1,26 +1,18 @@
 import 'dart:convert';
 
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:intl/intl.dart';
-import 'package:pashusansaar/animal_description/animal_description_page.dart';
 import 'package:pashusansaar/my_calls/myCallsController.dart';
 import 'package:pashusansaar/refresh_token/refresh_token_controller.dart';
 import 'package:pashusansaar/utils/colors.dart';
-import 'package:progress_dialog/progress_dialog.dart';
 import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pashusansaar/utils/constants.dart';
-import 'buy_animal/buy_animal_controller.dart';
-import 'my_calls/myCallsModel.dart';
 import 'utils/reusable_widgets.dart';
 import 'package:get/get.dart';
-import 'package:paginate_firestore/paginate_firestore.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:url_launcher/url_launcher.dart' as UrlLauncher;
 
@@ -229,7 +221,37 @@ class _MyCalledListState extends State<MyCalledList> {
                               builder: (BuildContext context) {
                                 return i.length > 1000
                                     ? Image.memory(base64Decode('$i'))
-                                    : Image.network('$i');
+                                    : Image.network(
+                                        '$i',
+                                        loadingBuilder: (BuildContext context,
+                                            Widget child,
+                                            ImageChunkEvent loadingProgress) {
+                                          if (loadingProgress == null)
+                                            return child;
+                                          return Center(
+                                            child: CircularProgressIndicator(
+                                              value: loadingProgress
+                                                          .expectedTotalBytes !=
+                                                      null
+                                                  ? loadingProgress
+                                                          .cumulativeBytesLoaded /
+                                                      loadingProgress
+                                                          .expectedTotalBytes
+                                                  : null,
+                                            ),
+                                          );
+                                        },
+                                        errorBuilder: (BuildContext context,
+                                            Object exception,
+                                            StackTrace stackTrace) {
+                                          return Center(
+                                            child: Icon(
+                                              Icons.error,
+                                              size: 60,
+                                            ),
+                                          );
+                                        },
+                                      );
                               },
                             );
                           }).toList(),
@@ -259,14 +281,28 @@ class _MyCalledListState extends State<MyCalledList> {
               },
               child: Container(
                 height: 200.0,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: _images[0].length > 1000
-                          ? MemoryImage(base64.decode(_images[0]))
-                          : NetworkImage(_images[0])),
-                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                  color: Colors.redAccent,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: Image.network(
+                    _images[0],
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    loadingBuilder: (
+                      BuildContext context,
+                      Widget child,
+                      ImageChunkEvent loadingProgress,
+                    ) {
+                      if (loadingProgress == null) return child;
+                      return Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes
+                              : null,
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
             ),

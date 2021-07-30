@@ -10,6 +10,7 @@ import 'package:pashusansaar/seller_contact/seller_contact_controller.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/constants.dart';
 import 'package:pashusansaar/utils/custom_fab/custom_floating_button_location.dart';
+import 'package:pashusansaar/utils/global.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
@@ -85,7 +86,7 @@ class _BuyAnimalState extends State<BuyAnimal>
   TextEditingController _locationController = TextEditingController();
   ScrollController _scrollController =
       ScrollController(keepScrollOffset: false);
-  bool _isCardVisible = false, _isLoadingScreen = false;
+  bool _isLoadingScreen = false;
   File fileUrl;
   final SellerContactController sellerContactController =
       Get.put(SellerContactController());
@@ -171,7 +172,7 @@ class _BuyAnimalState extends State<BuyAnimal>
 
       setState(() {
         widget.animalInfo = _temp;
-        // _isCardVisible = widget.animalInfo.length % 5 == 0;
+        // isCardVisible = widget.animalInfo.length % 5 == 0;
         prefs.setInt('page', data.page);
       });
     } catch (e) {
@@ -211,7 +212,8 @@ class _BuyAnimalState extends State<BuyAnimal>
 
   _getInitialData() async {
     Future.delayed(Duration(seconds: 7)).then((value) => setState(() {
-          _isCardVisible = widget.animalInfo.length % 5 == 0;
+          isCardVisible =
+              widget.animalInfo.length % LIST_COUNT_PER_NETWORK_CALL == 0;
         }));
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -564,13 +566,15 @@ class _BuyAnimalState extends State<BuyAnimal>
         key: previewContainer,
         child: Scaffold(
           backgroundColor: Colors.grey[100],
-          floatingActionButtonLocation: CustomFloatingActionButtonLocation(
-            FloatingActionButtonLocation.startDocked,
-            8,
-            -8,
-          ),
+          // floatingActionButtonLocation: CustomFloatingActionButtonLocation(
+          //   FloatingActionButtonLocation.startDocked,
+          //   8,
+          //   -8,
+          // ),
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.miniStartFloat,
           floatingActionButton: AnimatedOpacity(
-            opacity: !_isCardVisible ? 1.0 : 0.0,
+            opacity: !isCardVisible ? 1.0 : 0.0,
             duration: Duration(seconds: 3),
             child: CustomFABWidget(
               userMobileNumber: widget.userMobileNumber,
@@ -609,19 +613,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                                 return Column(
                                   children: [
                                     SizedBox(height: 10),
-                                    Center(
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          CircularProgressIndicator(),
-                                          SizedBox(
-                                            width: 14.0,
-                                          ),
-                                          Text('loading'.tr),
-                                        ],
-                                      ),
-                                    ),
+                                    ReusableWidgets.tinyLoader(),
                                   ],
                                 );
                               }
@@ -642,8 +634,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                                       _buildInfowidget(index),
                                       _distanceTimeMethod(index),
                                       _animalImageWidget(index),
-                                      ReusableWidgets.animalDescriptionMethod(
-                                          widget.animalInfo[index]),
+                                      _animalDescriptionMethod(index),
                                       Container(
                                           decoration: BoxDecoration(
                                             color: Colors.grey[100],
@@ -867,12 +858,12 @@ class _BuyAnimalState extends State<BuyAnimal>
                           ),
                           Positioned(
                             bottom: 0,
-                            right: 0,
+                            left: 0,
                             child: AnimatedOpacity(
-                              opacity: _isCardVisible ? 1.0 : 0.0,
+                              opacity: isCardVisible ? 1.0 : 0.0,
                               duration: Duration(seconds: 3),
                               child: Visibility(
-                                visible: _isCardVisible,
+                                visible: isCardVisible,
                                 child: Padding(
                                   padding: EdgeInsets.all(10),
                                   child: OpenContainer(
@@ -907,7 +898,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                     Alignment.bottomRight,
                                                 child: RawMaterialButton(
                                                   onPressed: () => setState(() {
-                                                    _isCardVisible = false;
+                                                    isCardVisible = false;
                                                   }),
                                                   elevation: 2.0,
                                                   fillColor: Colors.white,
@@ -1280,6 +1271,54 @@ class _BuyAnimalState extends State<BuyAnimal>
     Navigator.of(context).pop();
   }
 
+  _descriptionText(animalInfo) {
+    String animalBreedCheck = (animalInfo.animalBreed == 'not_known'.tr)
+        ? ""
+        : animalInfo.animalBreed;
+    String animalTypeCheck = (animalInfo.animalType >= 5)
+        ? intToAnimalOtherTypeMapping[animalInfo.animalType]
+        : intToAnimalTypeMapping[animalInfo.animalType];
+
+    String desc = '';
+
+    if (animalInfo.animalType >= 3) {
+      desc =
+          'ये ${animalBreedCheck ?? ''} ${animalTypeCheck ?? ''} ${animalInfo.animalAge} साल ${(animalInfo.animalType == 6 || animalInfo.animalType == 8 || animalInfo.animalType == 10) ? " की" : "का"} है। ';
+    } else {
+      desc =
+          'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल की है। ';
+      if (animalInfo.recentBayatTime != null) {
+        desc = desc +
+            'यह ${intToRecentBayaatTime[animalInfo.recentBayatTime]} ब्यायी है। ';
+      }
+      if (animalInfo.pregnantTime != null) {
+        desc =
+            desc + 'यह अभी ${intToPregnantTime[animalInfo.pregnantTime]} है। ';
+      }
+
+      if (animalInfo.animalMilkCapacity != null) {
+        desc = desc +
+            'पिछले बार के हिसाब से दूध कैपेसिटी ${animalInfo.animalMilkCapacity} लीटर है। ';
+      }
+    }
+    return desc + (animalInfo.moreInfo ?? "");
+  }
+
+  Padding _animalDescriptionMethod(int index) {
+    List _list = widget.animalInfo;
+
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Text(
+        // "description to be added",
+        _descriptionText(_list[index]),
+        maxLines: 4,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(color: Colors.grey[600], fontSize: 14.5),
+      ),
+    );
+  }
+
   Padding _animalImageWidget(int index) {
     List _list = widget.animalInfo;
 
@@ -1446,10 +1485,10 @@ class _BuyAnimalState extends State<BuyAnimal>
                     text:
                         // "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
                         _list[index].animalType <= 2
-                            ? "नस्ल: ${_list[index].animalBreed}\nजानकारी: ${ReusableWidgets.descriptionText(_list[index]) == null ? 'जानकारी उपलब्ध नहीं है|' : ReusableWidgets.descriptionText(_list[index])}\n${_list[index].animalMilkCapacity != null || _list[index].animalMilk != null ? 'दूध(प्रति दिन): ${_list[index].animalMilkCapacity ?? _list[index].animalMilk} Litre' : ''}\n\nपशु देखे: ${shortUrl.toString()}"
+                            ? "नस्ल: ${_list[index].animalBreed}\nजानकारी: ${_descriptionText(_list[index]) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list[index])}\n${_list[index].animalMilkCapacity != null || _list[index].animalMilk != null ? 'दूध(प्रति दिन): ${_list[index].animalMilkCapacity ?? _list[index].animalMilk} Litre' : ''}\n\nपशु देखे: ${shortUrl.toString()}"
                             : (_list[index].animalType <= 4
-                                ? ("नस्ल: ${_list[index].animalBreed}\nजानकारी: ${ReusableWidgets.descriptionText(_list[index]) == null ? 'जानकारी उपलब्ध नहीं है|' : ReusableWidgets.descriptionText(_list[index])}\n\nपशु देखे: ${shortUrl.toString()}")
-                                : ("जानकारी: ${ReusableWidgets.descriptionText(_list[index]) == null ? 'जानकारी उपलब्ध नहीं है|' : ReusableWidgets.descriptionText(_list[index])}\n\nपशु देखे: ${shortUrl.toString()}")),
+                                ? ("नस्ल: ${_list[index].animalBreed}\nजानकारी: ${_descriptionText(_list[index]) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list[index])}\n\nपशु देखे: ${shortUrl.toString()}")
+                                : ("जानकारी: ${_descriptionText(_list[index]) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list[index])}\n\nपशु देखे: ${shortUrl.toString()}")),
                     subject: 'पशु की जानकारी');
 
                 // Share.share(shortUrl.toString());

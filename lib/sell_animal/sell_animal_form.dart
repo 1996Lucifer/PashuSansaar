@@ -653,19 +653,21 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                 controller: _controller,
                 keyboardType: TextInputType.number,
                 onChanged: (String price) {
-                  // String string = '${_formatNumber(price)}';
-                  String string = '${_formatNumber(price.replaceAll(',', ''))}';
+                  if (price.isEmpty) {
+                    price = '';
+                  } else {
+                    String string =
+                        '${_formatNumber(price.replaceAll(',', ''))}';
 
-                  _controller.value = TextEditingValue(
-                    text: _currency + string,
-                    selection: TextSelection.collapsed(offset: string.length),
-                  );
-
-                  // _controller.selection = TextSelection(
-                  //     baseOffset: price.length, extentOffset: price.length);
-                  _controller.selection = TextSelection.fromPosition(
-                      TextPosition(offset: _controller.text.length));
-
+                    _controller.value = TextEditingValue(
+                      text: _currency + string,
+                      selection: TextSelection.collapsed(offset: string.length),
+                    );
+                    // _controller.selection = TextSelection(
+                    //     baseOffset: price.length, extentOffset: price.length);
+                    _controller.selection = TextSelection.fromPosition(
+                        TextPosition(offset: _controller.text.length));
+                  }
                   setState(() {
                     animalInfo['animalPrice'] = price;
                   });
