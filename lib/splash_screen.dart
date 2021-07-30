@@ -33,8 +33,9 @@ class _SplashScreenState extends State<SplashScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String _userId = prefs.getString('userId') ?? '';
     String _accessToken = prefs.getString('accessToken') ?? '';
+    isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
 
-    if (_userId.isEmpty && _accessToken.isEmpty) {
+    if (_userId.isEmpty && _accessToken.isEmpty && isLoggedIn) {
       _getLegacyUser(prefs);
     } else {
       setState(() {

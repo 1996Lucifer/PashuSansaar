@@ -347,3 +347,5 @@ Map<int, String> intToYesNo = {
   0: 'yes'.tr,
   1: 'no'.tr,
 };
+
+int LIST_COUNT_PER_NETWORK_CALL = 25;

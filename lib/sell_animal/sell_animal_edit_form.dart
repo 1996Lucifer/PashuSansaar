@@ -378,48 +378,47 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
       });
 
   Column animalType() => Column(children: [
-    Padding(
-      padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-      child: Row(
-        children: [
-          Text(
-            'animal_type'.tr,
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+          child: Row(
+            children: [
+              Text(
+                'animal_type'.tr,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ],
           ),
-        ],
-      ),
-    ),
-    IgnorePointer(
-      ignoring: true,
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-        child: DropdownSearch<String>(
-          mode: Mode.BOTTOM_SHEET,
-          showSelectedItem: true,
-          items: constant.animalType,
-          label: 'animal_type'.tr,
-          selectedItem: widget.animalInfo.animalType > 4
-              ? intToAnimalOtherTypeMapping[widget.animalInfo.animalType]
-              : intToAnimalTypeMapping[widget.animalInfo.animalType],
-          dropdownSearchDecoration: InputDecoration(
-              fillColor: Colors.grey,
-              filled: true,
-              contentPadding:
-              EdgeInsets.symmetric(vertical: 1, horizontal: 10),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(5),
-              )),
         ),
-      ),
-    ),
-    Padding(
-      padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-      child: Divider(
-        thickness: 1,
-      ),
-    ),
-  ]);
-
+        IgnorePointer(
+          ignoring: true,
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+            child: DropdownSearch<String>(
+              mode: Mode.BOTTOM_SHEET,
+              showSelectedItem: true,
+              items: constant.animalType,
+              label: 'animal_type'.tr,
+              selectedItem: widget.animalInfo.animalType > 4
+                  ? intToAnimalOtherTypeMapping[widget.animalInfo.animalType]
+                  : intToAnimalTypeMapping[widget.animalInfo.animalType],
+              dropdownSearchDecoration: InputDecoration(
+                  fillColor: Colors.grey,
+                  filled: true,
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 1, horizontal: 10),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5),
+                  )),
+            ),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+          child: Divider(
+            thickness: 1,
+          ),
+        ),
+      ]);
 
   Column animalBreed() => Column(
         children: [
@@ -731,15 +730,19 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                 controller: _controller,
                 keyboardType: TextInputType.number,
                 onChanged: (String price) {
-                  String string = '${_formatNumber(price.replaceAll(',', ''))}';
-                  _controller.value = TextEditingValue(
-                    text: _currency + string,
-                    selection: TextSelection.collapsed(offset: string.length),
-                  );
+                  if (price.isEmpty) {
+                    price = '';
+                  } else {
+                    String string =
+                        '${_formatNumber(price.replaceAll(',', ''))}';
+                    _controller.value = TextEditingValue(
+                      text: _currency + string,
+                      selection: TextSelection.collapsed(offset: string.length),
+                    );
 
-                  _controller.selection = TextSelection.fromPosition(
-                      TextPosition(offset: _controller.text.length));
-
+                    _controller.selection = TextSelection.fromPosition(
+                        TextPosition(offset: _controller.text.length));
+                  }
                   setState(() {
                     animalUpdationData['animalPrice'] =
                         ReusableWidgets.convertStringToInt(price);
@@ -1781,10 +1784,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                   } else {
                     pr.hide();
                     ReusableWidgets.showDialogBox(
-                        context,
-                        'error'.tr,
-                        Text(
-                            'animalSaveError'.tr));
+                        context, 'error'.tr, Text('animalSaveError'.tr));
                   }
                 }
               }),

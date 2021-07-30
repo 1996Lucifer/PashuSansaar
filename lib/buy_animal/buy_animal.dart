@@ -10,6 +10,7 @@ import 'package:pashusansaar/seller_contact/seller_contact_controller.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/constants.dart';
 import 'package:pashusansaar/utils/custom_fab/custom_floating_button_location.dart';
+import 'package:pashusansaar/utils/global.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
@@ -85,7 +86,7 @@ class _BuyAnimalState extends State<BuyAnimal>
   TextEditingController _locationController = TextEditingController();
   ScrollController _scrollController =
       ScrollController(keepScrollOffset: false);
-  bool _isCardVisible = false, _isLoadingScreen = false;
+  bool _isLoadingScreen = false;
   File fileUrl;
   final SellerContactController sellerContactController =
       Get.put(SellerContactController());
@@ -171,7 +172,7 @@ class _BuyAnimalState extends State<BuyAnimal>
 
       setState(() {
         widget.animalInfo = _temp;
-        // _isCardVisible = widget.animalInfo.length % 5 == 0;
+        // isCardVisible = widget.animalInfo.length % 5 == 0;
         prefs.setInt('page', data.page);
       });
     } catch (e) {
@@ -211,7 +212,8 @@ class _BuyAnimalState extends State<BuyAnimal>
 
   _getInitialData() async {
     Future.delayed(Duration(seconds: 7)).then((value) => setState(() {
-          _isCardVisible = widget.animalInfo.length % 5 == 0;
+          isCardVisible =
+              widget.animalInfo.length % LIST_COUNT_PER_NETWORK_CALL == 0;
         }));
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -564,13 +566,15 @@ class _BuyAnimalState extends State<BuyAnimal>
         key: previewContainer,
         child: Scaffold(
           backgroundColor: Colors.grey[100],
-          floatingActionButtonLocation: CustomFloatingActionButtonLocation(
-            FloatingActionButtonLocation.startDocked,
-            8,
-            -8,
-          ),
+          // floatingActionButtonLocation: CustomFloatingActionButtonLocation(
+          //   FloatingActionButtonLocation.startDocked,
+          //   8,
+          //   -8,
+          // ),
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.miniStartFloat,
           floatingActionButton: AnimatedOpacity(
-            opacity: !_isCardVisible ? 1.0 : 0.0,
+            opacity: !isCardVisible ? 1.0 : 0.0,
             duration: Duration(seconds: 3),
             child: CustomFABWidget(
               userMobileNumber: widget.userMobileNumber,
@@ -609,19 +613,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                                 return Column(
                                   children: [
                                     SizedBox(height: 10),
-                                    Center(
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          CircularProgressIndicator(),
-                                          SizedBox(
-                                            width: 14.0,
-                                          ),
-                                          Text('loading'.tr),
-                                        ],
-                                      ),
-                                    ),
+                                    ReusableWidgets.tinyLoader(),
                                   ],
                                 );
                               }
@@ -866,12 +858,12 @@ class _BuyAnimalState extends State<BuyAnimal>
                           ),
                           Positioned(
                             bottom: 0,
-                            right: 0,
+                            left: 0,
                             child: AnimatedOpacity(
-                              opacity: _isCardVisible ? 1.0 : 0.0,
+                              opacity: isCardVisible ? 1.0 : 0.0,
                               duration: Duration(seconds: 3),
                               child: Visibility(
-                                visible: _isCardVisible,
+                                visible: isCardVisible,
                                 child: Padding(
                                   padding: EdgeInsets.all(10),
                                   child: OpenContainer(
@@ -906,7 +898,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                     Alignment.bottomRight,
                                                 child: RawMaterialButton(
                                                   onPressed: () => setState(() {
-                                                    _isCardVisible = false;
+                                                    isCardVisible = false;
                                                   }),
                                                   elevation: 2.0,
                                                   fillColor: Colors.white,
@@ -1303,6 +1295,7 @@ class _BuyAnimalState extends State<BuyAnimal>
         desc =
             desc + 'यह अभी ${intToPregnantTime[animalInfo.pregnantTime]} है। ';
       }
+
       if (animalInfo.animalMilkCapacity != null) {
         desc = desc +
             'पिछले बार के हिसाब से दूध कैपेसिटी ${animalInfo.animalMilkCapacity} लीटर है। ';
