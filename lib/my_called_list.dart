@@ -404,7 +404,7 @@ class _MyCalledListState extends State<MyCalledList> {
 
                 Share.share(
                     _list.animalType <= 2
-                        ? "नस्ल: ${_list.animalBreed}\nजानकारी: ${_descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list)}\nदूध(प्रति दिन): ${_list.animalMilkCapacity} Litre\n\nपशु देखे: ${shortUrl.toString()}"
+                        ? "नस्ल: ${_list.animalBreed}\nजानकारी: ${_descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list)}\n ${_list.animalMilkCapacity != null || _list.animalMilk != null ? 'दूध(प्रति दिन): ${_list.animalMilkCapacity ?? _list.animalMilk} Litre' : ''}\n\nपशु देखे: ${shortUrl.toString()}"
                         : (_list.animalType <= 4
                             ? ("नस्ल: ${_list.animalBreed}\nजानकारी: ${_descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list)}\n\nपशु देखे: ${shortUrl.toString()}")
                             : ("जानकारी: ${_descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list)}\n\nपशु देखे: ${shortUrl.toString()}")),

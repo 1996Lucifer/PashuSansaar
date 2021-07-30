@@ -809,7 +809,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                   }
 
                                                   whatsappText =
-                                                      'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${widget.userName}, ${prefs.getString('district')} \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
+                                                      'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${widget.userName ?? ''} ${prefs.getString('district')} \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
                                                   whatsappUrl =
                                                       "https://api.whatsapp.com/send/?phone=+91 $myNum &text=$whatsappText";
                                                   await UrlLauncher.canLaunch(
@@ -1492,7 +1492,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                     text:
                         // "नस्ल: ${_list[index]['userAnimalBreed']}\nजानकारी: ${_list[index]['userAnimalDescription']}\nदूध(प्रति दिन): ${_list[index]['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
                         _list[index].animalType <= 2
-                            ? "नस्ल: ${_list[index].animalBreed}\nजानकारी: ${_descriptionText(_list[index]) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list[index])}\nदूध(प्रति दिन): ${_list[index].animalMilkCapacity} Litre\n\nपशु देखे: ${shortUrl.toString()}"
+                            ? "नस्ल: ${_list[index].animalBreed}\nजानकारी: ${_descriptionText(_list[index]) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list[index])}\n${_list[index].animalMilkCapacity != null || _list[index].animalMilk != null ? 'दूध(प्रति दिन): ${_list[index].animalMilkCapacity ?? _list[index].animalMilk} Litre' : ''}\n\nपशु देखे: ${shortUrl.toString()}"
                             : (_list[index].animalType <= 4
                                 ? ("नस्ल: ${_list[index].animalBreed}\nजानकारी: ${_descriptionText(_list[index]) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list[index])}\n\nपशु देखे: ${shortUrl.toString()}")
                                 : ("जानकारी: ${_descriptionText(_list[index]) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list[index])}\n\nपशु देखे: ${shortUrl.toString()}")),
