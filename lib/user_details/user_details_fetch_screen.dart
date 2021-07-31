@@ -503,12 +503,19 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
                                                     .tr
                                                 : 'location_error_supportive_again'
                                                     .tr,
-                                            style: DefaultTextStyle.of(context)
-                                                .style,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 16,
+                                            ),
                                           ),
                                         ),
                                         actions: <Widget>[
                                           ElevatedButton(
+                                              style: ButtonStyle(
+                                                backgroundColor:
+                                                    MaterialStateProperty.all(
+                                                        appPrimaryColor),
+                                              ),
                                               child: Text(
                                                 'Ok'.tr,
                                                 style: TextStyle(

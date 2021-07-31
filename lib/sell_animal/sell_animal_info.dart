@@ -621,6 +621,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                         )
                       : SizedBox.shrink(),
                   ListView.builder(
+                    cacheExtent: 999,
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
                     itemCount: widget.animalInfo.length,

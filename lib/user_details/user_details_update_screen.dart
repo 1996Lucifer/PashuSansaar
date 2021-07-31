@@ -514,6 +514,11 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
                                     ),
                                     actions: <Widget>[
                                       ElevatedButton(
+                                          style: ButtonStyle(
+                                            backgroundColor:
+                                                MaterialStateProperty.all(
+                                                    appPrimaryColor),
+                                          ),
                                           child: Text(
                                             'Ok'.tr,
                                             style: TextStyle(

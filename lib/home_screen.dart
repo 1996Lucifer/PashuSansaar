@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Map _referralWinnerData = {};
   final geo = Geoflutterfire();
   PageController _pageController;
-  String _referralUniqueValue = '', _mobileNumber = '';
+  String _referralUniqueValue = '', _mobileNumber = '', _userName = '';
   bool _checkReferral = false;
   double lat = 0.0, long = 0.0;
   locate.LocationData _locate;
@@ -167,6 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _referralUniqueValue = prefs.getString('referralUniqueValue');
       _checkReferral = prefs.getBool('checkReferral') ?? false;
       _mobileNumber = prefs.getString('mobileNumber');
+      _userName = prefs.getString('userName');
 
       lat = prefs.getDouble('latitude');
       long = prefs.getDouble('longitude');
@@ -177,6 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   getInitialInfo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+
     bool status;
     pr.show();
 
@@ -430,21 +432,21 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             BuyAnimal(
               animalInfo: _animalInfo,
-              userName: _profileData['name'],
-              userMobileNumber: _profileData['mobile'],
+              userName: _userName,
+              userMobileNumber: _mobileNumber,
               userImage: _profileData['image'],
               latitude: lat,
               longitude: long,
             ),
             SellAnimalMain(
               sellingAnimalInfo: _sellingAnimalInfo,
-              userName: _profileData['name'],
-              userMobileNumber: _profileData['mobile'],
+              userName: _userName,
+              userMobileNumber: _mobileNumber,
             ),
             ProfileMain(
               profileData: _profileData,
               sellingAnimalInfo: _sellingAnimalInfo,
-              userName: _profileData['name'],
+              userName: _userName,
               userMobileNumber: _mobileNumber,
               refData: _referralWinnerData,
             ),

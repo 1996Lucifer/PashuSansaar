@@ -109,7 +109,7 @@ class _InterestedBuyerState extends State<InterestedBuyer> {
               child: RichText(
                 textAlign: TextAlign.center,
                 text: TextSpan(
-                    text: _list.userName,
+                    text: _list._userName,
                     style: TextStyle(
                         color: Colors.grey[700],
                         fontWeight: FontWeight.bold,

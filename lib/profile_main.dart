@@ -55,7 +55,7 @@ class ProfileMainState extends State<ProfileMain>
   final MyCallListController myCallListController =
       Get.put(MyCallListController());
 
-  String userAddress = '', userName = '';
+  String userAddress = '';
 
   @override
   void initState() {
@@ -68,7 +68,6 @@ class ProfileMainState extends State<ProfileMain>
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       userAddress = prefs.getString('userAddress');
-      userName = prefs.getString('userName');
       _currentVersion = prefs.getStringList('currentVersion').join('.');
     });
   }
@@ -81,7 +80,6 @@ class ProfileMainState extends State<ProfileMain>
       userInfo['image'] = widget.profileData['image'];
       _currentVersion = prefs.getStringList('currentVersion').join('.');
       userAddress = prefs.getString('userAddress');
-      userName = prefs.getString('userName');
     });
     // getCallingInfo();
   }
@@ -438,13 +436,13 @@ class ProfileMainState extends State<ProfileMain>
                           child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                userName == null
+                                widget.userName == null
                                     ? Text('progress_dialog_message'.tr)
                                     : Row(
                                         children: [
                                           Icon(Icons.account_circle_outlined),
                                           SizedBox(width: 5),
-                                          Text(userName,
+                                          Text(widget.userName,
                                               style: TextStyle(
                                                   fontWeight: FontWeight.w500,
                                                   fontSize: 14)),

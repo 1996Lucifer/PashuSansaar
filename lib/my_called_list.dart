@@ -95,7 +95,6 @@ class _MyCalledListState extends State<MyCalledList> {
   Row _buildInfowidget(_list) {
     var formatter = intl.NumberFormat('#,##,000');
     return Row(
-      // mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Expanded(
           child: Padding(
@@ -349,7 +348,7 @@ class _MyCalledListState extends State<MyCalledList> {
               String whatsappText = '';
 
               whatsappText =
-                  'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${_list.userName}, ${_list.userAddress} \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
+                  'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${_list._userName}, ${_list.userAddress} \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
               whatsappUrl =
                   "https://api.whatsapp.com/send/?phone=+91 ${_list.mobile} &text=$whatsappText";
               await UrlLauncher.canLaunch(whatsappUrl) != null
@@ -663,6 +662,7 @@ class _MyCalledListState extends State<MyCalledList> {
               : Container(
                   margin: EdgeInsets.all(10),
                   child: ListView.separated(
+                    cacheExtent: 99,
                     itemCount: myCallList.length,
                     separatorBuilder: (context, index) => Divider(),
                     itemBuilder: (context, index) {
