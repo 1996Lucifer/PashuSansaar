@@ -111,40 +111,45 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
     pr.style(message: 'location_fetch'.tr);
     pr.show();
 
-    List<Address> address;
-    _locationData = await location.getLocation();
+    try {
+      List<Address> address;
+      _locationData = await location.getLocation();
 
-    print('_locationData===' + _locationData.toString());
-    address = await Geocoder.local.findAddressesFromCoordinates(
-      Coordinates(
-        _locationData.latitude,
-        _locationData.longitude,
-      ),
-    );
-    Address first = address.first;
-
-    print('first===' + first.toString());
-
-    setState(() {
-      prefs.setDouble("latitude", first.coordinates.latitude);
-      prefs.setDouble("longitude", first.coordinates.longitude);
-
-      prefs.setString(
-          "district",
-          ReusableWidgets.mappingDistrict(
-              first.subAdminArea ?? first.locality ?? first.featureName));
-      prefs.setString("zipCode", first.postalCode);
-      prefs.setString(
-        "userAddress",
-        first.addressLine ??
-            (first.adminArea +
-                ' ' +
-                first.postalCode +
-                ', ' +
-                first.countryName),
+      print('_locationData===' + _locationData.toString());
+      address = await Geocoder.local.findAddressesFromCoordinates(
+        Coordinates(
+          _locationData.latitude,
+          _locationData.longitude,
+        ),
       );
-    });
-    pr.hide();
+      Address first = address.first;
+
+      print('first===' + first.toString());
+
+      setState(() {
+        prefs.setDouble("latitude", first.coordinates.latitude);
+        prefs.setDouble("longitude", first.coordinates.longitude);
+
+        prefs.setString(
+            "district",
+            ReusableWidgets.mappingDistrict(
+                first.subAdminArea ?? first.locality ?? first.featureName));
+        prefs.setString("zipCode", first.postalCode);
+        prefs.setString(
+          "userAddress",
+          first.addressLine ??
+              (first.adminArea +
+                  ' ' +
+                  first.postalCode +
+                  ', ' +
+                  first.countryName),
+        );
+      });
+      pr.hide();
+    } catch (e) {
+      pr.hide();
+    }
+
     await assignDeviceID();
   }
 
@@ -292,7 +297,7 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
       isDismissible: false,
     );
 
-    pr.style(message: 'progress_dialog_message'.tr);
+    pr.style(message: 'user_register'.tr);
 
     return Scaffold(
       appBar: ReusableWidgets.getAppBar(context, 'Enter Details', false),
@@ -479,13 +484,6 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
                         SharedPreferences prefs =
                             await SharedPreferences.getInstance();
 
-                        // pr.style(message: 'progress_dialog_message'.tr);
-                        // pr.show();
-
-                        // Future.delayed(Duration(seconds: 2))
-                        //     .then((value) async {
-                        // pr.hide();
-
                         if (_zipCodeTextField &&
                             zipCodeController.text.isNotEmpty)
                           await loadAsset();
@@ -540,9 +538,8 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
                                     ]);
                               });
                         } else {
+                          pr.show();
                           try {
-                            pr.show();
-
                             bool status = await _authController.fetchAuthToken(
                               token: '${_otpController.authorization.value}',
                               mobileInfo: mobileInfo,
@@ -586,8 +583,17 @@ class _UserDetailsUpdateState extends State<UserDetailsUpdate> {
                               Get.off(() => HomeScreen(
                                     selectedIndex: 0,
                                   ));
+                            } else {
+                              ReusableWidgets.showDialogBox(
+                                context,
+                                'warning'.tr,
+                                Text(
+                                  'global_error'.tr,
+                                ),
+                              );
                             }
                           } catch (e) {
+                            pr.hide();
                             ReusableWidgets.showDialogBox(
                               context,
                               'warning'.tr,

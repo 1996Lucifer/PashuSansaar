@@ -35,7 +35,6 @@ class _HomeScreenState extends State<HomeScreen> {
   List<MyAnimals> _sellingAnimalInfo = [];
   Map _profileData = {};
   Map _referralWinnerData = {};
-  final geo = Geoflutterfire();
   PageController _pageController;
   String _referralUniqueValue = '', _mobileNumber = '', _userName = '';
   bool _checkReferral = false;
@@ -167,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _referralUniqueValue = prefs.getString('referralUniqueValue');
       _checkReferral = prefs.getBool('checkReferral') ?? false;
       _mobileNumber = prefs.getString('mobileNumber');
-      _userName = prefs.getString('userName');
+      _userName = prefs.getString('userName') ?? '';
 
       lat = prefs.getDouble('latitude');
       long = prefs.getDouble('longitude');
@@ -199,6 +198,7 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       }
     } catch (e) {
+      pr.hide();
       ReusableWidgets.loggerFunction(
           fileName: 'home_screen_refreshToken',
           error: e.toString(),
@@ -230,7 +230,9 @@ class _HomeScreenState extends State<HomeScreen> {
         _animalInfo = data.result;
         prefs.setInt('page', data.page);
       });
+      pr.hide();
     } catch (e) {
+      pr.hide();
       ReusableWidgets.loggerFunction(
           fileName: 'home_screen_getAnimal',
           error: e.toString(),
@@ -245,14 +247,12 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    pr.hide();
     getAnimalSellingInfo();
   }
 
   getAnimalSellingInfo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool status;
-    //pr.show();
 
     try {
       if (ReusableWidgets.isTokenExpired(prefs.getInt('expires') ?? 0)) {

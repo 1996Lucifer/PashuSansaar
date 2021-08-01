@@ -1390,20 +1390,15 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
 
       print('-Response=-=-=>>' + resp.toString());
 
-      // if (key.contains(_imageToBeUploaded[i]['fileName'].split('_')[1])) {
       _imageToBeUploaded.removeWhere((element) {
         print('element===>' + element.toString());
-        // return false;
         return element['fileName'].contains(key.split('_')[1]);
       });
-      // }
-
-      // print('-_imageToBeUploadedBefore=-=-=>>' + _imageToBeUploaded.toString());
 
       setState(() {
         _imageToBeUploaded.add({'fileName': key, 'fileType': fileType});
       });
-      // print('-_imageToBeUploadedAfter=-=-=>>' + _imageToBeUploaded.toString());
+
       return true;
     } catch (e) {
       print('=-=-==>>' + e.toString());
@@ -1558,9 +1553,22 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                         });
                       } else {
                         print('Error getting token==' + status.toString());
+                        ReusableWidgets.loggerFunction(
+                          fileName: 'sell_animal_edit_form_refreshToken',
+                          error: e.toString(),
+                          myNum: widget.userMobileNumber,
+                          userId: prefs.getString('userId'),
+                        );
                       }
                     }
                   } catch (e) {
+                    ReusableWidgets.loggerFunction(
+                      fileName: 'sell_animal_edit_form_refreshToken',
+                      error: e.toString(),
+                      myNum: widget.userMobileNumber,
+                      userId: prefs.getString('userId'),
+                    );
+
                     ReusableWidgets.showDialogBox(
                       context,
                       'warning'.tr,
@@ -1583,7 +1591,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                     result.add(imagesUpload["Image4"]);
                   }
 
-                  List imageUploadingStatus;
+                  List imageUploadingStatus = [];
                   try {
                     imageUploadingStatus =
                         await _uploadImageController.uploadImage(
@@ -1593,10 +1601,11 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                     );
                   } catch (e) {
                     ReusableWidgets.loggerFunction(
-                        fileName: 'sell_animal_edit_form_uploadImage',
-                        error: e.toString(),
-                        myNum: widget.userMobileNumber,
-                        userId: prefs.getString('userId'));
+                      fileName: 'sell_animal_edit_form_uploadImage',
+                      error: e.toString(),
+                      myNum: widget.userMobileNumber,
+                      userId: prefs.getString('userId'),
+                    );
                     ReusableWidgets.showDialogBox(
                       context,
                       'warning'.tr,
@@ -1606,7 +1615,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                     );
                   }
 
-                  if (imageUploadingStatus.isBlank) {
+                  if (imageUploadingStatus.length == 0) {
                     ReusableWidgets.showDialogBox(
                         context, 'error'.tr, Text('issue uploading image'));
                   } else {
@@ -1637,7 +1646,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                       animalUpdationData.toString());
 
                   bool saveAnimalData = false;
-                  if (_imageToBeUploaded.isNotEmpty) {
+                  if (_imageToBeUploaded.length > 0) {
                     if (animalUpdationData['animalType'] == 1 ||
                         animalUpdationData['animalType'] == 2) {
                       try {

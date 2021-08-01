@@ -63,7 +63,6 @@ class _SellAnimalFormState extends State<SellAnimalForm>
     'Image4': ''
   };
 
-  List _imageToBeUploaded = [];
   TextEditingController _controller;
   static const _locale = 'en_IN';
   final UploadImageController _uploadImageController =
@@ -1005,13 +1004,11 @@ class _SellAnimalFormState extends State<SellAnimalForm>
 
       print('-=-=-=>>' + resp.toString());
 
-      setState(() {
-        _imageToBeUploaded.add({'fileName': key, 'fileType': fileType});
-      });
-      return true;
+      return {'fileName': key, 'fileType': fileType};
+      // return true;
     } catch (e) {
       print('=-=-==>>' + e.toString());
-      return false;
+      return {};
     }
   }
 
@@ -1141,9 +1138,6 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                           Text('animal_gayabhin_time_error'.tr),
                         );
                       else {
-                        setState(() {
-                          _imageToBeUploaded.clear();
-                        });
                         pr = new ProgressDialog(context,
                             type: ProgressDialogType.Normal,
                             isDismissible: false);
@@ -1173,14 +1167,22 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                             } else {
                               print(
                                   'Error getting token==' + status.toString());
+                              ReusableWidgets.showDialogBox(
+                                context,
+                                'warning'.tr,
+                                Text(
+                                  'global_error'.tr,
+                                ),
+                              );
                             }
                           }
                         } catch (e) {
                           ReusableWidgets.loggerFunction(
-                              fileName: 'sell_animal_form_refreshToken',
-                              error: e.toString(),
-                              myNum: widget.userMobileNumber,
-                              userId: prefs.getString('userId'));
+                            fileName: 'sell_animal_form_refreshToken',
+                            error: e.toString(),
+                            myNum: widget.userMobileNumber,
+                            userId: prefs.getString('userId'),
+                          );
                           ReusableWidgets.showDialogBox(
                             context,
                             'warning'.tr,
@@ -1203,7 +1205,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                           result.add(imagesUpload["Image4"]);
                         }
 
-                        List imageUploadingStatus;
+                        List imageUploadingStatus = [];
                         try {
                           imageUploadingStatus =
                               await _uploadImageController.uploadImage(
@@ -1226,42 +1228,51 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                           );
                         }
 
-                        List<bool> _isImageUploaded = [];
+                        List _imageToBeUploadedLocal = [];
 
-                        if (imageUploadingStatus.isBlank) {
+                        if (imageUploadingStatus.length == 0) {
                           ReusableWidgets.showDialogBox(context, 'error'.tr,
                               Text('issue uploading image'));
                         } else {
-                          for (int i = 0;
-                              i < imageUploadingStatus.length;
-                              i++) {
-                            bool uploadStatus = await _upload(
-                              path: imagesFileUpload[imageUploadingStatus[i]
-                                  .fields
-                                  .key
-                                  .split('_')[1]],
-                              fileName: imageUploadingStatus[i].fields.key,
-                              url: imageUploadingStatus[i].url,
-                              key: imageUploadingStatus[i].fields.key,
-                              bucket: imageUploadingStatus[i].fields.bucket,
-                              xAmzAlgorithm:
-                                  imageUploadingStatus[i].fields.xAmzAlgorithm,
-                              xAmzCredential:
-                                  imageUploadingStatus[i].fields.xAmzCredential,
-                              xAmzDate: imageUploadingStatus[i].fields.xAmzDate,
-                              policy: imageUploadingStatus[i].fields.policy,
-                              xAmzSignature:
-                                  imageUploadingStatus[i].fields.xAmzSignature,
-                              fileType: result[i]['fileType'],
-                            );
+                          try {
+                            for (int i = 0;
+                                i < imageUploadingStatus.length;
+                                i++) {
+                              Map uploadImageKeyValue = await _upload(
+                                path: imagesFileUpload[imageUploadingStatus[i]
+                                    .fields
+                                    .key
+                                    .split('_')[1]],
+                                fileName: imageUploadingStatus[i].fields.key,
+                                url: imageUploadingStatus[i].url,
+                                key: imageUploadingStatus[i].fields.key,
+                                bucket: imageUploadingStatus[i].fields.bucket,
+                                xAmzAlgorithm: imageUploadingStatus[i]
+                                    .fields
+                                    .xAmzAlgorithm,
+                                xAmzCredential: imageUploadingStatus[i]
+                                    .fields
+                                    .xAmzCredential,
+                                xAmzDate:
+                                    imageUploadingStatus[i].fields.xAmzDate,
+                                policy: imageUploadingStatus[i].fields.policy,
+                                xAmzSignature: imageUploadingStatus[i]
+                                    .fields
+                                    .xAmzSignature,
+                                fileType: result[i]['fileType'],
+                              );
 
-                            print('][]' + uploadStatus.toString());
-                            _isImageUploaded.add(uploadStatus);
+                              _imageToBeUploadedLocal.addIf(
+                                  uploadImageKeyValue.length > 0,
+                                  uploadImageKeyValue);
+                            }
+                          } catch (e) {
+                            _imageToBeUploadedLocal = [];
                           }
                         }
 
                         bool saveAnimalData = false;
-                        if (_imageToBeUploaded.isNotEmpty) {
+                        if (_imageToBeUploadedLocal.length > 0) {
                           if (animalInfo['animalType'] == 'cow'.tr ||
                               animalInfo['animalType'] == 'buffalo_female'.tr) {
                             try {
@@ -1298,7 +1309,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                                     extraInfoData['animalHasBaby']],
                                 userId: prefs.getString('userId'),
                                 moreInfo: extraInfoData['moreInfo'],
-                                files: _imageToBeUploaded,
+                                files: _imageToBeUploadedLocal,
                                 token: prefs.getString("accessToken"),
                               );
                             } catch (e) {
@@ -1336,7 +1347,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                                     animalInfo['animalPrice']),
                                 userId: prefs.getString('userId'),
                                 moreInfo: extraInfoData['moreInfo'],
-                                files: _imageToBeUploaded,
+                                files: _imageToBeUploadedLocal,
                                 token: prefs.getString("accessToken"),
                               );
                             } catch (e) {
@@ -1359,7 +1370,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                               Text('upload_image_error'.tr));
                         }
 
-                        print('][]==' + _imageToBeUploaded.toString());
+                        print('][]==' + _imageToBeUploadedLocal.toString());
 
                         if (saveAnimalData) {
                           pr.hide();
