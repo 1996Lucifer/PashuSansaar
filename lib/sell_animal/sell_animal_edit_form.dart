@@ -479,7 +479,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
         ],
       );
 
-  Column animalAge() => Column(
+  animalAge() => Column(
         children: [
           Padding(
             padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
@@ -731,7 +731,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                 keyboardType: TextInputType.number,
                 onChanged: (String price) {
                   if (price.isEmpty) {
-                    price = '';
+                    price = '0';
                   } else {
                     String string =
                         '${_formatNumber(price.replaceAll(',', ''))}';
@@ -745,7 +745,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                   }
                   setState(() {
                     animalUpdationData['animalPrice'] =
-                        ReusableWidgets.convertStringToInt(price);
+                       ReusableWidgets.convertStringToInt(price);
                   });
                 },
                 decoration: InputDecoration(
@@ -1469,7 +1469,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                     'error'.tr,
                     Text('maximum_milk_length'.tr),
                   );
-                else if (animalUpdationData['animalPrice'] == null)
+                else if (animalUpdationData['animalPrice'] == null|| animalUpdationData['animalPrice'] == 0)
                   ReusableWidgets.showDialogBox(
                     context,
                     'error'.tr,

@@ -23,50 +23,35 @@ class CustomFABWidget extends StatelessWidget {
           userMobileNumber: userMobileNumber,
           userName: userName,
         ),
-        closedShape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18.0),
-            side: BorderSide(color: Colors.transparent)),
+        closedShape: CircleBorder(),
         closedColor: appPrimaryColor,
         closedBuilder: (context, openContainer) => Container(
-            padding: EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              shape: BoxShape.rectangle,
-              color: appPrimaryColor,
-            ),
-            height: 50,
-            width: 140,
-            child: Row(
+            margin: EdgeInsets.only(top: 12),
+            height: 70,
+            width: 70,
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
+              // crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  'कैसा ',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18.0
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  // crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      'कैसा ',
+                      style: TextStyle(color: Colors.white, fontSize: 14.0),
+                    ),
+                    Text(
+                      '🐄',
+                      style: TextStyle(color: Colors.white, fontSize: 24.0),
+                    ),
+                  ],
                 ),
                 Text(
-                  '🐄',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 30.0
-                  ),
-                ),
-                Text(
-                  ' चाहिये',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18.0
-                  ),
+                  'चाहिये',
+                  style: TextStyle(color: Colors.white, fontSize: 14.0),
                 ),
               ],
-            )
-
-            // child: Icon(
-            //   Icons.chat,
-            //   color: Colors.white,
-            // ),
-            ),
+            )),
       );
 }
