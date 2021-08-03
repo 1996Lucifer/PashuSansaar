@@ -27,7 +27,6 @@ dependencies:
   animations: any
   another_flushbar: any
   carousel_slider: ^3.0.0
-  check_vpn_connection: ^0.0.1
   cloud_firestore: ^0.16.0+1
   cupertino_icons: ^1.0.0
   date_format: ^1.0.9
@@ -36,12 +35,10 @@ dependencies:
   dotted_border: ^1.0.7
   dropdown_search: ^0.4.9
   firebase_auth: ^0.20.1
-  firebase_core: ^0.7.0
   firebase_dynamic_links: any
   firebase_in_app_messaging: any
   firebase_messaging: any
   firebase_remote_config: any
-  firebase_storage: any
   flutter_countdown_timer: any
   flutter_launcher_icons: any
   flutter_local_notifications: any
@@ -49,14 +46,12 @@ dependencies:
   font_awesome_flutter: ^8.11.0
   geocoder: ^0.2.1
   geodesy: ^0.3.2
-  geoflutterfire: ^2.2.2
   get: ^3.26.0
   image_picker: ^0.6.7+7
   intl: any
   location: ^3.2.4
   marquee: ^1.7.0
   package_info: any
-  paginate_firestore: any
   path_provider: any
   pin_code_fields: ^6.1.0
   progress_dialog: ^1.2.4

@@ -301,6 +301,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
             onChanged: (String type) {
               setState(() {
                 animalInfo['animalType'] = type;
+                animalInfo['animalTypeOther'] = null;
               });
             },
             dropdownSearchDecoration: InputDecoration(
@@ -326,7 +327,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
               onChanged: (String otherType) {
                 setState(() {
                   animalInfo['animalTypeOther'] = otherType;
-                  animalInfo['animalType'] = otherType;
+                  // animalInfo['animalType'] = otherType;
                 });
               },
               dropdownSearchDecoration: InputDecoration(
@@ -1177,6 +1178,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                             }
                           }
                         } catch (e) {
+                          pr.hide();
                           ReusableWidgets.loggerFunction(
                             fileName: 'sell_animal_form_refreshToken',
                             error: e.toString(),
@@ -1214,6 +1216,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                             token: prefs.getString('accessToken'),
                           );
                         } catch (e) {
+                          pr.hide();
                           ReusableWidgets.loggerFunction(
                               fileName: 'sell_animal_form_imageUpload',
                               error: e.toString(),
@@ -1279,11 +1282,12 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                               saveAnimalData =
                                   await sellAnimalController.saveAnimal(
                                 animalType:
-                                    animalInfo['animalTypeOther'] == null
+                                    animalInfo['animalTypeOther'] == null ||
+                                            animalInfo['animalTypeOther'] == ''
                                         ? animalTypeMapping[
                                             animalInfo['animalType']]
                                         : animalOtherTypeMapping[
-                                            animalInfo['animalType']],
+                                            animalInfo['animalTypeOther']],
                                 animalBreed: animalInfo['animalBreed'],
                                 animalAge: ReusableWidgets.convertStringToInt(
                                     animalInfo['animalAge']),
@@ -1294,8 +1298,10 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                                 animalMilk: ReusableWidgets.convertStringToInt(
                                     animalInfo['animalMilk']),
                                 animalMilkCapacity:
-                                    ReusableWidgets.convertStringToInt(
-                                        animalInfo['animalMilkCapacity']),
+                                    animalInfo['animalMilkCapacity'] == null
+                                        ? null
+                                        : ReusableWidgets.convertStringToInt(
+                                            animalInfo['animalMilkCapacity']),
                                 isRecentBayat:
                                     extraInfoData['alreadyPregnantYesNo'] ==
                                         constant.yesNo.first,
@@ -1305,14 +1311,18 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                                     constant.yesNo.first,
                                 pregnantTime: stringToPregnantTime[
                                     extraInfoData['animalIfPregnant']],
-                                animalHasBaby: stringToAnimalHasBaby[
-                                    extraInfoData['animalHasBaby']],
+                                animalHasBaby:
+                                    extraInfoData['animalHasBaby'] == null
+                                        ? null
+                                        : stringToAnimalHasBaby[
+                                            extraInfoData['animalHasBaby']],
                                 userId: prefs.getString('userId'),
                                 moreInfo: extraInfoData['moreInfo'],
                                 files: _imageToBeUploadedLocal,
                                 token: prefs.getString("accessToken"),
                               );
                             } catch (e) {
+                              pr.hide();
                               ReusableWidgets.loggerFunction(
                                   fileName: 'sell_animal_form_saveAnimal1',
                                   error: e.toString(),
@@ -1331,11 +1341,12 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                               saveAnimalData =
                                   await sellAnimalController.saveAnimal(
                                 animalType:
-                                    animalInfo['animalTypeOther'] == null
+                                    animalInfo['animalTypeOther'] == null ||
+                                            animalInfo['animalTypeOther'] == ''
                                         ? animalTypeMapping[
                                             animalInfo['animalType']]
                                         : animalOtherTypeMapping[
-                                            animalInfo['animalType']],
+                                            animalInfo['animalTypeOther']],
                                 animalBreed:
                                     ReusableWidgets.removeEnglishDataFromName(
                                         animalInfo['animalBreed']),
@@ -1366,6 +1377,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                             }
                           }
                         } else {
+                          pr.hide();
                           ReusableWidgets.showDialogBox(context, 'warning'.tr,
                               Text('upload_image_error'.tr));
                         }

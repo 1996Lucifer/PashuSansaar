@@ -7,7 +7,7 @@ class UploadImageModel {
   UploadImageModel.fromJson(Map<String, dynamic> json) {
     success = json['success'];
     if (json['urls'] != null) {
-      urls = new List<Urls>();
+      urls = <Urls>[];
       json['urls'].forEach((v) {
         urls.add(new Urls.fromJson(v));
       });

@@ -39,7 +39,6 @@ class _UserDetailsFetchState extends State<UserDetailsFetch> {
   TextEditingController referralCodeController = new TextEditingController();
   TextEditingController zipCodeController = new TextEditingController();
   Map<String, dynamic> mobileInfo = {};
-  LocationData _locate;
   final AuthToken _authController = Get.put(AuthToken());
   final OtpController _otpController = Get.put(OtpController());
 

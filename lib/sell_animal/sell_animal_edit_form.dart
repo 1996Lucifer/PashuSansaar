@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io' show File;
 import 'dart:math';
 
@@ -11,7 +10,6 @@ import 'package:pashusansaar/utils/colors.dart' show appPrimaryColor;
 import 'package:pashusansaar/utils/constants.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart' show ReusableWidgets;
 import 'package:dropdown_search/dropdown_search.dart' show DropdownSearch, Mode;
-import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'
     show
@@ -31,7 +29,6 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:dio/dio.dart' as dio;
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:mime/mime.dart';
 
 class SellAnimalEditForm extends StatefulWidget {
@@ -745,7 +742,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                   }
                   setState(() {
                     animalUpdationData['animalPrice'] =
-                       ReusableWidgets.convertStringToInt(price);
+                        ReusableWidgets.convertStringToInt(price);
                   });
                 },
                 decoration: InputDecoration(
@@ -1469,7 +1466,8 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                     'error'.tr,
                     Text('maximum_milk_length'.tr),
                   );
-                else if (animalUpdationData['animalPrice'] == null|| animalUpdationData['animalPrice'] == 0)
+                else if (animalUpdationData['animalPrice'] == null ||
+                    animalUpdationData['animalPrice'] == 0)
                   ReusableWidgets.showDialogBox(
                     context,
                     'error'.tr,

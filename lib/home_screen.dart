@@ -16,7 +16,6 @@ import 'profile_main.dart';
 import 'refresh_token/refresh_token_controller.dart';
 import 'sell_animal/sell_animal_main.dart';
 import 'package:get/get.dart';
-import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:geocoder/geocoder.dart' as geoCoder;
 
 // ignore: must_be_immutable

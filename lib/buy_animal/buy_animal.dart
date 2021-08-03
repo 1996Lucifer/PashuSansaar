@@ -9,7 +9,6 @@ import 'package:pashusansaar/refresh_token/refresh_token_controller.dart';
 import 'package:pashusansaar/seller_contact/seller_contact_controller.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/constants.dart';
-import 'package:pashusansaar/utils/custom_fab/custom_floating_button_location.dart';
 import 'package:pashusansaar/utils/global.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:dropdown_search/dropdown_search.dart';
@@ -27,7 +26,6 @@ import 'package:url_launcher/url_launcher.dart' as UrlLauncher;
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:share/share.dart';
 import 'package:pashusansaar/utils/constants.dart' as constant;
-import 'package:geoflutterfire/geoflutterfire.dart' as geoFire;
 import 'package:path_provider/path_provider.dart';
 import 'dart:ui' as ui;
 import 'package:animations/animations.dart';
@@ -59,7 +57,6 @@ class BuyAnimal extends StatefulWidget {
 class _BuyAnimalState extends State<BuyAnimal>
     with AutomaticKeepAliveClientMixin {
   var formatter = intl.NumberFormat('#,##,000');
-  final geo = geoFire.Geoflutterfire();
 
   int perPage = 10,
       _index = 0,

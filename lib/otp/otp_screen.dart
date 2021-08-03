@@ -1,14 +1,10 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart';
-import 'package:pashusansaar/home_screen.dart';
 import 'package:pashusansaar/login/login_controller.dart';
 import 'package:pashusansaar/otp/otp_controller.dart';
 import 'package:pashusansaar/otp/otp_model.dart';
 import 'package:pashusansaar/user_details/user_details_update_screen.dart';
 import 'package:pashusansaar/utils/colors.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
@@ -33,7 +29,6 @@ class _OTPScreenState extends State<OTPScreen>
 
   TextEditingController textEditingController = TextEditingController();
   String _verificationCode;
-  int _resendToken;
 
   StreamController<ErrorAnimationType> errorController;
 

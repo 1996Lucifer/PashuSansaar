@@ -1,11 +1,8 @@
 import 'dart:convert';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:pashusansaar/intersted_buyers/interestedBuyerController.dart';
-import 'package:pashusansaar/login/login_screen.dart';
 import 'package:pashusansaar/my_animals/myAnimalController.dart';
 import 'package:pashusansaar/my_animals/myAnimalModel.dart';
 import 'package:pashusansaar/refresh_token/refresh_token_controller.dart';

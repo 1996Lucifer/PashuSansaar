@@ -8,7 +8,7 @@ class InterestedBuyerModel {
   InterestedBuyerModel.fromJson(Map<String, dynamic> json) {
     success = json['success'];
     if (json['interestedBuyers'] != null) {
-      interestedBuyers = new List<InterestedBuyers>();
+      interestedBuyers = <InterestedBuyers>[];
       json['interestedBuyers'].forEach((v) {
         interestedBuyers.add(new InterestedBuyers.fromJson(v));
       });

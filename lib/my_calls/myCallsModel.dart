@@ -8,7 +8,7 @@ class MyCallsModel {
   MyCallsModel.fromJson(Map<String, dynamic> json) {
     success = json['success'];
     if (json['myCalls'] != null) {
-      myCalls = new List<MyCalls>();
+      myCalls = <MyCalls>[];
       json['myCalls'].forEach((v) {
         myCalls.add(new MyCalls.fromJson(v));
       });
@@ -109,7 +109,7 @@ class AnimalId {
     pregnantTime = json['pregnantTime'];
     moreInfo = json['moreInfo'];
     if (json['files'] != null) {
-      files = new List<Files>();
+      files = <Files>[];
       json['files'].forEach((v) {
         files.add(new Files.fromJson(v));
       });
