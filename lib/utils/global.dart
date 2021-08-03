@@ -14,4 +14,4 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 String token;
 String lastDocument = '';
 List districtList = [];
-bool isCardVisible = false;
+bool isCardVisible;

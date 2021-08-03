@@ -209,8 +209,7 @@ class _BuyAnimalState extends State<BuyAnimal>
 
   _getInitialData() async {
     Future.delayed(Duration(seconds: 7)).then((value) => setState(() {
-          isCardVisible =
-              widget.animalInfo.length % 5 == 0;
+          isCardVisible = widget.animalInfo.length % 25 == 0;
         }));
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -550,6 +549,110 @@ class _BuyAnimalState extends State<BuyAnimal>
         ),
       );
 
+  Widget _postBuyerWidget() {
+    return isCardVisible == null
+        ? SizedBox.shrink()
+        : !isCardVisible
+            ? CustomFABWidget(
+                userMobileNumber: widget.userMobileNumber,
+                userName: widget.userName,
+              )
+            : Padding(
+                padding: EdgeInsets.all(10),
+                child: OpenContainer(
+                  closedElevation: 0,
+                  transitionDuration: Duration(seconds: 2),
+                  openBuilder: (context, _) => AnimalInfoForm(
+                    userMobileNumber: widget.userMobileNumber,
+                    userName: widget.userName,
+                  ),
+                  closedShape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(10.0),
+                    ),
+                  ),
+                  closedColor: Theme.of(context).primaryColor,
+                  closedBuilder: (context, openContainer) => Container(
+                    height: 220,
+                    width: 150,
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        left: 8.0,
+                        right: 8,
+                      ),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Align(
+                              alignment: Alignment.bottomRight,
+                              child: RawMaterialButton(
+                                onPressed: () => setState(() {
+                                  isCardVisible = false;
+                                }),
+                                elevation: 2.0,
+                                fillColor: Colors.white,
+                                child: Icon(
+                                  Icons.close,
+                                  size: 20.0,
+                                  color: appPrimaryColor,
+                                ),
+                                shape: CircleBorder(),
+                                constraints: BoxConstraints(
+                                  minWidth: 30,
+                                  minHeight: 30,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 12.0),
+                              child: Text(
+                                'कौन सा पशु खरीदना चाहते है ?',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 22,
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              width: double.infinity,
+                              child: RaisedButton(
+                                shape: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10)),
+                                color: Colors.white,
+                                onPressed: null,
+                                disabledColor: Colors.white,
+                                disabledTextColor: appPrimaryColor,
+                                child: Row(
+                                    textDirection: TextDirection.rtl,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Icon(
+                                        Icons.arrow_forward_ios_sharp,
+                                        color: appPrimaryColor,
+                                      ),
+                                      Text(
+                                        'हमें बताये',
+                                        style: TextStyle(
+                                          color: appPrimaryColor,
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ]),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -570,13 +673,15 @@ class _BuyAnimalState extends State<BuyAnimal>
           // ),
           floatingActionButtonLocation:
               FloatingActionButtonLocation.miniStartFloat,
-          floatingActionButton: AnimatedOpacity(
-            opacity: !isCardVisible ? 1.0 : 0.0,
+          floatingActionButton: AnimatedSwitcher(
             duration: Duration(seconds: 3),
-            child: CustomFABWidget(
-              userMobileNumber: widget.userMobileNumber,
-              userName: widget.userName,
-            ),
+            child: _postBuyerWidget(),
+            transitionBuilder: (Widget child, Animation<double> animation) {
+              return ScaleTransition(
+                child: child,
+                scale: animation,
+              );
+            },
           ),
           body: Stack(
             children: [
@@ -811,27 +916,28 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                       : ScaffoldMessenger.of(
                                                               context)
                                                           .showSnackBar(
-                                                              SnackBar(
-                                                          content: Text(
-                                                              '$myNum is not present in Whatsapp'),
-                                                          duration: Duration(
-                                                              milliseconds:
-                                                                  300),
-                                                          padding: EdgeInsets
-                                                              .symmetric(
-                                                                  horizontal:
-                                                                      8),
-                                                          behavior:
-                                                              SnackBarBehavior
-                                                                  .floating,
-                                                          shape:
-                                                              RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        10.0),
+                                                          SnackBar(
+                                                            content: Text(
+                                                                '$myNum is not present in Whatsapp'),
+                                                            duration: Duration(
+                                                                milliseconds:
+                                                                    300),
+                                                            padding: EdgeInsets
+                                                                .symmetric(
+                                                                    horizontal:
+                                                                        8),
+                                                            behavior:
+                                                                SnackBarBehavior
+                                                                    .floating,
+                                                            shape:
+                                                                RoundedRectangleBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          10.0),
+                                                            ),
                                                           ),
-                                                        ));
+                                                        );
                                                 },
                                                 icon: FaIcon(
                                                     FontAwesomeIcons.whatsapp,
@@ -854,123 +960,21 @@ class _BuyAnimalState extends State<BuyAnimal>
                               );
                             },
                           ),
-                          Positioned(
-                            bottom: 0,
-                            left: 0,
-                            child: AnimatedOpacity(
-                              opacity: isCardVisible ? 1.0 : 0.0,
-                              duration: Duration(seconds: 3),
-                              child: Visibility(
-                                visible: isCardVisible,
-                                child: Padding(
-                                  padding: EdgeInsets.all(10),
-                                  child: OpenContainer(
-                                    closedElevation: 0,
-                                    transitionDuration: Duration(seconds: 2),
-                                    openBuilder: (context, _) => AnimalInfoForm(
-                                      userMobileNumber: widget.userMobileNumber,
-                                      userName: widget.userName,
-                                    ),
-                                    closedShape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.all(
-                                        Radius.circular(10.0),
-                                      ),
-                                    ),
-                                    closedColor: Theme.of(context).primaryColor,
-                                    closedBuilder: (context, openContainer) =>
-                                        Container(
-                                      height: 220,
-                                      width: 150,
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(
-                                          left: 8.0,
-                                          right: 8,
-                                        ),
-                                        child: SingleChildScrollView(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Align(
-                                                alignment:
-                                                    Alignment.bottomRight,
-                                                child: RawMaterialButton(
-                                                  onPressed: () => setState(() {
-                                                    isCardVisible = false;
-                                                  }),
-                                                  elevation: 2.0,
-                                                  fillColor: Colors.white,
-                                                  child: Icon(
-                                                    Icons.close,
-                                                    size: 20.0,
-                                                    color: appPrimaryColor,
-                                                  ),
-                                                  shape: CircleBorder(),
-                                                  constraints: BoxConstraints(
-                                                      minWidth: 30,
-                                                      minHeight: 30),
-                                                ),
-                                              ),
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                    left: 12.0),
-                                                child: Text(
-                                                  'कौन सा पशु खरीदना चाहते है ?',
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 22,
-                                                  ),
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                  width: double.infinity,
-                                                  child: RaisedButton(
-                                                    shape: OutlineInputBorder(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(10)),
-                                                    color: Colors.white,
-                                                    onPressed: null,
-                                                    disabledColor: Colors.white,
-                                                    disabledTextColor:
-                                                        appPrimaryColor,
-                                                    child: Row(
-                                                        textDirection:
-                                                            TextDirection.rtl,
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                        children: [
-                                                          Icon(
-                                                            Icons
-                                                                .arrow_forward_ios_sharp,
-                                                            color:
-                                                                appPrimaryColor,
-                                                          ),
-                                                          Text(
-                                                            'हमें बताये',
-                                                            style: TextStyle(
-                                                              color:
-                                                                  appPrimaryColor,
-                                                              fontSize: 20,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                            ),
-                                                          ),
-                                                        ]),
-                                                  )),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
+                          // Positioned(
+                          //   bottom: 10,
+                          //   left: 10,
+                          //   child: AnimatedSwitcher(
+                          //     duration: Duration(seconds: 3),
+                          //     child: _postBuyerWidget(),
+                          //     transitionBuilder:
+                          //         (Widget child, Animation<double> animation) {
+                          //       return ScaleTransition(
+                          //         child: child,
+                          //         scale: animation,
+                          //       );
+                          //     },
+                          //   ),
+                          // ),
                         ],
                       ),
                     ),

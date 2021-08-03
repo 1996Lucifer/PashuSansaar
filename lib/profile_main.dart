@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_native_image/flutter_native_image.dart';
@@ -46,16 +47,19 @@ class ProfileMainState extends State<ProfileMain>
     with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   final FocusNode myFocusNode = FocusNode();
   ImagePicker _picker;
-  String _base64Image = "", _currentVersion = '';
+  String _base64Image = "",
+      _currentVersion = '',
+      _winnerName = '',
+      _winnerLocation = '',
+      userAddress = '';
   Map userInfo = {};
   ProgressDialog pr;
+  RemoteConfig remoteConfig;
 
   @override
   bool get wantKeepAlive => true;
   final MyCallListController myCallListController =
       Get.put(MyCallListController());
-
-  String userAddress = '';
 
   @override
   void initState() {
@@ -66,9 +70,15 @@ class ProfileMainState extends State<ProfileMain>
 
   getMyLocationAndName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    remoteConfig = await RemoteConfig.instance;
+    await remoteConfig.fetch(expiration: const Duration(seconds: 0));
+    await remoteConfig.activateFetched();
+
     setState(() {
       userAddress = prefs.getString('userAddress');
       _currentVersion = prefs.getStringList('currentVersion').join('.');
+      _winnerName = remoteConfig.getString('referral_winner_name');
+      _winnerLocation = remoteConfig.getString('referral_winner_location');
     });
   }
 
@@ -701,10 +711,8 @@ class ProfileMainState extends State<ProfileMain>
                                                   fontWeight: FontWeight.bold,
                                                   fontSize: 16),
                                               text: 'referral_winner'.trParams({
-                                                'name':
-                                                    '${widget.refData['name']??'Sumit Gupta'}',
-                                                'place':
-                                                    '${widget.refData['address'] ?? 'Jaipur'}'
+                                                'name': _winnerName,
+                                                'place': _winnerLocation,
                                               })),
                                         ),
                                       ),

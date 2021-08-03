@@ -26,32 +26,46 @@ class CustomFABWidget extends StatelessWidget {
         closedShape: CircleBorder(),
         closedColor: appPrimaryColor,
         closedBuilder: (context, openContainer) => Container(
-            margin: EdgeInsets.only(top: 12),
-            height: 70,
-            width: 70,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              // crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  // crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      'कैसा ',
-                      style: TextStyle(color: Colors.white, fontSize: 14.0),
-                    ),
-                    Text(
-                      '🐄',
-                      style: TextStyle(color: Colors.white, fontSize: 24.0),
-                    ),
-                  ],
-                ),
-                Text(
-                  'चाहिये',
-                  style: TextStyle(color: Colors.white, fontSize: 14.0),
-                ),
-              ],
-            )),
+          // margin: EdgeInsets.only(top: 12),
+          height: 60,
+          width: 60,
+          child: Center(
+            child: 
+            Text(
+              '🐄',
+              style: TextStyle(color: Colors.white, fontSize: 30.0),
+            ),
+          ),
+
+          // Center(
+          //     child: FaIcon(
+          //   FontAwesomeIcons.horse,
+          //   color: Colors.white,
+          // ))
+          // Column(
+          //   mainAxisAlignment: MainAxisAlignment.center,
+          //   // crossAxisAlignment: CrossAxisAlignment.stretch,
+          //   children: [
+          //     Row(
+          //       mainAxisAlignment: MainAxisAlignment.center,
+          //       // crossAxisAlignment: CrossAxisAlignment.stretch,
+          //       children: [
+          //         Text(
+          //           'कैसा ',
+          //           style: TextStyle(color: Colors.white, fontSize: 14.0),
+          //         ),
+          //         Text(
+          //           '🐄',
+          //           style: TextStyle(color: Colors.white, fontSize: 24.0),
+          //         ),
+          //       ],
+          //     ),
+          //     // Text(
+          //     //   'चाहिये',
+          //     //   style: TextStyle(color: Colors.white, fontSize: 14.0),
+          //     // ),
+          //   ],
+          // ),
+        ),
       );
 }
