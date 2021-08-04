@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:core';
-import 'package:another_flushbar/flushbar.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:pashusansaar/buy_animal/buy_animal_model.dart';
 import 'package:pashusansaar/refresh_token/refresh_token_controller.dart';
@@ -1084,12 +1083,11 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                 print('locationerro==> ' +
                                                     e.toString());
                                                 Navigator.of(context).pop();
-                                                Flushbar(
-                                                  message:
-                                                      "no_animal_present".tr,
-                                                  duration:
-                                                      Duration(seconds: 2),
-                                                )..show(context);
+                                                ReusableWidgets.showDialogBox(
+                                                  context,
+                                                  'error'.tr,
+                                                  Text("no_animal_present".tr),
+                                                );
                                               }
                                             }
                                           }
@@ -1569,7 +1567,10 @@ class _BuyAnimalState extends State<BuyAnimal>
                         width: 80,
                       ),
                     ),
-                    errorWidget: (context, url, error) => Icon(Icons.error),
+                    errorWidget: (context, url, error) => Icon(
+                      Icons.error,
+                      size: 80,
+                    ),
                   )
 
                   // Image.network(

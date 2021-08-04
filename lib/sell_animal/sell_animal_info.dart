@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:pashusansaar/intersted_buyers/interestedBuyerController.dart';
@@ -81,35 +82,48 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                 height: 130.0,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
-                  child: Image.network(
-                    _list.files[_list.files.length - 1].fileName,
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    loadingBuilder: (
-                      BuildContext context,
-                      Widget child,
-                      ImageChunkEvent loadingProgress,
-                    ) {
-                      if (loadingProgress == null) return child;
-                      return Center(
-                        child: CircularProgressIndicator(
-                          value: loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes
-                              : null,
-                        ),
-                      );
-                    },
-                    errorBuilder: (BuildContext context, Object exception,
-                        StackTrace stackTrace) {
-                      return Center(
-                        child: Icon(
-                          Icons.error,
-                          size: 40,
-                        ),
-                      );
-                    },
+                  child: CachedNetworkImage(
+                    imageUrl: _list.files[_list.files.length - 1].fileName,
+                    progressIndicatorBuilder:
+                        (context, url, downloadProgress) => Center(
+                      child: Image.asset(
+                        'assets/images/loader.gif',
+                        height: 40,
+                        width: 40,
+                      ),
+                    ),
+                    errorWidget: (context, url, error) =>
+                        Icon(Icons.error, size: 30),
                   ),
+                  // Image.network(
+                  //   _list.files[_list.files.length - 1].fileName,
+                  //   fit: BoxFit.cover,
+                  //   width: double.infinity,
+                  //   loadingBuilder: (
+                  //     BuildContext context,
+                  //     Widget child,
+                  //     ImageChunkEvent loadingProgress,
+                  //   ) {
+                  //     if (loadingProgress == null) return child;
+                  //     return Center(
+                  //       child: CircularProgressIndicator(
+                  //         value: loadingProgress.expectedTotalBytes != null
+                  //             ? loadingProgress.cumulativeBytesLoaded /
+                  //                 loadingProgress.expectedTotalBytes
+                  //             : null,
+                  //       ),
+                  //     );
+                  //   },
+                  //   errorBuilder: (BuildContext context, Object exception,
+                  //       StackTrace stackTrace) {
+                  //     return Center(
+                  //       child: Icon(
+                  //         Icons.error,
+                  //         size: 40,
+                  //       ),
+                  //     );
+                  //   },
+                  // ),
                 ),
               ),
             ),
