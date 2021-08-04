@@ -26,46 +26,16 @@ class CustomFABWidget extends StatelessWidget {
         closedShape: CircleBorder(),
         closedColor: appPrimaryColor,
         closedBuilder: (context, openContainer) => Container(
-          // margin: EdgeInsets.only(top: 12),
+          // key: UniqueKey(),
           height: 60,
           width: 60,
           child: Center(
-            child: 
-            Text(
-              '🐄',
-              style: TextStyle(color: Colors.white, fontSize: 30.0),
+            child: Image.asset(
+              'assets/images/postBuyer.png',
+              width: 45,
+              height: 45,
             ),
           ),
-
-          // Center(
-          //     child: FaIcon(
-          //   FontAwesomeIcons.horse,
-          //   color: Colors.white,
-          // ))
-          // Column(
-          //   mainAxisAlignment: MainAxisAlignment.center,
-          //   // crossAxisAlignment: CrossAxisAlignment.stretch,
-          //   children: [
-          //     Row(
-          //       mainAxisAlignment: MainAxisAlignment.center,
-          //       // crossAxisAlignment: CrossAxisAlignment.stretch,
-          //       children: [
-          //         Text(
-          //           'कैसा ',
-          //           style: TextStyle(color: Colors.white, fontSize: 14.0),
-          //         ),
-          //         Text(
-          //           '🐄',
-          //           style: TextStyle(color: Colors.white, fontSize: 24.0),
-          //         ),
-          //       ],
-          //     ),
-          //     // Text(
-          //     //   'चाहिये',
-          //     //   style: TextStyle(color: Colors.white, fontSize: 14.0),
-          //     // ),
-          //   ],
-          // ),
         ),
       );
 }

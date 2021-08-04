@@ -70,9 +70,6 @@ void main() async {
   HttpOverrides.global = new MyHttpOverrides();
 
   await Firebase.initializeApp();
-  remoteConfig = await RemoteConfig.instance;
-  await remoteConfig.fetch(expiration: const Duration(seconds: 0));
-  await remoteConfig.activateFetched();
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   await flutterLocalNotificationsPlugin
@@ -204,6 +201,10 @@ class _MyAppState extends State<MyApp> {
     final PackageInfo info = await PackageInfo.fromPlatform();
 
     try {
+      remoteConfig = await RemoteConfig.instance;
+      await remoteConfig.fetch(expiration: const Duration(seconds: 0));
+      await remoteConfig.activateFetched();
+
       List<String> currentVersion = info.version.split('.');
       if (int.parse(currentVersion[0]) == 1 ||
           (prefs.getString('accessToken') ?? '').isEmpty) {
@@ -233,8 +234,14 @@ class _MyAppState extends State<MyApp> {
               nudgeVersion.split('.'), currentVersion, false);
         }
       }
-    } catch (exception) {
-      print(exception);
+    } catch (e) {
+      print(e);
+      ReusableWidgets.loggerFunction(
+        fileName: 'version_check',
+        error: e.toString(),
+        myNum: '',
+        userId: prefs.getString('userId') ?? '',
+      );
     }
 
     await initDynamicLink();

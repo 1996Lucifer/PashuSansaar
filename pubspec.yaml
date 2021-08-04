@@ -26,6 +26,7 @@ dependencies:
   android_play_install_referrer: any
   animations: any
   another_flushbar: any
+  cached_network_image: any
   carousel_slider: ^3.0.0
   cloud_firestore: ^0.16.0+1
   cupertino_icons: ^1.0.0

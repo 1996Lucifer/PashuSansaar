@@ -29,6 +29,7 @@ import 'package:pashusansaar/utils/constants.dart' as constant;
 import 'package:path_provider/path_provider.dart';
 import 'dart:ui' as ui;
 import 'package:animations/animations.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:pashusansaar/utils/custom_fab/custom_fab.dart';
 
 import 'animal_info_form.dart';
@@ -549,109 +550,110 @@ class _BuyAnimalState extends State<BuyAnimal>
         ),
       );
 
-  Widget _postBuyerWidget() {
-    return isCardVisible == null
-        ? SizedBox.shrink()
-        : !isCardVisible
-            ? CustomFABWidget(
-                userMobileNumber: widget.userMobileNumber,
-                userName: widget.userName,
-              )
-            : Padding(
-                padding: EdgeInsets.all(10),
-                child: OpenContainer(
-                  closedElevation: 0,
-                  transitionDuration: Duration(seconds: 2),
-                  openBuilder: (context, _) => AnimalInfoForm(
-                    userMobileNumber: widget.userMobileNumber,
-                    userName: widget.userName,
-                  ),
-                  closedShape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(10.0),
-                    ),
-                  ),
-                  closedColor: Theme.of(context).primaryColor,
-                  closedBuilder: (context, openContainer) => Container(
-                    height: 220,
-                    width: 150,
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                        left: 8.0,
-                        right: 8,
-                      ),
-                      child: SingleChildScrollView(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Align(
-                              alignment: Alignment.bottomRight,
-                              child: RawMaterialButton(
-                                onPressed: () => setState(() {
-                                  isCardVisible = false;
-                                }),
-                                elevation: 2.0,
-                                fillColor: Colors.white,
-                                child: Icon(
-                                  Icons.close,
-                                  size: 20.0,
-                                  color: appPrimaryColor,
-                                ),
-                                shape: CircleBorder(),
-                                constraints: BoxConstraints(
-                                  minWidth: 30,
-                                  minHeight: 30,
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 12.0),
-                              child: Text(
-                                'कौन सा पशु खरीदना चाहते है ?',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 22,
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              width: double.infinity,
-                              child: RaisedButton(
-                                shape: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10)),
-                                color: Colors.white,
-                                onPressed: null,
-                                disabledColor: Colors.white,
-                                disabledTextColor: appPrimaryColor,
-                                child: Row(
-                                    textDirection: TextDirection.rtl,
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Icon(
-                                        Icons.arrow_forward_ios_sharp,
-                                        color: appPrimaryColor,
-                                      ),
-                                      Text(
-                                        'हमें बताये',
-                                        style: TextStyle(
-                                          color: appPrimaryColor,
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ]),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              );
-  }
+  // Widget _postBuyerWidget() {
+  //   return isCardVisible == null
+  //       ? SizedBox.shrink()
+  //       : !isCardVisible
+  //           ? CustomFABWidget(
+  //               userMobileNumber: widget.userMobileNumber,
+  //               userName: widget.userName,
+  //             )
+  //           : Padding(
+  //               padding: EdgeInsets.all(10),
+  //               child: OpenContainer(
+  //                 closedElevation: 0,
+  //                 transitionDuration: Duration(seconds: 2),
+  //                 openBuilder: (context, _) => AnimalInfoForm(
+  //                   userMobileNumber: widget.userMobileNumber,
+  //                   userName: widget.userName,
+  //                 ),
+  //                 closedShape: RoundedRectangleBorder(
+  //                   borderRadius: BorderRadius.all(
+  //                     Radius.circular(10.0),
+  //                   ),
+  //                 ),
+  //                 closedColor: Theme.of(context).primaryColor,
+  //                 closedBuilder: (context, openContainer) => Container(
+  //                   // key: UniqueKey(),
+  //                   height: 220,
+  //                   width: 150,
+  //                   child: Padding(
+  //                     padding: const EdgeInsets.only(
+  //                       left: 8.0,
+  //                       right: 8,
+  //                     ),
+  //                     child: SingleChildScrollView(
+  //                       child: Column(
+  //                         crossAxisAlignment: CrossAxisAlignment.start,
+  //                         children: [
+  //                           Align(
+  //                             alignment: Alignment.bottomRight,
+  //                             child: RawMaterialButton(
+  //                               onPressed: () => setState(() {
+  //                                 isCardVisible = false;
+  //                               }),
+  //                               elevation: 2.0,
+  //                               fillColor: Colors.white,
+  //                               child: Icon(
+  //                                 Icons.close,
+  //                                 size: 20.0,
+  //                                 color: appPrimaryColor,
+  //                               ),
+  //                               shape: CircleBorder(),
+  //                               constraints: BoxConstraints(
+  //                                 minWidth: 30,
+  //                                 minHeight: 30,
+  //                               ),
+  //                             ),
+  //                           ),
+  //                           Padding(
+  //                             padding: const EdgeInsets.only(left: 12.0),
+  //                             child: Text(
+  //                               'कौन सा पशु खरीदना चाहते है ?',
+  //                               style: TextStyle(
+  //                                 color: Colors.white,
+  //                                 fontWeight: FontWeight.bold,
+  //                                 fontSize: 22,
+  //                               ),
+  //                             ),
+  //                           ),
+  //                           SizedBox(
+  //                             width: double.infinity,
+  //                             child: RaisedButton(
+  //                               shape: OutlineInputBorder(
+  //                                   borderRadius: BorderRadius.circular(10)),
+  //                               color: Colors.white,
+  //                               onPressed: null,
+  //                               disabledColor: Colors.white,
+  //                               disabledTextColor: appPrimaryColor,
+  //                               child: Row(
+  //                                   textDirection: TextDirection.rtl,
+  //                                   mainAxisAlignment:
+  //                                       MainAxisAlignment.spaceBetween,
+  //                                   children: [
+  //                                     Icon(
+  //                                       Icons.arrow_forward_ios_sharp,
+  //                                       color: appPrimaryColor,
+  //                                     ),
+  //                                     Text(
+  //                                       'हमें बताये',
+  //                                       style: TextStyle(
+  //                                         color: appPrimaryColor,
+  //                                         fontSize: 20,
+  //                                         fontWeight: FontWeight.bold,
+  //                                       ),
+  //                                     ),
+  //                                   ]),
+  //                             ),
+  //                           ),
+  //                         ],
+  //                       ),
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ),
+  //             );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -671,18 +673,16 @@ class _BuyAnimalState extends State<BuyAnimal>
           //   8,
           //   -8,
           // ),
-          floatingActionButtonLocation:
-              FloatingActionButtonLocation.miniStartFloat,
-          floatingActionButton: AnimatedSwitcher(
-            duration: Duration(seconds: 3),
-            child: _postBuyerWidget(),
-            transitionBuilder: (Widget child, Animation<double> animation) {
-              return ScaleTransition(
-                child: child,
-                scale: animation,
-              );
-            },
+          floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+          floatingActionButton: AnimatedOpacity(
+            opacity: isCardVisible != null && !isCardVisible ? 1.0 : 0.0,
+            duration: Duration(seconds: 5),
+            child: CustomFABWidget(
+              userMobileNumber: widget.userMobileNumber,
+              userName: widget.userName,
+            ),
           ),
+
           body: Stack(
             children: [
               widget.animalInfo == null || widget.animalInfo.length == 0
@@ -960,21 +960,20 @@ class _BuyAnimalState extends State<BuyAnimal>
                               );
                             },
                           ),
-                          // Positioned(
-                          //   bottom: 10,
-                          //   left: 10,
-                          //   child: AnimatedSwitcher(
-                          //     duration: Duration(seconds: 3),
-                          //     child: _postBuyerWidget(),
-                          //     transitionBuilder:
-                          //         (Widget child, Animation<double> animation) {
-                          //       return ScaleTransition(
-                          //         child: child,
-                          //         scale: animation,
-                          //       );
-                          //     },
-                          //   ),
-                          // ),
+                          Positioned(
+                            bottom: 10,
+                            left: 10,
+                            child: AnimatedOpacity(
+                              opacity: isCardVisible != null && isCardVisible
+                                  ? 1.0
+                                  : 0.0,
+                              duration: Duration(seconds: 3),
+                              child: Visibility(
+                                replacement: _postBuyerMethod(context),
+                                child: _postBuyerMethod(context),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -1199,6 +1198,180 @@ class _BuyAnimalState extends State<BuyAnimal>
     );
   }
 
+  Padding _postBuyerMethod(BuildContext context) {
+    return isCardVisible != null && !isCardVisible
+        ? Padding(
+            padding: EdgeInsets.all(10),
+            child: Container(
+              height: 220,
+              width: 150,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: appPrimaryColor,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  left: 8.0,
+                  right: 8,
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Align(
+                        alignment: Alignment.bottomRight,
+                        child: RawMaterialButton(
+                          onPressed: () {},
+                          elevation: 2.0,
+                          fillColor: Colors.white,
+                          child: Icon(
+                            Icons.close,
+                            size: 20.0,
+                            color: appPrimaryColor,
+                          ),
+                          shape: CircleBorder(),
+                          constraints:
+                              BoxConstraints(minWidth: 30, minHeight: 30),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 12.0),
+                        child: Text(
+                          'कौन सा पशु खरीदना चाहते है ?',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 22,
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: double.infinity,
+                        child: RaisedButton(
+                          shape: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          color: Colors.white,
+                          onPressed: null,
+                          disabledColor: Colors.white,
+                          disabledTextColor: appPrimaryColor,
+                          child: Row(
+                              textDirection: TextDirection.rtl,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Icon(
+                                  Icons.arrow_forward_ios_sharp,
+                                  color: appPrimaryColor,
+                                ),
+                                Text(
+                                  'हमें बताये',
+                                  style: TextStyle(
+                                    color: appPrimaryColor,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ]),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          )
+        : Padding(
+            padding: EdgeInsets.all(10),
+            child: OpenContainer(
+              closedElevation: 0,
+              transitionDuration: Duration(seconds: 2),
+              openBuilder: (context, _) => AnimalInfoForm(
+                userMobileNumber: widget.userMobileNumber,
+                userName: widget.userName,
+              ),
+              closedShape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(10.0),
+                ),
+              ),
+              closedColor: Theme.of(context).primaryColor,
+              closedBuilder: (context, openContainer) => Container(
+                height: 220,
+                width: 150,
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    left: 8.0,
+                    right: 8,
+                  ),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Align(
+                          alignment: Alignment.bottomRight,
+                          child: RawMaterialButton(
+                            onPressed: () => setState(() {
+                              isCardVisible = false;
+                            }),
+                            elevation: 2.0,
+                            fillColor: Colors.white,
+                            child: Icon(
+                              Icons.close,
+                              size: 20.0,
+                              color: appPrimaryColor,
+                            ),
+                            shape: CircleBorder(),
+                            constraints:
+                                BoxConstraints(minWidth: 30, minHeight: 30),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 12.0),
+                          child: Text(
+                            'कौन सा पशु खरीदना चाहते है ?',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 22,
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                            width: double.infinity,
+                            child: RaisedButton(
+                              shape: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10)),
+                              color: Colors.white,
+                              onPressed: null,
+                              disabledColor: Colors.white,
+                              disabledTextColor: appPrimaryColor,
+                              child: Row(
+                                  textDirection: TextDirection.rtl,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Icon(
+                                      Icons.arrow_forward_ios_sharp,
+                                      color: appPrimaryColor,
+                                    ),
+                                    Text(
+                                      'हमें बताये',
+                                      style: TextStyle(
+                                        color: appPrimaryColor,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ]),
+                            )),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+  }
+
   _getLocationBasedList(BuildContext context, Address first) async {
     int _radiusData = _valueRadius == 0
         ? 25
@@ -1316,33 +1489,44 @@ class _BuyAnimalState extends State<BuyAnimal>
                             boundaryMargin: const EdgeInsets.all(20.0),
                             minScale: 0.1,
                             maxScale: 1.6,
-                            child: Image.network(
-                              '$i',
-                              loadingBuilder: (BuildContext context,
-                                  Widget child,
-                                  ImageChunkEvent loadingProgress) {
-                                if (loadingProgress == null) return child;
-                                return Center(
-                                  child: CircularProgressIndicator(
-                                    value: loadingProgress.expectedTotalBytes !=
-                                            null
-                                        ? loadingProgress
-                                                .cumulativeBytesLoaded /
-                                            loadingProgress.expectedTotalBytes
-                                        : null,
-                                  ),
-                                );
-                              },
-                              errorBuilder: (BuildContext context,
-                                  Object exception, StackTrace stackTrace) {
-                                return Center(
-                                  child: Icon(
-                                    Icons.error,
-                                    size: 60,
-                                  ),
-                                );
-                              },
+                            child: CachedNetworkImage(
+                              imageUrl: '$i',
+                              progressIndicatorBuilder:
+                                  (context, url, downloadProgress) => Center(
+                                child: CircularProgressIndicator(
+                                    value: downloadProgress.progress),
+                              ),
+                              errorWidget: (context, url, error) =>
+                                  Icon(Icons.error, size: 60),
                             ),
+
+                            // Image.network(
+                            //   '$i',
+                            //   loadingBuilder: (BuildContext context,
+                            //       Widget child,
+                            //       ImageChunkEvent loadingProgress) {
+                            //     if (loadingProgress == null) return child;
+                            //     return Center(
+                            //       child: CircularProgressIndicator(
+                            //         value: loadingProgress.expectedTotalBytes !=
+                            //                 null
+                            //             ? loadingProgress
+                            //                     .cumulativeBytesLoaded /
+                            //                 loadingProgress.expectedTotalBytes
+                            //             : null,
+                            //       ),
+                            //     );
+                            //   },
+                            //   errorBuilder: (BuildContext context,
+                            //       Object exception, StackTrace stackTrace) {
+                            //     return Center(
+                            //       child: Icon(
+                            //         Icons.error,
+                            //         size: 60,
+                            //       ),
+                            //     );
+                            //   },
+                            // ),
                           );
                         }).toList(),
                       ),
@@ -1372,28 +1556,43 @@ class _BuyAnimalState extends State<BuyAnimal>
             child: Container(
               height: 200.0,
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(8.0),
-                child: Image.network(
-                  _images[0],
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  loadingBuilder: (
-                    BuildContext context,
-                    Widget child,
-                    ImageChunkEvent loadingProgress,
-                  ) {
-                    if (loadingProgress == null) return child;
-                    return Center(
-                      child: CircularProgressIndicator(
-                        value: loadingProgress.expectedTotalBytes != null
-                            ? loadingProgress.cumulativeBytesLoaded /
-                                loadingProgress.expectedTotalBytes
-                            : null,
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: CachedNetworkImage(
+                    imageUrl: _images[0],
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    progressIndicatorBuilder:
+                        (context, url, downloadProgress) => Center(
+                      child: Image.asset(
+                        'assets/images/loader.gif',
+                        height: 80,
+                        width: 80,
                       ),
-                    );
-                  },
-                ),
-              ),
+                    ),
+                    errorWidget: (context, url, error) => Icon(Icons.error),
+                  )
+
+                  // Image.network(
+                  //   _images[0],
+                  //   fit: BoxFit.cover,
+                  //   width: double.infinity,
+                  //   loadingBuilder: (
+                  //     BuildContext context,
+                  //     Widget child,
+                  //     ImageChunkEvent loadingProgress,
+                  //   ) {
+                  //     if (loadingProgress == null) return child;
+                  //     return Center(
+                  //       child: CircularProgressIndicator(
+                  //         value: loadingProgress.expectedTotalBytes != null
+                  //             ? loadingProgress.cumulativeBytesLoaded /
+                  //                 loadingProgress.expectedTotalBytes
+                  //             : null,
+                  //       ),
+                  //     );
+                  //   },
+                  // ),
+                  ),
             ),
           ),
           Positioned(
