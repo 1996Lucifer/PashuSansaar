@@ -676,9 +676,12 @@ class _BuyAnimalState extends State<BuyAnimal>
           floatingActionButton: AnimatedOpacity(
             opacity: isCardVisible != null && !isCardVisible ? 1.0 : 0.0,
             duration: Duration(seconds: 5),
-            child: CustomFABWidget(
-              userMobileNumber: widget.userMobileNumber,
-              userName: widget.userName,
+            child: Visibility(
+              visible: isCardVisible != null && !isCardVisible,
+              child: CustomFABWidget(
+                userMobileNumber: widget.userMobileNumber,
+                userName: widget.userName,
+              ),
             ),
           ),
 

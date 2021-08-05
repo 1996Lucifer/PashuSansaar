@@ -84,6 +84,8 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                   borderRadius: BorderRadius.circular(8.0),
                   child: CachedNetworkImage(
                     imageUrl: _list.files[_list.files.length - 1].fileName,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
                     progressIndicatorBuilder:
                         (context, url, downloadProgress) => Center(
                       child: Image.asset(
