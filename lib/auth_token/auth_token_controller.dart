@@ -43,7 +43,6 @@ class AuthToken extends GetxController {
       "utm_source": utmSource,
       "utm_campaign": utmCampaign
     };
-    SharedPreferences prefs = await SharedPreferences.getInstance();
 
     print("______payload_____________$payload");
     print("_________bearerToken__________${token.toString()}");

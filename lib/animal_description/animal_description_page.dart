@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ffi';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
@@ -23,7 +22,6 @@ import 'package:geodesy/geodesy.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:share/share.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:get/get.dart';
 import 'dart:ui' as ui;
 
@@ -111,6 +109,11 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
         userId: prefs.getString('userId'),
         accessToken: prefs.getString('accessToken') ?? '',
       );
+      print('animalId is ${widget.uniqueId}');
+      print('sender userId is ${widget.userId}');
+      print('userId is ${prefs.getString('userId')}');
+      print('accessToken is ${prefs.getString('accessToken')}');
+      print('data we are receiving is $data');
 
       setState(() {
         animalDesc = data;
@@ -158,85 +161,104 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
         appBar: ReusableWidgets.getAppBar(context, "app_name".tr, true),
         body: _isLoading
             ? Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                child: Padding(
-                  padding: EdgeInsets.only(left: 8.0, right: 8, top: 8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            : animalDesc == null
+                ? Center(
+                    child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Card(
-                        key: Key(widget.uniqueId),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                        elevation: 5,
-                        child: Column(
-                          children: [
-                            SizedBox(
-                              height: 10,
-                            ),
-                            _buildInfowidget(animalDesc),
-                            SizedBox(
-                              height: 5,
-                            ),
-                            _distanceTimeMethod(),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            _animalImage(animalDesc),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            _animalDescriptionMethod(animalDesc),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[100],
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey,
-                                      blurRadius: 1.0,
-                                    ),
-                                  ],
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                height: 80,
-                                child: Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: Row(
-                                    children: [
-                                      Image.asset('assets/images/profile.jpg',
-                                          width: 40, height: 40),
-                                      SizedBox(
-                                        width: 5,
-                                      ),
-                                      Text(
-                                        animalDesc.userName,
-                                        style: TextStyle(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.black),
-                                      ),
-                                    ],
-                                  ),
-                                ))
-                          ],
+                      Text(
+                        'animalSoldOut'.tr,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
                         ),
                       ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      _getButton(),
-                      SizedBox(
-                        height: 15,
-                      ),
+                      SizedBox(height: 10.0),
                       _getHomeScreenButton()
                     ],
-                  ),
-                ),
-              ),
+                  ))
+                : (SingleChildScrollView(
+                    child: Padding(
+                      padding: EdgeInsets.only(left: 8.0, right: 8, top: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Card(
+                            key: Key(widget.uniqueId),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            elevation: 5,
+                            child: Column(
+                              children: [
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                _buildInfowidget(animalDesc),
+                                SizedBox(
+                                  height: 5,
+                                ),
+                                _distanceTimeMethod(),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                _animalImage(animalDesc),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                ReusableWidgets.animalDescriptionMethod(
+                                    animalDesc),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[100],
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey,
+                                          blurRadius: 1.0,
+                                        ),
+                                      ],
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    height: 80,
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Row(
+                                        children: [
+                                          Image.asset(
+                                              'assets/images/profile.jpg',
+                                              width: 40,
+                                              height: 40),
+                                          SizedBox(
+                                            width: 5,
+                                          ),
+                                          Text(
+                                            animalDesc.userName,
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.black),
+                                          ),
+                                        ],
+                                      ),
+                                    ))
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          _getButton(),
+                          SizedBox(
+                            height: 15,
+                          ),
+                          _getHomeScreenButton()
+                        ],
+                      ),
+                    ),
+                  )),
       ),
     );
   }
@@ -471,53 +493,6 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
         .toStringAsFixed(0);
   }
 
-  _descriptionText(animalInfo) {
-    String animalBreedCheck = (animalInfo.animalBreed == 'not_known'.tr)
-        ? ""
-        : animalInfo.animalBreed;
-    String animalTypeCheck = (animalInfo.animalType >= 5)
-        ? intToAnimalOtherTypeMapping[animalInfo.animalType]
-        : intToAnimalTypeMapping[animalInfo.animalType];
-
-    String desc = '';
-
-    if (animalInfo.animalType >= 3) {
-      desc =
-          'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल ${(animalInfo.animalType == 6 || animalInfo.animalType == 8 || animalInfo.animalType == 10) ? " की" : "का"} है। ';
-    } else {
-      desc =
-          'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल की है। ';
-      if (animalInfo.recentBayatTime != null) {
-        desc = desc +
-            'यह ${intToRecentBayaatTime[animalInfo.recentBayatTime]} ब्यायी है। ';
-      }
-      if (animalInfo.pregnantTime != null) {
-        desc =
-            desc + 'यह अभी ${intToPregnantTime[animalInfo.pregnantTime]} है। ';
-      }
-      if (animalInfo.animalMilkCapacity != null) {
-        desc = desc +
-            'पिछले बार के हिसाब से दूध कैपेसिटी ${animalInfo.animalMilkCapacity} लीटर है। ';
-      }
-    }
-    return desc + (animalInfo.moreInfo ?? "");
-  }
-
-  Padding _animalDescriptionMethod(_list) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Text(
-        // "description to be added",
-        _descriptionText(_list),
-        maxLines: 4,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(color: Colors.grey[600], fontSize: 14.5),
-      ),
-    );
-  }
-
-  //*****************************************************************
-
   _getCallButton() => RaisedButton.icon(
         color: Colors.blue,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -601,8 +576,10 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
           Share.shareFiles([fileUrl.path],
               mimeTypes: ['images/png'],
               text: animalDesc.animalType <= 2
-                  ? "नस्ल: ${animalDesc.animalBreed}\nजानकारी: ${_descriptionText(animalDesc) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(animalDesc)}\nदूध(प्रति दिन): ${animalDesc.animalMilkCapacity} Litre\n\nपशु देखे: ${shortUrl.toString()}"
-                  : "नस्ल: ${animalDesc.animalBreed}\nजानकारी: ${_descriptionText(animalDesc) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(animalDesc)}\n\nपशु देखे: ${shortUrl.toString()}",
+                  ? "नस्ल: ${animalDesc.animalBreed}\nजानकारी: ${ReusableWidgets.descriptionText(animalDesc) == null ? 'जानकारी उपलब्ध नहीं है|' : ReusableWidgets.descriptionText(animalDesc)}\nदूध(प्रति दिन): ${animalDesc.animalMilkCapacity} Litre\n\nपशु देखे: ${shortUrl.toString()}"
+                  : (animalDesc.animalType <= 4
+                      ? ("नस्ल: ${animalDesc.animalBreed}\nजानकारी: ${ReusableWidgets.descriptionText(animalDesc) == null ? 'जानकारी उपलब्ध नहीं है|' : ReusableWidgets.descriptionText(animalDesc)}\n\nपशु देखे: ${shortUrl.toString()}")
+                      : ("जानकारी: ${ReusableWidgets.descriptionText(animalDesc) == null ? 'जानकारी उपलब्ध नहीं है|' : ReusableWidgets.descriptionText(animalDesc)}\n\nपशु देखे: ${shortUrl.toString()}")),
               subject: 'पशु की जानकारी');
         },
         icon: Icon(Icons.share, color: Colors.white, size: 16),

@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io' show File;
 import 'dart:math';
 
@@ -11,7 +10,6 @@ import 'package:pashusansaar/utils/colors.dart' show appPrimaryColor;
 import 'package:pashusansaar/utils/constants.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart' show ReusableWidgets;
 import 'package:dropdown_search/dropdown_search.dart' show DropdownSearch, Mode;
-import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'
     show
@@ -31,7 +29,6 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:dio/dio.dart' as dio;
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:mime/mime.dart';
 
 class SellAnimalEditForm extends StatefulWidget {
@@ -386,14 +383,6 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                 'animal_type'.tr,
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-              SizedBox(width: 5),
-              Text(
-                '*',
-                style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.red),
-              ),
             ],
           ),
         ),
@@ -406,22 +395,12 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
               showSelectedItem: true,
               items: constant.animalType,
               label: 'animal_type'.tr,
-              hint: 'animal_type'.tr,
               selectedItem: widget.animalInfo.animalType > 4
-                  ? constant.animalType[4]
+                  ? intToAnimalOtherTypeMapping[widget.animalInfo.animalType]
                   : intToAnimalTypeMapping[widget.animalInfo.animalType],
-              onChanged: (String type) {
-                setState(() {
-                  animalUpdationData['animalType'] = animalTypeMapping[type];
-
-                  if (animalUpdationData['animalType'] < 5) {
-                    _animalOtherType = '';
-                  } else {
-                    _animalOtherType = type;
-                  }
-                });
-              },
               dropdownSearchDecoration: InputDecoration(
+                  fillColor: Colors.grey,
+                  filled: true,
                   contentPadding:
                       EdgeInsets.symmetric(vertical: 1, horizontal: 10),
                   border: OutlineInputBorder(
@@ -430,35 +409,6 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
             ),
           ),
         ),
-        if (_animalOtherType.isNotEmpty) ...[
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-            child: DropdownSearch<String>(
-              mode: Mode.BOTTOM_SHEET,
-              showSelectedItem: true,
-              items: constant.animalTypeOther,
-              label: 'other_animal'.tr,
-              hint: 'other_animal'.tr,
-              selectedItem:
-                  intToAnimalOtherTypeMapping[widget.animalInfo.animalType],
-              onChanged: (String otherType) {
-                setState(() {
-                  animalUpdationData['animalType'] =
-                      animalOtherTypeMapping[otherType];
-                  if (animalUpdationData['animalType'] < 5) {
-                    _animalOtherType = '';
-                  }
-                });
-              },
-              dropdownSearchDecoration: InputDecoration(
-                  contentPadding:
-                      EdgeInsets.symmetric(vertical: 1, horizontal: 10),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(5),
-                  )),
-            ),
-          ),
-        ],
         Padding(
           padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
           child: Divider(
@@ -526,7 +476,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
         ],
       );
 
-  Column animalAge() => Column(
+  animalAge() => Column(
         children: [
           Padding(
             padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
@@ -777,15 +727,19 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                 controller: _controller,
                 keyboardType: TextInputType.number,
                 onChanged: (String price) {
-                  String string = '${_formatNumber(price.replaceAll(',', ''))}';
-                  _controller.value = TextEditingValue(
-                    text: _currency + string,
-                    selection: TextSelection.collapsed(offset: string.length),
-                  );
+                  if (price.isEmpty) {
+                    price = '0';
+                  } else {
+                    String string =
+                        '${_formatNumber(price.replaceAll(',', ''))}';
+                    _controller.value = TextEditingValue(
+                      text: _currency + string,
+                      selection: TextSelection.collapsed(offset: string.length),
+                    );
 
-                  _controller.selection = TextSelection.fromPosition(
-                      TextPosition(offset: _controller.text.length));
-
+                    _controller.selection = TextSelection.fromPosition(
+                        TextPosition(offset: _controller.text.length));
+                  }
                   setState(() {
                     animalUpdationData['animalPrice'] =
                         ReusableWidgets.convertStringToInt(price);
@@ -1433,20 +1387,15 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
 
       print('-Response=-=-=>>' + resp.toString());
 
-      // if (key.contains(_imageToBeUploaded[i]['fileName'].split('_')[1])) {
       _imageToBeUploaded.removeWhere((element) {
         print('element===>' + element.toString());
-        // return false;
         return element['fileName'].contains(key.split('_')[1]);
       });
-      // }
-
-      // print('-_imageToBeUploadedBefore=-=-=>>' + _imageToBeUploaded.toString());
 
       setState(() {
         _imageToBeUploaded.add({'fileName': key, 'fileType': fileType});
       });
-      // print('-_imageToBeUploadedAfter=-=-=>>' + _imageToBeUploaded.toString());
+
       return true;
     } catch (e) {
       print('=-=-==>>' + e.toString());
@@ -1517,7 +1466,8 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                     'error'.tr,
                     Text('maximum_milk_length'.tr),
                   );
-                else if (animalUpdationData['animalPrice'] == null)
+                else if (animalUpdationData['animalPrice'] == null ||
+                    animalUpdationData['animalPrice'] == 0)
                   ReusableWidgets.showDialogBox(
                     context,
                     'error'.tr,
@@ -1601,9 +1551,22 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                         });
                       } else {
                         print('Error getting token==' + status.toString());
+                        ReusableWidgets.loggerFunction(
+                          fileName: 'sell_animal_edit_form_refreshToken',
+                          error: e.toString(),
+                          myNum: widget.userMobileNumber,
+                          userId: prefs.getString('userId'),
+                        );
                       }
                     }
                   } catch (e) {
+                    ReusableWidgets.loggerFunction(
+                      fileName: 'sell_animal_edit_form_refreshToken',
+                      error: e.toString(),
+                      myNum: widget.userMobileNumber,
+                      userId: prefs.getString('userId'),
+                    );
+
                     ReusableWidgets.showDialogBox(
                       context,
                       'warning'.tr,
@@ -1626,7 +1589,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                     result.add(imagesUpload["Image4"]);
                   }
 
-                  List imageUploadingStatus;
+                  List imageUploadingStatus = [];
                   try {
                     imageUploadingStatus =
                         await _uploadImageController.uploadImage(
@@ -1635,6 +1598,12 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                       token: prefs.getString('accessToken'),
                     );
                   } catch (e) {
+                    ReusableWidgets.loggerFunction(
+                      fileName: 'sell_animal_edit_form_uploadImage',
+                      error: e.toString(),
+                      myNum: widget.userMobileNumber,
+                      userId: prefs.getString('userId'),
+                    );
                     ReusableWidgets.showDialogBox(
                       context,
                       'warning'.tr,
@@ -1644,7 +1613,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                     );
                   }
 
-                  if (imageUploadingStatus.isBlank) {
+                  if (imageUploadingStatus.length == 0) {
                     ReusableWidgets.showDialogBox(
                         context, 'error'.tr, Text('issue uploading image'));
                   } else {
@@ -1675,7 +1644,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                       animalUpdationData.toString());
 
                   bool saveAnimalData = false;
-                  if (_imageToBeUploaded.isNotEmpty) {
+                  if (_imageToBeUploaded.length > 0) {
                     if (animalUpdationData['animalType'] == 1 ||
                         animalUpdationData['animalType'] == 2) {
                       try {
@@ -1702,6 +1671,11 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                           token: prefs.getString("accessToken"),
                         );
                       } catch (e) {
+                        ReusableWidgets.loggerFunction(
+                            fileName: 'sell_animal_edit_form_updateAnimal1',
+                            error: e.toString(),
+                            myNum: widget.userMobileNumber,
+                            userId: prefs.getString('userId'));
                         ReusableWidgets.showDialogBox(
                           context,
                           'warning'.tr,
@@ -1726,6 +1700,11 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                           token: prefs.getString("accessToken"),
                         );
                       } catch (e) {
+                        ReusableWidgets.loggerFunction(
+                            fileName: 'sell_animal_edit_form_updateAnimal2',
+                            error: e.toString(),
+                            myNum: widget.userMobileNumber,
+                            userId: prefs.getString('userId'));
                         ReusableWidgets.showDialogBox(
                           context,
                           'warning'.tr,
@@ -1812,10 +1791,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                   } else {
                     pr.hide();
                     ReusableWidgets.showDialogBox(
-                        context,
-                        'error'.tr,
-                        Text(
-                            'Save animal error+${_imageToBeUploaded.isNotEmpty.toString()}'));
+                        context, 'error'.tr, Text('animalSaveError'.tr));
                   }
                 }
               }),

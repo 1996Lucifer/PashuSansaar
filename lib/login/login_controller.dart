@@ -21,8 +21,8 @@ class LoginController extends GetxController {
         var data = response.data;
         if (data['expires'] != null) {
           var expires = data['expires'];
-          print('This is the risponse if data$expires');
-          print('This is the risponse if data$data');
+          print('This is the response if data$expires');
+          print('This is the response if data$data');
           status.value = true;
         } else {
           status.value = false;

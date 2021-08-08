@@ -1,26 +1,18 @@
 import 'dart:convert';
 
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:intl/intl.dart';
-import 'package:pashusansaar/animal_description/animal_description_page.dart';
 import 'package:pashusansaar/my_calls/myCallsController.dart';
 import 'package:pashusansaar/refresh_token/refresh_token_controller.dart';
 import 'package:pashusansaar/utils/colors.dart';
-import 'package:progress_dialog/progress_dialog.dart';
 import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pashusansaar/utils/constants.dart';
-import 'buy_animal/buy_animal_controller.dart';
-import 'my_calls/myCallsModel.dart';
 import 'utils/reusable_widgets.dart';
 import 'package:get/get.dart';
-import 'package:paginate_firestore/paginate_firestore.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:url_launcher/url_launcher.dart' as UrlLauncher;
 
@@ -103,7 +95,6 @@ class _MyCalledListState extends State<MyCalledList> {
   Row _buildInfowidget(_list) {
     var formatter = intl.NumberFormat('#,##,000');
     return Row(
-      // mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Expanded(
           child: Padding(
@@ -229,7 +220,37 @@ class _MyCalledListState extends State<MyCalledList> {
                               builder: (BuildContext context) {
                                 return i.length > 1000
                                     ? Image.memory(base64Decode('$i'))
-                                    : Image.network('$i');
+                                    : Image.network(
+                                        '$i',
+                                        loadingBuilder: (BuildContext context,
+                                            Widget child,
+                                            ImageChunkEvent loadingProgress) {
+                                          if (loadingProgress == null)
+                                            return child;
+                                          return Center(
+                                            child: CircularProgressIndicator(
+                                              value: loadingProgress
+                                                          .expectedTotalBytes !=
+                                                      null
+                                                  ? loadingProgress
+                                                          .cumulativeBytesLoaded /
+                                                      loadingProgress
+                                                          .expectedTotalBytes
+                                                  : null,
+                                            ),
+                                          );
+                                        },
+                                        errorBuilder: (BuildContext context,
+                                            Object exception,
+                                            StackTrace stackTrace) {
+                                          return Center(
+                                            child: Icon(
+                                              Icons.error,
+                                              size: 60,
+                                            ),
+                                          );
+                                        },
+                                      );
                               },
                             );
                           }).toList(),
@@ -259,14 +280,28 @@ class _MyCalledListState extends State<MyCalledList> {
               },
               child: Container(
                 height: 200.0,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: _images[0].length > 1000
-                          ? MemoryImage(base64.decode(_images[0]))
-                          : NetworkImage(_images[0])),
-                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                  color: Colors.redAccent,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: Image.network(
+                    _images[0],
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    loadingBuilder: (
+                      BuildContext context,
+                      Widget child,
+                      ImageChunkEvent loadingProgress,
+                    ) {
+                      if (loadingProgress == null) return child;
+                      return Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes
+                              : null,
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
@@ -297,38 +332,6 @@ class _MyCalledListState extends State<MyCalledList> {
         ));
   }
 
-  _descriptionText(animalInfo) {
-    String animalBreedCheck = (animalInfo.animalBreed == 'not_known'.tr)
-        ? ""
-        : animalInfo.animalBreed;
-    String animalTypeCheck = (animalInfo.animalType >= 5)
-        ? intToAnimalOtherTypeMapping[animalInfo.animalType]
-        : intToAnimalTypeMapping[animalInfo.animalType];
-
-    String desc = '';
-
-    if (animalInfo.animalType >= 3) {
-      desc =
-          'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल ${(animalInfo.animalType == 6 || animalInfo.animalType == 8 || animalInfo.animalType == 10) ? " की" : "का"} है। ';
-    } else {
-      desc =
-          'ये $animalBreedCheck $animalTypeCheck ${animalInfo.animalAge} साल की है। ';
-      if (animalInfo.recentBayatTime != null) {
-        desc = desc +
-            'यह ${intToRecentBayaatTime[animalInfo.recentBayatTime]} ब्यायी है। ';
-      }
-      if (animalInfo.pregnantTime != null) {
-        desc =
-            desc + 'यह अभी ${intToPregnantTime[animalInfo.pregnantTime]} है। ';
-      }
-      if (animalInfo.animalMilkCapacity != null) {
-        desc = desc +
-            'पिछले बार के हिसाब से दूध कैपेसिटी ${animalInfo.animalMilkCapacity} लीटर है। ';
-      }
-    }
-    return desc + (animalInfo.moreInfo ?? "");
-  }
-
   _extraInfoWidget(_list, width) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
@@ -345,7 +348,7 @@ class _MyCalledListState extends State<MyCalledList> {
               String whatsappText = '';
 
               whatsappText =
-                  'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${_list.userName}, ${_list.userAddress} \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
+                  'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${_list._userName}, ${_list.userAddress} \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
               whatsappUrl =
                   "https://api.whatsapp.com/send/?phone=+91 ${_list.mobile} &text=$whatsappText";
               await UrlLauncher.canLaunch(whatsappUrl) != null
@@ -404,8 +407,10 @@ class _MyCalledListState extends State<MyCalledList> {
 
                 Share.share(
                     _list.animalType <= 2
-                        ? "नस्ल: ${_list.animalBreed}\nजानकारी: ${_descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list)}\nदूध(प्रति दिन): ${_list.animalMilkCapacity} Litre\n\nपशु देखे: ${shortUrl.toString()}"
-                        : "नस्ल: ${_list.animalBreed}\nजानकारी: ${_descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : _descriptionText(_list)}\n\nपशु देखे: ${shortUrl.toString()}",
+                        ? "नस्ल: ${_list.animalBreed}\nजानकारी: ${ReusableWidgets.descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : ReusableWidgets.descriptionText(_list)}\n ${_list.animalMilkCapacity != null || _list.animalMilk != null ? 'दूध(प्रति दिन): ${_list.animalMilkCapacity ?? _list.animalMilk} Litre' : ''}\n\nपशु देखे: ${shortUrl.toString()}"
+                        : (_list.animalType <= 4
+                            ? ("नस्ल: ${_list.animalBreed}\nजानकारी: ${ReusableWidgets.descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : ReusableWidgets.descriptionText(_list)}\n\nपशु देखे: ${shortUrl.toString()}")
+                            : ("जानकारी: ${ReusableWidgets.descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : ReusableWidgets.descriptionText(_list)}\n\nपशु देखे: ${shortUrl.toString()}")),
                     subject: 'पशु की जानकारी');
               },
               icon: Icon(Icons.share, color: Colors.white, size: 14),
@@ -510,9 +515,12 @@ class _MyCalledListState extends State<MyCalledList> {
                             Text('दूध (प्रति दिन)',
                                 style: TextStyle(
                                     fontSize: 15, fontWeight: FontWeight.bold)),
-                            _list.animalMilkCapacity == null?Text("-") :Text('${_list.animalMilkCapacity} लीटर',
-                                style: TextStyle(
-                                    fontSize: 14, fontWeight: FontWeight.w500))
+                            _list.animalMilkCapacity == null
+                                ? Text("-")
+                                : Text('${_list.animalMilkCapacity} लीटर',
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500))
                           ],
                         ),
                       ),
@@ -536,9 +544,9 @@ class _MyCalledListState extends State<MyCalledList> {
                             Text('ब्यात',
                                 style: TextStyle(
                                     fontSize: 15, fontWeight: FontWeight.bold)),
-                           Text(
-                                intToAnimalBayaatMapping[_list.animalBayat]
-                                    ?? "-",
+                            Text(
+                                intToAnimalBayaatMapping[_list.animalBayat] ??
+                                    "-",
                                 style: TextStyle(
                                     fontSize: 14, fontWeight: FontWeight.w500))
                           ],
@@ -572,8 +580,9 @@ class _MyCalledListState extends State<MyCalledList> {
                               _list.isRecentBayat == false ||
                                       _list.isRecentBayat == 'no'.tr
                                   ? 'ब्यायी नहीं है'
-                                  : intToRecentBayaatTime[_list.recentBayatTime]
-                                      ?? "-",
+                                  : intToRecentBayaatTime[
+                                          _list.recentBayatTime] ??
+                                      "-",
                               style: TextStyle(
                                   fontSize: 14, fontWeight: FontWeight.w500),
                             )
@@ -605,8 +614,8 @@ class _MyCalledListState extends State<MyCalledList> {
                                       _list.isPregnant == 'no'.tr ||
                                       _list.isPregnant == false
                                   ? 'गर्भवती नहीं है'
-                                  : intToPregnantTime[_list.pregnantTime]
-                                      ?? "-",
+                                  : intToPregnantTime[_list.pregnantTime] ??
+                                      "-",
                               style: TextStyle(
                                   fontSize: 14, fontWeight: FontWeight.w500),
                             )
@@ -653,6 +662,7 @@ class _MyCalledListState extends State<MyCalledList> {
               : Container(
                   margin: EdgeInsets.all(10),
                   child: ListView.separated(
+                    cacheExtent: 99,
                     itemCount: myCallList.length,
                     separatorBuilder: (context, index) => Divider(),
                     itemBuilder: (context, index) {

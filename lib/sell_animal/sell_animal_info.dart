@@ -1,6 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:convert';
+
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
+import 'package:pashusansaar/intersted_buyers/interestedBuyerController.dart';
 import 'package:pashusansaar/my_animals/myAnimalController.dart';
 import 'package:pashusansaar/my_animals/myAnimalModel.dart';
 import 'package:pashusansaar/refresh_token/refresh_token_controller.dart';
@@ -11,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:pashusansaar/utils/urls.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -66,51 +70,6 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
   @override
   bool get wantKeepAlive => true;
 
-  // _imageData(_list) {
-  //   var data = '';
-  //   if (_list.files[0].fileName != '') {
-  //     data = _list.files[0].fileName;
-  //   } else if (widget.animalInfo[index]['animalImages']['image2'] != '') {
-  //     data = widget.animalInfo[index]['animalImages']['image2'];
-  //   } else if (widget.animalInfo[index]['animalImages']['image3'] != '') {
-  //     data = widget.animalInfo[index]['animalImages']['image3'];
-  //   } else if (widget.animalInfo[index]['animalImages']['image4'] != '') {
-  //     data = widget.animalInfo[index]['animalImages']['image4'];
-  //   }
-  //
-  //   return data;
-  // }
-
-  _descriptionText(_list) {
-    String animalBreedCheck =
-        (_list.animalBreed == 'not_known'.tr) ? "" : _list.animalBreed;
-    String animalTypeCheck = (_list.animalType >= 5)
-        ? intToAnimalOtherTypeMapping[_list.animalType]
-        : intToAnimalTypeMapping[_list.animalType];
-
-    String desc = '';
-
-    if (_list.animalType >= 3) {
-      desc =
-          'ये $animalBreedCheck $animalTypeCheck ${_list.animalAge} साल ${(_list.animalType == 6 || _list.animalType == 8 || _list.animalType == 10) ? " की" : "का"} है। ';
-    } else {
-      desc =
-          'ये $animalBreedCheck $animalTypeCheck ${_list.animalAge} साल की है। ';
-      if (_list.recentBayatTime != null) {
-        desc = desc +
-            'यह ${intToRecentBayaatTime[_list.recentBayatTime]} ब्यायी है। ';
-      }
-      if (_list.pregnantTime != null) {
-        desc = desc + 'यह अभी ${intToPregnantTime[_list.pregnantTime]} है। ';
-      }
-      if (_list.animalMilkCapacity != null) {
-        desc = desc +
-            'पिछले बार के हिसाब से दूध कैपेसिटी ${_list.animalMilkCapacity} लीटर है। ';
-      }
-    }
-    return desc + (_list.moreInfo ?? "");
-  }
-
   Padding _buildImageDescriptionWidget(double width, _list) => Padding(
         padding: const EdgeInsets.all(8.0),
         child: Row(
@@ -123,35 +82,50 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                 height: 130.0,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
-                  child: Image.network(
-                    _list.files[_list.files.length - 1].fileName,
+                  child: CachedNetworkImage(
+                    imageUrl: _list.files[_list.files.length - 1].fileName,
                     fit: BoxFit.cover,
                     width: double.infinity,
-                    loadingBuilder: (
-                      BuildContext context,
-                      Widget child,
-                      ImageChunkEvent loadingProgress,
-                    ) {
-                      if (loadingProgress == null) return child;
-                      return Center(
-                        child: CircularProgressIndicator(
-                          value: loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes
-                              : null,
-                        ),
-                      );
-                    },
-                    errorBuilder: (BuildContext context, Object exception,
-                        StackTrace stackTrace) {
-                      return Center(
-                        child: Icon(
-                          Icons.error,
-                          size: 40,
-                        ),
-                      );
-                    },
+                    progressIndicatorBuilder:
+                        (context, url, downloadProgress) => Center(
+                      child: Image.asset(
+                        'assets/images/loader.gif',
+                        height: 40,
+                        width: 40,
+                      ),
+                    ),
+                    errorWidget: (context, url, error) =>
+                        Icon(Icons.error, size: 30),
                   ),
+                  // Image.network(
+                  //   _list.files[_list.files.length - 1].fileName,
+                  //   fit: BoxFit.cover,
+                  //   width: double.infinity,
+                  //   loadingBuilder: (
+                  //     BuildContext context,
+                  //     Widget child,
+                  //     ImageChunkEvent loadingProgress,
+                  //   ) {
+                  //     if (loadingProgress == null) return child;
+                  //     return Center(
+                  //       child: CircularProgressIndicator(
+                  //         value: loadingProgress.expectedTotalBytes != null
+                  //             ? loadingProgress.cumulativeBytesLoaded /
+                  //                 loadingProgress.expectedTotalBytes
+                  //             : null,
+                  //       ),
+                  //     );
+                  //   },
+                  //   errorBuilder: (BuildContext context, Object exception,
+                  //       StackTrace stackTrace) {
+                  //     return Center(
+                  //       child: Icon(
+                  //         Icons.error,
+                  //         size: 40,
+                  //       ),
+                  //     );
+                  //   },
+                  // ),
                 ),
               ),
             ),
@@ -160,7 +134,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
               child: Padding(
                 padding: const EdgeInsets.only(right: 12.0, left: 12, top: 15),
                 child: Text(
-                  _descriptionText(_list),
+                  ReusableWidgets.descriptionText(_list),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 4,
                   textAlign: TextAlign.justify,
@@ -317,17 +291,88 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
           ),
         ),
       );
+  final InterestedBuyerController interestedBuyerController =
+      Get.put(InterestedBuyerController());
 
-  _openAddEntryDialog(_list) {
-    Navigator.of(context).push(new MaterialPageRoute<Null>(
-        builder: (BuildContext context) {
-          return RemoveAnimal(
-              listId: _list.sId, price: _list.animalPrice.toString());
-        },
-        fullscreenDialog: true));
+  List interestedBuyers = [];
+  getInitialInfo(_list) async {
+    prefs = await SharedPreferences.getInstance();
+    bool status;
+
+    try {
+      if (ReusableWidgets.isTokenExpired(prefs.getInt('expires') ?? 0)) {
+        status = await refreshTokenController.getRefreshToken(
+            refresh: prefs.getString('refreshToken') ?? '');
+        if (status) {
+          setState(() {
+            prefs.setString(
+                'accessToken', refreshTokenController.accessToken.value);
+            prefs.setString(
+                'refreshToken', refreshTokenController.refreshToken.value);
+            prefs.setInt('expires', refreshTokenController.expires.value);
+          });
+        } else {
+          print('Error getting token==' + status.toString());
+        }
+      }
+    } catch (e) {
+      ReusableWidgets.loggerFunction(
+          fileName: 'sell_animal_info_refreshToken',
+          error: e.toString(),
+          myNum: widget.userMobileNumber,
+          userId: prefs.getString('userId'));
+      ReusableWidgets.showDialogBox(
+        context,
+        'warning'.tr,
+        Text(
+          'global_error'.tr,
+        ),
+      );
+    }
+
+    try {
+      List data = await interestedBuyerController.interstedBuyers(
+        animalId: _list.sId,
+        userId: prefs.getString('userId'),
+        token: prefs.getString('accessToken'),
+        page: 1,
+      );
+
+      setState(() {
+        interestedBuyers = data;
+      });
+    } catch (e) {
+      ReusableWidgets.loggerFunction(
+          fileName: 'sell_animal_info_gettingInterestedBuyers',
+          error: e.toString(),
+          myNum: widget.userMobileNumber,
+          userId: prefs.getString('userId'));
+      ReusableWidgets.showDialogBox(
+        context,
+        'warning'.tr,
+        Text(
+          'global_error'.tr,
+        ),
+      );
+    }
   }
 
-  _priceTextBox(index) => Column(
+  _openAddEntryDialog(_list) async {
+    await getInitialInfo(_list);
+    interestedBuyers.length == null || interestedBuyers.isEmpty
+        ? _showPriceDialog(_list)
+        : Navigator.of(context).push(new MaterialPageRoute<Null>(
+            builder: (BuildContext context) {
+              return RemoveAnimal(
+                listId: _list.sId,
+                price: _list.animalPrice.toString(),
+                interestedBuyersNew: interestedBuyers,
+              );
+            },
+            fullscreenDialog: true));
+  }
+
+  _priceTextBox() => Column(
         children: [
           TextFormField(
             inputFormatters: <TextInputFormatter>[
@@ -369,22 +414,10 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                       style: TextStyle(color: appPrimaryColor),
                     )
                   : SizedBox.shrink()
-
-          // Text(
-          //   'removal_price_error'.trParams(
-          //     {
-          //       'minPrice':
-          //           '${(int.parse(widget.animalInfo[index]['animalInfo']['animalPrice']) ~/ 2).toString()}',
-          //       'maxPrice':
-          //           '${widget.animalInfo[index]['animalInfo']['animalPrice']}'
-          //     },
-          //   ),
-          //   style: TextStyle(color: appPrimaryColor),
-          // )
         ],
       );
 
-  _showPriceDialog(index) => showDialog(
+  _showPriceDialog(_list) => showDialog(
         context: context,
         barrierDismissible: false,
         builder: (context) => StatefulBuilder(
@@ -395,9 +428,11 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('tell_price'.tr),
+                  Text(
+                    'tell_price'.tr,
+                  ),
                   SizedBox(height: 5),
-                  _priceTextBox(index)
+                  _priceTextBox()
                 ],
               ),
               padding: EdgeInsets.symmetric(vertical: 2, horizontal: 3),
@@ -428,97 +463,90 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                       fontWeight: FontWeight.bold,
                       fontSize: 16),
                 ),
-                onPressed: () {
+                onPressed: () async {
                   if (_price.isEmpty) {
                     setState(() {
                       _isError = false;
                       _isErrorEmpty = true;
                     });
-                  } else if ((int.parse(_price) <
-                          (widget.animalInfo[index].animalPrice ~/ 2)) ||
+                  }
+                  if ((int.parse(_price) <
+                          (int.parse(_list.animalPrice.toString()) ~/ 2)) ||
                       (int.parse(_price) >
-                          widget.animalInfo[index].animalPrice)) {
+                          int.parse(_list.animalPrice.toString()))) {
                     setState(() {
                       _isErrorEmpty = false;
                       _isError = true;
                     });
                   } else {
-                    setState(() {
-                      _isErrorEmpty = false;
-                      _isError = false;
-                    });
-
                     pr = new ProgressDialog(context,
                         type: ProgressDialogType.Normal, isDismissible: false);
                     pr.style(message: 'progress_dialog_message'.tr);
                     pr.show();
 
-                    FirebaseFirestore.instance
-                        .collection("animalSellingInfo")
-                        .doc(FirebaseAuth.instance.currentUser.uid)
-                        .collection('sellingAnimalList')
-                        .doc(widget.animalInfo[index].sId)
-                        .update({
-                          'animalRemove': {
-                            'soldFromApp': false,
-                            'price': _price,
-                            'soldDate':
-                                ReusableWidgets.dateTimeToEpoch(DateTime.now())
-                          },
-                          'isValidUser': 'RemovedByUser',
-                          'dateOfUpdation':
-                              ReusableWidgets.dateTimeToEpoch(DateTime.now())
-                        })
-                        .then((value) => FirebaseFirestore.instance
-                                .collection('buyingAnimalList1')
-                                .doc(widget.animalInfo[index].sId +
-                                    FirebaseAuth.instance.currentUser.uid)
-                                .update({
-                              'animalRemove': {
-                                'soldFromApp': false,
-                                'price': _price,
-                                'soldDate': ReusableWidgets.dateTimeToEpoch(
-                                    DateTime.now())
-                              },
-                              'isValidUser': 'RemovedByUser',
-                              'dateOfUpdation': ReusableWidgets.dateTimeToEpoch(
-                                  DateTime.now())
-                            }).then((value) {
-                              pr.hide();
-                              Navigator.of(context).pop();
+                    Map<String, dynamic> userMap = Map();
+                    SharedPreferences prefs =
+                        await SharedPreferences.getInstance();
+                    userMap = {
+                      "animalId": _list.sId,
+                      "userId": prefs.getString('userId'),
+                      "soldFromApp": 0,
+                      "sellingPrice": _price,
+                    };
 
-                              return showDialog(
-                                  context: context,
-                                  builder: (context) {
-                                    return AlertDialog(
-                                        title: Text('info'.tr),
-                                        content: Text('pashu_removed'.tr),
-                                        actions: <Widget>[
-                                          TextButton(
-                                              child: Text(
-                                                'Ok'.tr,
-                                                style: TextStyle(
-                                                    color: appPrimaryColor),
-                                              ),
-                                              onPressed: () {
-                                                Navigator.of(context).pop();
-                                                Get.offAll(() => HomeScreen(
-                                                      selectedIndex: 0,
-                                                    ));
-                                                // Navigator.pushReplacement(
-                                                //     context,
-                                                //     MaterialPageRoute(
-                                                //         builder: (context) =>
-                                                //             HomeScreen(
-                                                //               selectedIndex: 0,
-                                                //             )));
-                                              }),
-                                        ]);
-                                  });
-                            }).catchError((err) => print(
-                                    'removeAnimalError==>${err.toString()}')))
-                        .catchError((err) => print(
-                            'removeAnimalOuterError==>${err.toString()}'));
+                    print('my map is this $userMap');
+
+                    try {
+                      var response = await Dio().post(
+                        GlobalUrl.baseUrl + GlobalUrl.animalSold,
+                        data: json.encode(userMap),
+                        options: Options(
+                          headers: {
+                            "Authorization": prefs.getString('accessToken'),
+                          },
+                        ),
+                      );
+
+                      if (response.data != null) {
+                        print(
+                            'response statuscode  the animal sold is ${response.statusCode}');
+                        if (response.statusCode == 200 ||
+                            response.statusCode == 201) {
+                          pr.hide();
+                          print(
+                              ' 3 response data of the animal sold is ${response.data}');
+
+                          Navigator.of(context).pop();
+
+                          return showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                title: Text('info'.tr),
+                                content: Text('pashu_removed'.tr),
+                                actions: <Widget>[
+                                  TextButton(
+                                    child: Text(
+                                      'Ok'.tr,
+                                      style: TextStyle(color: appPrimaryColor),
+                                    ),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                      Get.offAll(
+                                          () => HomeScreen(selectedIndex: 0));
+                                    },
+                                  )
+                                ],
+                              );
+                            },
+                          );
+                        }
+                      }
+                    } catch (e) {
+                      print("Getting error in removing animal _______$e");
+                      pr.hide();
+                      Navigator.of(context).pop();
+                    }
                   }
                 },
               ),
@@ -563,66 +591,6 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
     );
   }
 
-/////<<<<<<<<<<<< previous dialog box >>>>>>>>>>>>>>>
-
-//   showRemoveAnimalDialog(index) {
-//     return showDialog(
-//       context: context,
-//       builder: (context) {
-//         return AlertDialog(
-//           title: Text('warning'.tr),
-//           content: Text('remove_animal_warning_text'.tr),
-//           actions: <Widget>[
-//             RaisedButton(
-//                 child: Text(
-//                   'no'.tr,
-//                   style: TextStyle(
-//                       color: Colors.white,
-//                       fontWeight: FontWeight.bold,
-//                       fontSize: 16),
-//                 ),
-//                 onPressed: () => Navigator.of(context).pop()),
-//             RaisedButton(
-//               child: Text(
-//                 'yes'.tr,
-//                 style: TextStyle(
-//                     color: Colors.white,
-//                     fontWeight: FontWeight.bold,
-//                     fontSize: 16),
-//               ),
-//               onPressed: () {
-//                 Navigator.of(context).pop();
-//                 FirebaseFirestore.instance
-//                     .collection('callingInfo')
-//                     .doc(widget.animalInfo[index]['uniqueId'])
-//                     .collection('interestedBuyers')
-//                     .orderBy('dateOfSaving')
-//                     .limit(1)
-//                     .get()
-//                     .then(
-//                   (value) {
-//                     if (value.docs.length == 0) {
-//                       _showPriceDialog(index);
-//                     } else {
-//                       _openAddEntryDialog(index);
-//                     }
-//                   },
-//                 );
-//               },
-//             ),
-//           ],
-//         );
-//       },
-//     );
-//   }
-// }
-
-//
-//
-//
-//
-//<<<<<<<<<<<<<<< new build >>>>>>>>>>>>>>>>>>>
-
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -635,7 +603,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
               child: Column(
                 children: [
                   Text(
-                    'आपका कोई पशु दर्ज़ नहीं है| कृपया पशु दर्ज़ करे',
+                    'addAnimal'.tr,
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -666,6 +634,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                         )
                       : SizedBox.shrink(),
                   ListView.builder(
+                    cacheExtent: 999,
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
                     itemCount: widget.animalInfo.length,
@@ -740,7 +709,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                                           child: Row(
                                             children: [
                                               Text(
-                                                'इच्छुक खरीदार की सूचि',
+                                                'interestedBuyer'.tr,
                                                 style: TextStyle(
                                                     color: appPrimaryColor,
                                                     fontSize: 15),
@@ -791,7 +760,7 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
                                           children: [
-                                            Text("इच्छुक खरीदार की सूचि देखे",
+                                            Text('seeInterestedBuyer'.tr,
                                                 style: TextStyle(
                                                     fontSize: 16,
                                                     fontWeight:
@@ -813,194 +782,3 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
     );
   }
 }
-
-//////////////////// Previous Build ???????????????
-
-// @override
-// Widget build(BuildContext context) {
-//   super.build(context);
-//   final double width = MediaQuery.of(context).size.width;
-//   return Scaffold(
-//     backgroundColor: Colors.grey[100],
-//     appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),
-//     body: myAnimalList == null || myAnimalList.isEmpty
-//         ? Center(
-//       child: Column(
-//         children: [
-//           Text(
-//             'आपका कोई पशु दर्ज़ नहीं है| कृपया पशु दर्ज़ करे',
-//             style:
-//             TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-//           ),
-//           _buildSellingFormButton(context)
-//         ],
-//       ),
-//     )
-//         : Column(
-//       mainAxisAlignment: MainAxisAlignment.start,
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       children: [
-//         widget.showExtraData
-//             ? _buildSellingFormButton(context)
-//             : SizedBox.shrink(),
-//         widget.showExtraData
-//             ? Padding(
-//           padding: const EdgeInsets.all(8.0),
-//           child: Container(
-//             height: 30,
-//             child: Text('your_selling_animal_info'.tr,
-//                 style: TextStyle(
-//                     fontSize: 20,
-//                     fontWeight: FontWeight.bold,
-//                     color: Colors.black)),
-//           ),
-//         )
-//             : SizedBox.shrink(),
-//         ListView.builder(
-//           shrinkWrap: true,
-//           physics: NeverScrollableScrollPhysics(),
-//           itemCount: widget.animalInfo.length,
-//           itemBuilder: (context, index) {
-//             return Padding(
-//               padding: const EdgeInsets.all(8.0),
-//               child: Card(
-//                 key: Key(widget.animalInfo[index]['uniqueId']),
-//                 shape: RoundedRectangleBorder(
-//                   borderRadius: BorderRadius.circular(10.0),
-//                 ),
-//                 elevation: 5,
-//                 child: Column(
-//                   crossAxisAlignment: CrossAxisAlignment.start,
-//                   children: [
-//                     _buildBreedTypeWidget(index),
-//                     _buildDateWidget(index),
-//                     _buildImageDescriptionWidget(width, index),
-//                     widget.showExtraData
-//                         ? Row(
-//                       textDirection: TextDirection.rtl,
-//                       mainAxisAlignment:
-//                       MainAxisAlignment.spaceBetween,
-//                       children: [
-//                         TextButton(
-//                             onPressed: () => Navigator.push(
-//                               context,
-//                               MaterialPageRoute(
-//                                 builder: (context) =>
-//                                     SellAnimalEditForm(
-//                                       index: index,
-//                                       userName: widget.userName,
-//                                       userMobileNumber: widget
-//                                           .userMobileNumber,
-//                                     ),
-//                               ),
-//                             ),
-//                             child: Row(
-//                               children: [
-//                                 Text(
-//                                   'change_info'.tr,
-//                                   style: TextStyle(
-//                                       color: appPrimaryColor,
-//                                       fontSize: 15),
-//                                 ),
-//                                 SizedBox(
-//                                   width: 5,
-//                                 ),
-//                                 FaIcon(
-//                                   FontAwesomeIcons.edit,
-//                                   color: appPrimaryColor,
-//                                   size: 16,
-//                                 )
-//                               ],
-//                             )),
-//                         TextButton(
-//                             onPressed: () => Navigator.push(
-//                                 context,
-//                                 MaterialPageRoute(
-//                                     builder: (context) =>
-//                                         InterestedBuyer(
-//                                           listId: widget.animalInfo[
-//                                           index][
-//                                           'uniqueId'] ??
-//                                               '',
-//                                           index: index,
-//                                           animalInfo:
-//                                           widget.animalInfo,
-//                                         ))),
-//                             child: Row(
-//                               children: [
-//                                 Text(
-//                                   'इच्छुक खरीदार की सूचि',
-//                                   style: TextStyle(
-//                                       color: appPrimaryColor,
-//                                       fontSize: 15),
-//                                 ),
-//                                 SizedBox(
-//                                   width: 5,
-//                                 ),
-//                                 FaIcon(
-//                                   FontAwesomeIcons.arrowRight,
-//                                   color: appPrimaryColor,
-//                                   size: 16,
-//                                 )
-//                               ],
-//                             )),
-//                       ],
-//                     )
-//                         : GestureDetector(
-//                       onTap: () => Navigator.push(
-//                           context,
-//                           MaterialPageRoute(
-//                               builder: (context) =>
-//                                   InterestedBuyer(
-//                                     // key:
-//                                     //     Key(widget.animalInfo[index]
-//                                     //         ['uniqueId']),
-//                                     listId:
-//                                     widget.animalInfo[index]
-//                                     ['uniqueId'] ??
-//                                         '',
-//                                     index: index,
-//                                     animalInfo:
-//                                     widget.animalInfo,
-//                                   ))),
-//                       child: Container(
-//                         decoration: BoxDecoration(
-//                           color: Colors.grey[100],
-//                           boxShadow: [
-//                             BoxShadow(
-//                               color: Colors.grey,
-//                               blurRadius: 1.0,
-//                             ),
-//                           ],
-//                           borderRadius:
-//                           BorderRadius.circular(8),
-//                         ),
-//                         height: 50,
-//                         child: Padding(
-//                           padding: const EdgeInsets.all(8.0),
-//                           child: Row(
-//                             mainAxisAlignment:
-//                             MainAxisAlignment.spaceBetween,
-//                             children: [
-//                               Text("इच्छुक खरीदार की सूचि देखे",
-//                                   style: TextStyle(
-//                                       fontSize: 16,
-//                                       fontWeight:
-//                                       FontWeight.bold)),
-//                               Icon(Icons.arrow_forward_ios)
-//                             ],
-//                           ),
-//                         ),
-//                       ),
-//                     )
-//                   ],
-//                 ),
-//               ),
-//             );
-//           },
-//         ),
-//         // ))
-//       ],
-//     ),
-//   );
-// }

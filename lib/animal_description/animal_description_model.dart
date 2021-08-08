@@ -97,7 +97,7 @@ class Animal {
     animalHasBaby = json['animalHasBaby'];
     moreInfo = json['moreInfo'];
     if (json['files'] != null) {
-      files = new List<Files>();
+      files = <Files>[];
       json['files'].forEach((v) {
         files.add(new Files.fromJson(v));
       });

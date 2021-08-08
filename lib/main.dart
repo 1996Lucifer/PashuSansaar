@@ -1,12 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:intl/intl.dart';
 import 'package:pashusansaar/animal_description/animal_description_page.dart';
 import 'package:pashusansaar/splash_screen.dart';
 import 'package:pashusansaar/translation/message.dart';
@@ -20,7 +17,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart' as URLauncher;
 import 'package:package_info/package_info.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
-import 'package:check_vpn_connection/check_vpn_connection.dart';
 
 import 'utils/reusable_widgets.dart';
 
@@ -74,10 +70,6 @@ void main() async {
   HttpOverrides.global = new MyHttpOverrides();
 
   await Firebase.initializeApp();
-  remoteConfig = await RemoteConfig.instance;
-  await remoteConfig.fetch(expiration: const Duration(seconds: 0));
-  await remoteConfig.activateFetched();
-  remoteConfig.getString('force_update_current_version');
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   await flutterLocalNotificationsPlugin
@@ -194,6 +186,12 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  double versionToDouble(_list) {
+    return (((int.parse(_list[0])) * 100) +
+        (int.parse(_list[1])) +
+        ((int.parse(_list[2])) * 0.1));
+  }
+
   versionCheck(context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -203,28 +201,47 @@ class _MyAppState extends State<MyApp> {
     final PackageInfo info = await PackageInfo.fromPlatform();
 
     try {
-      List<String> currentVersion1 = info.version.split('.');
-      if (int.parse(currentVersion1[0]) == 1 ||
+      remoteConfig = await RemoteConfig.instance;
+      await remoteConfig.fetch(expiration: const Duration(seconds: 0));
+      await remoteConfig.activateFetched();
+
+      List<String> currentVersion = info.version.split('.');
+      if (int.parse(currentVersion[0]) == 1 ||
           (prefs.getString('accessToken') ?? '').isEmpty) {
         await prefs.clear();
       }
-      List<String> newVersion1 =
-          remoteConfig.getString('force_update_current_version').split('.');
+      String minimumVersion = remoteConfig.getString('minimum_version');
+      String nudgeVersion = remoteConfig.getString('nudge_version');
 
-      setState(() {
-        prefs.setStringList('newVersion', newVersion1);
-        prefs.setStringList('currentVersion', currentVersion1);
-        prefs.setString('referralUniqueValue', _unique);
-      });
+      if (minimumVersion.isNotEmpty && nudgeVersion.isNotEmpty) {
+        double currentVersionDouble = versionToDouble(currentVersion);
+        double minimumVersionDouble =
+            versionToDouble(minimumVersion.split('.'));
+        double nudgeVersionDouble = versionToDouble(nudgeVersion.split('.'));
 
-      if ((newVersion1[0].compareTo(currentVersion1[0]) == 1) ||
-          (newVersion1[1].compareTo(currentVersion1[1]) == 1)) {
-        await _showVersionDialog(newVersion1, currentVersion1, true);
+        setState(() {
+          prefs.setStringList('currentVersion', currentVersion);
+          prefs.setStringList('minimumVersion', minimumVersion.split('.'));
+          prefs.setStringList('nudgeVersion', nudgeVersion.split('.'));
+          prefs.setString('referralUniqueValue', _unique);
+        });
+
+        if (currentVersionDouble < minimumVersionDouble) {
+          await _showVersionDialog(
+              minimumVersion.split('.'), currentVersion, true);
+        } else if (currentVersionDouble < nudgeVersionDouble) {
+          await _showVersionDialog(
+              nudgeVersion.split('.'), currentVersion, false);
+        }
       }
-      if (newVersion1[2].compareTo(currentVersion1[2]) == 1)
-        await _showVersionDialog(newVersion1, currentVersion1, false);
-    } catch (exception) {
-      print(exception);
+    } catch (e) {
+      print(e);
+      ReusableWidgets.loggerFunction(
+        fileName: 'version_check',
+        error: e.toString(),
+        myNum: '',
+        userId: prefs.getString('userId') ?? '',
+      );
     }
 
     await initDynamicLink();

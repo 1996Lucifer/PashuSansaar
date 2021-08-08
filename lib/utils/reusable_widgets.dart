@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:get/get.dart';
@@ -81,7 +82,66 @@ class ReusableWidgets {
         });
   }
 
-  static showDialogBoxWithNavigator(BuildContext context, String type, Widget content,
+  static loggerFunction(
+      {String fileName, String error, String myNum, String userId}) {
+    FirebaseFirestore.instance
+        .collection('logger')
+        .doc(myNum)
+        .collection(fileName)
+        .doc()
+        .set({
+      'issue': error,
+      'userId': userId,
+      'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
+    });
+  }
+
+ static descriptionText(_list) {
+    String animalBreedCheck = (_list.animalBreed == 'not_known'.tr)
+        ? ""
+        : _list.animalBreed;
+    String animalTypeCheck = (_list.animalType >= 5)
+        ? intToAnimalOtherTypeMapping[_list.animalType]
+        : intToAnimalTypeMapping[_list.animalType];
+
+    String desc = '';
+
+    if (_list.animalType >= 3) {
+      desc =
+      'ये ${animalBreedCheck ?? ''} ${animalTypeCheck ?? ''} ${_list.animalAge} साल ${(_list.animalType == 6 || _list.animalType == 8 || _list.animalType == 10) ? " की" : "का"} है। ';
+    } else {
+      desc =
+      'ये $animalBreedCheck $animalTypeCheck ${_list.animalAge} साल की है। ';
+      if (_list.recentBayatTime != null) {
+        desc = desc +
+            'यह ${intToRecentBayaatTime[_list.recentBayatTime]} ब्यायी है। ';
+      }
+      if (_list.pregnantTime != null) {
+        desc =
+            desc + 'यह अभी ${intToPregnantTime[_list.pregnantTime]} है। ';
+      }
+      if (_list.animalMilkCapacity != null) {
+        desc = desc +
+            'पिछले बार के हिसाब से दूध कैपेसिटी ${_list.animalMilkCapacity} लीटर है। ';
+      }
+    }
+    return desc + (_list.moreInfo ?? "");
+  }
+
+ static Padding animalDescriptionMethod(_list) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Text(
+        descriptionText(_list),
+        maxLines: 4,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(color: Colors.grey[600], fontSize: 14.5),
+      ),
+    );
+  }
+
+  static showDialogBoxWithNavigator(
+      BuildContext context, String type, Widget content,
       {bool cta = false, bool barrierDismissible = true}) {
     return showDialog(
         context: context,
@@ -124,7 +184,12 @@ class ReusableWidgets {
                     elevation: 5,
                     onPressed: () {
                       Navigator.of(context).pop();
-                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> HomeScreen(selectedIndex: 0),),);
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => HomeScreen(selectedIndex: 0),
+                        ),
+                      );
                     }),
               ]);
         });
@@ -215,4 +280,27 @@ class ReusableWidgets {
   static int convertStringToInt(String value) {
     return int.parse(value);
   }
+
+  static Center tinyLoader() {
+    return Center(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(),
+          SizedBox(
+            width: 14.0,
+          ),
+          Text(
+            'loading'.tr,
+            style: TextStyle(
+              color: appPrimaryColor,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
+

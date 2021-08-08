@@ -1,9 +1,7 @@
 import 'dart:convert';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'package:dropdown_search/dropdown_search.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geocoder/geocoder.dart';
@@ -273,16 +271,19 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
               controller: _budgetController,
               keyboardType: TextInputType.number,
               onChanged: (String price) {
-                String string = '${_formatNumber(price.replaceAll(',', ''))}';
+                if (price.isEmpty) {
+                  price = '';
+                } else {
+                  String string = '${_formatNumber(price.replaceAll(',', ''))}';
 
-                _budgetController.value = TextEditingValue(
-                  text: _currency + string,
-                  selection: TextSelection.collapsed(offset: string.length),
-                );
+                  _budgetController.value = TextEditingValue(
+                    text: _currency + string,
+                    selection: TextSelection.collapsed(offset: string.length),
+                  );
 
-                _budgetController.selection = TextSelection.fromPosition(
-                    TextPosition(offset: _budgetController.text.length));
-
+                  _budgetController.selection = TextSelection.fromPosition(
+                      TextPosition(offset: _budgetController.text.length));
+                }
                 setState(() {
                   animalInfo['animalBudget'] = price;
                 });
@@ -319,14 +320,6 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
-                ),
-                SizedBox(width: 5),
-                Text(
-                  '*',
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.red),
                 ),
               ],
             ),
