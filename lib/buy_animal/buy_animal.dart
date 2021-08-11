@@ -30,6 +30,7 @@ import 'dart:ui' as ui;
 import 'package:animations/animations.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:pashusansaar/utils/custom_fab/custom_fab.dart';
+import 'package:video_player/video_player.dart';
 
 import 'animal_info_form.dart';
 import 'buy_animal_controller.dart';
@@ -80,6 +81,7 @@ class _BuyAnimalState extends State<BuyAnimal>
       url2 = '',
       url3 = '',
       url4 = '';
+  VideoPlayerController _videoController;
   TextEditingController _locationController = TextEditingController();
   ScrollController _scrollController =
       ScrollController(keepScrollOffset: false);
@@ -1459,144 +1461,177 @@ class _BuyAnimalState extends State<BuyAnimal>
       padding: EdgeInsets.only(left: 8.0, right: 8, bottom: 4),
       child: Stack(
         children: [
-          GestureDetector(
-            onTap: () {
-              return Navigator.of(context).push(PageRouteBuilder(
-                opaque: true,
-                pageBuilder: (BuildContext context, _, __) =>
-                    StatefulBuilder(builder: (context, setState) {
-                  return Column(
-                    children: [
-                      CarouselSlider(
-                        options: CarouselOptions(
-                          height: MediaQuery.of(context).size.height * 0.9,
-                          viewportFraction: 1.0,
-                          initialPage: 0,
-                          enableInfiniteScroll: true,
-                          reverse: false,
-                          autoPlay: true,
-                          autoPlayInterval: Duration(seconds: 4),
-                          autoPlayAnimationDuration:
-                              Duration(milliseconds: 800),
-                          autoPlayCurve: Curves.fastOutSlowIn,
-                          enlargeCenterPage: true,
-                          scrollDirection: Axis.horizontal,
-                          onPageChanged: (index, reason) => setState(() {
-                            _current = index;
-                          }),
-                        ),
-                        items: _images.map((i) {
-                          return InteractiveViewer(
-                            boundaryMargin: const EdgeInsets.all(20.0),
-                            minScale: 0.1,
-                            maxScale: 1.6,
-                            child: CachedNetworkImage(
-                              imageUrl: '$i',
-                              progressIndicatorBuilder:
-                                  (context, url, downloadProgress) => Center(
-                                child: CircularProgressIndicator(
-                                    value: downloadProgress.progress),
-                              ),
-                              errorWidget: (context, url, error) =>
-                                  Icon(Icons.error, size: 60),
-                            ),
-
-                            // Image.network(
-                            //   '$i',
-                            //   loadingBuilder: (BuildContext context,
-                            //       Widget child,
-                            //       ImageChunkEvent loadingProgress) {
-                            //     if (loadingProgress == null) return child;
-                            //     return Center(
-                            //       child: CircularProgressIndicator(
-                            //         value: loadingProgress.expectedTotalBytes !=
-                            //                 null
-                            //             ? loadingProgress
-                            //                     .cumulativeBytesLoaded /
-                            //                 loadingProgress.expectedTotalBytes
-                            //             : null,
-                            //       ),
-                            //     );
-                            //   },
-                            //   errorBuilder: (BuildContext context,
-                            //       Object exception, StackTrace stackTrace) {
-                            //     return Center(
-                            //       child: Icon(
-                            //         Icons.error,
-                            //         size: 60,
-                            //       ),
-                            //     );
-                            //   },
-                            // ),
-                          );
-                        }).toList(),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: _images.map((url) {
-                          int indexData = _images.indexOf(url);
-                          return Container(
-                            width: 8.0,
-                            height: 8.0,
-                            margin: EdgeInsets.symmetric(
-                                vertical: 10.0, horizontal: 2.0),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: _current == indexData
-                                  ? Color.fromRGBO(255, 255, 255, 1)
-                                  : Color.fromRGBO(255, 255, 255, 0.4),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ],
-                  );
-                }),
-              ));
+          WillPopScope(
+            onWillPop: () async {
+              if (_videoController != null) {
+                _videoController.pause();
+                return true;
+              } else
+                return true;
             },
-            child: Container(
-              height: 200.0,
-              child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8.0),
-                  child: CachedNetworkImage(
-                    imageUrl: _images[0],
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    progressIndicatorBuilder:
-                        (context, url, downloadProgress) => Center(
-                      child: Image.asset(
-                        'assets/images/loader.gif',
-                        height: 80,
-                        width: 80,
-                      ),
-                    ),
-                    errorWidget: (context, url, error) => Icon(
-                      Icons.error,
-                      size: 80,
-                    ),
-                  )
+            child: GestureDetector(
+              onTap: () async {
+                if (_videoController != null) _videoController.dispose();
+                if (_list[index]['image1'].isEmpty &&
+                    _list[index]['image2'].isEmpty &&
+                    _list[index]['image3'].isEmpty &&
+                    _list[index]['image4'].isEmpty) {
+                  pr = new ProgressDialog(context,
+                      type: ProgressDialogType.Normal, isDismissible: false);
 
-                  // Image.network(
-                  //   _images[0],
-                  //   fit: BoxFit.cover,
-                  //   width: double.infinity,
-                  //   loadingBuilder: (
-                  //     BuildContext context,
-                  //     Widget child,
-                  //     ImageChunkEvent loadingProgress,
-                  //   ) {
-                  //     if (loadingProgress == null) return child;
-                  //     return Center(
-                  //       child: CircularProgressIndicator(
-                  //         value: loadingProgress.expectedTotalBytes != null
-                  //             ? loadingProgress.cumulativeBytesLoaded /
-                  //                 loadingProgress.expectedTotalBytes
-                  //             : null,
-                  //       ),
-                  //     );
-                  //   },
-                  // ),
-                  ),
+                  pr.style(
+                      message: 'video_loading_message'.tr,
+                      messageTextStyle:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w500));
+                  pr.show();
+
+                  if (_videoController != null) _videoController.dispose();
+
+                  _videoController =
+                      VideoPlayerController.network(_list[index]['video']);
+                  await _videoController.initialize();
+                  _videoController.setLooping(false);
+                  _videoController.play();
+                  pr.hide();
+                }
+
+                return Navigator.of(context).push(PageRouteBuilder(
+                  opaque: true,
+                  pageBuilder: (BuildContext context, _, __) =>
+                      StatefulBuilder(builder: (context, setState) {
+                    return Column(
+                      children: [
+                        CarouselSlider(
+                          options: CarouselOptions(
+                            height: MediaQuery.of(context).size.height * 0.9,
+                            viewportFraction: 1.0,
+                            initialPage: 0,
+                            enableInfiniteScroll: true,
+                            reverse: false,
+                            autoPlay: true,
+                            autoPlayInterval: Duration(seconds: 4),
+                            autoPlayAnimationDuration:
+                                Duration(milliseconds: 800),
+                            autoPlayCurve: Curves.fastOutSlowIn,
+                            enlargeCenterPage: true,
+                            scrollDirection: Axis.horizontal,
+                            onPageChanged: (index, reason) => setState(() {
+                              _current = index;
+                            }),
+                          ),
+                          items: _images.map((i) {
+                            return InteractiveViewer(
+                              boundaryMargin: const EdgeInsets.all(20.0),
+                              minScale: 0.1,
+                              maxScale: 1.6,
+                              child: CachedNetworkImage(
+                                imageUrl: '$i',
+                                progressIndicatorBuilder:
+                                    (context, url, downloadProgress) => Center(
+                                  child: CircularProgressIndicator(
+                                      value: downloadProgress.progress),
+                                ),
+                                errorWidget: (context, url, error) =>
+                                    Icon(Icons.error, size: 60),
+                              ),
+
+                              // Image.network(
+                              //   '$i',
+                              //   loadingBuilder: (BuildContext context,
+                              //       Widget child,
+                              //       ImageChunkEvent loadingProgress) {
+                              //     if (loadingProgress == null) return child;
+                              //     return Center(
+                              //       child: CircularProgressIndicator(
+                              //         value: loadingProgress.expectedTotalBytes !=
+                              //                 null
+                              //             ? loadingProgress
+                              //                     .cumulativeBytesLoaded /
+                              //                 loadingProgress.expectedTotalBytes
+                              //             : null,
+                              //       ),
+                              //     );
+                              //   },
+                              //   errorBuilder: (BuildContext context,
+                              //       Object exception, StackTrace stackTrace) {
+                              //     return Center(
+                              //       child: Icon(
+                              //         Icons.error,
+                              //         size: 60,
+                              //       ),
+                              //     );
+                              //   },
+                              // ),
+                            );
+                          }).toList(),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: _images.map((url) {
+                            int indexData = _images.indexOf(url);
+                            return Container(
+                              width: 8.0,
+                              height: 8.0,
+                              margin: EdgeInsets.symmetric(
+                                  vertical: 10.0, horizontal: 2.0),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: _current == indexData
+                                    ? Color.fromRGBO(255, 255, 255, 1)
+                                    : Color.fromRGBO(255, 255, 255, 0.4),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    );
+                  }),
+                ));
+              },
+              child: Container(
+                height: 200.0,
+                child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8.0),
+                    child: CachedNetworkImage(
+                      imageUrl: _images[0],
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      progressIndicatorBuilder:
+                          (context, url, downloadProgress) => Center(
+                        child: Image.asset(
+                          'assets/images/loader.gif',
+                          height: 80,
+                          width: 80,
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => Icon(
+                        Icons.error,
+                        size: 80,
+                      ),
+                    )
+
+                    // Image.network(
+                    //   _images[0],
+                    //   fit: BoxFit.cover,
+                    //   width: double.infinity,
+                    //   loadingBuilder: (
+                    //     BuildContext context,
+                    //     Widget child,
+                    //     ImageChunkEvent loadingProgress,
+                    //   ) {
+                    //     if (loadingProgress == null) return child;
+                    //     return Center(
+                    //       child: CircularProgressIndicator(
+                    //         value: loadingProgress.expectedTotalBytes != null
+                    //             ? loadingProgress.cumulativeBytesLoaded /
+                    //                 loadingProgress.expectedTotalBytes
+                    //             : null,
+                    //       ),
+                    //     );
+                    //   },
+                    // ),
+                    ),
+              ),
             ),
           ),
           Positioned(

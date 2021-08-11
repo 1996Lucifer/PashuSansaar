@@ -96,10 +96,9 @@ class ReusableWidgets {
     });
   }
 
- static descriptionText(_list) {
-    String animalBreedCheck = (_list.animalBreed == 'not_known'.tr)
-        ? ""
-        : _list.animalBreed;
+  static descriptionText(_list) {
+    String animalBreedCheck =
+        (_list.animalBreed == 'not_known'.tr) ? "" : _list.animalBreed;
     String animalTypeCheck = (_list.animalType >= 5)
         ? intToAnimalOtherTypeMapping[_list.animalType]
         : intToAnimalTypeMapping[_list.animalType];
@@ -108,17 +107,16 @@ class ReusableWidgets {
 
     if (_list.animalType >= 3) {
       desc =
-      'ये ${animalBreedCheck ?? ''} ${animalTypeCheck ?? ''} ${_list.animalAge} साल ${(_list.animalType == 6 || _list.animalType == 8 || _list.animalType == 10) ? " की" : "का"} है। ';
+          'ये ${animalBreedCheck ?? ''} ${animalTypeCheck ?? ''} ${_list.animalAge} साल ${(_list.animalType == 6 || _list.animalType == 8 || _list.animalType == 10) ? " की" : "का"} है। ';
     } else {
       desc =
-      'ये $animalBreedCheck $animalTypeCheck ${_list.animalAge} साल की है। ';
+          'ये $animalBreedCheck $animalTypeCheck ${_list.animalAge} साल की है। ';
       if (_list.recentBayatTime != null) {
         desc = desc +
             'यह ${intToRecentBayaatTime[_list.recentBayatTime]} ब्यायी है। ';
       }
       if (_list.pregnantTime != null) {
-        desc =
-            desc + 'यह अभी ${intToPregnantTime[_list.pregnantTime]} है। ';
+        desc = desc + 'यह अभी ${intToPregnantTime[_list.pregnantTime]} है। ';
       }
       if (_list.animalMilkCapacity != null) {
         desc = desc +
@@ -128,7 +126,7 @@ class ReusableWidgets {
     return desc + (_list.moreInfo ?? "");
   }
 
- static Padding animalDescriptionMethod(_list) {
+  static Padding animalDescriptionMethod(_list) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Text(
@@ -302,5 +300,11 @@ class ReusableWidgets {
       ),
     );
   }
-}
 
+  static String printDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, "0");
+    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
+    String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
+    return "$twoDigitMinutes:$twoDigitSeconds";
+  }
+}

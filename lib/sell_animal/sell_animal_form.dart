@@ -21,12 +21,13 @@ import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:intl/intl.dart';
 import 'dart:math' as math;
 import 'package:mime/mime.dart';
-
 import 'sell_animal_controller.dart';
+import 'package:video_compress/video_compress.dart';
+import 'package:video_player/video_player.dart';
 
 class SellAnimalForm extends StatefulWidget {
-  String userName;
-  String userMobileNumber;
+  final String userName;
+  final String userMobileNumber;
   SellAnimalForm({
     Key key,
     @required this.userName,
@@ -45,22 +46,28 @@ class _SellAnimalFormState extends State<SellAnimalForm>
   Color backgroundColor = Colors.red[50];
   bool _showData = false, _isLoading = false;
   SharedPreferences prefs;
-  String desc = '', fileUrl = '';
+  String desc = '';
   File filePath;
-  String uniqueId;
+  String videoPath = '';
+  VideoPlayerController _videoController, _videoController1;
+  bool _isInitialised = false;
+  Subscription _subscription;
+  double _progressState = 0;
 
   Map<String, dynamic> imagesUpload = {
     'Image1': {},
     'Image2': {},
     'Image3': {},
-    'Image4': {}
+    'Image4': {},
+    'video': {}
   };
 
   Map<String, dynamic> imagesFileUpload = {
     'Image1': '',
     'Image2': '',
     'Image3': '',
-    'Image4': ''
+    'Image4': '',
+    'video': ''
   };
 
   TextEditingController _controller;
@@ -78,9 +85,21 @@ class _SellAnimalFormState extends State<SellAnimalForm>
   @override
   void initState() {
     _controller = TextEditingController();
-    uniqueId = ReusableWidgets.randomIDGenerator();
+    _subscription = VideoCompress.compressProgress$.subscribe((progress) {
+      setState(() {
+        _progressState = progress;
+      });
+    });
 
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _subscription.unsubscribe();
+    _videoController.dispose();
+    _videoController1.dispose();
   }
 
   String _formatNumber(String s) =>
@@ -93,56 +112,87 @@ class _SellAnimalFormState extends State<SellAnimalForm>
       if (_picker == null) {
         _picker = ImagePicker();
       }
-      var file = await _picker.getImage(source: ImageSource.camera);
 
-      switch (file) {
-        case null:
-          return null;
-          break;
-        default:
-          await getFileSize(file.path, 1).then((val) async {
-            double size = double.parse(val.split(' ')[0]);
-            String type = val.split(' ')[1];
-            File compressedFile;
+      if (ReusableWidgets.convertStringToInt(index) == 5) {
+        var pickedFile = await _picker.getVideo(
+            source: ImageSource.camera,
+            preferredCameraDevice: CameraDevice.rear,
+            maxDuration: Duration(minutes: 1));
 
-            switch (type.compareTo('KB')) {
-              case 0:
-                if (size <= 300.0) {
-                  compressedFile = await FlutterNativeImage.compressImage(
-                      file.path,
-                      quality: 100);
-                } else if (size > 300.0 && size <= 600.0) {
-                  compressedFile = await FlutterNativeImage.compressImage(
-                      file.path,
-                      quality: 85);
-                } else if (size > 600.0 && size <= 1000.0) {
-                  compressedFile = await FlutterNativeImage.compressImage(
-                      file.path,
-                      quality: 75);
-                } else {
-                  compressedFile = await FlutterNativeImage.compressImage(
-                      file.path,
-                      quality: 65);
-                }
-                break;
-              case 1:
-                compressedFile = await FlutterNativeImage.compressImage(
-                    file.path,
-                    quality: 60);
-                break;
-            }
-            final mimeType = lookupMimeType(file.path);
-
+        switch (pickedFile) {
+          case null:
+            return null;
+            break;
+          default:
+            File file = File(pickedFile.path);
             setState(() {
-              imagesFileUpload['Image$index'] = compressedFile.path;
-              imagesUpload['Image$index'] = {
-                "fileName": "Image$index",
-                "fileType": mimeType
-              };
+              videoPath = file.path;
             });
 
-            // await uploadFile(compressedFile, index);
-          });
+            _videoController = VideoPlayerController.file(File(videoPath));
+
+            // _videoController.addListener(() {
+            //   setState(() {});
+            // });
+            _videoController.setLooping(false);
+            _videoController.initialize().then((_) {
+              setState(() {
+                _isInitialised = true;
+              });
+            });
+
+            _videoController.play();
+        }
+      } else {
+        var file = await _picker.getImage(source: ImageSource.camera);
+
+        switch (file) {
+          case null:
+            return null;
+            break;
+          default:
+            await getFileSize(file.path, 1).then((val) async {
+              double size = double.parse(val.split(' ')[0]);
+              String type = val.split(' ')[1];
+              File compressedFile;
+
+              switch (type.compareTo('KB')) {
+                case 0:
+                  if (size <= 300.0) {
+                    compressedFile = await FlutterNativeImage.compressImage(
+                        file.path,
+                        quality: 100);
+                  } else if (size > 300.0 && size <= 600.0) {
+                    compressedFile = await FlutterNativeImage.compressImage(
+                        file.path,
+                        quality: 85);
+                  } else if (size > 600.0 && size <= 1000.0) {
+                    compressedFile = await FlutterNativeImage.compressImage(
+                        file.path,
+                        quality: 75);
+                  } else {
+                    compressedFile = await FlutterNativeImage.compressImage(
+                        file.path,
+                        quality: 65);
+                  }
+                  break;
+                case 1:
+                  compressedFile = await FlutterNativeImage.compressImage(
+                      file.path,
+                      quality: 60);
+                  break;
+              }
+              final mimeType = lookupMimeType(file.path);
+
+              setState(() {
+                imagesFileUpload['Image$index'] = compressedFile.path;
+                imagesUpload['Image$index'] = {
+                  "fileName": "Image$index",
+                  "fileType": mimeType
+                };
+              });
+            });
+        }
       }
     } catch (e) {}
   }
@@ -163,57 +213,84 @@ class _SellAnimalFormState extends State<SellAnimalForm>
       if (_picker == null) {
         _picker = ImagePicker();
       }
-      var file = await _picker.getImage(source: ImageSource.gallery);
 
-      switch (file) {
-        case null:
-          return null;
-          break;
-        default:
-          await getFileSize(file.path, 1).then((val) async {
-            double size = double.parse(val.split(' ')[0]);
-            String type = val.split(' ')[1];
-            File compressedFile;
+      if (ReusableWidgets.convertStringToInt(index) == 5) {
+        var pickedFile = await _picker.getVideo(
+            source: ImageSource.gallery,
+            preferredCameraDevice: CameraDevice.rear,
+            maxDuration: Duration(minutes: 1));
 
-            switch (type.compareTo('KB')) {
-              case 0:
-                if (size <= 300.0) {
-                  compressedFile = await FlutterNativeImage.compressImage(
-                      file.path,
-                      quality: 100);
-                } else if (size > 300.0 && size <= 600.0) {
-                  compressedFile = await FlutterNativeImage.compressImage(
-                      file.path,
-                      quality: 85);
-                } else if (size > 600.0 && size <= 1000.0) {
-                  compressedFile = await FlutterNativeImage.compressImage(
-                      file.path,
-                      quality: 75);
-                } else {
-                  compressedFile = await FlutterNativeImage.compressImage(
-                      file.path,
-                      quality: 65);
-                }
-                break;
-              case 1:
-                compressedFile = await FlutterNativeImage.compressImage(
-                    file.path,
-                    quality: 60);
-                break;
-            }
-
-            final mimeType = lookupMimeType(file.path);
-
+        switch (pickedFile) {
+          case null:
+            return null;
+            break;
+          default:
+            File file = File(pickedFile.path);
             setState(() {
-              imagesFileUpload['Image$index'] = compressedFile.path;
-              imagesUpload['Image$index'] = {
-                "fileName": "Image$index",
-                "fileType": mimeType
-              };
+              videoPath = file.path;
             });
 
-            // await uploadFile(compressedFile, index);
-          });
+            _videoController = VideoPlayerController.file(File(videoPath));
+            _videoController.setLooping(false);
+            _videoController.initialize().then((_) {
+              setState(() {
+                _isInitialised = true;
+              });
+            });
+
+            _videoController.play();
+        }
+      } else {
+        var file = await _picker.getImage(source: ImageSource.gallery);
+
+        switch (file) {
+          case null:
+            return null;
+            break;
+          default:
+            await getFileSize(file.path, 1).then((val) async {
+              double size = double.parse(val.split(' ')[0]);
+              String type = val.split(' ')[1];
+              File compressedFile;
+
+              switch (type.compareTo('KB')) {
+                case 0:
+                  if (size <= 300.0) {
+                    compressedFile = await FlutterNativeImage.compressImage(
+                        file.path,
+                        quality: 100);
+                  } else if (size > 300.0 && size <= 600.0) {
+                    compressedFile = await FlutterNativeImage.compressImage(
+                        file.path,
+                        quality: 85);
+                  } else if (size > 600.0 && size <= 1000.0) {
+                    compressedFile = await FlutterNativeImage.compressImage(
+                        file.path,
+                        quality: 75);
+                  } else {
+                    compressedFile = await FlutterNativeImage.compressImage(
+                        file.path,
+                        quality: 65);
+                  }
+                  break;
+                case 1:
+                  compressedFile = await FlutterNativeImage.compressImage(
+                      file.path,
+                      quality: 60);
+                  break;
+              }
+
+              final mimeType = lookupMimeType(file.path);
+
+              setState(() {
+                imagesFileUpload['Image$index'] = compressedFile.path;
+                imagesUpload['Image$index'] = {
+                  "fileName": "Image$index",
+                  "fileType": mimeType
+                };
+              });
+            });
+        }
       }
     } catch (e) {}
   }
@@ -689,6 +766,169 @@ class _SellAnimalFormState extends State<SellAnimalForm>
         ],
       );
 
+  _videoStructure(width) {
+    return Padding(
+        padding: EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+        child: GestureDetector(
+          onTap: () => chooseOption('4'),
+          child: Stack(
+            children: [
+              DottedBorder(
+                strokeWidth: 2,
+                borderType: BorderType.RRect,
+                radius: Radius.circular(12),
+                padding: EdgeInsets.all(6),
+                color: Colors.grey[500],
+                child: ClipRRect(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(12),
+                    ),
+                    child: Container(
+                      height: 200,
+                      width: width * 0.9,
+                      // color: Colors.amber,
+                      child: Visibility(
+                          visible: _videoController == null && !_isInitialised,
+                          child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Opacity(
+                                  opacity: 0.5,
+                                  child: Image.asset(
+                                    'assets/images/photouploadside.png',
+                                    height: 100,
+                                  ),
+                                ),
+                                RaisedButton(
+                                  color: appPrimaryColor,
+                                  onPressed: () => chooseOption('5'),
+                                  child: Text(
+                                    'वीडियो चुने',
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 16),
+                                  ),
+                                )
+                              ]),
+                          replacement: Visibility(
+                            visible: _isInitialised,
+                            child: Stack(
+                              alignment: Alignment.bottomCenter,
+                              children: [
+                                Container(
+                                    width: width * 0.9,
+                                    child: Stack(
+                                      alignment: Alignment.bottomCenter,
+                                      children: [
+                                        VideoPlayer(_videoController),
+                                      ],
+                                    )),
+                                Visibility(
+                                  visible: _isInitialised,
+                                  child: Positioned(
+                                    top: -1,
+                                    right: -1,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          videoPath = '';
+                                          _videoController.pause();
+                                          _isInitialised = false;
+                                        });
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Icon(Icons.cancel_rounded,
+                                            color: appPrimaryColor, size: 30),
+                                      ),
+                                    ),
+                                  ),
+                                  replacement: SizedBox.shrink(),
+                                ),
+                                _videoController == null
+                                    ? SizedBox.shrink()
+                                    : ValueListenableBuilder(
+                                        valueListenable: _videoController,
+                                        builder: (context,
+                                                VideoPlayerValue value,
+                                                child) =>
+                                            Row(
+                                          children: [
+                                            IconButton(
+                                                icon: Icon(
+                                                  _videoController
+                                                          .value.isPlaying
+                                                      ? Icons.pause
+                                                      : Icons.play_arrow,
+                                                ),
+                                                onPressed: () => setState(() {
+                                                      if (!_videoController
+                                                              .value
+                                                              .isPlaying &&
+                                                          value.position
+                                                                  .compareTo(value
+                                                                      .duration) ==
+                                                              0) {
+                                                        _videoController
+                                                            .initialize();
+                                                      }
+                                                      _videoController
+                                                              .value.isPlaying
+                                                          ? _videoController
+                                                              .pause()
+                                                          : _videoController
+                                                              .play();
+                                                    })),
+                                            Container(
+                                              width: width * 0.5,
+                                              child: VideoProgressIndicator(
+                                                  _videoController,
+                                                  allowScrubbing: true),
+                                            ),
+                                            SizedBox(
+                                              width: 10,
+                                            ),
+                                            Text(
+                                                ReusableWidgets.printDuration(
+                                                        value.position)
+                                                    .toString(),
+                                                style: TextStyle(
+                                                    color: appPrimaryColor))
+                                          ],
+                                        ),
+                                      ),
+                              ],
+                            ),
+                            replacement: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Opacity(
+                                    opacity: 0.5,
+                                    child: Image.asset(
+                                      'assets/images/photouploadside.png',
+                                      height: 100,
+                                    ),
+                                  ),
+                                  RaisedButton(
+                                    color: appPrimaryColor,
+                                    onPressed: () => chooseOption('5'),
+                                    child: Text(
+                                      'वीडियो चुने',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  )
+                                ]),
+                          )),
+                    )),
+              ),
+            ],
+          ),
+        ));
+  }
+
   Padding imageStructure1(double width) => Padding(
         padding: EdgeInsets.symmetric(vertical: 5, horizontal: 30),
         child: GestureDetector(
@@ -982,7 +1222,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
     String xAmzDate,
     String policy,
     String xAmzSignature,
-    fileType,
+    String fileType,
   }) async {
     try {
       dio.FormData data = dio.FormData.fromMap({
@@ -998,10 +1238,10 @@ class _SellAnimalFormState extends State<SellAnimalForm>
         ),
       });
 
-      dio.Response resp = await dio.Dio().post(
-        url,
-        data: data,
-      );
+      dio.Response resp = await dio.Dio().post(url, data: data,
+          onSendProgress: (int send, int total) {
+        print((send / total) * 100);
+      });
 
       print('-=-=-=>>' + resp.toString());
 
@@ -1091,15 +1331,26 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                           'error'.tr,
                           Text('animal_price_error'.tr),
                         );
-                      else if (imagesFileUpload['Image1'].isEmpty &&
-                          imagesFileUpload['Image2'].isEmpty &&
-                          imagesFileUpload['Image3'].isEmpty &&
-                          imagesFileUpload['Image4'].isEmpty)
+                      else if (videoPath.isEmpty)
                         ReusableWidgets.showDialogBox(
                           context,
                           'error'.tr,
-                          Text('animal_image_error'.tr),
+                          Text('animal_video_error'.tr),
                         );
+                      else if (_videoController != null &&
+                          _videoController.value.duration.inSeconds > 60.0)
+                        ReusableWidgets.showDialogBox(
+                            context, 'error'.tr, Text('time_duration'.tr));
+
+                      // else if (imagesFileUpload['Image1'].isEmpty &&
+                      //     imagesFileUpload['Image2'].isEmpty &&
+                      //     imagesFileUpload['Image3'].isEmpty &&
+                      //     imagesFileUpload['Image4'].isEmpty)
+                      //   ReusableWidgets.showDialogBox(
+                      //     context,
+                      //     'error'.tr,
+                      //     Text('animal_image_error'.tr),
+                      //   );
                       else if (([0, 1].contains(constant.animalType
                               .indexOf(animalInfo['animalType']))) &&
                           extraInfoData['alreadyPregnantYesNo'] == null)
@@ -1775,6 +2026,161 @@ class _SellAnimalFormState extends State<SellAnimalForm>
     );
   }
 
+  _sampleVideo() => Padding(
+        padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            RichText(
+              text: TextSpan(
+                text: 'upload_video_text'.tr,
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black),
+                children: <TextSpan>[
+                  TextSpan(
+                      text: 'video_supportive_text'.tr,
+                      style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey[500])),
+                  TextSpan(
+                      text: ' *',
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red)),
+                ],
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
+                _videoController1 = VideoPlayerController.network(
+                  'https://firebasestorage.googleapis.com/v0/b/pashusansaar-6e910.appspot.com/o/sample_video%2Fsample_video.mp4?alt=media&token=77ec82d0-5ce7-4a4b-84d9-a0f65915401b',
+                );
+                _videoController1.setLooping(false);
+                _videoController1.initialize();
+                _videoController1.pause();
+
+                return Navigator.of(context).push(
+                  PageRouteBuilder(
+                    opaque: true,
+                    pageBuilder: (BuildContext context, _, __) => WillPopScope(
+                        onWillPop: () async {
+                          setState(() {
+                            _videoController1.pause();
+                          });
+                          return true;
+                        },
+                        child: StatefulBuilder(
+                            builder: (context, setState) => Stack(
+                                  alignment: AlignmentDirectional.bottomCenter,
+                                  children: [
+                                    Center(
+                                        child: StreamBuilder<Object>(
+                                            stream: null,
+                                            builder: (context, snapshot) {
+                                              return VideoPlayer(
+                                                  _videoController1);
+                                            })),
+                                    _videoController1 == null
+                                        ? SizedBox.shrink()
+                                        : ValueListenableBuilder(
+                                            valueListenable: _videoController1,
+                                            builder: (context,
+                                                    VideoPlayerValue value,
+                                                    child) =>
+                                                Row(
+                                              children: [
+                                                Card(
+                                                  color: Colors.transparent,
+                                                  child: IconButton(
+                                                      icon: Icon(
+                                                        _videoController1
+                                                                .value.isPlaying
+                                                            ? Icons.pause
+                                                            : Icons.play_arrow,
+                                                      ),
+                                                      color: Colors.white,
+                                                      onPressed:
+                                                          () => setState(() {
+                                                                if (!_videoController1
+                                                                        .value
+                                                                        .isPlaying &&
+                                                                    value.position
+                                                                            .compareTo(value.duration) ==
+                                                                        0) {
+                                                                  _videoController1
+                                                                      .initialize();
+                                                                }
+                                                                _videoController1
+                                                                        .value
+                                                                        .isPlaying
+                                                                    ? _videoController1
+                                                                        .pause()
+                                                                    : _videoController1
+                                                                        .play();
+                                                              })),
+                                                ),
+                                                Card(
+                                                  color: Colors.transparent,
+                                                  child: Container(
+                                                    width:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.6,
+                                                    child: VideoProgressIndicator(
+                                                        _videoController1,
+                                                        colors:
+                                                            VideoProgressColors(
+                                                                playedColor:
+                                                                    Colors
+                                                                        .white),
+                                                        allowScrubbing: true),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  width: 10,
+                                                ),
+                                                Card(
+                                                  color: Colors.transparent,
+                                                  child: Padding(
+                                                      padding: const EdgeInsets
+                                                              .symmetric(
+                                                          vertical: 11.0,
+                                                          horizontal: 5),
+                                                      child: Text(
+                                                        ReusableWidgets
+                                                                .printDuration(
+                                                                    value
+                                                                        .position)
+                                                            .toString(),
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 15),
+                                                      )),
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                  ],
+                                ))),
+                  ),
+                );
+              },
+              child: Text('sample_video'.tr,
+                  style: TextStyle(
+                      decoration: TextDecoration.underline,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black)),
+            )
+          ],
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -1819,6 +2225,8 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                   ? animalMilkPerDayCapacity()
                   : SizedBox.shrink(),
               animalPrice(),
+              _sampleVideo(),
+              _videoStructure(width),
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                 child: Row(
@@ -1842,10 +2250,16 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                 ),
               ),
               Row(
-                children: [imageStructure1(width), imageStructure2(width)],
+                children: [
+                  imageStructure1(width),
+                  imageStructure2(width),
+                ],
               ),
               Row(
-                children: [imageStructure3(width), imageStructure4(width)],
+                children: [
+                  imageStructure3(width),
+                  imageStructure4(width),
+                ],
               ),
               extraInfo(),
               Padding(
@@ -1856,22 +2270,6 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                     ? extraINfoData()
                     : moreInfoTextArea(),
               ),
-              // AnimatedOpacity(
-              //   opacity: 1,
-              //   // opacity: _showData ? 1 : 0,
-              //   duration: Duration(seconds: 2),
-              //   child: _showData
-              //       ? Padding(
-              //           padding: const EdgeInsets.symmetric(
-              //               vertical: 4, horizontal: 8),
-              //           child: [0, 1].contains(
-              //             constant.animalType.indexOf(animalInfo['animalType']),
-              //           )
-              //               ? extraINfoData()
-              //               : moreInfoTextArea(),
-              //         )
-              //       : SizedBox.shrink(),
-              // ),
               saveButton(),
             ],
           ),
