@@ -8,6 +8,7 @@ import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Login extends StatefulWidget {
   Login({Key key}) : super(key: key);
@@ -21,10 +22,25 @@ class _LoginState extends State<Login> {
   final LoginController loginController = Get.put(LoginController());
 
   Map<String, String> mobileInfo = {};
+  String languageCode = '', languageCountryCode = '';
   @override
   void initState() {
     super.initState();
+    getLanguageDetail();
     // initialiseFirebaseInstance();
+  }
+
+  getLanguageDetail() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      languageCode = prefs.getString('languageCode') ?? 'hn';
+      languageCountryCode = prefs.getString('languageCountryCode') ?? 'IN';
+      Get.updateLocale(
+        Locale(languageCode, languageCountryCode),
+      );
+    });
+    print(languageCode);
+    print(languageCountryCode);
   }
 
   assignDeviceID() async {

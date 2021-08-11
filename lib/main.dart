@@ -313,7 +313,10 @@ class _MyAppState extends State<MyApp> {
       title: 'PashuSansaar',
       debugShowCheckedModeBanner: false,
       translations: Messages(), // translations
-      locale: Locale(languageCode ?? 'hn', languageCountryCode ?? 'IN'),
+      locale: Locale(
+        languageCode,
+        languageCountryCode,
+      ),
       fallbackLocale: Locale('hn', 'IN'),
       theme: ThemeData(
         fontFamily: 'Mukta',

@@ -62,28 +62,28 @@ class _SplashScreenState extends State<SplashScreen> {
   //   }
   // }
 
-  _getLegacyUser(prefs) async {
-    LegacyUserModel legacyUserData = _legacyUserController.getLegacyUserData(
-      number: FirebaseAuth.instance.currentUser.phoneNumber,
-      legacyId: FirebaseAuth.instance.currentUser.uid,
-    );
-    setState(() {
-      prefs.setString('accessToken', legacyUserData.accessToken);
-      prefs.setString('refreshToken', legacyUserData.refreshToken);
-      prefs.setInt('expires', legacyUserData.expires);
-      prefs.setString('userId', legacyUserData.userId);
-      isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
-      isLanguageSelected = prefs.getBool('isLanguageSelected') ?? false;
-      newVersion = prefs.getStringList('newVersion') ?? [];
-      currentVersion = prefs.getStringList('currentVersion') ?? [];
-      prefs.setInt('count', 0);
-    });
-  }
+  // _getLegacyUser(prefs) async {
+  //   LegacyUserModel legacyUserData = _legacyUserController.getLegacyUserData(
+  //     number: FirebaseAuth.instance.currentUser.phoneNumber,
+  //     legacyId: FirebaseAuth.instance.currentUser.uid,
+  //   );
+  //   setState(() {
+  //     prefs.setString('accessToken', legacyUserData.accessToken);
+  //     prefs.setString('refreshToken', legacyUserData.refreshToken);
+  //     prefs.setInt('expires', legacyUserData.expires);
+  //     prefs.setString('userId', legacyUserData.userId);
+  //     isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+  //     isLanguageSelected = prefs.getBool('isLanguageSelected') ?? false;
+  //     newVersion = prefs.getStringList('newVersion') ?? [];
+  //     currentVersion = prefs.getStringList('currentVersion') ?? [];
+  //     prefs.setInt('count', 0);
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
     return SplashScreenView(
-      home: isLoggedIn ? HomeScreen(selectedIndex: 0) : Login(),
+      home: isLoggedIn ? HomeScreen(selectedIndex: 0) : ChooseLanguage(),
       duration: 2000,
       imageSize: 200,
       imageSrc: "assets/images/cow.png",
