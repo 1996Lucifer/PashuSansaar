@@ -23,10 +23,10 @@ class OtpController extends GetxController {
 
     String url = GlobalUrl.baseUrl + GlobalUrl.verifyOtp;
 
-    var response = await Dio().post(url, data: json.encode(payload));
+    try {
+      var response = await Dio().post(url, data: json.encode(payload));
 
-    if (response.data != null) {
-      try {
+      if (response.data != null) {
         var data = response.data;
         if (response.statusCode == 200 || response.statusCode == 201) {
           OtpModel otpData = OtpModel.fromJson(data);
@@ -44,11 +44,11 @@ class OtpController extends GetxController {
           status.value = true;
           return otpData;
         }
-      } catch (e) {
-        status.value = false;
-        print("Exceptions user Login otp _______$e");
-        return '';
       }
+    } catch (e) {
+      status.value = false;
+      print("Exceptions user Login otp _______$e");
+      return '';
     }
   }
 }

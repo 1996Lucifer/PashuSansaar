@@ -95,7 +95,6 @@ class _MyCalledListState extends State<MyCalledList> {
   Row _buildInfowidget(_list) {
     var formatter = intl.NumberFormat('#,##,000');
     return Row(
-      // mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Expanded(
           child: Padding(
@@ -222,7 +221,37 @@ class _MyCalledListState extends State<MyCalledList> {
                               builder: (BuildContext context) {
                                 return i.length > 1000
                                     ? Image.memory(base64Decode('$i'))
-                                    : Image.network('$i');
+                                    : Image.network(
+                                        '$i',
+                                        loadingBuilder: (BuildContext context,
+                                            Widget child,
+                                            ImageChunkEvent loadingProgress) {
+                                          if (loadingProgress == null)
+                                            return child;
+                                          return Center(
+                                            child: CircularProgressIndicator(
+                                              value: loadingProgress
+                                                          .expectedTotalBytes !=
+                                                      null
+                                                  ? loadingProgress
+                                                          .cumulativeBytesLoaded /
+                                                      loadingProgress
+                                                          .expectedTotalBytes
+                                                  : null,
+                                            ),
+                                          );
+                                        },
+                                        errorBuilder: (BuildContext context,
+                                            Object exception,
+                                            StackTrace stackTrace) {
+                                          return Center(
+                                            child: Icon(
+                                              Icons.error,
+                                              size: 60,
+                                            ),
+                                          );
+                                        },
+                                      );
                               },
                             );
                           }).toList(),
@@ -252,14 +281,28 @@ class _MyCalledListState extends State<MyCalledList> {
               },
               child: Container(
                 height: 200.0,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: _images[0].length > 1000
-                          ? MemoryImage(base64.decode(_images[0]))
-                          : NetworkImage(_images[0])),
-                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                  color: Colors.redAccent,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: Image.network(
+                    _images[0],
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    loadingBuilder: (
+                      BuildContext context,
+                      Widget child,
+                      ImageChunkEvent loadingProgress,
+                    ) {
+                      if (loadingProgress == null) return child;
+                      return Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes
+                              : null,
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
@@ -675,6 +718,7 @@ class _MyCalledListState extends State<MyCalledList> {
               : Container(
                   margin: EdgeInsets.all(10),
                   child: ListView.separated(
+                    cacheExtent: 99,
                     itemCount: myCallList.length,
                     separatorBuilder: (context, index) => Divider(),
                     itemBuilder: (context, index) {

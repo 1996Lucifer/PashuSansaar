@@ -43,23 +43,24 @@ class _SplashScreenState extends State<SplashScreen> {
     });
   }
 
-  _checkLegacyUser() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String _userId = prefs.getString('userId') ?? '';
-    String _accessToken = prefs.getString('accessToken') ?? '';
+  // _checkLegacyUser() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   String _userId = prefs.getString('userId') ?? '';
+  //   String _accessToken = prefs.getString('accessToken') ?? '';
+  //   isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
 
-    if (_userId.isEmpty && _accessToken.isEmpty) {
-      _getLegacyUser(prefs);
-    } else {
-      setState(() {
-        isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
-        isLanguageSelected = prefs.getBool('isLanguageSelected') ?? false;
-        newVersion = prefs.getStringList('newVersion') ?? [];
-        currentVersion = prefs.getStringList('currentVersion') ?? [];
-        prefs.setInt('count', 0);
-      });
-    }
-  }
+  //   if (_userId.isEmpty && _accessToken.isEmpty && isLoggedIn) {
+  //     _getLegacyUser(prefs);
+  //   } else {
+  //     setState(() {
+  //       isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+  //       isLanguageSelected = prefs.getBool('isLanguageSelected') ?? false;
+  //       newVersion = prefs.getStringList('newVersion') ?? [];
+  //       currentVersion = prefs.getStringList('currentVersion') ?? [];
+  //       prefs.setInt('count', 0);
+  //     });
+  //   }
+  // }
 
   _getLegacyUser(prefs) async {
     LegacyUserModel legacyUserData = _legacyUserController.getLegacyUserData(
@@ -82,12 +83,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return SplashScreenView(
-      home: isLoggedIn
-          //  &&
-          //         ([0, 1].contains(newVersion[0].compareTo(currentVersion[0]))) &&
-          //         ([0, 1].contains(newVersion[1].compareTo(currentVersion[1])))
-          ? HomeScreen(selectedIndex: 0)
-          : (isLanguageSelected ? Login() : ChooseLanguage()),
+      home: isLoggedIn ? HomeScreen(selectedIndex: 0) : Login(),
       duration: 2000,
       imageSize: 200,
       imageSrc: "assets/images/cow.png",

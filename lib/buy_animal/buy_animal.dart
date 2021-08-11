@@ -2,13 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:core';
-import 'package:another_flushbar/flushbar.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:pashusansaar/buy_animal/buy_animal_model.dart';
 import 'package:pashusansaar/refresh_token/refresh_token_controller.dart';
 import 'package:pashusansaar/seller_contact/seller_contact_controller.dart';
 import 'package:pashusansaar/utils/colors.dart';
 import 'package:pashusansaar/utils/constants.dart';
+import 'package:pashusansaar/utils/global.dart';
 import 'package:pashusansaar/utils/reusable_widgets.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
@@ -25,11 +25,11 @@ import 'package:url_launcher/url_launcher.dart' as UrlLauncher;
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:share/share.dart';
 import 'package:pashusansaar/utils/constants.dart' as constant;
-import 'package:geoflutterfire/geoflutterfire.dart' as geoFire;
 import 'package:path_provider/path_provider.dart';
 import 'dart:ui' as ui;
 import 'package:animations/animations.dart';
-import 'package:pashusansaar/utils/custom_fab.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:pashusansaar/utils/custom_fab/custom_fab.dart';
 
 import 'animal_info_form.dart';
 import 'buy_animal_controller.dart';
@@ -57,7 +57,6 @@ class BuyAnimal extends StatefulWidget {
 class _BuyAnimalState extends State<BuyAnimal>
     with AutomaticKeepAliveClientMixin {
   var formatter = intl.NumberFormat('#,##,000');
-  final geo = geoFire.Geoflutterfire();
 
   int perPage = 10,
       _index = 0,
@@ -84,7 +83,7 @@ class _BuyAnimalState extends State<BuyAnimal>
   TextEditingController _locationController = TextEditingController();
   ScrollController _scrollController =
       ScrollController(keepScrollOffset: false);
-  bool _isCardVisible = false, _isLoadingScreen = false;
+  bool _isLoadingScreen = false;
   File fileUrl;
   final SellerContactController sellerContactController =
       Get.put(SellerContactController());
@@ -138,6 +137,11 @@ class _BuyAnimalState extends State<BuyAnimal>
         }
       }
     } catch (e) {
+      ReusableWidgets.loggerFunction(
+          fileName: 'buy_animal_refreshToken',
+          error: e.toString(),
+          myNum: widget.userMobileNumber,
+          userId: prefs.getString('userId'));
       ReusableWidgets.showDialogBox(
         context,
         'warning'.tr,
@@ -165,10 +169,15 @@ class _BuyAnimalState extends State<BuyAnimal>
 
       setState(() {
         widget.animalInfo = _temp;
-        // _isCardVisible = widget.animalInfo.length % 5 == 0;
+        // isCardVisible = widget.animalInfo.length % 5 == 0;
         prefs.setInt('page', data.page);
       });
     } catch (e) {
+      ReusableWidgets.loggerFunction(
+          fileName: 'buy_animal',
+          error: e.toString(),
+          myNum: widget.userMobileNumber,
+          userId: prefs.getString('userId'));
       ReusableWidgets.showDialogBox(
         context,
         'warning'.tr,
@@ -200,7 +209,7 @@ class _BuyAnimalState extends State<BuyAnimal>
 
   _getInitialData() async {
     Future.delayed(Duration(seconds: 7)).then((value) => setState(() {
-          _isCardVisible = widget.animalInfo.length % 5 == 0;
+          isCardVisible = widget.animalInfo.length % 25 == 0;
         }));
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -540,6 +549,111 @@ class _BuyAnimalState extends State<BuyAnimal>
         ),
       );
 
+  // Widget _postBuyerWidget() {
+  //   return isCardVisible == null
+  //       ? SizedBox.shrink()
+  //       : !isCardVisible
+  //           ? CustomFABWidget(
+  //               userMobileNumber: widget.userMobileNumber,
+  //               userName: widget.userName,
+  //             )
+  //           : Padding(
+  //               padding: EdgeInsets.all(10),
+  //               child: OpenContainer(
+  //                 closedElevation: 0,
+  //                 transitionDuration: Duration(seconds: 2),
+  //                 openBuilder: (context, _) => AnimalInfoForm(
+  //                   userMobileNumber: widget.userMobileNumber,
+  //                   userName: widget.userName,
+  //                 ),
+  //                 closedShape: RoundedRectangleBorder(
+  //                   borderRadius: BorderRadius.all(
+  //                     Radius.circular(10.0),
+  //                   ),
+  //                 ),
+  //                 closedColor: Theme.of(context).primaryColor,
+  //                 closedBuilder: (context, openContainer) => Container(
+  //                   // key: UniqueKey(),
+  //                   height: 220,
+  //                   width: 150,
+  //                   child: Padding(
+  //                     padding: const EdgeInsets.only(
+  //                       left: 8.0,
+  //                       right: 8,
+  //                     ),
+  //                     child: SingleChildScrollView(
+  //                       child: Column(
+  //                         crossAxisAlignment: CrossAxisAlignment.start,
+  //                         children: [
+  //                           Align(
+  //                             alignment: Alignment.bottomRight,
+  //                             child: RawMaterialButton(
+  //                               onPressed: () => setState(() {
+  //                                 isCardVisible = false;
+  //                               }),
+  //                               elevation: 2.0,
+  //                               fillColor: Colors.white,
+  //                               child: Icon(
+  //                                 Icons.close,
+  //                                 size: 20.0,
+  //                                 color: appPrimaryColor,
+  //                               ),
+  //                               shape: CircleBorder(),
+  //                               constraints: BoxConstraints(
+  //                                 minWidth: 30,
+  //                                 minHeight: 30,
+  //                               ),
+  //                             ),
+  //                           ),
+  //                           Padding(
+  //                             padding: const EdgeInsets.only(left: 12.0),
+  //                             child: Text(
+  //                               'कौन सा पशु खरीदना चाहते है ?',
+  //                               style: TextStyle(
+  //                                 color: Colors.white,
+  //                                 fontWeight: FontWeight.bold,
+  //                                 fontSize: 22,
+  //                               ),
+  //                             ),
+  //                           ),
+  //                           SizedBox(
+  //                             width: double.infinity,
+  //                             child: RaisedButton(
+  //                               shape: OutlineInputBorder(
+  //                                   borderRadius: BorderRadius.circular(10)),
+  //                               color: Colors.white,
+  //                               onPressed: null,
+  //                               disabledColor: Colors.white,
+  //                               disabledTextColor: appPrimaryColor,
+  //                               child: Row(
+  //                                   textDirection: TextDirection.rtl,
+  //                                   mainAxisAlignment:
+  //                                       MainAxisAlignment.spaceBetween,
+  //                                   children: [
+  //                                     Icon(
+  //                                       Icons.arrow_forward_ios_sharp,
+  //                                       color: appPrimaryColor,
+  //                                     ),
+  //                                     Text(
+  //                                       'हमें बताये',
+  //                                       style: TextStyle(
+  //                                         color: appPrimaryColor,
+  //                                         fontSize: 20,
+  //                                         fontWeight: FontWeight.bold,
+  //                                       ),
+  //                                     ),
+  //                                   ]),
+  //                             ),
+  //                           ),
+  //                         ],
+  //                       ),
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ),
+  //             );
+  // }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -553,15 +667,24 @@ class _BuyAnimalState extends State<BuyAnimal>
         key: previewContainer,
         child: Scaffold(
           backgroundColor: Colors.grey[100],
-          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+          // floatingActionButtonLocation: CustomFloatingActionButtonLocation(
+          //   FloatingActionButtonLocation.startDocked,
+          //   8,
+          //   -8,
+          // ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
           floatingActionButton: AnimatedOpacity(
-            opacity: !_isCardVisible ? 1.0 : 0.0,
-            duration: Duration(seconds: 3),
-            child: CustomFABWidget(
-              userMobileNumber: widget.userMobileNumber,
-              userName: widget.userName,
+            opacity: isCardVisible != null && !isCardVisible ? 1.0 : 0.0,
+            duration: Duration(seconds: 5),
+            child: Visibility(
+              visible: isCardVisible != null && !isCardVisible,
+              child: CustomFABWidget(
+                userMobileNumber: widget.userMobileNumber,
+                userName: widget.userName,
+              ),
             ),
           ),
+
           body: Stack(
             children: [
               widget.animalInfo == null || widget.animalInfo.length == 0
@@ -580,6 +703,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                         alignment: Alignment.bottomCenter,
                         children: [
                           ListView.builder(
+                            cacheExtent: 9999,
                             key: ObjectKey(widget.animalInfo[0]),
                             padding: EdgeInsets.only(bottom: 60),
                             controller: _scrollController,
@@ -592,9 +716,7 @@ class _BuyAnimalState extends State<BuyAnimal>
                                 return Column(
                                   children: [
                                     SizedBox(height: 10),
-                                    Center(
-                                      child: CircularProgressIndicator(),
-                                    ),
+                                    ReusableWidgets.tinyLoader(),
                                   ],
                                 );
                               }
@@ -615,7 +737,8 @@ class _BuyAnimalState extends State<BuyAnimal>
                                       _buildInfowidget(index),
                                       _distanceTimeMethod(index),
                                       _animalImageWidget(index),
-                                      _animalDescriptionMethod(index),
+                                      ReusableWidgets.animalDescriptionMethod(
+                                          widget.animalInfo[index]),
                                       Container(
                                           decoration: BoxDecoration(
                                             color: Colors.grey[100],
@@ -798,27 +921,28 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                       : ScaffoldMessenger.of(
                                                               context)
                                                           .showSnackBar(
-                                                              SnackBar(
-                                                          content: Text(
-                                                              '$myNum is not present in Whatsapp'),
-                                                          duration: Duration(
-                                                              milliseconds:
-                                                                  300),
-                                                          padding: EdgeInsets
-                                                              .symmetric(
-                                                                  horizontal:
-                                                                      8),
-                                                          behavior:
-                                                              SnackBarBehavior
-                                                                  .floating,
-                                                          shape:
-                                                              RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        10.0),
+                                                          SnackBar(
+                                                            content: Text(
+                                                                '$myNum is not present in Whatsapp'),
+                                                            duration: Duration(
+                                                                milliseconds:
+                                                                    300),
+                                                            padding: EdgeInsets
+                                                                .symmetric(
+                                                                    horizontal:
+                                                                        8),
+                                                            behavior:
+                                                                SnackBarBehavior
+                                                                    .floating,
+                                                            shape:
+                                                                RoundedRectangleBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          10.0),
+                                                            ),
                                                           ),
-                                                        ));
+                                                        );
                                                 },
                                                 icon: FaIcon(
                                                     FontAwesomeIcons.whatsapp,
@@ -842,119 +966,16 @@ class _BuyAnimalState extends State<BuyAnimal>
                             },
                           ),
                           Positioned(
-                            bottom: 0,
-                            right: 0,
+                            bottom: 10,
+                            left: 10,
                             child: AnimatedOpacity(
-                              opacity: _isCardVisible ? 1.0 : 0.0,
+                              opacity: isCardVisible != null && isCardVisible
+                                  ? 1.0
+                                  : 0.0,
                               duration: Duration(seconds: 3),
                               child: Visibility(
-                                visible: _isCardVisible,
-                                child: Padding(
-                                  padding: EdgeInsets.all(10),
-                                  child: OpenContainer(
-                                    closedElevation: 0,
-                                    transitionDuration: Duration(seconds: 2),
-                                    openBuilder: (context, _) => AnimalInfoForm(
-                                      userMobileNumber: widget.userMobileNumber,
-                                      userName: widget.userName,
-                                    ),
-                                    closedShape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.all(
-                                        Radius.circular(10.0),
-                                      ),
-                                    ),
-                                    closedColor: Theme.of(context).primaryColor,
-                                    closedBuilder: (context, openContainer) =>
-                                        Container(
-                                      height: 220,
-                                      width: 150,
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(
-                                          left: 8.0,
-                                          right: 8,
-                                        ),
-                                        child: SingleChildScrollView(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Align(
-                                                alignment:
-                                                    Alignment.bottomRight,
-                                                child: RawMaterialButton(
-                                                  onPressed: () => setState(() {
-                                                    _isCardVisible = false;
-                                                  }),
-                                                  elevation: 2.0,
-                                                  fillColor: Colors.white,
-                                                  child: Icon(
-                                                    Icons.close,
-                                                    size: 20.0,
-                                                    color: appPrimaryColor,
-                                                  ),
-                                                  shape: CircleBorder(),
-                                                  constraints: BoxConstraints(
-                                                      minWidth: 30,
-                                                      minHeight: 30),
-                                                ),
-                                              ),
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                    left: 12.0),
-                                                child: Text(
-                                                  'whichAnimal'.tr,
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 22,
-                                                  ),
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                  width: double.infinity,
-                                                  child: RaisedButton(
-                                                    shape: OutlineInputBorder(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(10)),
-                                                    color: Colors.white,
-                                                    onPressed: null,
-                                                    disabledColor: Colors.white,
-                                                    disabledTextColor:
-                                                        appPrimaryColor,
-                                                    child: Row(
-                                                        textDirection:
-                                                            TextDirection.rtl,
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                        children: [
-                                                          Icon(
-                                                            Icons
-                                                                .arrow_forward_ios_sharp,
-                                                            color:
-                                                                appPrimaryColor,
-                                                          ),
-                                                          Text(
-                                                            'tellUs'.tr,
-                                                            style: TextStyle(
-                                                              color:
-                                                                  appPrimaryColor,
-                                                              fontSize: 20,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                            ),
-                                                          ),
-                                                        ]),
-                                                  )),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                                replacement: _postBuyerMethod(context),
+                                child: _postBuyerMethod(context),
                               ),
                             ),
                           ),
@@ -1066,12 +1087,11 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                     context, first);
                                               } catch (e) {
                                                 Navigator.of(context).pop();
-                                                Flushbar(
-                                                  message:
-                                                      "no_animal_present".tr,
-                                                  duration:
-                                                      Duration(seconds: 2),
-                                                )..show(context);
+                                                ReusableWidgets.showDialogBox(
+                                                  context,
+                                                  'error'.tr,
+                                                  Text("no_animal_present".tr),
+                                                );
                                               }
                                             }
                                           }
@@ -1179,6 +1199,178 @@ class _BuyAnimalState extends State<BuyAnimal>
       ),
     );
   }
+
+  Widget _postBuyerMethod(BuildContext context) => isCardVisible != null && !isCardVisible
+        ? Padding(
+            padding: EdgeInsets.all(10),
+            child: Container(
+              height: 220,
+              width: 150,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: appPrimaryColor,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  left: 8.0,
+                  right: 8,
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Align(
+                        alignment: Alignment.bottomRight,
+                        child: RawMaterialButton(
+                          onPressed: () {},
+                          elevation: 2.0,
+                          fillColor: Colors.white,
+                          child: Icon(
+                            Icons.close,
+                            size: 20.0,
+                            color: appPrimaryColor,
+                          ),
+                          shape: CircleBorder(),
+                          constraints:
+                              BoxConstraints(minWidth: 30, minHeight: 30),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 12.0),
+                        child: Text(
+                          'कौन सा पशु खरीदना चाहते है ?',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 22,
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: double.infinity,
+                        child: RaisedButton(
+                          shape: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          color: Colors.white,
+                          onPressed: null,
+                          disabledColor: Colors.white,
+                          disabledTextColor: appPrimaryColor,
+                          child: Row(
+                              textDirection: TextDirection.rtl,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Icon(
+                                  Icons.arrow_forward_ios_sharp,
+                                  color: appPrimaryColor,
+                                ),
+                                Text(
+                                  'हमें बताये',
+                                  style: TextStyle(
+                                    color: appPrimaryColor,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ]),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          )
+        : Padding(
+            padding: EdgeInsets.all(10),
+            child: OpenContainer(
+              closedElevation: 0,
+              transitionDuration: Duration(seconds: 2),
+              openBuilder: (context, _) => AnimalInfoForm(
+                userMobileNumber: widget.userMobileNumber,
+                userName: widget.userName,
+              ),
+              closedShape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(10.0),
+                ),
+              ),
+              closedColor: Theme.of(context).primaryColor,
+              closedBuilder: (context, openContainer) => Container(
+                height: 220,
+                width: 150,
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    left: 8.0,
+                    right: 8,
+                  ),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Align(
+                          alignment: Alignment.bottomRight,
+                          child: RawMaterialButton(
+                            onPressed: () => setState(() {
+                              isCardVisible = false;
+                            }),
+                            elevation: 2.0,
+                            fillColor: Colors.white,
+                            child: Icon(
+                              Icons.close,
+                              size: 20.0,
+                              color: appPrimaryColor,
+                            ),
+                            shape: CircleBorder(),
+                            constraints:
+                                BoxConstraints(minWidth: 30, minHeight: 30),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 12.0),
+                          child: Text(
+                            'कौन सा पशु खरीदना चाहते है ?',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 22,
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                            width: double.infinity,
+                            child: RaisedButton(
+                              shape: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10)),
+                              color: Colors.white,
+                              onPressed: null,
+                              disabledColor: Colors.white,
+                              disabledTextColor: appPrimaryColor,
+                              child: Row(
+                                  textDirection: TextDirection.rtl,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Icon(
+                                      Icons.arrow_forward_ios_sharp,
+                                      color: appPrimaryColor,
+                                    ),
+                                    Text(
+                                      'हमें बताये',
+                                      style: TextStyle(
+                                        color: appPrimaryColor,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ]),
+                            )),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
 
   _getLocationBasedList(BuildContext context, Address first) async {
     int _radiusData = _valueRadius == 0
@@ -1315,7 +1507,6 @@ class _BuyAnimalState extends State<BuyAnimal>
   Padding _animalImageWidget(int index) {
     List _list = widget.animalInfo;
 
-    // List<String> _images = ['assets/images/AppIcon.jpg'];
     List<String> _images = [];
     _list[index]
         .files
@@ -1356,33 +1547,44 @@ class _BuyAnimalState extends State<BuyAnimal>
                             boundaryMargin: const EdgeInsets.all(20.0),
                             minScale: 0.1,
                             maxScale: 1.6,
-                            child: Image.network(
-                              '$i',
-                              loadingBuilder: (BuildContext context,
-                                  Widget child,
-                                  ImageChunkEvent loadingProgress) {
-                                if (loadingProgress == null) return child;
-                                return Center(
-                                  child: CircularProgressIndicator(
-                                    value: loadingProgress.expectedTotalBytes !=
-                                            null
-                                        ? loadingProgress
-                                                .cumulativeBytesLoaded /
-                                            loadingProgress.expectedTotalBytes
-                                        : null,
-                                  ),
-                                );
-                              },
-                              errorBuilder: (BuildContext context,
-                                  Object exception, StackTrace stackTrace) {
-                                return Center(
-                                  child: Icon(
-                                    Icons.error,
-                                    size: 60,
-                                  ),
-                                );
-                              },
+                            child: CachedNetworkImage(
+                              imageUrl: '$i',
+                              progressIndicatorBuilder:
+                                  (context, url, downloadProgress) => Center(
+                                child: CircularProgressIndicator(
+                                    value: downloadProgress.progress),
+                              ),
+                              errorWidget: (context, url, error) =>
+                                  Icon(Icons.error, size: 60),
                             ),
+
+                            // Image.network(
+                            //   '$i',
+                            //   loadingBuilder: (BuildContext context,
+                            //       Widget child,
+                            //       ImageChunkEvent loadingProgress) {
+                            //     if (loadingProgress == null) return child;
+                            //     return Center(
+                            //       child: CircularProgressIndicator(
+                            //         value: loadingProgress.expectedTotalBytes !=
+                            //                 null
+                            //             ? loadingProgress
+                            //                     .cumulativeBytesLoaded /
+                            //                 loadingProgress.expectedTotalBytes
+                            //             : null,
+                            //       ),
+                            //     );
+                            //   },
+                            //   errorBuilder: (BuildContext context,
+                            //       Object exception, StackTrace stackTrace) {
+                            //     return Center(
+                            //       child: Icon(
+                            //         Icons.error,
+                            //         size: 60,
+                            //       ),
+                            //     );
+                            //   },
+                            // ),
                           );
                         }).toList(),
                       ),
@@ -1412,28 +1614,46 @@ class _BuyAnimalState extends State<BuyAnimal>
             child: Container(
               height: 200.0,
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(8.0),
-                child: Image.network(
-                  _images[0],
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  loadingBuilder: (
-                    BuildContext context,
-                    Widget child,
-                    ImageChunkEvent loadingProgress,
-                  ) {
-                    if (loadingProgress == null) return child;
-                    return Center(
-                      child: CircularProgressIndicator(
-                        value: loadingProgress.expectedTotalBytes != null
-                            ? loadingProgress.cumulativeBytesLoaded /
-                                loadingProgress.expectedTotalBytes
-                            : null,
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: CachedNetworkImage(
+                    imageUrl: _images[0],
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    progressIndicatorBuilder:
+                        (context, url, downloadProgress) => Center(
+                      child: Image.asset(
+                        'assets/images/loader.gif',
+                        height: 80,
+                        width: 80,
                       ),
-                    );
-                  },
-                ),
-              ),
+                    ),
+                    errorWidget: (context, url, error) => Icon(
+                      Icons.error,
+                      size: 80,
+                    ),
+                  )
+
+                  // Image.network(
+                  //   _images[0],
+                  //   fit: BoxFit.cover,
+                  //   width: double.infinity,
+                  //   loadingBuilder: (
+                  //     BuildContext context,
+                  //     Widget child,
+                  //     ImageChunkEvent loadingProgress,
+                  //   ) {
+                  //     if (loadingProgress == null) return child;
+                  //     return Center(
+                  //       child: CircularProgressIndicator(
+                  //         value: loadingProgress.expectedTotalBytes != null
+                  //             ? loadingProgress.cumulativeBytesLoaded /
+                  //                 loadingProgress.expectedTotalBytes
+                  //             : null,
+                  //       ),
+                  //     );
+                  //   },
+                  // ),
+                  ),
             ),
           ),
           Positioned(

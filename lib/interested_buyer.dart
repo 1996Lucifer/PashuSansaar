@@ -245,7 +245,7 @@ class _InterestedBuyerState extends State<InterestedBuyer> {
                   padding:
                       const EdgeInsets.only(right: 12.0, left: 12, top: 15),
                   child: Text(
-                    _descriptionText(_list),
+                    ReusableWidgets.descriptionText(_list),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 4,
                     textAlign: TextAlign.justify,

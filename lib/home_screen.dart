@@ -16,7 +16,6 @@ import 'profile_main.dart';
 import 'refresh_token/refresh_token_controller.dart';
 import 'sell_animal/sell_animal_main.dart';
 import 'package:get/get.dart';
-import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:geocoder/geocoder.dart' as geoCoder;
 
 // ignore: must_be_immutable
@@ -35,9 +34,8 @@ class _HomeScreenState extends State<HomeScreen> {
   List<MyAnimals> _sellingAnimalInfo = [];
   Map _profileData = {};
   Map _referralWinnerData = {};
-  final geo = Geoflutterfire();
   PageController _pageController;
-  String _referralUniqueValue = '', _mobileNumber = '';
+  String _referralUniqueValue = '', _mobileNumber = '', _userName = '';
   bool _checkReferral = false;
   double lat = 0.0, long = 0.0;
   locate.LocationData _locate;
@@ -167,6 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _referralUniqueValue = prefs.getString('referralUniqueValue');
       _checkReferral = prefs.getBool('checkReferral') ?? false;
       _mobileNumber = prefs.getString('mobileNumber');
+      _userName = prefs.getString('userName') ?? '';
 
       lat = prefs.getDouble('latitude');
       long = prefs.getDouble('longitude');
@@ -177,6 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   getInitialInfo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+
     bool status;
     pr.show();
 
@@ -197,6 +197,12 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       }
     } catch (e) {
+      pr.hide();
+      ReusableWidgets.loggerFunction(
+          fileName: 'home_screen_refreshToken',
+          error: e.toString(),
+          myNum: _mobileNumber,
+          userId: prefs.getString('userId'));
       ReusableWidgets.showDialogBox(
         context,
         'warning'.tr,
@@ -208,8 +214,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
     try {
       BuyAnimalModel data = await buyAnimalController.getAnimal(
-        // latitude: 40.1,
-        // longitude: -97.1,
         distance: 50000,
         latitude: lat,
         longitude: long,
@@ -225,7 +229,14 @@ class _HomeScreenState extends State<HomeScreen> {
         _animalInfo = data.result;
         prefs.setInt('page', data.page);
       });
+      pr.hide();
     } catch (e) {
+      pr.hide();
+      ReusableWidgets.loggerFunction(
+          fileName: 'home_screen_getAnimal',
+          error: e.toString(),
+          myNum: _mobileNumber,
+          userId: prefs.getString('userId'));
       ReusableWidgets.showDialogBox(
         context,
         'warning'.tr,
@@ -235,14 +246,12 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    pr.hide();
     getAnimalSellingInfo();
   }
 
   getAnimalSellingInfo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool status;
-    //pr.show();
 
     try {
       if (ReusableWidgets.isTokenExpired(prefs.getInt('expires') ?? 0)) {
@@ -261,6 +270,11 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       }
     } catch (e) {
+      ReusableWidgets.loggerFunction(
+          fileName: 'home_screen_refreshToken',
+          error: e.toString(),
+          myNum: _mobileNumber,
+          userId: prefs.getString('userId'));
       ReusableWidgets.showDialogBox(
         context,
         'warning'.tr,
@@ -282,6 +296,11 @@ class _HomeScreenState extends State<HomeScreen> {
         _sellingAnimalInfo = dataSellingInfo.myAnimals;
       });
     } catch (e) {
+      ReusableWidgets.loggerFunction(
+          fileName: 'home_screen_getAnimalList',
+          error: e.toString(),
+          myNum: _mobileNumber,
+          userId: prefs.getString('userId'));
       ReusableWidgets.showDialogBox(
         context,
         'warning'.tr,
@@ -412,21 +431,21 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             BuyAnimal(
               animalInfo: _animalInfo,
-              userName: _profileData['name'],
-              userMobileNumber: _profileData['mobile'],
+              userName: _userName,
+              userMobileNumber: _mobileNumber,
               userImage: _profileData['image'],
               latitude: lat,
               longitude: long,
             ),
             SellAnimalMain(
               sellingAnimalInfo: _sellingAnimalInfo,
-              userName: _profileData['name'],
-              userMobileNumber: _profileData['mobile'],
+              userName: _userName,
+              userMobileNumber: _mobileNumber,
             ),
             ProfileMain(
               profileData: _profileData,
               sellingAnimalInfo: _sellingAnimalInfo,
-              userName: _profileData['name'],
+              userName: _userName,
               userMobileNumber: _mobileNumber,
               refData: _referralWinnerData,
             ),

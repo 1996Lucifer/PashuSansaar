@@ -271,16 +271,19 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
               controller: _budgetController,
               keyboardType: TextInputType.number,
               onChanged: (String price) {
-                String string = '${_formatNumber(price.replaceAll(',', ''))}';
+                if (price.isEmpty) {
+                  price = '';
+                } else {
+                  String string = '${_formatNumber(price.replaceAll(',', ''))}';
 
-                _budgetController.value = TextEditingValue(
-                  text: _currency + string,
-                  selection: TextSelection.collapsed(offset: string.length),
-                );
+                  _budgetController.value = TextEditingValue(
+                    text: _currency + string,
+                    selection: TextSelection.collapsed(offset: string.length),
+                  );
 
-                _budgetController.selection = TextSelection.fromPosition(
-                    TextPosition(offset: _budgetController.text.length));
-
+                  _budgetController.selection = TextSelection.fromPosition(
+                      TextPosition(offset: _budgetController.text.length));
+                }
                 setState(() {
                   animalInfo['animalBudget'] = price;
                 });

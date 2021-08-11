@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:pashusansaar/buy_animal/animal_info_form.dart';
 
-import 'colors.dart';
+import '../colors.dart';
 
-const double fabSize = 56;
+const double fabSize = 100;
 
 class CustomFABWidget extends StatelessWidget {
   final String userMobileNumber, userName;
@@ -26,15 +26,15 @@ class CustomFABWidget extends StatelessWidget {
         closedShape: CircleBorder(),
         closedColor: appPrimaryColor,
         closedBuilder: (context, openContainer) => Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: appPrimaryColor,
-          ),
-          height: fabSize,
-          width: fabSize,
-          child: Icon(
-            Icons.chat,
-            color: Colors.white,
+          // key: UniqueKey(),
+          height: 60,
+          width: 60,
+          child: Center(
+            child: Image.asset(
+              'assets/images/postBuyer.png',
+              width: 45,
+              height: 45,
+            ),
           ),
         ),
       );

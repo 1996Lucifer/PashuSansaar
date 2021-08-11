@@ -553,6 +553,7 @@ class Messages extends Translations {
           'global_error':
               'आपकी जानकारी प्राप्त करने में दिक्कत हो रही है|\nकृपया दोबारा कोशिश करे',
           'milk_quantity': 'दूध की मात्रा',
+          'upload_image_error': 'चित्र प्राप्त करने में दिक्कत हो रही हैं',
           //Description text
           'animalTypeAge':
               'ये @animalBreed @animalTypeCheck @animalAge साल की है। ',
@@ -614,6 +615,13 @@ class Messages extends Translations {
           'otpSended': 'OTP भेजा गया है',
           'otpReSended': 'OTP पुनः भेजा गया है',
           'what_budget': 'आपका बजट क्या हैं (₹)',
+          'animalSoldOut': 'यह पशु बिक चुका है|',
+          'animalSaveError':
+              'आपका पशु दर्ज़ करने में दिक्कत हो रही है|\nकृपया दोबारा कोशिश करे',
+          'location_fetch': 'लोकेशन प्राप्त किया जा रहा हैं',
+          'loading': 'लोड हो रहा है...',
+          'notKnown': 'पता नहीं',
+          'user_register': 'जानकारी दर्ज़ हो रही है..',
         }
       };
 }
