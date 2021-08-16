@@ -8,14 +8,16 @@ import 'package:pashusansaar/utils/urls.dart';
 class UploadImageController extends GetxController {
   uploadImage({
     List files,
+    List videoFiles,
     String token,
     String userId,
   }) async {
     Map<String, dynamic> payload = {
       "userId": userId,
       "files": files,
+      "videoFiles": videoFiles,
     };
-    
+
     try {
       dio.Options options = new dio.Options(
         headers: {

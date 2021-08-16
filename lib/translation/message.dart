@@ -81,7 +81,7 @@ class Messages extends Translations {
           'price_hint_text': 'जैसे: 30,000',
           'choose_photo': 'फोटो चुनें',
           'save_button': 'दर्ज़ (Save) करे',
-          'upload_image_text': 'फोटो डालें (कम से कम तीन)',
+          'upload_image_text': 'फोटो डालें',
           'cow': 'गाय',
           'buffalo_female': 'भैंस',
           'ox': 'बैल',
@@ -284,6 +284,7 @@ class Messages extends Translations {
               'आपकी जानकारी प्राप्त करने में दिक्कत हो रही है|\nकृपया दोबारा कोशिश करे',
           'milk_quantity': 'दूध की मात्रा',
           'upload_image_error': 'चित्र प्राप्त करने में दिक्कत हो रही हैं',
+          'upload_video_error': 'वीडियो प्राप्त करने में दिक्कत हो रही हैं',
 
           //Description text
           'animalTypeAge':
@@ -362,7 +363,7 @@ class Messages extends Translations {
               'वीडियो लोड हो रही है, कृपया प्रतीक्षा करे..',
           'time_duration': 'वीडियो 1 मिनट से ज्यादा का नहीं होना चाहिए',
           'video_supportive_text': ' (अधिकतम 1 मिनट)',
-          'upload_video_text': 'वीडियो डालें', 
+          'upload_video_text': 'वीडियो डालें',
         }
       };
 }

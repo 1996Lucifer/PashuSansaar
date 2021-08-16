@@ -42,6 +42,7 @@ class Result {
   int pregnantTime;
   String moreInfo;
   List<Files> files;
+  List<VideoFiles> videoFiles;
   String userId;
   double longitude;
   double latitude;
@@ -67,6 +68,7 @@ class Result {
     this.pregnantTime,
     this.moreInfo,
     this.files,
+    this.videoFiles,
     this.userId,
     this.longitude,
     this.latitude,
@@ -98,6 +100,13 @@ class Result {
         files.add(new Files.fromJson(v));
       });
     }
+    if (json['videoFiles'] != null) {
+      videoFiles = <VideoFiles>[];
+      json['videoFiles'].forEach((v) {
+        videoFiles.add(new VideoFiles.fromJson(v));
+      });
+    }
+
     userId = json['userId'];
     longitude = json['longitude'];
     latitude = json['latitude'];
@@ -127,6 +136,10 @@ class Result {
     if (this.files != null) {
       data['files'] = this.files.map((v) => v.toJson()).toList();
     }
+    if (this.videoFiles != null) {
+      data['videoFiles'] = this.videoFiles.map((v) => v.toJson()).toList();
+    }
+
     data['userId'] = this.userId;
     data['longitude'] = this.longitude;
     data['latitude'] = this.latitude;
@@ -157,6 +170,25 @@ class Files {
     data['fileName'] = this.fileName;
     data['fileType'] = this.fileType;
     data['fileUrl'] = this.fileUrl;
+    return data;
+  }
+}
+
+class VideoFiles {
+  String fileName;
+  String fileType;
+
+  VideoFiles({this.fileName, this.fileType});
+
+  VideoFiles.fromJson(Map<String, dynamic> json) {
+    fileName = json['fileName'];
+    fileType = json['fileType'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['fileName'] = this.fileName;
+    data['fileType'] = this.fileType;
     return data;
   }
 }

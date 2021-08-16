@@ -83,7 +83,9 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
                   child: CachedNetworkImage(
-                    imageUrl: _list.files[_list.files.length - 1].fileName,
+                    imageUrl: _list.files.length != 0
+                        ? _list.files[_list.files.length - 1].fileName
+                        : _list.videoFiles[1].fileName,
                     fit: BoxFit.cover,
                     width: double.infinity,
                     progressIndicatorBuilder:
@@ -97,35 +99,6 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                     errorWidget: (context, url, error) =>
                         Icon(Icons.error, size: 30),
                   ),
-                  // Image.network(
-                  //   _list.files[_list.files.length - 1].fileName,
-                  //   fit: BoxFit.cover,
-                  //   width: double.infinity,
-                  //   loadingBuilder: (
-                  //     BuildContext context,
-                  //     Widget child,
-                  //     ImageChunkEvent loadingProgress,
-                  //   ) {
-                  //     if (loadingProgress == null) return child;
-                  //     return Center(
-                  //       child: CircularProgressIndicator(
-                  //         value: loadingProgress.expectedTotalBytes != null
-                  //             ? loadingProgress.cumulativeBytesLoaded /
-                  //                 loadingProgress.expectedTotalBytes
-                  //             : null,
-                  //       ),
-                  //     );
-                  //   },
-                  //   errorBuilder: (BuildContext context, Object exception,
-                  //       StackTrace stackTrace) {
-                  //     return Center(
-                  //       child: Icon(
-                  //         Icons.error,
-                  //         size: 40,
-                  //       ),
-                  //     );
-                  //   },
-                  // ),
                 ),
               ),
             ),

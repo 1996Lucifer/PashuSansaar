@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:get/get.dart';
 import 'package:pashusansaar/home_screen.dart';
 import 'package:pashusansaar/utils/colors.dart';
+import 'package:mime/mime.dart';
 
 import 'constants.dart';
 
@@ -306,5 +307,9 @@ class ReusableWidgets {
     String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
     String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
     return "$twoDigitMinutes:$twoDigitSeconds";
+  }
+
+  static String mimeType(String path) {
+    return lookupMimeType(path);
   }
 }

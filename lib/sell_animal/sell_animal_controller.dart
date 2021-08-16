@@ -21,6 +21,7 @@ class SellAnimalController extends GetxController {
     String userId,
     String moreInfo,
     List files,
+    List videoFiles,
     String token,
   }) async {
     Map<String, dynamic> payload = {
@@ -38,6 +39,7 @@ class SellAnimalController extends GetxController {
       "userId": userId,
       "moreInfo": moreInfo,
       "files": files,
+      "videoFiles": videoFiles,
       "animalHasBaby": animalHasBaby,
     };
 

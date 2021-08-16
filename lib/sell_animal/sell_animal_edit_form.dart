@@ -29,10 +29,9 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:dio/dio.dart' as dio;
-import 'package:mime/mime.dart';
 
 class SellAnimalEditForm extends StatefulWidget {
-  MyAnimals animalInfo;
+  final MyAnimals animalInfo;
   final int index;
   final String userName;
   final String userMobileNumber;
@@ -234,7 +233,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                     quality: 60);
                 break;
             }
-            final mimeType = lookupMimeType(file.path);
+            final mimeType = ReusableWidgets.mimeType(file.path);
 
             setState(() {
               imagesFileUpload['Image$index'] = compressedFile.path;
@@ -306,7 +305,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                 break;
             }
 
-            final mimeType = lookupMimeType(file.path);
+            final mimeType = ReusableWidgets.mimeType(file.path);
 
             setState(() {
               imagesFileUpload['Image$index'] = compressedFile.path;

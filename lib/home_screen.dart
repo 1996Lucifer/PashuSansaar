@@ -16,9 +16,7 @@ import 'profile_main.dart';
 import 'refresh_token/refresh_token_controller.dart';
 import 'sell_animal/sell_animal_main.dart';
 import 'package:get/get.dart';
-import 'package:geocoder/geocoder.dart' as geoCoder;
 
-// ignore: must_be_immutable
 class HomeScreen extends StatefulWidget {
   int selectedIndex;
   HomeScreen({Key key, @required this.selectedIndex}) : super(key: key);
@@ -35,8 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Map _profileData = {};
   Map _referralWinnerData = {};
   PageController _pageController;
-  String _referralUniqueValue = '', _mobileNumber = '', _userName = '';
-  bool _checkReferral = false;
+  String _mobileNumber = '', _userName = '';
   double lat = 0.0, long = 0.0;
   locate.LocationData _locate;
 
@@ -99,71 +96,11 @@ class _HomeScreenState extends State<HomeScreen> {
     await loginSetup();
   }
 
-  Future<void> initReferrerDetails(mobile) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    var address = await geoCoder.Geocoder.local.findAddressesFromCoordinates(
-        geoCoder.Coordinates(
-            prefs.getDouble('latitude'), prefs.getDouble('longitude')));
-    var first = address.first;
-    try {
-      Map<String, dynamic> referralInfo = {
-        'userAddress': first.addressLine ??
-            (first.adminArea +
-                ' ' +
-                first.postalCode +
-                ', ' +
-                first.countryName),
-        'dateOfUpdation': ReusableWidgets.dateTimeToEpoch(DateTime.now()),
-        'userId': FirebaseAuth.instance.currentUser.uid,
-        'userMobile': mobile
-      };
-
-      await FirebaseFirestore.instance
-          .collection('referralData')
-          .doc(_referralUniqueValue)
-          .update(referralInfo)
-          .then((value) => setState(() {
-                prefs.setBool('checkReferral', true);
-              }))
-          .catchError((error) {
-        print('e-referral--123->' + error.toString());
-        FirebaseFirestore.instance
-            .collection('logger')
-            .doc(_mobileNumber)
-            .collection('home-referralInner')
-            .doc()
-            .set({
-          'issue': error.toString(),
-          'userId': FirebaseAuth.instance.currentUser == null
-              ? ''
-              : FirebaseAuth.instance.currentUser.uid,
-          'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
-        });
-      });
-    } catch (e) {
-      print('e-referral--->' + e.toString());
-      FirebaseFirestore.instance
-          .collection('logger')
-          .doc(_mobileNumber)
-          .collection('home-referralOuter')
-          .doc()
-          .set({
-        'issue': e.toString(),
-        'userId': FirebaseAuth.instance.currentUser == null
-            ? ''
-            : FirebaseAuth.instance.currentUser.uid,
-        'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
-      });
-    }
-  }
-
   loginSetup() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       prefs.setBool('isLoggedIn', true);
       prefs.setBool('alreadyUser', true);
-      _referralUniqueValue = prefs.getString('referralUniqueValue');
-      _checkReferral = prefs.getBool('checkReferral') ?? false;
       _mobileNumber = prefs.getString('mobileNumber');
       _userName = prefs.getString('userName') ?? '';
 
@@ -338,8 +275,6 @@ class _HomeScreenState extends State<HomeScreen> {
         'date': DateFormat().add_yMMMd().add_jm().format(DateTime.now()),
       });
     }
-
-    if (!_checkReferral) initReferrerDetails(_profileData['mobile']);
 
     getReferralWinnerInfo();
   }

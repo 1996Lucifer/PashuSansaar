@@ -25,15 +25,47 @@ class UploadImageModel {
 }
 
 class Urls {
+  List<VideoUrls> videoUrls;
   String url;
   Fields fields;
 
-  Urls({this.url, this.fields});
+  Urls({this.videoUrls, this.url, this.fields});
 
   Urls.fromJson(Map<String, dynamic> json) {
+    if (json['videoUrls'] != null) {
+      videoUrls = <VideoUrls>[];
+      json['videoUrls'].forEach((v) {
+        videoUrls.add(new VideoUrls.fromJson(v));
+      });
+    }
     url = json['url'];
     fields =
-    json['fields'] != null ? new Fields.fromJson(json['fields']) : null;
+        json['fields'] != null ? new Fields.fromJson(json['fields']) : null;
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    if (this.videoUrls != null) {
+      data['videoUrls'] = this.videoUrls.map((v) => v.toJson()).toList();
+    }
+    data['url'] = this.url;
+    if (this.fields != null) {
+      data['fields'] = this.fields.toJson();
+    }
+    return data;
+  }
+}
+
+class VideoUrls {
+  String url;
+  Fields fields;
+
+  VideoUrls({this.url, this.fields});
+
+  VideoUrls.fromJson(Map<String, dynamic> json) {
+    url = json['url'];
+    fields =
+        json['fields'] != null ? new Fields.fromJson(json['fields']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -57,12 +89,12 @@ class Fields {
 
   Fields(
       {this.key,
-        this.bucket,
-        this.xAmzAlgorithm,
-        this.xAmzCredential,
-        this.xAmzDate,
-        this.policy,
-        this.xAmzSignature});
+      this.bucket,
+      this.xAmzAlgorithm,
+      this.xAmzCredential,
+      this.xAmzDate,
+      this.policy,
+      this.xAmzSignature});
 
   Fields.fromJson(Map<String, dynamic> json) {
     key = json['key'];
