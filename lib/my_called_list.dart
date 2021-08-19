@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
@@ -8,9 +9,11 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pashusansaar/my_calls/myCallsController.dart';
 import 'package:pashusansaar/refresh_token/refresh_token_controller.dart';
 import 'package:pashusansaar/utils/colors.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pashusansaar/utils/constants.dart';
+import 'package:video_player/video_player.dart';
 import 'utils/reusable_widgets.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart' as intl;
@@ -31,6 +34,8 @@ class _MyCalledListState extends State<MyCalledList> {
   List myCallList = [];
   bool _isLoadingScreen = false;
   SharedPreferences prefs;
+  VideoPlayerController _videoController;
+  ProgressDialog pr;
 
   getInitialInfo() async {
     prefs = await SharedPreferences.getInstance();
@@ -182,154 +187,450 @@ class _MyCalledListState extends State<MyCalledList> {
   }
 
   Padding _animalImageWidget(_list) {
-    List<String> _images = [];
-    _list.animalId.files
-        .forEach((img) => _images.addIf(img.fileName != null, img.fileName));
+    List<String> _images = [], _videos = [], _videoImageList = [];
+    if (_list.animalId.videoFiles != null) {
+      _list.animalId.videoFiles.forEach(
+        (elem) => _videos.addIf(elem.fileName != null, elem.fileName),
+      );
+    }
+    _list.animalId.files?.forEach(
+      (elem) => _images.addIf(elem.fileName != null, elem.fileName),
+    );
+    _videoImageList = List.from(_videos)..addAll(_images);
 
     return Padding(
-        padding: EdgeInsets.only(left: 8.0, right: 8, bottom: 4),
-        child: Stack(
-          children: [
-            GestureDetector(
-              onTap: () {
-                return Navigator.of(context).push(PageRouteBuilder(
-                  opaque: true,
-                  pageBuilder: (BuildContext context, _, __) =>
-                      StatefulBuilder(builder: (context, setState) {
-                    return Column(
-                      children: [
-                        CarouselSlider(
-                          options: CarouselOptions(
+      padding: EdgeInsets.only(
+        left: 8.0,
+        right: 8.0,
+        bottom: 4.0,
+      ),
+      child: Stack(
+        children: [
+          WillPopScope(
+            onWillPop: () async {
+              if (_videoController != null) {
+                _videoController.dispose();
+              }
+              return true;
+            },
+            child: GestureDetector(
+              onTap: () async {
+                if (_videoController != null) _videoController.pause();
+                if (_videos.length != 0) {
+                  pr.style(
+                      message: 'video_loading_message'.tr,
+                      messageTextStyle:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w500));
+                  pr.show();
+
+                  if (_videoController != null) _videoController.dispose();
+
+                  _videoController =
+                      VideoPlayerController.network(_videoImageList[0]);
+                  await _videoController.initialize();
+                  _videoController.setLooping(false);
+                  pr.hide();
+                  _videoController.play();
+                }
+
+                return Navigator.of(context).push(
+                  PageRouteBuilder(
+                    opaque: true,
+                    pageBuilder: (BuildContext context, _, __) =>
+                        StatefulBuilder(builder: (context, setState) {
+                      return Column(
+                        children: [
+                          CarouselSlider(
+                            options: CarouselOptions(
                               height: MediaQuery.of(context).size.height * 0.9,
                               viewportFraction: 1.0,
                               initialPage: 0,
                               enableInfiniteScroll: true,
                               reverse: false,
-                              autoPlay: true,
-                              autoPlayInterval: Duration(seconds: 3),
+                              autoPlay: _videos.isEmpty ? true : false,
+                              autoPlayInterval: Duration(seconds: 4),
                               autoPlayAnimationDuration:
                                   Duration(milliseconds: 800),
                               autoPlayCurve: Curves.fastOutSlowIn,
                               enlargeCenterPage: true,
                               scrollDirection: Axis.horizontal,
                               onPageChanged: (index, reason) => setState(() {
-                                    _current = index;
-                                  })),
-                          items: _images.map((i) {
-                            return Builder(
-                              builder: (BuildContext context) {
-                                return i.length > 1000
-                                    ? Image.memory(base64Decode('$i'))
-                                    : Image.network(
-                                        '$i',
-                                        loadingBuilder: (BuildContext context,
-                                            Widget child,
-                                            ImageChunkEvent loadingProgress) {
-                                          if (loadingProgress == null)
-                                            return child;
-                                          return Center(
+                                _current = index;
+                              }),
+                            ),
+                            items: _videoImageList.map((i) {
+                              return i.split('/')[4].split('_')[1] == "Video"
+                                  ? Stack(
+                                      alignment:
+                                          AlignmentDirectional.bottomCenter,
+                                      children: [
+                                        _videoController == null
+                                            ? SizedBox.shrink()
+                                            : ValueListenableBuilder(
+                                                valueListenable:
+                                                    _videoController,
+                                                builder: (context,
+                                                        VideoPlayerValue value,
+                                                        child) =>
+                                                    Center(
+                                                  child: StreamBuilder<Object>(
+                                                      stream: null,
+                                                      builder:
+                                                          (context, snapshot) {
+                                                        return GestureDetector(
+                                                          onTap: () {
+                                                            if (!_videoController
+                                                                    .value
+                                                                    .isPlaying &&
+                                                                value.position
+                                                                        .compareTo(
+                                                                            value.duration) ==
+                                                                    0) {
+                                                              _videoController
+                                                                  .initialize();
+                                                            }
+                                                            setState(() {
+                                                              _videoController
+                                                                      .value
+                                                                      .isPlaying
+                                                                  ? _videoController
+                                                                      .pause()
+                                                                  : _videoController
+                                                                      .play();
+                                                            });
+                                                          },
+                                                          child: AspectRatio(
+                                                            aspectRatio:
+                                                                _videoController
+                                                                    .value
+                                                                    .aspectRatio,
+                                                            child: Stack(
+                                                              alignment:
+                                                                  Alignment
+                                                                      .center,
+                                                              children: [
+                                                                VideoPlayer(
+                                                                    _videoController),
+                                                                _videoController
+                                                                        .value
+                                                                        .isPlaying
+                                                                    ? SizedBox
+                                                                        .shrink()
+                                                                    : Icon(
+                                                                        Icons
+                                                                            .play_circle_fill,
+                                                                        color: Colors
+                                                                            .grey[800],
+                                                                        size:
+                                                                            80,
+                                                                      ),
+                                                              ],
+                                                            ),
+                                                            // ),
+                                                          ),
+                                                        );
+                                                      }),
+                                                ),
+                                              ),
+                                        _videoController == null
+                                            ? SizedBox.shrink()
+                                            : ValueListenableBuilder(
+                                                valueListenable:
+                                                    _videoController,
+                                                builder: (context,
+                                                        VideoPlayerValue value,
+                                                        child) =>
+                                                    Row(
+                                                  children: [
+                                                    Card(
+                                                      color: Colors.transparent,
+                                                      child: IconButton(
+                                                        icon: Icon(
+                                                          _videoController.value
+                                                                  .isPlaying
+                                                              ? Icons.pause
+                                                              : Icons
+                                                                  .play_arrow,
+                                                          color: Colors.white,
+                                                        ),
+                                                        onPressed: () =>
+                                                            setState(() {
+                                                          if (value.duration ==
+                                                              null)
+                                                            ReusableWidgets
+                                                                .showDialogBox(
+                                                              context,
+                                                              'error'.tr,
+                                                              Text('Error'),
+                                                            );
+                                                          if (!_videoController
+                                                                  .value
+                                                                  .isPlaying &&
+                                                              value.position
+                                                                      .compareTo(
+                                                                          value
+                                                                              .duration) ==
+                                                                  0) {
+                                                            _videoController
+                                                                .initialize();
+                                                          }
+                                                          _videoController.value
+                                                                  .isPlaying
+                                                              ? _videoController
+                                                                  .pause()
+                                                              : _videoController
+                                                                  .play();
+                                                        }),
+                                                      ),
+                                                    ),
+                                                    Card(
+                                                      color: Colors.transparent,
+                                                      child: Container(
+                                                        width: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.6,
+                                                        child:
+                                                            VideoProgressIndicator(
+                                                          _videoController,
+                                                          colors:
+                                                              VideoProgressColors(
+                                                            playedColor:
+                                                                Colors.white,
+                                                          ),
+                                                          padding:
+                                                              EdgeInsets.all(
+                                                                  20),
+                                                          allowScrubbing: true,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                      width: 10,
+                                                    ),
+                                                    Card(
+                                                      color: Colors.transparent,
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                    .symmetric(
+                                                                vertical: 11.0,
+                                                                horizontal: 5),
+                                                        child: Text(
+                                                          ReusableWidgets
+                                                              .printDuration(
+                                                            value.position,
+                                                          ).toString(),
+                                                          style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 15,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                        GestureDetector(
+                                          onTap: () {
+                                            if (_videos.length != 0) {
+                                              _videoController.pause();
+                                              Navigator.of(context).popUntil(
+                                                  (route) => route.isFirst);
+                                            } else if (_images.length != 0) {
+                                              Navigator.of(context).popUntil(
+                                                  (route) => route.isFirst);
+                                            }
+                                          },
+                                          child: Column(
+                                            children: [
+                                              SizedBox(
+                                                height: 10,
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    top: 16.0,
+                                                    left: 8,
+                                                    right: 8),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    _buildInfowidget(
+                                                        _list.animalId),
+                                                    SizedBox(
+                                                      width: 5,
+                                                    ),
+                                                    Icon(
+                                                      Icons.cancel,
+                                                      size: 50,
+                                                      color: Colors.white,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  : Stack(
+                                      alignment: AlignmentDirectional.center,
+                                      children: [
+                                        CachedNetworkImage(
+                                          imageUrl: '$i',
+                                          progressIndicatorBuilder: (context,
+                                                  url, downloadProgress) =>
+                                              Center(
                                             child: CircularProgressIndicator(
-                                              value: loadingProgress
-                                                          .expectedTotalBytes !=
-                                                      null
-                                                  ? loadingProgress
-                                                          .cumulativeBytesLoaded /
-                                                      loadingProgress
-                                                          .expectedTotalBytes
-                                                  : null,
+                                              value: downloadProgress.progress,
                                             ),
-                                          );
-                                        },
-                                        errorBuilder: (BuildContext context,
-                                            Object exception,
-                                            StackTrace stackTrace) {
-                                          return Center(
-                                            child: Icon(
-                                              Icons.error,
-                                              size: 60,
-                                            ),
-                                          );
-                                        },
-                                      );
-                              },
-                            );
-                          }).toList(),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: _images.map((url) {
-                            int indexData = _images.indexOf(url);
-                            return Container(
-                              width: 8.0,
-                              height: 8.0,
-                              margin: EdgeInsets.symmetric(
-                                  vertical: 10.0, horizontal: 2.0),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: _current == indexData
-                                    ? Color.fromRGBO(255, 255, 255, 1)
-                                    : Color.fromRGBO(255, 255, 255, 0.4),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                    );
-                  }),
-                ));
+                                          ),
+                                          errorWidget: (context, url, error) =>
+                                              Icon(
+                                            Icons.error,
+                                            size: 60,
+                                          ),
+                                        ),
+                                        GestureDetector(
+                                          onTap: () {
+                                            if (_videos.length != 0) {
+                                              _videoController.pause();
+                                              Navigator.of(context).popUntil(
+                                                  (route) => route.isFirst);
+                                            } else if (_images.length != 0) {
+                                              Navigator.of(context).popUntil(
+                                                  (route) => route.isFirst);
+                                            }
+                                          },
+                                          child: Column(
+                                            children: [
+                                              SizedBox(
+                                                height: 10,
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                  top: 16.0,
+                                                  left: 8,
+                                                  right: 8,
+                                                ),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Expanded(
+                                                        child: _buildInfowidget(
+                                                            _list.animalId)),
+                                                    SizedBox(
+                                                      width: 5,
+                                                    ),
+                                                    Icon(
+                                                      Icons.cancel,
+                                                      size: 50,
+                                                      color: Colors.white,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                            }).toList(),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: _videoImageList.map((url) {
+                              int indexData = _videoImageList.indexOf(url);
+                              return Container(
+                                width: 8.0,
+                                height: 8.0,
+                                margin: EdgeInsets.symmetric(
+                                  vertical: 10.0,
+                                  horizontal: 2.0,
+                                ),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: _current == indexData
+                                      ? Color.fromRGBO(255, 255, 255, 1)
+                                      : Color.fromRGBO(255, 255, 255, 0.4),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      );
+                    }),
+                  ),
+                );
               },
               child: Container(
                 height: 200.0,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
-                  child: Image.network(
-                    _images[0],
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    loadingBuilder: (
-                      BuildContext context,
-                      Widget child,
-                      ImageChunkEvent loadingProgress,
-                    ) {
-                      if (loadingProgress == null) return child;
-                      return Center(
-                        child: CircularProgressIndicator(
-                          value: loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes
-                              : null,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      CachedNetworkImage(
+                        imageUrl: _videos.length != 0 ? _videos[1] : _images[0],
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        progressIndicatorBuilder:
+                            (context, url, downloadProgress) => Center(
+                          child: Image.asset(
+                            'assets/images/loader.gif',
+                            height: 80,
+                            width: 80,
+                          ),
                         ),
-                      );
-                    },
+                        errorWidget: (context, url, error) => Icon(
+                          Icons.error,
+                          size: 80,
+                        ),
+                      ),
+                      _videos.isNotEmpty
+                          ? Icon(
+                              Icons.play_circle_outline_sharp,
+                              size: 100,
+                              color: appPrimaryColor,
+                            )
+                          : SizedBox.shrink(),
+                    ],
                   ),
                 ),
               ),
             ),
-            Positioned(
-              right: 0,
-              child: Opacity(
-                opacity: 0.5,
-                child: RaisedButton.icon(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18.0),
-                      side: BorderSide(color: Colors.transparent)),
-                  color: Colors.black,
-                  onPressed: () => null,
-                  icon: FaIcon(FontAwesomeIcons.clock,
-                      color: Colors.white, size: 16),
-                  label: Text(
-                    //'time',
-                    "${ReusableWidgets.dateDifference(_list.updatedAt)} देखा",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13),
-                  ),
+          ),
+          Positioned(
+            right: 0,
+            child: Opacity(
+              opacity: 0.5,
+              child: RaisedButton.icon(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18.0),
+                    side: BorderSide(color: Colors.transparent)),
+                color: Colors.black,
+                onPressed: () => null,
+                icon: FaIcon(FontAwesomeIcons.clock,
+                    color: Colors.white, size: 16),
+                label: Text(
+                  //'time',
+                  "${ReusableWidgets.dateDifference(_list.updatedAt)} देखा",
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13),
                 ),
               ),
-            )
-          ],
-        ));
+            ),
+          )
+        ],
+      ),
+    );
   }
 
   _extraInfoWidget(_list, width) {
@@ -639,7 +940,11 @@ class _MyCalledListState extends State<MyCalledList> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    double height = MediaQuery.of(context).size.height;
+    pr = new ProgressDialog(context,
+        type: ProgressDialogType.Normal, isDismissible: false);
+
+    pr.style(message: 'progress_dialog_message'.tr);
+
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: ReusableWidgets.getAppBar(context, "app_name".tr, false),

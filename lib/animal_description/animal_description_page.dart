@@ -52,6 +52,7 @@ double lat, long;
 class _AnimalDescriptionState extends State<AnimalDescription> {
   static GlobalKey previewContainer =
       new GlobalKey(debugLabel: 'descriptionPreviewController');
+
   @override
   void initState() {
     super.initState();
@@ -118,10 +119,12 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
       print('accessToken is ${prefs.getString('accessToken')}');
       print('data we are receiving is $data');
 
-      setState(() {
-        animalDesc = data;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          animalDesc = data;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       ReusableWidgets.loggerFunction(
         fileName: 'animal_description',
