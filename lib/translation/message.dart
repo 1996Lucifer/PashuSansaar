@@ -364,6 +364,7 @@ class Messages extends Translations {
           'time_duration': 'वीडियो 1 मिनट से ज्यादा का नहीं होना चाहिए',
           'video_supportive_text': ' (अधिकतम 1 मिनट)',
           'upload_video_text': 'वीडियो डालें',
+          'video_loading_text': 'वीडियो प्राप्त की जा रही हैं',
         }
       };
 }

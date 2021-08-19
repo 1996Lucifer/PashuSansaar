@@ -106,7 +106,6 @@ class Result {
         videoFiles.add(new VideoFiles.fromJson(v));
       });
     }
-
     userId = json['userId'];
     longitude = json['longitude'];
     latitude = json['latitude'];
@@ -139,7 +138,6 @@ class Result {
     if (this.videoFiles != null) {
       data['videoFiles'] = this.videoFiles.map((v) => v.toJson()).toList();
     }
-
     data['userId'] = this.userId;
     data['longitude'] = this.longitude;
     data['latitude'] = this.latitude;

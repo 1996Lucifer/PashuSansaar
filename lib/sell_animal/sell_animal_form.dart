@@ -830,152 +830,163 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                       height: 200,
                       width: width * 0.9,
                       // color: Colors.amber,
-                      child: Visibility(
-                          visible: _videoController == null && !_isInitialised,
-                          child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      child: _progressState != 0 && _progressState != 100.0
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Opacity(
-                                  opacity: 0.5,
-                                  child: Image.asset(
-                                    'assets/images/photouploadside.png',
-                                    height: 100,
-                                  ),
-                                ),
-                                RaisedButton(
-                                  color: appPrimaryColor,
-                                  onPressed: () => chooseOption('5'),
-                                  child: Text(
-                                    'वीडियो चुने',
-                                    style: TextStyle(
-                                        color: Colors.white, fontSize: 16),
+                                CircularProgressIndicator(),
+                                SizedBox(width: 5),
+                                Text(
+                                  'video_loading_text'.tr,
+                                  style: TextStyle(
+                                    color: appPrimaryColor,
+                                    fontSize: 16,
                                   ),
                                 )
-                              ]),
-                          replacement: Visibility(
-                            visible: _isInitialised,
-                            child: _progressState != 100.0
-                                ? CircularProgressIndicator()
-                                : Stack(
-                                    alignment: Alignment.bottomCenter,
-                                    children: [
-                                      Container(
-                                        width: width * 0.9,
-                                        child: Stack(
-                                          alignment: Alignment.bottomCenter,
-                                          children: [
-                                            VideoPlayer(_videoController),
-                                          ],
-                                        ),
+                              ],
+                            )
+                          : Visibility(
+                              visible:
+                                  _videoController == null && !_isInitialised,
+                              child: Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Opacity(
+                                      opacity: 0.5,
+                                      child: Image.asset(
+                                        'assets/images/photouploadside.png',
+                                        height: 100,
                                       ),
-                                      Visibility(
-                                        visible: _isInitialised,
-                                        child: Positioned(
-                                          top: -1,
-                                          right: -1,
-                                          child: GestureDetector(
-                                            onTap: () {
-                                              setState(() {
-                                                videoPath = '';
-                                                _videoController.pause();
-                                                _isInitialised = false;
-                                              });
-                                            },
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Icon(Icons.cancel_rounded,
-                                                  color: appPrimaryColor,
-                                                  size: 30),
-                                            ),
+                                    ),
+                                    RaisedButton(
+                                      color: appPrimaryColor,
+                                      onPressed: () => chooseOption('5'),
+                                      child: Text(
+                                        'वीडियो चुने',
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 16),
+                                      ),
+                                    )
+                                  ]),
+                              replacement: Visibility(
+                                visible: _isInitialised,
+                                child: Stack(
+                                  alignment: Alignment.bottomCenter,
+                                  children: [
+                                    Container(
+                                      width: width * 0.9,
+                                      child: Stack(
+                                        alignment: Alignment.bottomCenter,
+                                        children: [
+                                          VideoPlayer(_videoController),
+                                        ],
+                                      ),
+                                    ),
+                                    Visibility(
+                                      visible: _isInitialised,
+                                      child: Positioned(
+                                        top: -1,
+                                        right: -1,
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            setState(() {
+                                              videoPath = '';
+                                              _videoController.pause();
+                                              _isInitialised = false;
+                                            });
+                                          },
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Icon(Icons.cancel_rounded,
+                                                color: appPrimaryColor,
+                                                size: 30),
                                           ),
                                         ),
-                                        replacement: SizedBox.shrink(),
                                       ),
-                                      _videoController == null
-                                          ? SizedBox.shrink()
-                                          : ValueListenableBuilder(
-                                              valueListenable: _videoController,
-                                              builder: (context,
-                                                      VideoPlayerValue value,
-                                                      child) =>
-                                                  Row(
-                                                children: [
-                                                  IconButton(
-                                                      icon: Icon(
-                                                        _videoController
-                                                                .value.isPlaying
-                                                            ? Icons.pause
-                                                            : Icons.play_arrow,
-                                                      ),
-                                                      onPressed:
-                                                          () => setState(() {
-                                                                if (!_videoController
-                                                                        .value
-                                                                        .isPlaying &&
-                                                                    value.position
-                                                                            .compareTo(value.duration) ==
-                                                                        0) {
-                                                                  _videoController
-                                                                      .initialize();
-                                                                }
+                                      replacement: SizedBox.shrink(),
+                                    ),
+                                    _videoController == null
+                                        ? SizedBox.shrink()
+                                        : ValueListenableBuilder(
+                                            valueListenable: _videoController,
+                                            builder: (context,
+                                                    VideoPlayerValue value,
+                                                    child) =>
+                                                Row(
+                                              children: [
+                                                IconButton(
+                                                    icon: Icon(
+                                                      _videoController
+                                                              .value.isPlaying
+                                                          ? Icons.pause
+                                                          : Icons.play_arrow,
+                                                    ),
+                                                    onPressed:
+                                                        () => setState(() {
+                                                              if (!_videoController
+                                                                      .value
+                                                                      .isPlaying &&
+                                                                  value.position
+                                                                          .compareTo(
+                                                                              value.duration) ==
+                                                                      0) {
                                                                 _videoController
-                                                                        .value
-                                                                        .isPlaying
-                                                                    ? _videoController
-                                                                        .pause()
-                                                                    : _videoController
-                                                                        .play();
-                                                              })),
-                                                  Container(
-                                                    width: width * 0.5,
-                                                    child:
-                                                        VideoProgressIndicator(
-                                                            _videoController,
-                                                            allowScrubbing:
-                                                                true),
-                                                  ),
-                                                  SizedBox(
-                                                    width: 10,
-                                                  ),
-                                                  Text(
-                                                      ReusableWidgets
-                                                              .printDuration(
-                                                                  value
-                                                                      .position)
-                                                          .toString(),
-                                                      style: TextStyle(
-                                                          color:
-                                                              appPrimaryColor))
-                                                ],
-                                              ),
+                                                                    .initialize();
+                                                              }
+                                                              _videoController
+                                                                      .value
+                                                                      .isPlaying
+                                                                  ? _videoController
+                                                                      .pause()
+                                                                  : _videoController
+                                                                      .play();
+                                                            })),
+                                                Container(
+                                                  width: width * 0.5,
+                                                  child: VideoProgressIndicator(
+                                                      _videoController,
+                                                      allowScrubbing: true),
+                                                ),
+                                                SizedBox(
+                                                  width: 10,
+                                                ),
+                                                Text(
+                                                    ReusableWidgets
+                                                            .printDuration(
+                                                                value.position)
+                                                        .toString(),
+                                                    style: TextStyle(
+                                                        color: appPrimaryColor))
+                                              ],
                                             ),
-                                    ],
-                                  ),
-                            replacement: Column(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Opacity(
-                                    opacity: 0.5,
-                                    child: Image.asset(
-                                      'assets/images/photouploadside.png',
-                                      height: 100,
-                                    ),
-                                  ),
-                                  RaisedButton(
-                                    color: appPrimaryColor,
-                                    onPressed: () => chooseOption('5'),
-                                    child: Text(
-                                      'वीडियो चुने',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
+                                          ),
+                                  ],
+                                ),
+                                replacement: Column(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Opacity(
+                                        opacity: 0.5,
+                                        child: Image.asset(
+                                          'assets/images/photouploadside.png',
+                                          height: 100,
+                                        ),
                                       ),
-                                    ),
-                                  )
-                                ]),
-                          )),
+                                      RaisedButton(
+                                        color: appPrimaryColor,
+                                        onPressed: () => chooseOption('5'),
+                                        child: Text(
+                                          'वीडियो चुने',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      )
+                                    ]),
+                              )),
                     )),
               ),
             ],
@@ -1550,7 +1561,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                           ReusableWidgets.showDialogBox(
                             context,
                             'error'.tr,
-                            Text('issue uploading video'),
+                            Text('issue uploading image or video'),
                           );
                         } else {
                           try {
@@ -1610,39 +1621,44 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                           } catch (e) {
                             _videoToBeUploadedLocal = [];
                           }
-                          
+
                           try {
                             for (int i = 0;
                                 i < imageUploadingStatus.length;
                                 i++) {
-                              Map uploadImageKeyValue = await _upload(
-                                path: imagesFileUpload[imageUploadingStatus[i]
-                                    .fields
-                                    .key
-                                    .split('_')[1]],
-                                fileName: imageUploadingStatus[i].fields.key,
-                                url: imageUploadingStatus[i].url,
-                                key: imageUploadingStatus[i].fields.key,
-                                bucket: imageUploadingStatus[i].fields.bucket,
-                                xAmzAlgorithm: imageUploadingStatus[i]
-                                    .fields
-                                    .xAmzAlgorithm,
-                                xAmzCredential: imageUploadingStatus[i]
-                                    .fields
-                                    .xAmzCredential,
-                                xAmzDate:
-                                    imageUploadingStatus[i].fields.xAmzDate,
-                                policy: imageUploadingStatus[i].fields.policy,
-                                xAmzSignature: imageUploadingStatus[i]
-                                    .fields
-                                    .xAmzSignature,
-                                fileType: result[i]['fileType'],
-                              );
+                              if (imageUploadingStatus[i].fields == null ||
+                                  imageUploadingStatus[i].url == null) {
+                                continue;
+                              } else {
+                                Map uploadImageKeyValue = await _upload(
+                                  path: imagesFileUpload[imageUploadingStatus[i]
+                                      .fields
+                                      .key
+                                      .split('_')[1]],
+                                  fileName: imageUploadingStatus[i].fields.key,
+                                  url: imageUploadingStatus[i].url,
+                                  key: imageUploadingStatus[i].fields.key,
+                                  bucket: imageUploadingStatus[i].fields.bucket,
+                                  xAmzAlgorithm: imageUploadingStatus[i]
+                                      .fields
+                                      .xAmzAlgorithm,
+                                  xAmzCredential: imageUploadingStatus[i]
+                                      .fields
+                                      .xAmzCredential,
+                                  xAmzDate:
+                                      imageUploadingStatus[i].fields.xAmzDate,
+                                  policy: imageUploadingStatus[i].fields.policy,
+                                  xAmzSignature: imageUploadingStatus[i]
+                                      .fields
+                                      .xAmzSignature,
+                                  fileType: result[i - 1]['fileType'],
+                                );
 
-                              _imageToBeUploadedLocal.addIf(
-                                uploadImageKeyValue.length > 0,
-                                uploadImageKeyValue,
-                              );
+                                _imageToBeUploadedLocal.addIf(
+                                  uploadImageKeyValue.length > 0,
+                                  uploadImageKeyValue,
+                                );
+                              }
                             }
                           } catch (e) {
                             _imageToBeUploadedLocal = [];
@@ -1757,8 +1773,11 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                           }
                         } else {
                           pr.hide();
-                          ReusableWidgets.showDialogBox(context, 'warning'.tr,
-                              Text('upload_video_error'.tr));
+                          ReusableWidgets.showDialogBox(
+                            context,
+                            'warning'.tr,
+                            Text('upload_video_error'.tr),
+                          );
                         }
 
                         print('][]==' + _imageToBeUploadedLocal.toString());

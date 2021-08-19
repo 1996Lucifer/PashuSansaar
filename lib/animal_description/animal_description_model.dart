@@ -7,7 +7,7 @@ class AnimalDescriptionModel {
   AnimalDescriptionModel.fromJson(Map<String, dynamic> json) {
     success = json['success'];
     animal =
-    json['animal'] != null ? new Animal.fromJson(json['animal']) : null;
+        json['animal'] != null ? new Animal.fromJson(json['animal']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -37,6 +37,7 @@ class Animal {
   int animalHasBaby;
   String moreInfo;
   List<Files> files;
+  List<VideoFiles> videoFiles;
   String userId;
   int animalStatus;
   String verificationStatus;
@@ -51,32 +52,33 @@ class Animal {
 
   Animal(
       {this.location,
-        this.sId,
-        this.animalType,
-        this.animalBreed,
-        this.animalAge,
-        this.animalBayat,
-        this.animalMilk,
-        this.animalMilkCapacity,
-        this.animalPrice,
-        this.isRecentBayat,
-        this.recentBayatTime,
-        this.isPregnant,
-        this.pregnantTime,
-        this.animalHasBaby,
-        this.moreInfo,
-        this.files,
-        this.userId,
-        this.animalStatus,
-        this.verificationStatus,
-        this.longitude,
-        this.latitude,
-        this.userName,
-        this.zipCode,
-        this.mobile,
-        this.createdAt,
-        this.updatedAt,
-        this.iV});
+      this.sId,
+      this.animalType,
+      this.animalBreed,
+      this.animalAge,
+      this.animalBayat,
+      this.animalMilk,
+      this.animalMilkCapacity,
+      this.animalPrice,
+      this.isRecentBayat,
+      this.recentBayatTime,
+      this.isPregnant,
+      this.pregnantTime,
+      this.animalHasBaby,
+      this.moreInfo,
+      this.files,
+      this.videoFiles,
+      this.userId,
+      this.animalStatus,
+      this.verificationStatus,
+      this.longitude,
+      this.latitude,
+      this.userName,
+      this.zipCode,
+      this.mobile,
+      this.createdAt,
+      this.updatedAt,
+      this.iV});
 
   Animal.fromJson(Map<String, dynamic> json) {
     location = json['location'] != null
@@ -100,6 +102,12 @@ class Animal {
       files = <Files>[];
       json['files'].forEach((v) {
         files.add(new Files.fromJson(v));
+      });
+    }
+    if (json['videoFiles'] != null) {
+      videoFiles = <VideoFiles>[];
+      json['videoFiles'].forEach((v) {
+        videoFiles.add(new VideoFiles.fromJson(v));
       });
     }
     userId = json['userId'];
@@ -136,6 +144,9 @@ class Animal {
     data['moreInfo'] = this.moreInfo;
     if (this.files != null) {
       data['files'] = this.files.map((v) => v.toJson()).toList();
+    }
+    if (this.videoFiles != null) {
+      data['videoFiles'] = this.videoFiles.map((v) => v.toJson()).toList();
     }
     data['userId'] = this.userId;
     data['animalStatus'] = this.animalStatus;
@@ -178,6 +189,25 @@ class Files {
   Files({this.fileName, this.fileType});
 
   Files.fromJson(Map<String, dynamic> json) {
+    fileName = json['fileName'];
+    fileType = json['fileType'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['fileName'] = this.fileName;
+    data['fileType'] = this.fileType;
+    return data;
+  }
+}
+
+class VideoFiles {
+  String fileName;
+  String fileType;
+
+  VideoFiles({this.fileName, this.fileType});
+
+  VideoFiles.fromJson(Map<String, dynamic> json) {
     fileName = json['fileName'];
     fileType = json['fileType'];
   }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/rendering.dart';
 import 'package:pashusansaar/animal_description/animal_description_controller.dart';
@@ -25,6 +26,8 @@ import 'package:share/share.dart';
 import 'package:get/get.dart';
 import 'dart:ui' as ui;
 
+import 'package:video_player/video_player.dart';
+
 class AnimalDescription extends StatefulWidget {
   final String userId;
   final String uniqueId;
@@ -45,7 +48,6 @@ Animal animalDesc;
 ProgressDialog pr;
 bool _isLoading = false;
 double lat, long;
-int myNum;
 
 class _AnimalDescriptionState extends State<AnimalDescription> {
   static GlobalKey previewContainer =
@@ -58,6 +60,7 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
 
   var formatter = intl.NumberFormat('#,##,000');
   bool _isLoadingScreen = false;
+  VideoPlayerController _videoController;
 
   final AnimalDescriptionController animalDescriptionController =
       Get.put(AnimalDescriptionController());
@@ -117,25 +120,56 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
 
       setState(() {
         animalDesc = data;
+        _isLoading = false;
       });
     } catch (e) {
-      ReusableWidgets.showDialogBox(
-        context,
-        'warning'.tr,
-        Text(
-          'global_error'.tr,
-        ),
+      ReusableWidgets.loggerFunction(
+        fileName: 'animal_description',
+        error: e.toString(),
+        myNum: prefs.getString('userId'),
+        userId: prefs.getString('userId'),
       );
+      // ReusableWidgets.showDialogBox(
+      //   context,
+      //   'warning'.tr,
+      //   Text(
+      //     'global_error'.tr,
+      //   ),
+      // );
     }
 
+    // try {
+    //   myNum = await sellerContactController.getSellerContact(
+    //       animalId: widget.uniqueId,
+    //       userId: prefs.getString('userId'),
+    //       token: prefs.getString('accessToken'),
+    //       channel: [
+    //         {"contactMedium": "Call"}
+    //       ]);
+    // } catch (e) {
+    // ReusableWidgets.showDialogBox(
+    //   context,
+    //   'warning'.tr,
+    //   Text(
+    //     'global_error'.tr,
+    //   ),
+    // );
+    // }
+  }
+
+  getSellerContacts(BuildContext context, String mode) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
     try {
+      int myNum;
       myNum = await sellerContactController.getSellerContact(
           animalId: widget.uniqueId,
           userId: prefs.getString('userId'),
           token: prefs.getString('accessToken'),
           channel: [
-            {"contactMedium": "Call"}
+            {"contactMedium": mode}
           ]);
+      return myNum;
     } catch (e) {
       ReusableWidgets.showDialogBox(
         context,
@@ -145,16 +179,15 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
         ),
       );
     }
-
-    setState(() {
-      _isLoading = false;
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-    pr = new ProgressDialog(context,
-        type: ProgressDialogType.Normal, isDismissible: false);
+    pr = new ProgressDialog(
+      context,
+      type: ProgressDialogType.Normal,
+      isDismissible: false,
+    );
     return RepaintBoundary(
       key: previewContainer,
       child: Scaffold(
@@ -496,7 +529,8 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
   _getCallButton() => RaisedButton.icon(
         color: Colors.blue,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        onPressed: () async {
+        onPressed: () {
+          int myNum = getSellerContacts(context, "Call");
           return UrlLauncher.launch('tel:+91 $myNum');
         },
         label: Text(
@@ -514,6 +548,8 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
         color: darkGreenColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         onPressed: () async {
+          int myNum = getSellerContacts(context, "Whatsapp");
+
           whatsappText =
               'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${animalDesc.userName}, $_userLocality \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';
           whatsappUrl =
@@ -627,102 +663,484 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
   }
 
   Widget _animalImage(_list) {
-    List<String> _images = [];
+    List<String> _images = [], _videos = [], _videoImageList = [];
     _list.files
         .forEach((elem) => _images.addIf(elem.fileName != null, elem.fileName));
+    _list.files?.forEach(
+      (elem) => _images.addIf(elem.fileName != null, elem.fileName),
+    );
+    _videoImageList = List.from(_videos)..addAll(_images);
 
     return Padding(
-        padding: EdgeInsets.only(left: 8.0, right: 8, bottom: 4),
-        child: GestureDetector(
-          onTap: () {
-            return Navigator.of(context).push(PageRouteBuilder(
-              opaque: true,
-              pageBuilder: (BuildContext context, _, __) =>
-                  StatefulBuilder(builder: (context, setState) {
-                return Column(
-                  children: [
-                    CarouselSlider(
-                      options: CarouselOptions(
-                          height: MediaQuery.of(context).size.height * 0.9,
-                          viewportFraction: 1.0,
-                          initialPage: 0,
-                          enableInfiniteScroll: true,
-                          reverse: false,
-                          autoPlay: true,
-                          autoPlayInterval: Duration(seconds: 3),
-                          autoPlayAnimationDuration:
-                              Duration(milliseconds: 800),
-                          autoPlayCurve: Curves.fastOutSlowIn,
-                          enlargeCenterPage: true,
-                          scrollDirection: Axis.horizontal,
-                          onPageChanged: (index, reason) => setState(() {
+      padding: EdgeInsets.only(
+        left: 8.0,
+        right: 8.0,
+        bottom: 4.0,
+      ),
+      child: Stack(
+        children: [
+          WillPopScope(
+            onWillPop: () async {
+              if (_videoController != null) {
+                _videoController.dispose();
+              }
+              return false;
+            },
+            child: GestureDetector(
+              onTap: () async {
+                if (_videoController != null) _videoController.pause();
+                if (_videos.length != 0) {
+                  pr.style(
+                      message: 'video_loading_message'.tr,
+                      messageTextStyle:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w500));
+                  // pr.show();
+
+                  if (_videoController != null) _videoController.dispose();
+
+                  _videoController =
+                      VideoPlayerController.network(_videoImageList[0]);
+                  await _videoController.initialize();
+                  _videoController.setLooping(false);
+                  // pr.hide();
+                  _videoController.play();
+                }
+
+                return Navigator.of(context).push(
+                  PageRouteBuilder(
+                    opaque: true,
+                    pageBuilder: (BuildContext context, _, __) =>
+                        StatefulBuilder(builder: (context, setState) {
+                      return Column(
+                        children: [
+                          CarouselSlider(
+                            options: CarouselOptions(
+                              height: MediaQuery.of(context).size.height * 0.9,
+                              viewportFraction: 1.0,
+                              initialPage: 0,
+                              enableInfiniteScroll: true,
+                              reverse: false,
+                              autoPlay: _videos.isEmpty ? true : false,
+                              autoPlayInterval: Duration(seconds: 4),
+                              autoPlayAnimationDuration:
+                                  Duration(milliseconds: 800),
+                              autoPlayCurve: Curves.fastOutSlowIn,
+                              enlargeCenterPage: true,
+                              scrollDirection: Axis.horizontal,
+                              onPageChanged: (index, reason) => setState(() {
                                 _current = index;
-                              })),
-                      items: _images.map((i) {
-                        return InteractiveViewer(
-                            boundaryMargin: const EdgeInsets.all(20.0),
-                            minScale: 0.1,
-                            maxScale: 1.6,
-                            child: i.length > 1000
-                                ? Image.memory(base64Decode('$i'))
-                                : Image.network(
-                                    '$i',
-                                    loadingBuilder: (BuildContext context,
-                                        Widget child,
-                                        ImageChunkEvent loadingProgress) {
-                                      if (loadingProgress == null) return child;
-                                      return Center(
-                                        child: CircularProgressIndicator(
-                                          value: loadingProgress
-                                                      .expectedTotalBytes !=
-                                                  null
-                                              ? loadingProgress
-                                                      .cumulativeBytesLoaded /
-                                                  loadingProgress
-                                                      .expectedTotalBytes
-                                              : null,
+                              }),
+                            ),
+                            items: _videoImageList.map((i) {
+                              return i.split('/')[4].split('_')[1] == "Video"
+                                  ? Stack(
+                                      alignment:
+                                          AlignmentDirectional.bottomCenter,
+                                      children: [
+                                        _videoController == null
+                                            ? SizedBox.shrink()
+                                            : ValueListenableBuilder(
+                                                valueListenable:
+                                                    _videoController,
+                                                builder: (context,
+                                                        VideoPlayerValue value,
+                                                        child) =>
+                                                    Center(
+                                                  child: StreamBuilder<Object>(
+                                                      stream: null,
+                                                      builder:
+                                                          (context, snapshot) {
+                                                        return GestureDetector(
+                                                          onTap: () {
+                                                            if (!_videoController
+                                                                    .value
+                                                                    .isPlaying &&
+                                                                value.position
+                                                                        .compareTo(
+                                                                            value.duration) ==
+                                                                    0) {
+                                                              _videoController
+                                                                  .initialize();
+                                                            }
+                                                            setState(() {
+                                                              _videoController
+                                                                      .value
+                                                                      .isPlaying
+                                                                  ? _videoController
+                                                                      .pause()
+                                                                  : _videoController
+                                                                      .play();
+                                                            });
+                                                          },
+                                                          child: AspectRatio(
+                                                            aspectRatio:
+                                                                _videoController
+                                                                    .value
+                                                                    .aspectRatio,
+                                                            child: Stack(
+                                                              alignment:
+                                                                  Alignment
+                                                                      .center,
+                                                              children: [
+                                                                VideoPlayer(
+                                                                    _videoController),
+                                                                _videoController
+                                                                        .value
+                                                                        .isPlaying
+                                                                    ? SizedBox
+                                                                        .shrink()
+                                                                    : Icon(
+                                                                        Icons
+                                                                            .play_circle_fill,
+                                                                        color: Colors
+                                                                            .grey[800],
+                                                                        size:
+                                                                            80,
+                                                                      ),
+                                                              ],
+                                                            ),
+                                                            // ),
+                                                          ),
+                                                        );
+                                                      }),
+                                                ),
+                                              ),
+                                        _videoController == null
+                                            ? SizedBox.shrink()
+                                            : ValueListenableBuilder(
+                                                valueListenable:
+                                                    _videoController,
+                                                builder: (context,
+                                                        VideoPlayerValue value,
+                                                        child) =>
+                                                    Row(
+                                                  children: [
+                                                    Card(
+                                                      color: Colors.transparent,
+                                                      child: IconButton(
+                                                        icon: Icon(
+                                                          _videoController.value
+                                                                  .isPlaying
+                                                              ? Icons.pause
+                                                              : Icons
+                                                                  .play_arrow,
+                                                          color: Colors.white,
+                                                        ),
+                                                        onPressed: () =>
+                                                            setState(() {
+                                                          if (value.duration ==
+                                                              null)
+                                                            ReusableWidgets
+                                                                .showDialogBox(
+                                                              context,
+                                                              'error'.tr,
+                                                              Text('Error'),
+                                                            );
+                                                          if (!_videoController
+                                                                  .value
+                                                                  .isPlaying &&
+                                                              value.position
+                                                                      .compareTo(
+                                                                          value
+                                                                              .duration) ==
+                                                                  0) {
+                                                            _videoController
+                                                                .initialize();
+                                                          }
+                                                          _videoController.value
+                                                                  .isPlaying
+                                                              ? _videoController
+                                                                  .pause()
+                                                              : _videoController
+                                                                  .play();
+                                                        }),
+                                                      ),
+                                                    ),
+                                                    Card(
+                                                      color: Colors.transparent,
+                                                      child: Container(
+                                                        width: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.6,
+                                                        child:
+                                                            VideoProgressIndicator(
+                                                          _videoController,
+                                                          colors:
+                                                              VideoProgressColors(
+                                                            playedColor:
+                                                                Colors.white,
+                                                          ),
+                                                          padding:
+                                                              EdgeInsets.all(
+                                                                  20),
+                                                          allowScrubbing: true,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                      width: 10,
+                                                    ),
+                                                    Card(
+                                                      color: Colors.transparent,
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                    .symmetric(
+                                                                vertical: 11.0,
+                                                                horizontal: 5),
+                                                        child: Text(
+                                                            ReusableWidgets
+                                                                    .printDuration(
+                                                                        value
+                                                                            .position)
+                                                                .toString(),
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontSize: 15)),
+                                                      ),
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                        GestureDetector(
+                                          onTap: () {
+                                            if (_videos.length != 0) {
+                                              _videoController.pause();
+                                              Navigator.of(context).popUntil(
+                                                  (route) => route.isFirst);
+                                            } else if (_images.length != 0) {
+                                              Navigator.of(context).popUntil(
+                                                  (route) => route.isFirst);
+                                            }
+                                          },
+                                          child: Column(
+                                            children: [
+                                              SizedBox(
+                                                height: 10,
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    top: 16.0,
+                                                    left: 8,
+                                                    right: 8),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    _buildInfowidget(_list),
+                                                    SizedBox(
+                                                      width: 5,
+                                                    ),
+                                                    Icon(
+                                                      Icons.cancel,
+                                                      size: 50,
+                                                      color: Colors.white,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                      );
-                                    },
-                                  ));
-                      }).toList(),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: _images.map((url) {
-                        int indexData = _images.indexOf(url);
-                        return Container(
-                          width: 8.0,
-                          height: 8.0,
-                          margin: EdgeInsets.symmetric(
-                              vertical: 10.0, horizontal: 2.0),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: _current == indexData
-                                ? Color.fromRGBO(255, 255, 255, 1)
-                                : Color.fromRGBO(255, 255, 255, 0.4),
+                                      ],
+                                    )
+                                  : Stack(
+                                      alignment: AlignmentDirectional.center,
+                                      children: [
+                                        CachedNetworkImage(
+                                          imageUrl: '$i',
+                                          progressIndicatorBuilder: (context,
+                                                  url, downloadProgress) =>
+                                              Center(
+                                            child: CircularProgressIndicator(
+                                              value: downloadProgress.progress,
+                                            ),
+                                          ),
+                                          errorWidget: (context, url, error) =>
+                                              Icon(
+                                            Icons.error,
+                                            size: 60,
+                                          ),
+                                        ),
+                                        GestureDetector(
+                                          onTap: () {
+                                            if (_videos.length != 0) {
+                                              _videoController.pause();
+                                              Navigator.of(context).popUntil(
+                                                  (route) => route.isFirst);
+                                            } else if (_images.length != 0) {
+                                              Navigator.of(context).popUntil(
+                                                  (route) => route.isFirst);
+                                            }
+                                          },
+                                          child: Column(
+                                            children: [
+                                              SizedBox(
+                                                height: 10,
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                  top: 16.0,
+                                                  left: 8,
+                                                  right: 8,
+                                                ),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    _buildInfowidget(_list),
+                                                    SizedBox(
+                                                      width: 5,
+                                                    ),
+                                                    Icon(
+                                                      Icons.cancel,
+                                                      size: 50,
+                                                      color: Colors.white,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                            }).toList(),
                           ),
-                        );
-                      }).toList(),
-                    ),
-                  ],
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: _videoImageList.map((url) {
+                              int indexData = _videoImageList.indexOf(url);
+                              return Container(
+                                width: 8.0,
+                                height: 8.0,
+                                margin: EdgeInsets.symmetric(
+                                  vertical: 10.0,
+                                  horizontal: 2.0,
+                                ),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: _current == indexData
+                                      ? Color.fromRGBO(255, 255, 255, 1)
+                                      : Color.fromRGBO(255, 255, 255, 0.4),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      );
+                    }),
+                  ),
                 );
-              }),
-            ));
-          },
-          child: Container(
-            height: 200.0,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                  fit: BoxFit.cover,
-                  image: _images[0].length > 1000
-                      ? MemoryImage(base64.decode(_images[0]))
-                      : NetworkImage(_images[0])),
-              borderRadius: BorderRadius.all(Radius.circular(8.0)),
-              color: Colors.redAccent,
+              },
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    height: 200.0,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8.0),
+                      child: CachedNetworkImage(
+                        imageUrl: _videos.length != 0 ? _videos[1] : _images[0],
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        progressIndicatorBuilder:
+                            (context, url, downloadProgress) => Center(
+                          child: Image.asset(
+                            'assets/images/loader.gif',
+                            height: 80,
+                            width: 80,
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Icon(
+                          Icons.error,
+                          size: 80,
+                        ),
+                      ),
+                    ),
+                  ),
+                  _videos.isNotEmpty
+                      ? Icon(
+                          Icons.play_circle_outline_sharp,
+                          size: 100,
+                          color: appPrimaryColor,
+                        )
+                      : SizedBox.shrink()
+                ],
+              ),
             ),
           ),
-        ));
+          Positioned(
+            right: 0,
+            child: RaisedButton.icon(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18.0),
+                side: BorderSide(color: violetColor),
+              ),
+              color: violetColor,
+              onPressed: () async {
+                String qParams = json.encode({
+                  "uniqueId": _list.sId,
+                  "userId": _list.userId,
+                  "screen": "DESCRIPTION_PAGE",
+                });
+
+                final DynamicLinkParameters parameters = DynamicLinkParameters(
+                    uriPrefix: "https://pashusansaar.page.link",
+                    link: Uri.parse(
+                        "https://www.pashu-sansaar.com/?data=$qParams"),
+                    androidParameters: AndroidParameters(
+                      packageName: 'dj.pashusansaar',
+                      minimumVersion: 21,
+                    ),
+                    dynamicLinkParametersOptions: DynamicLinkParametersOptions(
+                      shortDynamicLinkPathLength:
+                          ShortDynamicLinkPathLength.unguessable,
+                    ),
+                    navigationInfoParameters:
+                        NavigationInfoParameters(forcedRedirectEnabled: true));
+
+                final shortDynamicLink = await parameters.buildShortLink();
+                final Uri shortUrl = shortDynamicLink.shortUrl;
+
+                await takeScreenShot(_list.sId);
+
+                // Share.share(
+                //     "नस्ल: ${_list.animalBreed}\nजानकारी: description\nदूध(प्रति दिन): ${_list.animalMilk} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
+                //     subject: 'animal_info'.tr);
+
+                Share.shareFiles([fileUrl.path],
+                    mimeTypes: ['images/png'],
+                    text:
+                        // "नस्ल: ${_list['userAnimalBreed']}\nजानकारी: ${_list['userAnimalDescription']}\nदूध(प्रति दिन): ${_list['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
+                        _list.animalType <= 2
+                            ? "नस्ल: ${_list.animalBreed}\nजानकारी: ${ReusableWidgets.descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : ReusableWidgets.descriptionText(_list)}\n${_list.animalMilkCapacity != null || _list.animalMilk != null ? 'दूध(प्रति दिन): ${_list.animalMilkCapacity ?? _list.animalMilk} Litre' : ''}\n\nपशु देखे: ${shortUrl.toString()}"
+                            : (_list.animalType <= 4
+                                ? ("नस्ल: ${_list.animalBreed}\nजानकारी: ${ReusableWidgets.descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : ReusableWidgets.descriptionText(_list)}\n\nपशु देखे: ${shortUrl.toString()}")
+                                : ("जानकारी: ${ReusableWidgets.descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : ReusableWidgets.descriptionText(_list)}\n\nपशु देखे: ${shortUrl.toString()}")),
+                    subject: 'पशु की जानकारी');
+
+                // Share.share(shortUrl.toString());
+              },
+              icon: Icon(Icons.share, color: Colors.white, size: 14),
+              label: Text(
+                'share'.tr,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   removingNumberFromBayaat(String bayaat) {

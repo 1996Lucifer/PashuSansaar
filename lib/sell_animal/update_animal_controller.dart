@@ -21,6 +21,7 @@ class UpdateAnimalController extends GetxController {
     String userId,
     String moreInfo,
     List files,
+    List videoFiles,
     String token,
     String animalId,
   }) async {
@@ -39,6 +40,7 @@ class UpdateAnimalController extends GetxController {
       "userId": userId,
       "moreInfo": moreInfo,
       "files": files,
+      "videoFiles": videoFiles,
       "animalId": animalId,
       "animalHasBaby": animalHasBaby,
     };

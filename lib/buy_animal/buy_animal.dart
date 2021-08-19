@@ -1478,11 +1478,8 @@ class _BuyAnimalState extends State<BuyAnimal>
             },
             child: GestureDetector(
               onTap: () async {
-                if (_videoController != null) _videoController.dispose();
+                if (_videoController != null) _videoController.pause();
                 if (_videos.length != 0) {
-                  pr = new ProgressDialog(context,
-                      type: ProgressDialogType.Normal, isDismissible: false);
-
                   pr.style(
                       message: 'video_loading_message'.tr,
                       messageTextStyle:
@@ -1684,15 +1681,15 @@ class _BuyAnimalState extends State<BuyAnimal>
                                                                 vertical: 11.0,
                                                                 horizontal: 5),
                                                         child: Text(
-                                                            ReusableWidgets
-                                                                    .printDuration(
-                                                                        value
-                                                                            .position)
-                                                                .toString(),
-                                                            style: TextStyle(
-                                                                color: Colors
-                                                                    .white,
-                                                                fontSize: 15)),
+                                                          ReusableWidgets
+                                                              .printDuration(
+                                                            value.position,
+                                                          ).toString(),
+                                                          style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 15,
+                                                          ),
+                                                        ),
                                                       ),
                                                     )
                                                   ],
@@ -1741,26 +1738,67 @@ class _BuyAnimalState extends State<BuyAnimal>
                                         ),
                                       ],
                                     )
-                                  : InteractiveViewer(
-                                      boundaryMargin:
-                                          const EdgeInsets.all(20.0),
-                                      minScale: 0.1,
-                                      maxScale: 1.6,
-                                      child: CachedNetworkImage(
-                                        imageUrl: '$i',
-                                        progressIndicatorBuilder:
-                                            (context, url, downloadProgress) =>
-                                                Center(
-                                          child: CircularProgressIndicator(
-                                            value: downloadProgress.progress,
+                                  : Stack(
+                                      alignment: AlignmentDirectional.center,
+                                      children: [
+                                        CachedNetworkImage(
+                                          imageUrl: '$i',
+                                          progressIndicatorBuilder: (context,
+                                                  url, downloadProgress) =>
+                                              Center(
+                                            child: CircularProgressIndicator(
+                                              value: downloadProgress.progress,
+                                            ),
+                                          ),
+                                          errorWidget: (context, url, error) =>
+                                              Icon(
+                                            Icons.error,
+                                            size: 60,
                                           ),
                                         ),
-                                        errorWidget: (context, url, error) =>
-                                            Icon(
-                                          Icons.error,
-                                          size: 60,
+                                        GestureDetector(
+                                          onTap: () {
+                                            if (_videos.length != 0) {
+                                              _videoController.pause();
+                                              Navigator.of(context).popUntil(
+                                                  (route) => route.isFirst);
+                                            } else if (_images.length != 0) {
+                                              Navigator.of(context).popUntil(
+                                                  (route) => route.isFirst);
+                                            }
+                                          },
+                                          child: Column(
+                                            children: [
+                                              SizedBox(
+                                                height: 10,
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                  top: 16.0,
+                                                  left: 8,
+                                                  right: 8,
+                                                ),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    _buildInfowidget(index),
+                                                    SizedBox(
+                                                      width: 5,
+                                                    ),
+                                                    Icon(
+                                                      Icons.cancel,
+                                                      size: 50,
+                                                      color: Colors.white,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                      ),
+                                      ],
                                     );
                             }).toList(),
                           ),
@@ -1772,7 +1810,9 @@ class _BuyAnimalState extends State<BuyAnimal>
                                 width: 8.0,
                                 height: 8.0,
                                 margin: EdgeInsets.symmetric(
-                                    vertical: 10.0, horizontal: 2.0),
+                                  vertical: 10.0,
+                                  horizontal: 2.0,
+                                ),
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: _current == indexData
@@ -1792,22 +1832,34 @@ class _BuyAnimalState extends State<BuyAnimal>
                 height: 200.0,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
-                  child: CachedNetworkImage(
-                    imageUrl: _videos.length != 0 ? _videos[1] : _images[0],
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    progressIndicatorBuilder:
-                        (context, url, downloadProgress) => Center(
-                      child: Image.asset(
-                        'assets/images/loader.gif',
-                        height: 80,
-                        width: 80,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      CachedNetworkImage(
+                        imageUrl: _videos.length != 0 ? _videos[1] : _images[0],
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        progressIndicatorBuilder:
+                            (context, url, downloadProgress) => Center(
+                            child: Image.asset(
+                              'assets/images/loader.gif',
+                              height: 80,
+                              width: 80,
+                            ),
+                          ),
+                        errorWidget: (context, url, error) => Icon(
+                          Icons.error,
+                          size: 80,
+                        ),
                       ),
-                    ),
-                    errorWidget: (context, url, error) => Icon(
-                      Icons.error,
-                      size: 80,
-                    ),
+                      _videos.isNotEmpty
+                          ? Icon(
+                              Icons.play_circle_outline_sharp,
+                              size: 100,
+                              color: appPrimaryColor,
+                            )
+                          : SizedBox.shrink(),
+                    ],
                   ),
                 ),
               ),
