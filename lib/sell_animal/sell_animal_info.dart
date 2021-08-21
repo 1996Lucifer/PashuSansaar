@@ -82,22 +82,34 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                 height: 130.0,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
-                  child: CachedNetworkImage(
-                    imageUrl: _list.files.length != 0
-                        ? _list.files[_list.files.length - 1].fileName
-                        : _list.videoFiles[1].fileName,
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    progressIndicatorBuilder:
-                        (context, url, downloadProgress) => Center(
-                      child: Image.asset(
-                        'assets/images/loader.gif',
-                        height: 40,
-                        width: 40,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      CachedNetworkImage(
+                        imageUrl: _list.files.length != 0
+                            ? _list.files[_list.files.length - 1].fileName
+                            : _list.videoFiles[1].fileName,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        progressIndicatorBuilder:
+                            (context, url, downloadProgress) => Center(
+                          child: Image.asset(
+                            'assets/images/loader.gif',
+                            height: 40,
+                            width: 40,
+                          ),
+                        ),
+                        errorWidget: (context, url, error) =>
+                            Icon(Icons.error, size: 30),
                       ),
-                    ),
-                    errorWidget: (context, url, error) =>
-                        Icon(Icons.error, size: 30),
+                      _list.videoFiles.isNotEmpty
+                          ? Icon(
+                              Icons.play_circle_outline_sharp,
+                              size: 50,
+                              color: appPrimaryColor,
+                            )
+                          : SizedBox.shrink(),
+                    ],
                   ),
                 ),
               ),
@@ -705,9 +717,6 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                                         MaterialPageRoute(
                                             builder: (context) =>
                                                 InterestedBuyer(
-                                                  // key:
-                                                  //     Key(widget.animalInfo[index]
-                                                  //         ['uniqueId']),
                                                   listId: widget
                                                           .animalInfo[index]
                                                           .sId ??
@@ -738,7 +747,9 @@ class _SellingAnimalInfoState extends State<SellingAnimalInfo>
                                                     fontSize: 16,
                                                     fontWeight:
                                                         FontWeight.bold)),
-                                            Icon(Icons.arrow_forward_ios)
+                                            Icon(
+                                              Icons.arrow_forward_ios,
+                                            )
                                           ],
                                         ),
                                       ),

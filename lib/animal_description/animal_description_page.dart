@@ -226,6 +226,7 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
                             ),
                             elevation: 5,
                             child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 SizedBox(
                                   height: 10,
@@ -243,7 +244,8 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
                                   height: 10,
                                 ),
                                 ReusableWidgets.animalDescriptionMethod(
-                                    animalDesc),
+                                  animalDesc,
+                                ),
                                 SizedBox(
                                   height: 10,
                                 ),
@@ -665,10 +667,11 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
     });
   }
 
-  Widget _animalImage(_list) {
+  Padding _animalImage(_list) {
     List<String> _images = [], _videos = [], _videoImageList = [];
-    _list.files
-        .forEach((elem) => _images.addIf(elem.fileName != null, elem.fileName));
+    _list.videoFiles?.forEach(
+      (elem) => _videos.addIf(elem.fileName != null, elem.fileName),
+    );
     _list.files?.forEach(
       (elem) => _images.addIf(elem.fileName != null, elem.fileName),
     );
@@ -682,39 +685,40 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
       ),
       child: Stack(
         children: [
-          WillPopScope(
-            onWillPop: () async {
-              if (_videoController != null) {
-                _videoController.dispose();
+          GestureDetector(
+            onTap: () async {
+              if (_videoController != null) _videoController.pause();
+              if (_videos.length != 0) {
+                pr.style(
+                    message: 'video_loading_message'.tr,
+                    messageTextStyle:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.w500));
+                pr.show();
+
+                if (_videoController != null) _videoController.dispose();
+
+                _videoController =
+                    VideoPlayerController.network(_videoImageList[0]);
+                await _videoController.initialize();
+                _videoController.setLooping(false);
+                pr.hide();
+                _videoController.play();
               }
-              return false;
-            },
-            child: GestureDetector(
-              onTap: () async {
-                if (_videoController != null) _videoController.pause();
-                if (_videos.length != 0) {
-                  pr.style(
-                      message: 'video_loading_message'.tr,
-                      messageTextStyle:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.w500));
-                  // pr.show();
 
-                  if (_videoController != null) _videoController.dispose();
-
-                  _videoController =
-                      VideoPlayerController.network(_videoImageList[0]);
-                  await _videoController.initialize();
-                  _videoController.setLooping(false);
-                  // pr.hide();
-                  _videoController.play();
-                }
-
-                return Navigator.of(context).push(
-                  PageRouteBuilder(
-                    opaque: true,
-                    pageBuilder: (BuildContext context, _, __) =>
-                        StatefulBuilder(builder: (context, setState) {
-                      return Column(
+              return Navigator.of(context).push(
+                PageRouteBuilder(
+                  opaque: true,
+                  pageBuilder: (BuildContext context, _, __) =>
+                      StatefulBuilder(builder: (context, setState) {
+                    return WillPopScope(
+                      onWillPop: () async {
+                        print("=-=-=-=buy animal willpop=-=-=-=-=");
+                        if (_videoController.value.isPlaying) {
+                          _videoController.pause();
+                        }
+                        return Future.value(true);
+                      },
+                      child: Column(
                         children: [
                           CarouselSlider(
                             options: CarouselOptions(
@@ -894,15 +898,15 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
                                                                 vertical: 11.0,
                                                                 horizontal: 5),
                                                         child: Text(
-                                                            ReusableWidgets
-                                                                    .printDuration(
-                                                                        value
-                                                                            .position)
-                                                                .toString(),
-                                                            style: TextStyle(
-                                                                color: Colors
-                                                                    .white,
-                                                                fontSize: 15)),
+                                                          ReusableWidgets
+                                                              .printDuration(
+                                                            value.position,
+                                                          ).toString(),
+                                                          style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 15,
+                                                          ),
+                                                        ),
                                                       ),
                                                     )
                                                   ],
@@ -912,12 +916,10 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
                                           onTap: () {
                                             if (_videos.length != 0) {
                                               _videoController.pause();
-                                              Navigator.of(context).popUntil(
-                                                  (route) => route.isFirst);
-                                            } else if (_images.length != 0) {
-                                              Navigator.of(context).popUntil(
-                                                  (route) => route.isFirst);
                                             }
+                                            Navigator.of(context).pop();
+                                            // Navigator.of(context).popUntil(
+                                            //     (route) => route.isFirst);
                                           },
                                           child: Column(
                                             children: [
@@ -973,11 +975,14 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
                                           onTap: () {
                                             if (_videos.length != 0) {
                                               _videoController.pause();
-                                              Navigator.of(context).popUntil(
-                                                  (route) => route.isFirst);
+                                              Navigator.of(context).pop();
+                                              // popUntil(
+                                              //     (route) => route.isFirst);
                                             } else if (_images.length != 0) {
-                                              Navigator.of(context).popUntil(
-                                                  (route) => route.isFirst);
+                                              Navigator.of(context).pop();
+
+                                              // Navigator.of(context).popUntil(
+                                              //     (route) => route.isFirst);
                                             }
                                           },
                                           child: Column(
@@ -1036,107 +1041,44 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
                             }).toList(),
                           ),
                         ],
-                      );
-                    }),
-                  ),
-                );
-              },
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    height: 200.0,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0),
-                      child: CachedNetworkImage(
-                        imageUrl: _videos.length != 0 ? _videos[1] : _images[0],
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        progressIndicatorBuilder:
-                            (context, url, downloadProgress) => Center(
-                          child: Image.asset(
-                            'assets/images/loader.gif',
-                            height: 80,
-                            width: 80,
-                          ),
-                        ),
-                        errorWidget: (context, url, error) => Icon(
-                          Icons.error,
-                          size: 80,
+                      ),
+                    );
+                  }),
+                ),
+              );
+            },
+            child: Container(
+              height: 200.0,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8.0),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    CachedNetworkImage(
+                      imageUrl: _videos.length != 0 ? _videos[1] : _images[0],
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      progressIndicatorBuilder:
+                          (context, url, downloadProgress) => Center(
+                        child: Image.asset(
+                          'assets/images/loader.gif',
+                          height: 80,
+                          width: 80,
                         ),
                       ),
+                      errorWidget: (context, url, error) => Icon(
+                        Icons.error,
+                        size: 80,
+                      ),
                     ),
-                  ),
-                  _videos.isNotEmpty
-                      ? Icon(
-                          Icons.play_circle_outline_sharp,
-                          size: 100,
-                          color: appPrimaryColor,
-                        )
-                      : SizedBox.shrink()
-                ],
-              ),
-            ),
-          ),
-          Positioned(
-            right: 0,
-            child: RaisedButton.icon(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18.0),
-                side: BorderSide(color: violetColor),
-              ),
-              color: violetColor,
-              onPressed: () async {
-                String qParams = json.encode({
-                  "uniqueId": _list.sId,
-                  "userId": _list.userId,
-                  "screen": "DESCRIPTION_PAGE",
-                });
-
-                final DynamicLinkParameters parameters = DynamicLinkParameters(
-                    uriPrefix: "https://pashusansaar.page.link",
-                    link: Uri.parse(
-                        "https://www.pashu-sansaar.com/?data=$qParams"),
-                    androidParameters: AndroidParameters(
-                      packageName: 'dj.pashusansaar',
-                      minimumVersion: 21,
-                    ),
-                    dynamicLinkParametersOptions: DynamicLinkParametersOptions(
-                      shortDynamicLinkPathLength:
-                          ShortDynamicLinkPathLength.unguessable,
-                    ),
-                    navigationInfoParameters:
-                        NavigationInfoParameters(forcedRedirectEnabled: true));
-
-                final shortDynamicLink = await parameters.buildShortLink();
-                final Uri shortUrl = shortDynamicLink.shortUrl;
-
-                await takeScreenShot(_list.sId);
-
-                // Share.share(
-                //     "नस्ल: ${_list.animalBreed}\nजानकारी: description\nदूध(प्रति दिन): ${_list.animalMilk} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
-                //     subject: 'animal_info'.tr);
-
-                Share.shareFiles([fileUrl.path],
-                    mimeTypes: ['images/png'],
-                    text:
-                        // "नस्ल: ${_list['userAnimalBreed']}\nजानकारी: ${_list['userAnimalDescription']}\nदूध(प्रति दिन): ${_list['userAnimalMilk']} Litre\n\nऍप डाउनलोड  करे : https://play.google.com/store/apps/details?id=dj.pashusansaar}",
-                        _list.animalType <= 2
-                            ? "नस्ल: ${_list.animalBreed}\nजानकारी: ${ReusableWidgets.descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : ReusableWidgets.descriptionText(_list)}\n${_list.animalMilkCapacity != null || _list.animalMilk != null ? 'दूध(प्रति दिन): ${_list.animalMilkCapacity ?? _list.animalMilk} Litre' : ''}\n\nपशु देखे: ${shortUrl.toString()}"
-                            : (_list.animalType <= 4
-                                ? ("नस्ल: ${_list.animalBreed}\nजानकारी: ${ReusableWidgets.descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : ReusableWidgets.descriptionText(_list)}\n\nपशु देखे: ${shortUrl.toString()}")
-                                : ("जानकारी: ${ReusableWidgets.descriptionText(_list) == null ? 'जानकारी उपलब्ध नहीं है|' : ReusableWidgets.descriptionText(_list)}\n\nपशु देखे: ${shortUrl.toString()}")),
-                    subject: 'पशु की जानकारी');
-
-                // Share.share(shortUrl.toString());
-              },
-              icon: Icon(Icons.share, color: Colors.white, size: 14),
-              label: Text(
-                'share'.tr,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
+                    _videos.isNotEmpty
+                        ? Icon(
+                            Icons.play_circle_outline_sharp,
+                            size: 100,
+                            color: appPrimaryColor,
+                          )
+                        : SizedBox.shrink(),
+                  ],
                 ),
               ),
             ),

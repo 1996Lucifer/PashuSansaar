@@ -1731,6 +1731,11 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
       print('-Response=-=-=>>' + resp.toString());
 
       if (key.split('_')[1] == "Video" || key.split('_')[1] == 'thumbnail') {
+        _videoToBeUploaded.removeWhere((element) {
+          print('element==video=>' + element.toString());
+          return element['fileName'].contains(key.split('_')[1]);
+        });
+
         setState(() {
           _videoToBeUploaded.add({'fileName': key, 'fileType': fileType});
         });

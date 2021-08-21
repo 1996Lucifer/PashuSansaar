@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:core';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
+import 'package:pashusansaar/animal_description/animal_description_page.dart';
 import 'package:pashusansaar/buy_animal/buy_animal_model.dart';
 import 'package:pashusansaar/refresh_token/refresh_token_controller.dart';
 import 'package:pashusansaar/seller_contact/seller_contact_controller.dart';
@@ -550,111 +551,6 @@ class _BuyAnimalState extends State<BuyAnimal>
           ],
         ),
       );
-
-  // Widget _postBuyerWidget() {
-  //   return isCardVisible == null
-  //       ? SizedBox.shrink()
-  //       : !isCardVisible
-  //           ? CustomFABWidget(
-  //               userMobileNumber: widget.userMobileNumber,
-  //               userName: widget.userName,
-  //             )
-  //           : Padding(
-  //               padding: EdgeInsets.all(10),
-  //               child: OpenContainer(
-  //                 closedElevation: 0,
-  //                 transitionDuration: Duration(seconds: 2),
-  //                 openBuilder: (context, _) => AnimalInfoForm(
-  //                   userMobileNumber: widget.userMobileNumber,
-  //                   userName: widget.userName,
-  //                 ),
-  //                 closedShape: RoundedRectangleBorder(
-  //                   borderRadius: BorderRadius.all(
-  //                     Radius.circular(10.0),
-  //                   ),
-  //                 ),
-  //                 closedColor: Theme.of(context).primaryColor,
-  //                 closedBuilder: (context, openContainer) => Container(
-  //                   // key: UniqueKey(),
-  //                   height: 220,
-  //                   width: 150,
-  //                   child: Padding(
-  //                     padding: const EdgeInsets.only(
-  //                       left: 8.0,
-  //                       right: 8,
-  //                     ),
-  //                     child: SingleChildScrollView(
-  //                       child: Column(
-  //                         crossAxisAlignment: CrossAxisAlignment.start,
-  //                         children: [
-  //                           Align(
-  //                             alignment: Alignment.bottomRight,
-  //                             child: RawMaterialButton(
-  //                               onPressed: () => setState(() {
-  //                                 isCardVisible = false;
-  //                               }),
-  //                               elevation: 2.0,
-  //                               fillColor: Colors.white,
-  //                               child: Icon(
-  //                                 Icons.close,
-  //                                 size: 20.0,
-  //                                 color: appPrimaryColor,
-  //                               ),
-  //                               shape: CircleBorder(),
-  //                               constraints: BoxConstraints(
-  //                                 minWidth: 30,
-  //                                 minHeight: 30,
-  //                               ),
-  //                             ),
-  //                           ),
-  //                           Padding(
-  //                             padding: const EdgeInsets.only(left: 12.0),
-  //                             child: Text(
-  //                               'कौन सा पशु खरीदना चाहते है ?',
-  //                               style: TextStyle(
-  //                                 color: Colors.white,
-  //                                 fontWeight: FontWeight.bold,
-  //                                 fontSize: 22,
-  //                               ),
-  //                             ),
-  //                           ),
-  //                           SizedBox(
-  //                             width: double.infinity,
-  //                             child: RaisedButton(
-  //                               shape: OutlineInputBorder(
-  //                                   borderRadius: BorderRadius.circular(10)),
-  //                               color: Colors.white,
-  //                               onPressed: null,
-  //                               disabledColor: Colors.white,
-  //                               disabledTextColor: appPrimaryColor,
-  //                               child: Row(
-  //                                   textDirection: TextDirection.rtl,
-  //                                   mainAxisAlignment:
-  //                                       MainAxisAlignment.spaceBetween,
-  //                                   children: [
-  //                                     Icon(
-  //                                       Icons.arrow_forward_ios_sharp,
-  //                                       color: appPrimaryColor,
-  //                                     ),
-  //                                     Text(
-  //                                       'हमें बताये',
-  //                                       style: TextStyle(
-  //                                         color: appPrimaryColor,
-  //                                         fontSize: 20,
-  //                                         fontWeight: FontWeight.bold,
-  //                                       ),
-  //                                     ),
-  //                                   ]),
-  //                             ),
-  //                           ),
-  //                         ],
-  //                       ),
-  //                     ),
-  //                   ),
-  //                 ),
-  //               ),
-  //             );
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -1469,39 +1365,40 @@ class _BuyAnimalState extends State<BuyAnimal>
       ),
       child: Stack(
         children: [
-          WillPopScope(
-            onWillPop: () async {
-              if (_videoController != null) {
-                _videoController.dispose();
+          GestureDetector(
+            onTap: () async {
+              if (_videoController != null) _videoController.pause();
+              if (_videos.length != 0) {
+                pr.style(
+                    message: 'video_loading_message'.tr,
+                    messageTextStyle:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.w500));
+                pr.show();
+
+                if (_videoController != null) _videoController.dispose();
+
+                _videoController =
+                    VideoPlayerController.network(_videoImageList[0]);
+                await _videoController.initialize();
+                _videoController.setLooping(false);
+                pr.hide();
+                _videoController.play();
               }
-              return true;
-            },
-            child: GestureDetector(
-              onTap: () async {
-                if (_videoController != null) _videoController.pause();
-                if (_videos.length != 0) {
-                  pr.style(
-                      message: 'video_loading_message'.tr,
-                      messageTextStyle:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.w500));
-                  pr.show();
 
-                  if (_videoController != null) _videoController.dispose();
-
-                  _videoController =
-                      VideoPlayerController.network(_videoImageList[0]);
-                  await _videoController.initialize();
-                  _videoController.setLooping(false);
-                  pr.hide();
-                  _videoController.play();
-                }
-
-                return Navigator.of(context).push(
-                  PageRouteBuilder(
-                    opaque: true,
-                    pageBuilder: (BuildContext context, _, __) =>
-                        StatefulBuilder(builder: (context, setState) {
-                      return Column(
+              return Navigator.of(context).push(
+                PageRouteBuilder(
+                  opaque: true,
+                  pageBuilder: (BuildContext context, _, __) =>
+                      StatefulBuilder(builder: (context, setState) {
+                    return WillPopScope(
+                      onWillPop: () async {
+                        print("=-=-=-=buy animal willpop=-=-=-=-=");
+                        if (_videoController.value.isPlaying) {
+                          _videoController.pause();
+                        }
+                        return Future.value(true);
+                      },
+                      child: Column(
                         children: [
                           CarouselSlider(
                             options: CarouselOptions(
@@ -1699,12 +1596,9 @@ class _BuyAnimalState extends State<BuyAnimal>
                                           onTap: () {
                                             if (_videos.length != 0) {
                                               _videoController.pause();
-                                              Navigator.of(context).popUntil(
-                                                  (route) => route.isFirst);
-                                            } else if (_images.length != 0) {
-                                              Navigator.of(context).popUntil(
-                                                  (route) => route.isFirst);
                                             }
+                                            Navigator.of(context).popUntil(
+                                                (route) => route.isFirst);
                                           },
                                           child: Column(
                                             children: [
@@ -1823,44 +1717,44 @@ class _BuyAnimalState extends State<BuyAnimal>
                             }).toList(),
                           ),
                         ],
-                      );
-                    }),
-                  ),
-                );
-              },
-              child: Container(
-                height: 200.0,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8.0),
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      CachedNetworkImage(
-                        imageUrl: _videos.length != 0 ? _videos[1] : _images[0],
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        progressIndicatorBuilder:
-                            (context, url, downloadProgress) => Center(
-                            child: Image.asset(
-                              'assets/images/loader.gif',
-                              height: 80,
-                              width: 80,
-                            ),
-                          ),
-                        errorWidget: (context, url, error) => Icon(
-                          Icons.error,
-                          size: 80,
+                      ),
+                    );
+                  }),
+                ),
+              );
+            },
+            child: Container(
+              height: 200.0,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8.0),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    CachedNetworkImage(
+                      imageUrl: _videos.length != 0 ? _videos[1] : _images[0],
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      progressIndicatorBuilder:
+                          (context, url, downloadProgress) => Center(
+                        child: Image.asset(
+                          'assets/images/loader.gif',
+                          height: 80,
+                          width: 80,
                         ),
                       ),
-                      _videos.isNotEmpty
-                          ? Icon(
-                              Icons.play_circle_outline_sharp,
-                              size: 100,
-                              color: appPrimaryColor,
-                            )
-                          : SizedBox.shrink(),
-                    ],
-                  ),
+                      errorWidget: (context, url, error) => Icon(
+                        Icons.error,
+                        size: 80,
+                      ),
+                    ),
+                    _videos.isNotEmpty
+                        ? Icon(
+                            Icons.play_circle_outline_sharp,
+                            size: 100,
+                            color: appPrimaryColor,
+                          )
+                        : SizedBox.shrink(),
+                  ],
                 ),
               ),
             ),

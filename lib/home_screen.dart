@@ -357,7 +357,8 @@ class _HomeScreenState extends State<HomeScreen> {
     pr.style(message: 'progress_dialog_message'.tr);
     // if (pr.isShowing()) pr.hide();
 
-    return WillPopScope(
+    return 
+    WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
         body: PageView(
