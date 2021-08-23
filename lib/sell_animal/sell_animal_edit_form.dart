@@ -773,6 +773,9 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                 keyboardType: TextInputType.number,
                 onChanged: (String milk) {
                   setState(() {
+                    if (milk.isEmpty) {
+                      milk = '';
+                    }
                     animalUpdationData['animalMilk'] =
                         ReusableWidgets.convertStringToInt(
                             milk.replaceAll(new RegExp(r'^0+(?=.)'), ''));
@@ -810,7 +813,9 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
           Padding(
               padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
               child: TextFormField(
-                initialValue: widget.animalInfo.animalMilkCapacity.toString(),
+                initialValue: widget.animalInfo.animalMilkCapacity == null
+                    ? ''
+                    : widget.animalInfo.animalMilkCapacity.toString(),
                 inputFormatters: <TextInputFormatter>[
                   FilteringTextInputFormatter.digitsOnly,
                   FilteringTextInputFormatter.deny(RegExp(r'^0+'))
@@ -818,6 +823,9 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                 keyboardType: TextInputType.number,
                 onChanged: (String milkCapacity) {
                   setState(() {
+                    if (milkCapacity.isEmpty) {
+                      milkCapacity = '0';
+                    }
                     animalUpdationData['animalMilkCapacity'] =
                         ReusableWidgets.convertStringToInt(milkCapacity);
                   });
@@ -1215,6 +1223,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                               editImagesUpload['Image1'] = '';
                               _imageToBeUploaded.removeWhere((element) =>
                                   element['fileName'].contains('Image1'));
+                              imagesUpload['Image1'] = {};
                             });
                           },
                           child: Icon(
@@ -1237,6 +1246,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                               imagesFileUpload['Image1'] = '';
                               _imageToBeUploaded.removeWhere((element) =>
                                   element['fileName'].contains('Image1'));
+                              imagesUpload['Image1'] = {};
                             });
                           },
                           child: Icon(
@@ -1365,6 +1375,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                               editImagesUpload['Image2'] = '';
                               _imageToBeUploaded.removeWhere((element) =>
                                   element['fileName'].contains('Image2'));
+                              imagesUpload['Image2'] = {};
                             });
                           },
                           child: Icon(
@@ -1387,6 +1398,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                               imagesFileUpload['Image2'] = '';
                               _imageToBeUploaded.removeWhere((element) =>
                                   element['fileName'].contains('Image2'));
+                              imagesUpload['Image2'] = {};
                             });
                           },
                           child: Icon(
@@ -1512,6 +1524,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                               editImagesUpload['Image3'] = '';
                               _imageToBeUploaded.removeWhere((element) =>
                                   element['fileName'].contains('Image3'));
+                              imagesUpload['Image3'] = {};
                             });
                           },
                           child: Icon(
@@ -1534,6 +1547,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                               imagesFileUpload['Image3'] = '';
                               _imageToBeUploaded.removeWhere((element) =>
                                   element['fileName'].contains('Image3'));
+                              imagesUpload['Image3'] = {};
                             });
                           },
                           child: Icon(
@@ -1659,6 +1673,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                               editImagesUpload['Image4'] = '';
                               _imageToBeUploaded.removeWhere((element) =>
                                   element['fileName'].contains('Image4'));
+                              imagesUpload['Image4'] = {};
                             });
                           },
                           child: Icon(
@@ -1681,6 +1696,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                               imagesFileUpload['Image4'] = '';
                               _imageToBeUploaded.removeWhere((element) =>
                                   element['fileName'].contains('Image4'));
+                              imagesUpload['Image4'] = {};
                             });
                           },
                           child: Icon(
@@ -1974,6 +1990,15 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                     'error'.tr,
                     Text('maximum_milk_length'.tr),
                   );
+                else if ((animalUpdationData['animalType'] == 1 ||
+                        animalUpdationData['animalType'] == 2) &&
+                    (animalUpdationData['animalMilkCapacity'] != 0 &&
+                        animalUpdationData['animalMilkCapacity'] > 70))
+                  ReusableWidgets.showDialogBox(
+                    context,
+                    'error'.tr,
+                    Text('maximum_milk_length'.tr),
+                  );
                 else if (animalUpdationData['animalPrice'] == null ||
                     animalUpdationData['animalPrice'] == 0)
                   ReusableWidgets.showDialogBox(
@@ -2246,7 +2271,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                           animalPrice: animalUpdationData['animalPrice'],
                           animalMilk: animalUpdationData['animalMilk'],
                           animalMilkCapacity:
-                              animalUpdationData['animalMilkCapacity'],
+                              animalUpdationData['animalMilkCapacity'] ?? '0',
                           isRecentBayat: animalUpdationData['isRecentBayat'],
                           recentBayatTime:
                               animalUpdationData['recentBayatTime'],
@@ -2262,6 +2287,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                         );
                       } catch (e) {
                         pr.hide();
+                        print('sell_animal_form_saveAnimal1==' + e.toString());
 
                         ReusableWidgets.loggerFunction(
                             fileName: 'sell_animal_edit_form_updateAnimal1',
@@ -2312,6 +2338,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                     }
                   } else {
                     pr.hide();
+                    print('sell_animal_form_saveAnimal2==' + e.toString());
 
                     ReusableWidgets.showDialogBox(
                       context,

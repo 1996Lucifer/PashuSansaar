@@ -665,6 +665,9 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                 ],
                 keyboardType: TextInputType.number,
                 onChanged: (String milk) {
+                  if (milk.isEmpty) {
+                    milk = '';
+                  }
                   setState(() {
                     animalInfo['animalMilk'] =
                         milk.replaceAll(new RegExp(r'^0+(?=.)'), '');
@@ -710,6 +713,9 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                 keyboardType: TextInputType.number,
                 onChanged: (String milkCapacity) {
                   setState(() {
+                    if (milkCapacity.isEmpty) {
+                      milkCapacity = '';
+                    }
                     animalInfo['animalMilkCapacity'] = milkCapacity;
                   });
                 },
@@ -1389,6 +1395,16 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                           'error'.tr,
                           Text('maximum_milk_length'.tr),
                         );
+                      else if ([0, 1].contains(constant.animalType
+                              .indexOf(animalInfo['animalType'])) &&
+                          (animalInfo['animalMilkCapacity'] != null &&
+                              animalInfo['animalMilkCapacity'].isNotEmpty) &&
+                          (int.parse(animalInfo['animalMilkCapacity']) > 70))
+                        ReusableWidgets.showDialogBox(
+                          context,
+                          'error'.tr,
+                          Text('maximum_milk_length'.tr),
+                        );
                       else if (animalInfo['animalPrice'] == null ||
                           animalInfo['animalPrice'].isEmpty)
                         ReusableWidgets.showDialogBox(
@@ -1689,7 +1705,9 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                                 animalMilk: ReusableWidgets.convertStringToInt(
                                     animalInfo['animalMilk']),
                                 animalMilkCapacity:
-                                    animalInfo['animalMilkCapacity'] == null
+                                    animalInfo['animalMilkCapacity'] == null ||
+                                            animalInfo['animalMilkCapacity']
+                                                .isEmpty
                                         ? null
                                         : ReusableWidgets.convertStringToInt(
                                             animalInfo['animalMilkCapacity']),
@@ -1715,6 +1733,8 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                               );
                             } catch (e) {
                               pr.hide();
+                              print('sell_animal_form_saveAnimal1==' +
+                                  e.toString());
                               ReusableWidgets.loggerFunction(
                                 fileName: 'sell_animal_form_saveAnimal1',
                                 error: e.toString(),
@@ -1756,6 +1776,10 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                                 token: prefs.getString("accessToken"),
                               );
                             } catch (e) {
+                              pr.hide();
+                              print('sell_animal_form_saveAnimal2==' +
+                                  e.toString());
+
                               ReusableWidgets.loggerFunction(
                                 fileName: 'sell_animal_form_saveAnimal2',
                                 error: e.toString(),

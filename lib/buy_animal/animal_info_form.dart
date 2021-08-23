@@ -333,6 +333,9 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
               keyboardType: TextInputType.number,
               maxLength: 6,
               onChanged: (String zipcode) {
+                if (zipcode.isEmpty) {
+                  zipcode = '';
+                }
                 setState(() {
                   animalInfo['zipCode'] = zipcode;
                 });
@@ -385,11 +388,19 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
                 SharedPreferences prefs = await SharedPreferences.getInstance();
                 String countryCode = '';
 
-                if (animalInfo['zipCode'] != null) {
-                  var addresses = await Geocoder.local
-                      .findAddressesFromQuery(animalInfo['zipCode']);
-                  var first = addresses.first;
-                  countryCode = first.countryCode;
+                try {
+                  if (animalInfo['zipCode'] != null) {
+                    var addresses = await Geocoder.local
+                        .findAddressesFromQuery(animalInfo['zipCode']);
+                    var first = addresses.first;
+                    countryCode = first.countryCode;
+                  }
+                } catch (e) {
+                  // ReusableWidgets.showDialogBox(
+                  //   context,
+                  //   'error'.tr,
+                  //   Text('zipcode_error'.tr),
+                  // );
                 }
 
                 if (animalInfo['animalType'] == null)
@@ -431,11 +442,13 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
                     'error'.tr,
                     Text('animal_price_error'.tr),
                   );
-                else if (animalInfo['zipCode'] != null &&
+                else if ((animalInfo['zipCode'] != null &&
+                        animalInfo['zipCode'].isNotEmpty) &&
                     int.parse(animalInfo['zipCode']) < 6) {
                   ReusableWidgets.showDialogBox(
                       context, 'error'.tr, Text("error_length_zipcode".tr));
-                } else if (animalInfo['zipCode'] != null &&
+                } else if ((animalInfo['zipCode'] != null &&
+                        animalInfo['zipCode'].isNotEmpty) &&
                     countryCode != "IN") {
                   ReusableWidgets.showDialogBox(
                       context, 'error'.tr, Text("invalid_zipcode_error".tr));
@@ -446,24 +459,42 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
                   pr.style(message: 'progress_dialog_message'.tr);
                   pr.show();
                   String district;
-                  if (animalInfo['zipCode'] != null) {
+                  if (animalInfo['zipCode'] != null &&
+                      animalInfo['zipCode'].isNotEmpty) {
                     district =
                         await getPositionBasedOnZipcode(animalInfo['zipCode']);
                   }
 
-                  Map<String, dynamic> payload = {
-                    "userId": prefs.getString('userId'),
-                    "animalType": animalInfo['animalTypeOther'] == null
-                        ? animalTypeMapping[animalInfo['animalType']]
-                        : animalOtherTypeMapping[animalInfo['animalType']],
-                    "animalBreed": ReusableWidgets.removeEnglishDataFromName(
-                        animalInfo['animalBreed']),
-                    "animalMilk": animalInfo['animalMilk'],
-                    "zipCode":
-                        animalInfo['zipCode'] ?? prefs.getString('zipCode'),
-                    "animalPrice": animalInfo['animalBudget'],
-                    "district": district ?? prefs.getString('district'),
-                  };
+                  Map<String, dynamic> payload = {};
+                  if (animalTypeMapping[animalInfo['animalType']] == 1 ||
+                      animalTypeMapping[animalInfo['animalType']] == 2) {
+                    payload = {
+                      "userId": prefs.getString('userId'),
+                      "animalType": animalInfo['animalTypeOther'] == null
+                          ? animalTypeMapping[animalInfo['animalType']]
+                          : animalOtherTypeMapping[animalInfo['animalType']],
+                      "animalBreed": ReusableWidgets.removeEnglishDataFromName(
+                          animalInfo['animalBreed']),
+                      "animalMilk": animalInfo['animalMilk'],
+                      "zipCode":
+                          animalInfo['zipCode'] ?? prefs.getString('zipCode'),
+                      "animalPrice": animalInfo['animalBudget'],
+                      "district": district ?? prefs.getString('district'),
+                    };
+                  } else {
+                    payload = {
+                      "userId": prefs.getString('userId'),
+                      "animalType": animalInfo['animalTypeOther'] == null
+                          ? animalTypeMapping[animalInfo['animalType']]
+                          : animalOtherTypeMapping[animalInfo['animalType']],
+                      "animalBreed": ReusableWidgets.removeEnglishDataFromName(
+                          animalInfo['animalBreed']),
+                      "zipCode":
+                          animalInfo['zipCode'] ?? prefs.getString('zipCode'),
+                      "animalPrice": animalInfo['animalBudget'],
+                      "district": district ?? prefs.getString('district'),
+                    };
+                  }
 
                   print('payload is $payload');
 
@@ -565,163 +596,3 @@ class _AnimalInfoFormState extends State<AnimalInfoForm> {
     );
   }
 }
-
-//
-//
-
-//<<<<<<<<<<<<<< Save Button >>>>>>>>>>>>>>>>>>
-//
-//
-//
-// saveButton() => Padding(
-//   padding: EdgeInsets.all(15),
-//   child: SizedBox(
-//       width: double.infinity,
-//       child: RaisedButton(
-//         padding: EdgeInsets.all(10.0),
-//         shape: RoundedRectangleBorder(
-//           borderRadius: BorderRadius.circular(24),
-//         ),
-//         elevation: 5,
-//         child: Text(
-//           'save_button'.tr,
-//           style: TextStyle(
-//               fontSize: 20,
-//               color: Colors.white,
-//               fontStyle: FontStyle.normal,
-//               fontWeight: FontWeight.w600),
-//         ),
-//         onPressed: () async {
-//           String countryCode = '';
-//           try {
-//             var addresses = await Geocoder.local
-//                 .findAddressesFromQuery(animalInfo['zipCode']);
-//             var first = addresses.first;
-//             countryCode = first.countryCode;
-//           } catch (e) {
-//             countryCode = 'XYZ';
-//           }
-//
-//           if (animalInfo['animalType'] == null)
-//             ReusableWidgets.showDialogBox(
-//               context,
-//               'error'.tr,
-//               Text('animal_type_error'.tr),
-//             );
-//           else if (animalInfo['animalBreed'] == null)
-//             ReusableWidgets.showDialogBox(
-//               context,
-//               'error'.tr,
-//               Text('animal_breed_error'.tr),
-//             );
-//           else if ([0, 1].contains(
-//             constant.animalType.indexOf(animalInfo['animalType']),
-//           ) &&
-//               (animalInfo['animalMilk'] == null ||
-//                   animalInfo['animalMilk'].isEmpty))
-//             ReusableWidgets.showDialogBox(
-//               context,
-//               'error'.tr,
-//               Text('animal_milk_error'.tr),
-//             );
-//           else if ([0, 1].contains(constant.animalType
-//               .indexOf(animalInfo['animalType'])) &&
-//               (animalInfo['animalMilk'] != null ||
-//                   animalInfo['animalMilk'].isNotEmpty) &&
-//               (int.parse(animalInfo['animalMilk']) > 70))
-//             ReusableWidgets.showDialogBox(
-//               context,
-//               'error'.tr,
-//               Text('maximum_milk_length'.tr),
-//             );
-//           else if (animalInfo['animalBudget'] == null ||
-//               animalInfo['animalBudget'].isEmpty)
-//             ReusableWidgets.showDialogBox(
-//               context,
-//               'error'.tr,
-//               Text('animal_price_error'.tr),
-//             );
-//           else if (animalInfo['zipCode'] == null) {
-//             ReusableWidgets.showDialogBox(
-//                 context, 'error'.tr, Text("error_empty_zipcode".tr));
-//           } else if (int.parse(animalInfo['zipCode']) < 6) {
-//             ReusableWidgets.showDialogBox(
-//                 context, 'error'.tr, Text("error_length_zipcode".tr));
-//           } else if (countryCode != "IN" || countryCode == 'XYZ') {
-//             ReusableWidgets.showDialogBox(
-//                 context, 'error'.tr, Text("invalid_zipcode_error".tr));
-//           } else {
-//             print(animalInfo);
-//             pr = new ProgressDialog(context,
-//                 type: ProgressDialogType.Normal, isDismissible: false);
-//             pr.style(message: 'progress_dialog_message'.tr);
-//             pr.show();
-//
-//             try {
-//               await FirebaseFirestore.instance
-//                   .collection("buyerRequirementForm")
-//                   .doc(ReusableWidgets.randomIDGenerator() +
-//                   ReusableWidgets.randomCodeGenerator())
-//                   .set(
-//                 {
-//                   "animalType": animalInfo['animalType'],
-//                   "animalBreed":
-//                   ReusableWidgets.removeEnglishDataFromName(
-//                       animalInfo['animalBreed']),
-//                   "animalMilk": animalInfo['animalMilk'],
-//                   "animalBudget": animalInfo['animalBudget'],
-//                   'mobile': widget.userMobileNumber,
-//                   'userName': widget.userName,
-//                   'userId': FirebaseAuth.instance.currentUser.uid,
-//                   "zipCode": animalInfo['zipCode'],
-//                   "dateOfSaving": DateFormat()
-//                       .add_yMMMd()
-//                       .add_jm()
-//                       .format(DateTime.now())
-//                 },
-//               ).then((value) {
-//                 pr.hide();
-//                 return showDialog(
-//                     context: context,
-//                     builder: (context) {
-//                       return AlertDialog(
-//                           title: Text('info'.tr),
-//                           content: Text('animal_info_saved'.tr),
-//                           actions: <Widget>[
-//                             TextButton(
-//                                 child: Text(
-//                                   'Ok'.tr,
-//                                   style: TextStyle(color: appPrimaryColor),
-//                                 ),
-//                                 onPressed: () {
-//                                   Navigator.of(context).pop();
-//                                   Get.offAll(() => HomeScreen(
-//                                     selectedIndex: 0,
-//                                   ));
-//                                 }),
-//                           ]);
-//                     });
-//               });
-//             } catch (e) {
-//               pr.hide();
-//               FirebaseFirestore.instance
-//                   .collection('logger')
-//                   .doc(widget.userMobileNumber)
-//                   .collection('sell-profile')
-//                   .doc()
-//                   .set({
-//                 'issue': e.toString(),
-//                 'userId': FirebaseAuth.instance.currentUser == null
-//                     ? ''
-//                     : FirebaseAuth.instance.currentUser.uid,
-//                 'mobile': widget.userMobileNumber,
-//                 'date': DateFormat()
-//                     .add_yMMMd()
-//                     .add_jm()
-//                     .format(DateTime.now()),
-//               });
-//             }
-//           }
-//         },
-//       )),
-// );
