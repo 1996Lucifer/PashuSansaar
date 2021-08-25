@@ -132,40 +132,21 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
         myNum: prefs.getString('userId'),
         userId: prefs.getString('userId'),
       );
-      // ReusableWidgets.showDialogBox(
-      //   context,
-      //   'warning'.tr,
-      //   Text(
-      //     'global_error'.tr,
-      //   ),
-      // );
+      ReusableWidgets.showDialogBox(
+        context,
+        'warning'.tr,
+        Text(
+          'global_error'.tr,
+        ),
+      );
     }
-
-    // try {
-    //   myNum = await sellerContactController.getSellerContact(
-    //       animalId: widget.uniqueId,
-    //       userId: prefs.getString('userId'),
-    //       token: prefs.getString('accessToken'),
-    //       channel: [
-    //         {"contactMedium": "Call"}
-    //       ]);
-    // } catch (e) {
-    // ReusableWidgets.showDialogBox(
-    //   context,
-    //   'warning'.tr,
-    //   Text(
-    //     'global_error'.tr,
-    //   ),
-    // );
-    // }
   }
 
   getSellerContacts(BuildContext context, String mode) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     try {
-      int myNum;
-      myNum = await sellerContactController.getSellerContact(
+      int myNum = await sellerContactController.getSellerContact(
           animalId: widget.uniqueId,
           userId: prefs.getString('userId'),
           token: prefs.getString('accessToken'),
@@ -534,8 +515,8 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
   _getCallButton() => RaisedButton.icon(
         color: Colors.blue,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        onPressed: () {
-          int myNum = getSellerContacts(context, "Call");
+        onPressed: () async {
+          int myNum = await getSellerContacts(context, "Call");
           return UrlLauncher.launch('tel:+91 $myNum');
         },
         label: Text(
@@ -553,7 +534,7 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
         color: darkGreenColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         onPressed: () async {
-          int myNum = getSellerContacts(context, "Whatsapp");
+          int myNum = await getSellerContacts(context, "Whatsapp");
 
           whatsappText =
               'नमस्कार भाई साहब, मैंने आपका पशु देखा पशुसंसार पे और आपसे आगे बात करना चाहता हूँ. कब बात कर सकते हैं? ${animalDesc.userName}, $_userLocality \n\nपशुसंसार सूचना - ऑनलाइन पेमेंट के धोखे से बचने के लिए कभी भी ऑनलाइन  एडवांस पेमेंट, एडवांस, जमा राशि, ट्रांसपोर्ट इत्यादि के नाम पे, किसी भी एप से न करें वरना नुकसान हो सकता है';

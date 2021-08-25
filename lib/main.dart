@@ -45,14 +45,20 @@ RemoteConfig remoteConfig;
 
 Future _goToDeeplyNestedView(data) async {
   if (data != null && data['screen'] == 'DESCRIPTION_PAGE') {
-    await navigatorKey.currentState.push(
-      MaterialPageRoute(
-        builder: (_) => AnimalDescription(
-          userId: data['userId'],
-          uniqueId: data['uniqueId'],
-        ),
+    await Get.to(
+      () => AnimalDescription(
+        userId: data['userId'],
+        uniqueId: data['uniqueId'],
       ),
     );
+    // await navigatorKey.currentState.push(
+    //   MaterialPageRoute(
+    //     builder: (_) => AnimalDescription(
+    //       userId: data['userId'],
+    //       uniqueId: data['uniqueId'],
+    //     ),
+    //   ),
+    // );
   }
 }
 
@@ -158,10 +164,20 @@ class _MyAppState extends State<MyApp> {
       print("link1===>" + dynamicData.toString());
 
       if (deepLink != null && dynamicData != {} && dynamicData != null)
-        navigatorKey.currentState.push(MaterialPageRoute(
-            builder: (_) => AnimalDescription(
-                userId: dynamicData['userId'],
-                uniqueId: dynamicData['uniqueId'])));
+        // navigatorKey.currentState.push(
+        //   MaterialPageRoute(
+        //     builder: (_) => AnimalDescription(
+        //       userId: dynamicData['userId'],
+        //       uniqueId: dynamicData['uniqueId'],
+        //     ),
+        //   ),
+        // );
+        Get.to(
+          () => AnimalDescription(
+            userId: dynamicData['userId'],
+            uniqueId: dynamicData['uniqueId'],
+          ),
+        );
     }, onError: (OnLinkErrorException e) async {
       print('onLinkError');
       print(e.message);
@@ -175,14 +191,20 @@ class _MyAppState extends State<MyApp> {
     print("link2===>" + dynamicData.toString());
 
     if (deepLink != null && dynamicData != {} && dynamicData != null) {
-      navigatorKey.currentState.push(
-        MaterialPageRoute(
-          builder: (_) => AnimalDescription(
-            userId: dynamicData['userId'],
-            uniqueId: dynamicData['uniqueId'],
-          ),
+      Get.to(
+        () => AnimalDescription(
+          userId: dynamicData['userId'],
+          uniqueId: dynamicData['uniqueId'],
         ),
       );
+      // navigatorKey.currentState.push(
+      //   MaterialPageRoute(
+      //     builder: (_) => AnimalDescription(
+      //       userId: dynamicData['userId'],
+      //       uniqueId: dynamicData['uniqueId'],
+      //     ),
+      //   ),
+      // );
     }
   }
 
