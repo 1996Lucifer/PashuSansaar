@@ -365,6 +365,7 @@ class Messages extends Translations {
           'video_supportive_text': ' (अधिकतम 1 मिनट)',
           'upload_video_text': 'वीडियो डालें',
           'video_loading_text': 'वीडियो प्राप्त की जा रही हैं',
+          'only_mp4_format': 'वीडियो mp4 फॉर्मेट में डाले'
         }
       };
 }

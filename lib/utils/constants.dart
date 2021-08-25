@@ -352,3 +352,5 @@ Map<int, String> intToYesNo = {
   1: 'no'.tr,
 };
 
+
+const String videoType = "video/mp4";

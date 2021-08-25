@@ -128,43 +128,47 @@ class _SellAnimalFormState extends State<SellAnimalForm>
             return null;
             break;
           default:
-            MediaInfo mediaInfo = await VideoCompress.compressVideo(
-              pickedFile.path,
-              quality: VideoQuality.LowQuality,
-            );
+            if (ReusableWidgets.mimeType(pickedFile.path) != videoType) {
+              ReusableWidgets.showDialogBox(
+                context,
+                'error'.tr,
+                Text('only_mp4_format'.tr),
+              );
+            } else {
+              MediaInfo mediaInfo = await VideoCompress.compressVideo(
+                pickedFile.path,
+                quality: VideoQuality.LowQuality,
+              );
 
-            final thumbnailFile =
-                await VideoCompress.getFileThumbnail(pickedFile.path,
-                    quality: 50, // default(100)
-                    position: -1 // default(-1)
-                    );
+              final thumbnailFile =
+                  await VideoCompress.getFileThumbnail(pickedFile.path,
+                      quality: 50, // default(100)
+                      position: -1 // default(-1)
+                      );
 
-            setState(() {
-              videoPath = mediaInfo.path;
-              thumbNail = thumbnailFile.path;
-              videoUpload['Video'] = {
-                "fileName": "Video",
-                "fileType": ReusableWidgets.mimeType(mediaInfo.path),
-              };
-              videoUpload['thumbnail'] = {
-                "fileName": "thumbnail",
-                "fileType": ReusableWidgets.mimeType(thumbnailFile.path),
-              };
-            });
-
-            _videoController = VideoPlayerController.file(File(videoPath));
-
-            // _videoController.addListener(() {
-            //   setState(() {});
-            // });
-            _videoController.setLooping(false);
-            _videoController.initialize().then((_) {
               setState(() {
-                _isInitialised = true;
+                videoPath = mediaInfo.path;
+                thumbNail = thumbnailFile.path;
+                videoUpload['Video'] = {
+                  "fileName": "Video",
+                  "fileType": ReusableWidgets.mimeType(mediaInfo.path),
+                };
+                videoUpload['thumbnail'] = {
+                  "fileName": "thumbnail",
+                  "fileType": ReusableWidgets.mimeType(thumbnailFile.path),
+                };
               });
-            });
 
-            _videoController.play();
+              _videoController = VideoPlayerController.file(File(videoPath));
+              _videoController.setLooping(false);
+              _videoController.initialize().then((_) {
+                setState(() {
+                  _isInitialised = true;
+                });
+              });
+
+              _videoController.play();
+            }
         }
       } else {
         var file = await _picker.getImage(source: ImageSource.camera);
@@ -248,40 +252,48 @@ class _SellAnimalFormState extends State<SellAnimalForm>
             return null;
             break;
           default:
-            MediaInfo mediaInfo = await VideoCompress.compressVideo(
-              pickedFile.path,
-              quality: VideoQuality.LowQuality,
-            );
+            if (ReusableWidgets.mimeType(pickedFile.path) != videoType) {
+              ReusableWidgets.showDialogBox(
+                context,
+                'error'.tr,
+                Text('only_mp4_format'.tr),
+              );
+            } else {
+              MediaInfo mediaInfo = await VideoCompress.compressVideo(
+                pickedFile.path,
+                quality: VideoQuality.LowQuality,
+              );
 
-            final thumbnailFile =
-                await VideoCompress.getFileThumbnail(pickedFile.path,
-                    quality: 50, // default(100)
-                    position: -1 // default(-1)
-                    );
+              final thumbnailFile =
+                  await VideoCompress.getFileThumbnail(pickedFile.path,
+                      quality: 50, // default(100)
+                      position: -1 // default(-1)
+                      );
 
-            setState(() {
-              videoPath = mediaInfo.path;
-              thumbNail = thumbnailFile.path;
-
-              videoUpload['Video'] = {
-                "fileName": "Video",
-                "fileType": ReusableWidgets.mimeType(mediaInfo.path),
-              };
-              videoUpload['thumbnail'] = {
-                "fileName": "thumbnail",
-                "fileType": ReusableWidgets.mimeType(thumbnailFile.path),
-              };
-            });
-
-            _videoController = VideoPlayerController.file(File(videoPath));
-            _videoController.setLooping(false);
-            _videoController.initialize().then((_) {
               setState(() {
-                _isInitialised = true;
-              });
-            });
+                videoPath = mediaInfo.path;
+                thumbNail = thumbnailFile.path;
 
-            _videoController.play();
+                videoUpload['Video'] = {
+                  "fileName": "Video",
+                  "fileType": ReusableWidgets.mimeType(mediaInfo.path),
+                };
+                videoUpload['thumbnail'] = {
+                  "fileName": "thumbnail",
+                  "fileType": ReusableWidgets.mimeType(thumbnailFile.path),
+                };
+              });
+
+              _videoController = VideoPlayerController.file(File(videoPath));
+              _videoController.setLooping(false);
+              _videoController.initialize().then((_) {
+                setState(() {
+                  _isInitialised = true;
+                });
+              });
+
+              _videoController.play();
+            }
         }
       } else {
         var file = await _picker.getImage(source: ImageSource.gallery);
