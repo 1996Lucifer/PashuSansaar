@@ -280,7 +280,7 @@ class ReusableWidgets {
     return int.parse(value);
   }
 
-  static Center tinyLoader() {
+  static Center tinyLoader([String text]) {
     return Center(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -290,7 +290,7 @@ class ReusableWidgets {
             width: 14.0,
           ),
           Text(
-            'loading'.tr,
+            text ?? 'loading'.tr,
             style: TextStyle(
               color: appPrimaryColor,
               fontSize: 16,

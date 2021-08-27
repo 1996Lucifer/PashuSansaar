@@ -598,7 +598,7 @@ class _AnimalDescriptionState extends State<AnimalDescription> {
           Share.shareFiles([fileUrl.path],
               mimeTypes: ['images/png'],
               text: animalDesc.animalType <= 2
-                  ? "नस्ल: ${animalDesc.animalBreed}\nजानकारी: ${ReusableWidgets.descriptionText(animalDesc) == null ? 'जानकारी उपलब्ध नहीं है|' : ReusableWidgets.descriptionText(animalDesc)}\nदूध(प्रति दिन): ${animalDesc.animalMilkCapacity} Litre\n\nपशु देखे: ${shortUrl.toString()}"
+                  ? "नस्ल: ${animalDesc.animalBreed}\nजानकारी: ${ReusableWidgets.descriptionText(animalDesc) == null ? 'जानकारी उपलब्ध नहीं है|' : ReusableWidgets.descriptionText(animalDesc)}\nदूध(प्रति दिन): ${animalDesc.animalMilk} Litre\n\nपशु देखे: ${shortUrl.toString()}"
                   : (animalDesc.animalType <= 4
                       ? ("नस्ल: ${animalDesc.animalBreed}\nजानकारी: ${ReusableWidgets.descriptionText(animalDesc) == null ? 'जानकारी उपलब्ध नहीं है|' : ReusableWidgets.descriptionText(animalDesc)}\n\nपशु देखे: ${shortUrl.toString()}")
                       : ("जानकारी: ${ReusableWidgets.descriptionText(animalDesc) == null ? 'जानकारी उपलब्ध नहीं है|' : ReusableWidgets.descriptionText(animalDesc)}\n\nपशु देखे: ${shortUrl.toString()}")),

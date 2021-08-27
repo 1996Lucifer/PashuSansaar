@@ -87,22 +87,10 @@ class _SellAnimalFormState extends State<SellAnimalForm>
   void initState() {
     _controller = TextEditingController();
     _subscription = VideoCompress.compressProgress$.subscribe((progress) {
-      if (progress < 2.0) {
-        setState(() {
-          _progressState = 0.0;
-          videoPath = '';
-          _subscription.unsubscribe();
-        });
-        ReusableWidgets.showDialogBox(
-          context,
-          'error'.tr,
-          Text('only_mp4_format'.tr),
-        );
-      } else {
-        setState(() {
-          _progressState = progress;
-        });
-      }
+      setState(() {
+        _progressState = progress;
+      });
+
       print('_progressState===' + _progressState.toString());
     });
 
@@ -859,20 +847,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                       width: width * 0.9,
                       // color: Colors.amber,
                       child: _progressState != 0 && _progressState != 100.0
-                          ? Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                CircularProgressIndicator(),
-                                SizedBox(width: 5),
-                                Text(
-                                  'video_loading_text'.tr,
-                                  style: TextStyle(
-                                    color: appPrimaryColor,
-                                    fontSize: 16,
-                                  ),
-                                )
-                              ],
-                            )
+                          ? ReusableWidgets.tinyLoader('video_loading_text'.tr)
                           : Visibility(
                               visible:
                                   _videoController == null && !_isInitialised,
@@ -1357,16 +1332,22 @@ class _SellAnimalFormState extends State<SellAnimalForm>
               ),
               elevation: 5,
               // color: themeColor,
-              child: Text(
-                'save_button'.tr,
-                style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.white,
-                    fontStyle: FontStyle.normal,
-                    fontWeight: FontWeight.w600),
-              ),
-              onPressed: _isLoading
-                  ? null
+              child: _progressState != 0 && _progressState != 100.0
+                  ? Center(
+                      child: CircularProgressIndicator(
+                      backgroundColor: Colors.white,
+                    ))
+                  : Text(
+                      'save_button'.tr,
+                      style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.white,
+                          fontStyle: FontStyle.normal,
+                          fontWeight: FontWeight.w600),
+                    ),
+              onPressed: _isLoading ||
+                      (_progressState != 0 && _progressState != 100.0)
+                  ? () {}
                   : () async {
                       if (animalInfo['animalType'] == null)
                         ReusableWidgets.showDialogBox(

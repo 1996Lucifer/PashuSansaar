@@ -172,7 +172,6 @@ class _HomeScreenState extends State<HomeScreen>
         _animalInfo = data.result;
         prefs.setInt('page', data.page);
       });
-      pr.hide();
     } catch (e) {
       pr.hide();
       ReusableWidgets.loggerFunction(
@@ -213,6 +212,8 @@ class _HomeScreenState extends State<HomeScreen>
         }
       }
     } catch (e) {
+      pr.hide();
+
       ReusableWidgets.loggerFunction(
           fileName: 'home_screen_refreshToken',
           error: e.toString(),
@@ -238,7 +239,10 @@ class _HomeScreenState extends State<HomeScreen>
       setState(() {
         _sellingAnimalInfo = dataSellingInfo.myAnimals;
       });
+      pr.hide();
     } catch (e) {
+      pr.hide();
+
       ReusableWidgets.loggerFunction(
           fileName: 'home_screen_getAnimalList',
           error: e.toString(),
