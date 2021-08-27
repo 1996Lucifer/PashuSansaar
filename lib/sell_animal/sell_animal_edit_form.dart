@@ -2008,7 +2008,9 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                         );
                       else if ((animalUpdationData['animalType'] == 1 ||
                               animalUpdationData['animalType'] == 2) &&
-                          (animalUpdationData['animalMilkCapacity'] != 0 &&
+                          ((animalUpdationData['animalMilkCapacity'] != null &&
+                                  animalUpdationData['animalMilkCapacity'] !=
+                                      0) &&
                               animalUpdationData['animalMilkCapacity'] > 70))
                         ReusableWidgets.showDialogBox(
                           context,
@@ -2301,8 +2303,7 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
                                 animalPrice: animalUpdationData['animalPrice'],
                                 animalMilk: animalUpdationData['animalMilk'],
                                 animalMilkCapacity:
-                                    animalUpdationData['animalMilkCapacity'] ??
-                                        '0',
+                                    animalUpdationData['animalMilkCapacity'],
                                 isRecentBayat:
                                     animalUpdationData['isRecentBayat'],
                                 recentBayatTime:
