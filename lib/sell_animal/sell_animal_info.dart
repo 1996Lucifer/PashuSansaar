@@ -43,7 +43,7 @@ class SellingAnimalInfo extends StatefulWidget {
 }
 
 class _SellingAnimalInfoState extends State<SellingAnimalInfo>
-    with AutomaticKeepAliveClientMixin {
+    with AutomaticKeepAliveClientMixin<SellingAnimalInfo> {
   bool _isError = false, _isErrorEmpty = false;
   String _price = '';
   TextEditingController _controller = TextEditingController();

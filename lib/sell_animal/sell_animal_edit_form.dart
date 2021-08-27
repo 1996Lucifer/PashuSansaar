@@ -1,6 +1,7 @@
 import 'dart:io' show File;
 import 'dart:math';
 
+import 'package:flutter_document_picker/flutter_document_picker.dart';
 import 'package:pashusansaar/my_animals/myAnimalModel.dart';
 import 'package:pashusansaar/refresh_token/refresh_token_controller.dart';
 import 'package:pashusansaar/sell_animal/sell_animal_controller.dart';
@@ -43,7 +44,7 @@ class SellAnimalEditForm extends StatefulWidget {
 }
 
 class _SellAnimalEditFormState extends State<SellAnimalEditForm>
-    with AutomaticKeepAliveClientMixin {
+    with AutomaticKeepAliveClientMixin<SellAnimalEditForm> {
   Map<String, dynamic> extraInfoData = {}, animalUpdationData = {};
   ImagePicker _picker;
   ProgressDialog pr;
@@ -387,17 +388,21 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
         _picker = ImagePicker();
       }
       if (ReusableWidgets.convertStringToInt(index) == 5) {
-        var pickedFile = await _picker.getVideo(
-            source: ImageSource.gallery,
-            preferredCameraDevice: CameraDevice.rear,
-            maxDuration: Duration(minutes: 1));
+        // var pickedFile = await _picker.getVideo(
+        //     source: ImageSource.gallery,
+        //     preferredCameraDevice: CameraDevice.rear,
+        //     maxDuration: Duration(minutes: 1));
+        final path = await FlutterDocumentPicker.openDocument(
+            params: FlutterDocumentPickerParams(
+          allowedMimeTypes: ['video/mp4'],
+        ));
 
-        switch (pickedFile) {
+        switch (path) {
           case null:
             return null;
             break;
           default:
-            if (ReusableWidgets.mimeType(pickedFile.path) != videoType) {
+            if (ReusableWidgets.mimeType(path) != videoType) {
               ReusableWidgets.showDialogBox(
                 context,
                 'error'.tr,
@@ -405,15 +410,14 @@ class _SellAnimalEditFormState extends State<SellAnimalEditForm>
               );
             } else {
               MediaInfo mediaInfo = await VideoCompress.compressVideo(
-                pickedFile.path,
+                path,
                 quality: VideoQuality.LowQuality,
               );
 
-              final thumbnailFile =
-                  await VideoCompress.getFileThumbnail(pickedFile.path,
-                      quality: 50, // default(100)
-                      position: -1 // default(-1)
-                      );
+              final thumbnailFile = await VideoCompress.getFileThumbnail(path,
+                  quality: 50, // default(100)
+                  position: -1 // default(-1)
+                  );
 
               setState(() {
                 videoPath = mediaInfo.path;

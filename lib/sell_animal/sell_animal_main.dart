@@ -8,12 +8,12 @@ class SellAnimalMain extends StatelessWidget {
   final String userName;
   final String userMobileNumber;
 
-  SellAnimalMain(
-      {Key key,
-      @required this.sellingAnimalInfo,
-      @required this.userName,
-      @required this.userMobileNumber})
-      : super(key: key);
+  SellAnimalMain({
+    Key key,
+    @required this.sellingAnimalInfo,
+    @required this.userName,
+    @required this.userMobileNumber,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

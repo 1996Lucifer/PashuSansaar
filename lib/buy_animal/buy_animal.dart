@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:core';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
-import 'package:pashusansaar/animal_description/animal_description_page.dart';
 import 'package:pashusansaar/buy_animal/buy_animal_model.dart';
 import 'package:pashusansaar/refresh_token/refresh_token_controller.dart';
 import 'package:pashusansaar/seller_contact/seller_contact_controller.dart';
@@ -57,7 +56,7 @@ class BuyAnimal extends StatefulWidget {
 }
 
 class _BuyAnimalState extends State<BuyAnimal>
-    with AutomaticKeepAliveClientMixin {
+    with AutomaticKeepAliveClientMixin<BuyAnimal> {
   var formatter = intl.NumberFormat('#,##,000');
 
   int perPage = 10,

@@ -21,8 +21,6 @@ environment:
   sdk: ">=2.10.0 <3.0.0"
 
 dependencies:
-  flutter:
-    sdk: flutter
   android_play_install_referrer: any
   animations: any
   cached_network_image: any
@@ -39,7 +37,10 @@ dependencies:
   firebase_in_app_messaging: any
   firebase_messaging: any
   firebase_remote_config: any
+  flutter:
+    sdk: flutter
   flutter_countdown_timer: any
+  flutter_document_picker: any
   flutter_launcher_icons: any
   flutter_local_notifications: any
   flutter_native_image: ^0.0.5+3
@@ -47,7 +48,7 @@ dependencies:
   geocoder: ^0.2.1
   geodesy: ^0.3.2
   get: ^3.26.0
-  image_picker: ^0.6.7+7
+  image_picker: ^0.6.7+15
   intl: any
   location: ^3.2.4
   marquee: ^1.7.0
@@ -61,7 +62,6 @@ dependencies:
   url_launcher: any
   video_compress: any
   video_player: any
-
 
 dev_dependencies:
   flutter_test:

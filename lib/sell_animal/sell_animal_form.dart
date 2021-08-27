@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:dio/dio.dart' as dio;
+import 'package:flutter_document_picker/flutter_document_picker.dart';
 import 'package:pashusansaar/refresh_token/refresh_token_controller.dart';
 import 'package:pashusansaar/upload_image/upload_image_controller.dart';
 import 'package:pashusansaar/utils/colors.dart';
@@ -38,7 +39,7 @@ class SellAnimalForm extends StatefulWidget {
 }
 
 class _SellAnimalFormState extends State<SellAnimalForm>
-    with AutomaticKeepAliveClientMixin {
+    with AutomaticKeepAliveClientMixin<SellAnimalForm> {
   var animalInfo = {}, extraInfoData = {};
   ImagePicker _picker;
   ProgressDialog pr;
@@ -86,9 +87,22 @@ class _SellAnimalFormState extends State<SellAnimalForm>
   void initState() {
     _controller = TextEditingController();
     _subscription = VideoCompress.compressProgress$.subscribe((progress) {
-      setState(() {
-        _progressState = progress;
-      });
+      if (progress < 2.0) {
+        setState(() {
+          _progressState = 0.0;
+          videoPath = '';
+          _subscription.unsubscribe();
+        });
+        ReusableWidgets.showDialogBox(
+          context,
+          'error'.tr,
+          Text('only_mp4_format'.tr),
+        );
+      } else {
+        setState(() {
+          _progressState = progress;
+        });
+      }
       print('_progressState===' + _progressState.toString());
     });
 
@@ -128,47 +142,39 @@ class _SellAnimalFormState extends State<SellAnimalForm>
             return null;
             break;
           default:
-            if (ReusableWidgets.mimeType(pickedFile.path) != videoType) {
-              ReusableWidgets.showDialogBox(
-                context,
-                'error'.tr,
-                Text('only_mp4_format'.tr),
-              );
-            } else {
-              MediaInfo mediaInfo = await VideoCompress.compressVideo(
-                pickedFile.path,
-                quality: VideoQuality.LowQuality,
-              );
+            MediaInfo mediaInfo = await VideoCompress.compressVideo(
+              pickedFile.path,
+              quality: VideoQuality.LowQuality,
+            );
 
-              final thumbnailFile =
-                  await VideoCompress.getFileThumbnail(pickedFile.path,
-                      quality: 50, // default(100)
-                      position: -1 // default(-1)
-                      );
+            final thumbnailFile =
+                await VideoCompress.getFileThumbnail(pickedFile.path,
+                    quality: 50, // default(100)
+                    position: -1 // default(-1)
+                    );
 
+            setState(() {
+              videoPath = mediaInfo.path;
+              thumbNail = thumbnailFile.path;
+              videoUpload['Video'] = {
+                "fileName": "Video",
+                "fileType": ReusableWidgets.mimeType(mediaInfo.path),
+              };
+              videoUpload['thumbnail'] = {
+                "fileName": "thumbnail",
+                "fileType": ReusableWidgets.mimeType(thumbnailFile.path),
+              };
+            });
+
+            _videoController = VideoPlayerController.file(File(videoPath));
+            _videoController.setLooping(false);
+            _videoController.initialize().then((_) {
               setState(() {
-                videoPath = mediaInfo.path;
-                thumbNail = thumbnailFile.path;
-                videoUpload['Video'] = {
-                  "fileName": "Video",
-                  "fileType": ReusableWidgets.mimeType(mediaInfo.path),
-                };
-                videoUpload['thumbnail'] = {
-                  "fileName": "thumbnail",
-                  "fileType": ReusableWidgets.mimeType(thumbnailFile.path),
-                };
+                _isInitialised = true;
               });
+            });
 
-              _videoController = VideoPlayerController.file(File(videoPath));
-              _videoController.setLooping(false);
-              _videoController.initialize().then((_) {
-                setState(() {
-                  _isInitialised = true;
-                });
-              });
-
-              _videoController.play();
-            }
+            _videoController.play();
         }
       } else {
         var file = await _picker.getImage(source: ImageSource.camera);
@@ -242,34 +248,38 @@ class _SellAnimalFormState extends State<SellAnimalForm>
       }
 
       if (ReusableWidgets.convertStringToInt(index) == 5) {
-        var pickedFile = await _picker.getVideo(
-            source: ImageSource.gallery,
-            preferredCameraDevice: CameraDevice.rear,
-            maxDuration: Duration(minutes: 1));
+        // var pickedFile = await _picker.getVideo(
+        //     source: ImageSource.gallery,
+        //     preferredCameraDevice: CameraDevice.rear,
+        //     maxDuration: Duration(minutes: 1));
+        final path = await FlutterDocumentPicker.openDocument(
+            params: FlutterDocumentPickerParams(
+          allowedMimeTypes: ['video/mp4'],
+        ));
 
-        switch (pickedFile) {
+        switch (path) {
           case null:
             return null;
             break;
           default:
-            if (ReusableWidgets.mimeType(pickedFile.path) != videoType) {
+            MediaInfo mediaInfo;
+            var thumbnailFile;
+
+            if (ReusableWidgets.mimeType(path) != videoType)
               ReusableWidgets.showDialogBox(
                 context,
                 'error'.tr,
                 Text('only_mp4_format'.tr),
               );
-            } else {
-              MediaInfo mediaInfo = await VideoCompress.compressVideo(
-                pickedFile.path,
+            else {
+              mediaInfo = await VideoCompress.compressVideo(
+                path,
                 quality: VideoQuality.LowQuality,
               );
-
-              final thumbnailFile =
-                  await VideoCompress.getFileThumbnail(pickedFile.path,
-                      quality: 50, // default(100)
-                      position: -1 // default(-1)
-                      );
-
+              thumbnailFile = await VideoCompress.getFileThumbnail(path,
+                  quality: 50, // default(100)
+                  position: -1 // default(-1)
+                  );
               setState(() {
                 videoPath = mediaInfo.path;
                 thumbNail = thumbnailFile.path;
@@ -1586,6 +1596,7 @@ class _SellAnimalFormState extends State<SellAnimalForm>
                             _videoToBeUploadedLocal = [];
 
                         if (imageUploadingStatus.length == 0) {
+                          pr.hide();
                           ReusableWidgets.showDialogBox(
                             context,
                             'error'.tr,

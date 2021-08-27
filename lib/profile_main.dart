@@ -16,7 +16,6 @@ import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'home_screen.dart';
 import 'my_called_list.dart';
-import 'my_calls/myCallsController.dart';
 import 'sell_animal/sell_animal_info.dart';
 import 'utils/colors.dart';
 import 'utils/reusable_widgets.dart';
@@ -44,7 +43,9 @@ class ProfileMain extends StatefulWidget {
 }
 
 class ProfileMainState extends State<ProfileMain>
-    with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
+    with
+        SingleTickerProviderStateMixin,
+        AutomaticKeepAliveClientMixin<ProfileMain> {
   final FocusNode myFocusNode = FocusNode();
   ImagePicker _picker;
   String _base64Image = "",
@@ -58,8 +59,6 @@ class ProfileMainState extends State<ProfileMain>
 
   @override
   bool get wantKeepAlive => true;
-  final MyCallListController myCallListController =
-      Get.put(MyCallListController());
 
   @override
   void initState() {

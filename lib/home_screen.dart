@@ -25,7 +25,8 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with AutomaticKeepAliveClientMixin<HomeScreen> {
   ProgressDialog pr;
 
   List<Result> _animalInfo = [];
@@ -46,11 +47,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
-    _pageController = PageController(initialPage: widget.selectedIndex);
+    _pageController = PageController(
+      initialPage: widget.selectedIndex,
+    );
     // updateData();
     checkInitialData();
     super.initState();
   }
+
+  @override
+  bool get wantKeepAlive => true;
 
   checkInitialData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -351,14 +357,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     pr = new ProgressDialog(context,
         type: ProgressDialogType.Normal, isDismissible: false);
 
     pr.style(message: 'progress_dialog_message'.tr);
     // if (pr.isShowing()) pr.hide();
 
-    return 
-    WillPopScope(
+    return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
         body: PageView(
@@ -390,18 +396,27 @@ class _HomeScreenState extends State<HomeScreen> {
         bottomNavigationBar: BottomNavigationBar(
           items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-              icon:
-                  Image.asset('assets/images/buy3.png', height: 25, width: 25),
+              icon: Image.asset(
+                'assets/images/buy3.png',
+                height: 25,
+                width: 25,
+              ),
               label: 'buy'.tr,
             ),
             BottomNavigationBarItem(
-              icon:
-                  Image.asset('assets/images/Sell.png', height: 25, width: 25),
+              icon: Image.asset(
+                'assets/images/Sell.png',
+                height: 25,
+                width: 25,
+              ),
               label: 'sell'.tr,
             ),
             BottomNavigationBarItem(
-              icon: Image.asset('assets/images/profile.jpg',
-                  height: 25, width: 25),
+              icon: Image.asset(
+                'assets/images/profile.jpg',
+                height: 25,
+                width: 25,
+              ),
               label: 'profile'.tr,
             ),
           ],
